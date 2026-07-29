@@ -97,6 +97,15 @@ def run():
     log["steps"].append({"name": "内容生产", "status": "ok", "produced": ok,
                          "total": len(produced), "items": produced})
 
+    # ═══ Step 3: 知识转化(每小时) ═══
+    try:
+        from daily_knowledge import run as run_knowledge
+        kr2 = run_knowledge()
+        log["steps"].append({"name": "知识模式提取", "status": "ok",
+                            "patterns": kr2.get("patterns", 0), "scanned": kr2.get("scanned", 0)})
+    except Exception as e:
+        log["steps"].append({"name": "知识模式提取", "status": "failed", "error": str(e)[:100]})
+
     # ═══ 记录 ═══
     log_file = BASE / "data" / "cron_pipeline_log.jsonl"
     log_file.parent.mkdir(parents=True, exist_ok=True)
