@@ -150,6 +150,10 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div class="sb-cat">📈 情报</div>
     <span class="sb-sub" data-panel="intel"><span class="ico">📈</span>趋势情报</span>
 
+    <div class="sb-cat">📊 运营</div>
+    <span class="sb-sub" data-panel="pipeline"><span class="ico">🚀</span>管线监控</span>
+    <span class="sb-sub" data-panel="postmortem"><span class="ico">📋</span>复盘日志</span>
+
     <div class="sb-cat">🔧 管理</div>
     <span class="sb-sub" data-panel="users"><span class="ico">👥</span>用户管理</span>
     <span class="sb-sub" data-panel="apikeys"><span class="ico">🔑</span>授权管理</span>
@@ -390,7 +394,32 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
 </div>
 
-<!-- ═══════════ 10. SYSTEM ═══════════ -->
+<!-- ═══════════ 10. PIPELINE ═══════════ -->
+<div class="panel" id="panel-pipeline">
+  <div class="panel-card"><h3>🚀 管线监控 <span class="sub">情报→选题→生产→发布 全链路状态</span></h3>
+    <div class="kpis" id="pipeline-kpis"></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button class="btn go" onclick="loadPipeline()">🔄 刷新</button>
+      <button class="btn" onclick="triggerPipeline()">🚀 手动触发管线</button>
+    </div>
+    <div class="result" id="pipelineResult"></div>
+  </div>
+  <div class="panel-card"><h3>🧠 知识转化 <span class="sub">Inbox→Knowledge→Pattern→Rule 四层转化</span></h3>
+    <div class="kpis" id="knowledge-kpis"></div>
+    <div class="result" id="knowledgeResult"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 11. POSTMORTEM ═══════════ -->
+<div class="panel" id="panel-postmortem">
+  <div class="panel-card"><h3>📋 复盘日志 <span class="sub">L1直接因→L2机制缺口→L3模式判断</span></h3>
+    <button class="btn go" onclick="loadPostmortem()" style="margin-bottom:8px">🔄 加载</button>
+    <button class="btn" onclick="runPostmortem()" style="margin-bottom:8px">🧠 执行复盘</button>
+    <div id="postmortem-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 12. SYSTEM ═══════════ -->
 <div class="panel" id="panel-system">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
     <div class="panel-card"><h3>💚 健康检查</h3><button class="btn go" onclick="sysH()">🩺 全量检查</button><div class="result" id="hR"></div></div>
@@ -746,6 +775,55 @@ async function loadLogs(){
 async function sysH(){var b=document.getElementById('hR');b.classList.add('show');b.textContent='检查中...';var d=await api('/api/health/full');b.textContent=JSON.stringify(d,null,2)}
 async function sysB(){var b=document.getElementById('bR');b.classList.add('show');b.textContent='备份中...';var d=await api('/api/admin/backup',{method:'POST'});b.textContent=JSON.stringify(d,null,2)}
 async function sysBS(){var b=document.getElementById('bR');b.classList.add('show');b.textContent='加载中...';var d=await api('/api/admin/backup/status');b.textContent=JSON.stringify(d,null,2)}
+
+// ═══════════ PIPELINE ═══════════
+async function loadPipeline(){
+  try{
+    var d=await api('/api/admin/pipeline/status'),p=d.pipeline||{};
+    document.getElementById('pipeline-kpis').innerHTML=
+      '<div class="kpi"><div class="l">管线健康</div><div class="v '+(p.pipeline_health==='active'?'g':'r')+'">'+(p.pipeline_health||'idle')+'</div></div>'+
+      '<div class="kpi"><div class="l">内容产出</div><div class="v p">'+ (p.content_produced_today||0) +'</div></div>'+
+      '<div class="kpi"><div class="l">选题简报</div><div class="v p">'+ (p.briefs_generated||0) +'</div></div>'+
+      '<div class="kpi"><div class="l">情报报告</div><div class="v p">'+ (p.intel_reports||0) +'</div></div>';
+    // Knowledge
+    var k=await api('/api/admin/knowledge/stats'),s=k.stats||{};
+    document.getElementById('knowledge-kpis').innerHTML=
+      '<div class="kpi"><div class="l">📥 Inbox</div><div class="v">'+ (s.inbox||0) +'</div></div>'+
+      '<div class="kpi"><div class="l">✅ Processed</div><div class="v p">'+ (s.processed||0) +'</div></div>'+
+      '<div class="kpi"><div class="l">🧩 Patterns</div><div class="v p">'+ (s.patterns||0) +'</div></div>'+
+      '<div class="kpi"><div class="l">📐 Rules</div><div class="v g">'+ (s.rules||0) +'</div></div>';
+    document.getElementById('knowledgeResult').innerHTML='<div style="text-align:center;padding:12px;font-size:.8rem">转化率: <b style="color:var(--accent2)">'+ (k.conversion_rate||'0%') +'</b> (Inbox→Knowledge→Pattern→Rule)</div>';
+    document.getElementById('knowledgeResult').classList.add('show');
+  }catch(e){}
+}
+async function triggerPipeline(){
+  var b=document.getElementById('pipelineResult');b.classList.add('show');b.textContent='🚀 管线执行中 (约60秒)...';
+  var topic=prompt('管线主题:','厦门厨房装修避坑指南')||'装修设计';
+  var d=await api('/api/admin/pipeline/trigger',{method:'POST',body:JSON.stringify({topic:topic})});
+  var steps=d.result?d.result.steps:[];
+  b.innerHTML='<h4>🚀 管线执行结果</h4>'+steps.map(function(s){
+    return '<div class="card" style="margin-bottom:3px"><b>'+(s.status==='ok'?'✅':'❌')+' Step '+s.step+': '+s.name+'</b> '+ (s.count?'('+s.count+'条)':'')+(s.word_count?'('+s.word_count+'字)':'')+(s.file?'<br>📁 '+s.file:'')+(s.error?'<br><span style=\"color:var(--red)\">'+s.error+'</span>':'')+(s.briefs?'<br>'+s.briefs.join('<br>'):'')+'</div>';
+  }).join('');
+  loadPipeline();
+}
+
+// ═══════════ POSTMORTEM ═══════════
+async function loadPostmortem(){
+  var d=await api('/api/admin/postmortem'),recs=d.records||[];
+  document.getElementById('postmortem-content').innerHTML=recs.length?recs.reverse().map(function(r){
+    return '<div class="panel-card" style="margin-bottom:8px"><h3>📋 '+(r.date||'')+' — '+(r.task||'')+'</h3>'+
+      '<p style="margin:6px 0"><b style="color:var(--red)">L1直接因:</b> '+(r.L1_direct||'')+'</p>'+
+      '<p style="margin:6px 0"><b style="color:var(--gold)">L2机制缺口:</b> '+(r.L2_mechanism||'')+'</p>'+
+      '<p style="margin:6px 0"><b style="color:var(--accent2)">L3模式判断:</b> '+(r.L3_pattern||'')+'</p>'+
+      (r.actions||[]).map(function(a){return '<span class="tag" style="margin:2px">👉 '+a+'</span>'}).join('')+
+      '</div>';
+  }).join(''):'<div class="loading">暂无复盘记录</div>';
+}
+async function runPostmortem(){
+  var d=await api('/api/admin/postmortem/run',{method:'POST'});
+  toast('复盘完成 · '+d.total_records+'条记录');
+  loadPostmortem();
+}
 
 // ═══════════ INIT ═══════════
 loadCreatorStyles();loadPLib();loadDep();loadZQ();
