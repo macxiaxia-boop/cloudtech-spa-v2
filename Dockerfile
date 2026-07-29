@@ -1,5 +1,5 @@
 # CloudTech v2.1 — Production Docker Image
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 LABEL app="CloudTech" version="2.1.0"
 
@@ -14,13 +14,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /app/data /app/logs
-VOLUME ["/app/data", "/app/logs"]
+RUN mkdir -p /app/data /app/logs /app/backups
+VOLUME ["/app/data", "/app/logs", "/app/backups"]
 
 ENV CLOUDTECH_HOST=0.0.0.0
 ENV CLOUDTECH_PORT=5099
 ENV CLOUDTECH_WORKERS=4
-ENV DB_TYPE=sqlite
+ENV PYTHONUNBUFFERED=1
 
 EXPOSE 5099
 

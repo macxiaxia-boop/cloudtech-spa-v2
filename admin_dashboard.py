@@ -12,6 +12,14 @@ load_dotenv(Path(__file__).parent / ".env")
 from flask import Flask, send_from_directory, jsonify, request
 
 from error_tracker import setup_error_handler
+from schemas import validate, LoginRequest, RegisterRequest, GenerateV2Request
+from schemas import TopicDiscoveryRequest, MultiPlatformRequest, StyleCloneRequest, DeaiCheckRequest
+from schemas import RepurposeExtractRequest, RepurposeRewriteRequest
+from schemas import ZhuangqiBriefRequest, ZhuangqiWeekPlanRequest
+from schemas import GeoKeywordRequest, GeoRankRequest, GeoContentRequest
+from schemas import SocialSearchRequest, TrendSearchRequest
+from schemas import PromptGenerateRequest, PromptCreateRequest, PromptDeployRequest
+from schemas import AdminUserUpdateRequest, ApiKeyGenerateRequest
 
 BASE = Path(__file__).parent
 LANDING = BASE / "landing-page"
@@ -141,6 +149,7 @@ def repurpose_page():
     return send_from_directory(str(LANDING), "repurpose.html")
 
 @app.route("/api/repurpose/extract", methods=["POST"])
+@validate(RepurposeExtractRequest)
 def api_repurpose_extract():
     try:
         data = request.get_json()
@@ -164,6 +173,7 @@ def api_repurpose_extract():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route("/api/repurpose/rewrite", methods=["POST"])
+@validate(RepurposeRewriteRequest)
 def api_repurpose_rewrite():
     try:
         data = request.get_json()
@@ -181,6 +191,7 @@ def api_repurpose_rewrite():
 
 # ── 注册 API ──
 @app.route("/api/auth/register", methods=["POST"])
+@validate(RegisterRequest)
 def api_register():
     data = request.get_json() or {}
     email = data.get("email", "").strip()
@@ -212,6 +223,7 @@ def api_register():
 
 # ── 登录 API ──
 @app.route("/api/auth/login", methods=["POST"])
+@validate(LoginRequest)
 def api_login():
     data = request.get_json() or {}
     email = data.get("email", "").strip()
@@ -353,6 +365,7 @@ def api_zhuangqi_scenes():
 
 
 @app.route("/api/zhuangqi/brief", methods=["POST"])
+@validate(ZhuangqiBriefRequest)
 def api_zhuangqi_brief():
     try:
         from zhuangqi_content_engine import api_generate_brief, CONTENT_FORMATS
@@ -477,6 +490,7 @@ def api_browser_status():
 
 # ── 社交媒体搜索(简易版·Tavily驱动·无需Cookie) ──
 @app.route("/api/zhuangqi/social/search", methods=["POST"])
+@validate(SocialSearchRequest)
 def api_social_search():
     try:
         from social_scraper import SocialCollector
@@ -535,6 +549,7 @@ def api_trend_dashboard():
 # ═══════════════════════════════════════════════════════
 
 @app.route("/api/geo/keyword-research", methods=["POST"])
+@validate(GeoKeywordRequest)
 def api_geo_keyword_research():
     import urllib.request as ur
     data = request.get_json()
@@ -565,6 +580,7 @@ def api_geo_keyword_research():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route("/api/geo/rank-check", methods=["POST"])
+@validate(GeoRankRequest)
 def api_geo_rank_check():
     import urllib.request as ur
     data = request.get_json()
@@ -600,6 +616,7 @@ def api_geo_rank_check():
     return jsonify({"status": "ok", "results": all_results})
 
 @app.route("/api/geo/content-generate", methods=["POST"])
+@validate(GeoContentRequest)
 def api_geo_content_generate():
     import urllib.request as ur
     data = request.get_json()
@@ -760,6 +777,7 @@ def api_prompts_list():
     return jsonify({"status": "ok", "prompts": [dict(r) for r in rows]})
 
 @app.route("/api/prompts/create", methods=["POST"])
+@validate(PromptCreateRequest)
 def api_prompts_create():
     from database import Database
     db = Database().connect()
@@ -790,6 +808,7 @@ def api_prompts_manage(pid):
         return jsonify({"status": "ok", "updated": pid})
 
 @app.route("/api/prompts/generate", methods=["POST"])
+@validate(PromptGenerateRequest)
 def api_prompts_generate():
     import urllib.request as ur
     data = request.get_json()
@@ -1012,6 +1031,7 @@ def api_create_styles():
 
 
 @app.route("/api/create/topic-discovery", methods=["POST"])
+@validate(TopicDiscoveryRequest)
 def api_create_topic_discovery():
     """选题发现：领域 + 对标创作者 → 5个选题简报"""
     data = request.get_json() or {}
@@ -1135,6 +1155,7 @@ Emoji密度：{creator['emoji']}
 
 
 @app.route("/api/create/multi-platform", methods=["POST"])
+@validate(MultiPlatformRequest)
 def api_create_multi_platform():
     """一题多平台：一个主题 → 6个平台适配版本"""
     data = request.get_json() or {}
@@ -1165,6 +1186,7 @@ def api_create_multi_platform():
 
 
 @app.route("/api/create/style-clone", methods=["POST"])
+@validate(StyleCloneRequest)
 def api_create_style_clone():
     """风格克隆：粘贴参考文章 → 提取风格DNA"""
     data = request.get_json() or {}
@@ -1179,6 +1201,7 @@ def api_create_style_clone():
 
 
 @app.route("/api/create/deai-check", methods=["POST"])
+@validate(DeaiCheckRequest)
 def api_create_deai_check():
     """去AI腔检测：粘贴文本 → 5维度评分+修改建议"""
     data = request.get_json() or {}
@@ -1290,6 +1313,7 @@ def api_create_forms():
 
 
 @app.route("/api/create/generate-v2", methods=["POST"])
+@validate(GenerateV2Request)
 def api_create_generate_v2():
     """增强版AI写作：内容形式 + 创作者风格 + 叙事公式 + 表达风格 + 钩子类型"""
     data = request.get_json() or {}
@@ -1589,20 +1613,69 @@ def api_admin_crashes():
         return jsonify({"status":"error","message":str(e)}), 500
 
 
+# ═══════════════════════════════════════════════════════
+# API 文档 — OpenAPI 3.0 + Swagger UI
+# ═══════════════════════════════════════════════════════
+
+@app.route("/api/docs")
+def api_docs_page():
+    return send_from_directory(str(LANDING), "api-docs.html")
+
+@app.route("/api/openapi.json")
+def api_openapi_json():
+    from openapi import get_spec
+    return jsonify(get_spec())
+
+
+# ═══════════════════════════════════════════════════════
+# 监控 — Prometheus metrics endpoint
+# ═══════════════════════════════════════════════════════
+
+@app.route("/metrics", methods=["GET"], endpoint="metrics_endpoint")
+def metrics():
+    import time as _time, shutil as _shutil
+    lines = [
+        "# HELP cloudtech_info CloudTech version info",
+        "cloudtech_info{version=\"2.1.0\"} 1",
+        "# HELP cloudtech_http_requests_total Total HTTP requests (placeholder)",
+        "cloudtech_http_requests_total 0",
+    ]
+    try:
+        usage = _shutil.disk_usage("C:\\")
+        lines.append("# HELP system_disk_free_bytes Disk free space on C:")
+        lines.append(f"system_disk_free_bytes {usage.free}")
+    except:
+        lines.append("system_disk_free_bytes 0")
+    return "\n".join(lines) + "\n", 200, {"Content-Type": "text/plain; version=0.0.4"}
+
+
+
+    return send_from_directory(str(LANDING), "api-docs.html")
+
+
 # ⚠️ 通配路由必须放在最后，否则会拦截 /admin /health 等
 @app.route("/<path:filename>")
 def serve_static(filename):
+    # Don't intercept API routes
+    if filename in ("metrics", "api/openapi.json", "api/docs"):
+        return jsonify({"error": "Not found"}), 404
     path = LANDING / filename
     if path.exists():
         return send_from_directory(str(LANDING), filename)
     return jsonify({"error": "Not found"}), 404
 
 # ── CORS ──
+CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:5099,http://127.0.0.1:5099,http://localhost:8501").split(",")
+
 @app.after_request
 def add_cors(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+    origin = request.headers.get("Origin", "")
+    if origin in CORS_ORIGINS or not origin:  # no origin = same-origin request
+        response.headers["Access-Control-Allow-Origin"] = origin or CORS_ORIGINS[0]
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization,X-Admin-Token"
     response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
     return response
 
 if __name__ == "__main__":
