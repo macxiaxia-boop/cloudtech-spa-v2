@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注册 — 云数科技</title>
+<link rel="stylesheet" href="design-system.css">
+<style>
+:root { --bg:#0a0a0f; --card:#111118; --border:#1e1e2a; --accent:#6c5ce7; --accent2:#a78bfa; --green:#00c853; --red:#ff1744; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:#e0e0e0; font-family:-apple-system,"Microsoft YaHei",sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.auth-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:48px 40px; width:100%; max-width:460px; }
+.auth-card h1 { font-size:1.5rem; margin-bottom:4px; }
+.auth-card p { color:#777; font-size:0.85rem; margin-bottom:32px; }
+.form-row { display:flex; gap:12px; }
+.form-row .form-group { flex:1; }
+.form-group { margin-bottom:20px; }
+.form-group label { display:block; font-size:0.85rem; color:#999; margin-bottom:6px; }
+.form-group input { width:100%; padding:12px 16px; background:#0a0a0f; border:1px solid var(--border); border-radius:8px; color:#e0e0e0; font-size:0.95rem; outline:none; transition:border-color .2s; }
+.form-group input:focus { border-color:var(--accent); }
+.form-group select { width:100%; padding:12px 16px; background:#0a0a0f; border:1px solid var(--border); border-radius:8px; color:#e0e0e0; font-size:0.95rem; outline:none; }
+.btn { width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-size:0.95rem; cursor:pointer; transition:opacity .2s; }
+.btn:hover { opacity:0.9; }
+.btn:disabled { opacity:0.5; cursor:not-allowed; }
+.error-msg { background:rgba(255,23,68,.1); border:1px solid var(--red); color:var(--red); padding:10px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:16px; display:none; }
+.success-msg { background:rgba(0,200,83,.1); border:1px solid var(--green); color:var(--green); padding:10px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:16px; display:none; }
+.auth-links { margin-top:24px; text-align:center; font-size:0.85rem; color:#777; }
+.auth-links a { color:var(--accent2); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="auth-card">
+  <h1>注册云数科技</h1>
+  <p>7天免费试用 · 无需信用卡 · 随时取消</p>
+  <div class="error-msg" id="error"></div>
+  <div class="success-msg" id="success"></div>
+  <form id="registerForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label>姓名</label>
+        <input type="text" id="name" placeholder="您的姓名" required>
+      </div>
+      <div class="form-group">
+        <label>公司</label>
+        <input type="text" id="company" placeholder="公司名称(选填)">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>邮箱</label>
+      <input type="email" id="email" placeholder="your@email.com" required>
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input type="password" id="password" placeholder="至少6位" required minlength="6">
+    </div>
+    <div class="form-group">
+      <label>套餐</label>
+      <select id="plan">
+        <option value="starter">入门版 — ¥99/月 (5项目, 基础分析)</option>
+        <option value="pro">专业版 — ¥299/月 (20项目, API, 优先支持)</option>
+        <option value="business">企业版 — ¥999/月 (无限, 全功能, 专属客服)</option>
+      </select>
+    </div>
+    <button type="submit" class="btn" id="submitBtn">开始7天免费试用</button>
+  </form>
+  <div class="auth-links">
+    已有账号？<a href="/login.html">立即登录</a>
+  </div>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const error = document.getElementById('error');
+  const success = document.getElementById('success');
+  btn.disabled = true; btn.textContent = '注册中...';
+  error.style.display = 'none'; success.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        company: document.getElementById('company').value,
+        plan: document.getElementById('plan').value
+      })
+    });
+    const data = await res.json();
+    if (data.token) {
+      localStorage.setItem('cloudtech_token', data.token);
+      localStorage.setItem('cloudtech_user', JSON.stringify(data.user));
+      success.textContent = '注册成功！3秒后跳转...';
+      success.style.display = 'block';
+      setTimeout(() => { window.location.href = '/admin'; }, 3000);
+    } else {
+      throw new Error(data.error || '注册失败');
+    }
+  } catch (err) {
+    error.textContent = err.message;
+    error.style.display = 'block';
+    btn.disabled = false; btn.textContent = '开始7天免费试用';
+  }
+});
+</script>
+</body>
+</html>

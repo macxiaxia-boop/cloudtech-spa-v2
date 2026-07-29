@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运营后台 — 云数科技</title>
+<style>
+:root { --bg:#0a0a0f; --card:#111118; --border:#1e1e2a; --accent:#6c5ce7; --accent2:#a78bfa; --green:#00c853; --red:#ff1744; --yellow:#ffd600; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:#e0e0e0; font-family:-apple-system,"Microsoft YaHei",sans-serif; }
+.header { background:var(--card); border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; }
+.header h1 { font-size:1.2rem; }
+.header .time { color:#777; font-size:0.8rem; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; padding:24px 32px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; }
+.card h2 { font-size:0.8rem; color:#777; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; }
+.card .value { font-size:2rem; font-weight:700; }
+.card .sub { font-size:0.8rem; color:#777; margin-top:4px; }
+.accent { color:var(--accent2); }
+.green { color:var(--green); }
+.red { color:var(--red); }
+.tables { padding:0 32px 32px; }
+.table-card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:16px; }
+.table-card h2 { padding:16px 24px; border-bottom:1px solid var(--border); font-size:0.9rem; }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; padding:10px 24px; font-size:0.8rem; color:#777; border-bottom:1px solid var(--border); }
+td { padding:10px 24px; font-size:0.9rem; border-bottom:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:0.75rem; }
+.badge-active { background:rgba(0,200,83,.15); color:var(--green); }
+.badge-inactive { background:rgba(255,23,68,.15); color:var(--red); }
+.loading { text-align:center; padding:48px; color:#777; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>云数科技 · 运营后台</h1>
+  <span class="time" id="clock"></span>
+</div>
+
+<div class="loading" id="loading">加载中...</div>
+
+<div id="content" style="display:none">
+  <div class="grid">
+    <div class="card">
+      <h2>月度经常性收入 MRR</h2>
+      <div class="value accent" id="mrr">--</div>
+      <div class="sub" id="arpu"></div>
+    </div>
+    <div class="card">
+      <h2>活跃订阅</h2>
+      <div class="value green" id="active-subs">--</div>
+      <div class="sub" id="churned"></div>
+    </div>
+    <div class="card">
+      <h2>总用户数</h2>
+      <div class="value" id="total-users">--</div>
+      <div class="sub" id="new-users"></div>
+    </div>
+    <div class="card">
+      <h2>API 调用</h2>
+      <div class="value" id="api-calls">--</div>
+      <div class="sub">本月累计</div>
+    </div>
+  </div>
+
+  <div class="tables">
+    <div class="table-card">
+      <h2>MRR by Plan</h2>
+      <table><thead><tr><th>套餐</th><th>MRR</th></tr></thead><tbody id="mrr-table"></tbody></table>
+    </div>
+    <div class="table-card">
+      <h2>租户列表</h2>
+      <table><thead><tr><th>租户</th><th>邮箱</th><th>套餐</th><th>状态</th><th>注册日期</th></tr></thead><tbody id="tenant-table"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+async function load() {
+  try {
+    const token = localStorage.getItem('cloudtech_token');
+    const res = await fetch('/api/admin/ops', {
+      headers: token ? {'Authorization': 'Bearer ' + token} : {}
+    });
+    const data = await res.json();
+
+    document.getElementById('mrr').textContent = '¥' + (data.mrr?.mrr || 0).toLocaleString();
+    document.getElementById('arpu').textContent = 'ARPU: ¥' + (data.mrr?.arpu || 0);
+    document.getElementById('active-subs').textContent = data.mrr?.active_subscriptions || 0;
+    document.getElementById('churned').textContent = '流失: ' + (data.mrr?.churned || 0);
+    document.getElementById('total-users').textContent = data.users?.total_users || 0;
+    document.getElementById('new-users').textContent = '本月新增: ' + (data.users?.new_this_month || 0);
+    document.getElementById('api-calls').textContent = (data.usage?.api_calls || 0).toLocaleString();
+
+    // MRR table
+    const mrrTable = document.getElementById('mrr-table');
+    const plans = data.mrr?.mrr_by_plan || {};
+    mrrTable.innerHTML = Object.entries(plans).map(([k,v]) => `<tr><td>${k}</td><td>¥${v.toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="2">暂无数据</td></tr>';
+
+    // Tenant table
+    const tTable = document.getElementById('tenant-table');
+    const tenants = data.tenants?.tenants || [];
+    tTable.innerHTML = tenants.map(t => `
+      <tr>
+        <td>${t.name}</td><td>${t.email}</td><td>${t.plan}</td>
+        <td><span class="badge badge-${t.status==='active'?'active':'inactive'}">${t.status}</span></td>
+        <td>${t.created}</td>
+      </tr>`).join('') || '<tr><td colspan="5">暂无租户</td></tr>';
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  } catch(e) {
+    document.getElementById('loading').textContent = '加载失败: ' + e.message;
+  }
+}
+
+setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleString('zh-CN'); }, 1000);
+load();
+</script>
+</body>
+</html>

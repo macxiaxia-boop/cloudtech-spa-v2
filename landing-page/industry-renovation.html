@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="云数科技·装修行业方案 — 从0到1建立装企内容获客体系。避坑内容/真实案例/透明报价/工艺展示，一键生成。">
+<title>装修行业方案 — 云数科技 | 装企内容获客系统</title>
+<style>
+  :root { --bg:#0a0a0f; --surface:#141420; --surface2:#1a1a2e; --border:#2a2a3e; --text:#e0e0e8; --text2:#9090a8; --accent:#6c5ce7; --accent2:#a78bfa; --green:#00d68f; --orange:#ff9500; --radius:12px; --maxw:1100px; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .container { max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+  nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(10,10,15,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+  nav .container { display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .logo { font-size:1.25rem; font-weight:700; color:#fff; text-decoration:none; }
+  .logo span { color:var(--accent2); }
+  .nav-links { display:flex; gap:24px; align-items:center; }
+  .nav-links a { color:var(--text2); text-decoration:none; font-size:0.9rem; }
+  .nav-links a:hover { color:#fff; }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:10px 22px; border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; text-decoration:none; transition:all 0.2s; }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { background:#7c6ff7; transform:translateY(-1px); box-shadow:0 8px 24px rgba(108,92,231,0.3); }
+  .btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+  .btn-outline:hover { border-color:var(--accent2); color:#fff; }
+
+  .hero { padding:140px 0 80px; text-align:center; position:relative; }
+  .hero::before { content:''; position:absolute; top:-200px; left:50%; transform:translateX(-50%); width:600px; height:600px; background:radial-gradient(circle,rgba(108,92,231,0.12) 0%,transparent 70%); pointer-events:none; }
+  .hero .badge { display:inline-block; padding:4px 16px; border-radius:20px; font-size:0.8rem; font-weight:600; background:rgba(0,214,143,0.1); color:var(--green); margin-bottom:20px; }
+  .hero h1 { font-size:2.8rem; font-weight:800; letter-spacing:-1px; margin-bottom:16px; }
+  .hero h1 span { background:linear-gradient(135deg,var(--accent2),#6366f1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .hero p { font-size:1.15rem; color:var(--text2); max-width:650px; margin:0 auto 32px; }
+
+  .pain-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px; padding:0 0 80px; }
+  .pain-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:28px; }
+  .pain-card .num { font-size:2rem; font-weight:800; color:var(--accent2); }
+  .pain-card h3 { color:#fff; margin:8px 0; }
+  .pain-card p { color:var(--text2); font-size:0.9rem; }
+
+  section { padding:80px 0; }
+  .section-header { text-align:center; margin-bottom:56px; }
+  .section-header h2 { font-size:2rem; font-weight:700; }
+  .section-header p { color:var(--text2); margin-top:8px; }
+
+  .solution-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px; }
+  .solution-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:32px; }
+  .solution-card .icon { font-size:2.5rem; margin-bottom:16px; }
+  .solution-card h3 { color:#fff; margin-bottom:8px; }
+  .solution-card p { color:var(--text2); font-size:0.9rem; }
+  .solution-card .content-types { display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+  .solution-card .tag { padding:2px 10px; border-radius:12px; font-size:0.75rem; background:rgba(108,92,231,0.1); color:var(--accent2); }
+
+  .steps { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; }
+  .step-card { text-align:center; padding:32px 20px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); position:relative; }
+  .step-num { width:40px; height:40px; border-radius:50%; background:var(--accent); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; margin-bottom:16px; }
+
+  .roi-box { background:var(--surface2); border:1px solid var(--accent); border-radius:var(--radius); padding:40px; margin-top:40px; }
+  .roi-box h3 { color:#fff; font-size:1.5rem; margin-bottom:24px; text-align:center; }
+  .roi-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:24px; text-align:center; }
+  .roi-item .before { color:var(--text2); font-size:0.85rem; text-decoration:line-through; }
+  .roi-item .after { color:var(--green); font-size:1.3rem; font-weight:700; }
+  .roi-item .label { color:var(--text2); font-size:0.85rem; margin-top:4px; }
+
+  .cta { text-align:center; padding:100px 0; }
+  .cta h2 { font-size:2.2rem; margin-bottom:16px; }
+  .cta p { color:var(--text2); margin-bottom:32px; font-size:1.1rem; }
+
+  footer { border-top:1px solid var(--border); padding:32px 0; text-align:center; color:var(--text2); font-size:0.85rem; }
+
+  @media (max-width:768px) { .hero h1 { font-size:1.8rem; } .roi-grid { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="index.html" class="logo">云数<span>科技</span></a>
+    <div class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="industry-renovation.html" style="color:#fff;">装修行业</a>
+      <a href="pricing.html">定价</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <span class="badge">🏠 行业方案</span>
+    <h1>装修公司<br><span>内容获客系统</span></h1>
+    <p>从0到1建立装企内容矩阵。避坑内容/真实案例/透明报价/工艺展示——四大内容类型模板开箱即用。让客户在网上找到你，信任你，选择你。</p>
+    <div class="btn-group" style="display:flex;gap:12px;justify-content:center;">
+      <a href="#cta" class="btn btn-primary" style="font-size:1rem;padding:12px 32px;">🚀 免费获取内容模板</a>
+      <a href="#solutions" class="btn btn-outline" style="font-size:1rem;padding:12px 32px;">查看方案 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Pain Points -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <h2>装修获客正在经历30年来最大变化</h2>
+      <p>传统方式失效，新的方式还没建立——这是最大的机会窗口</p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="num">130%</div>
+        <h3>获客成本暴涨</h3>
+        <p>单条线索成本较2020年上涨130%，平台线索均价800-1,200元/条。电销接通率降至2-6%，地推被驱离概率>70%。</p>
+      </div>
+      <div class="pain-card">
+        <div class="num">70%</div>
+        <h3>装企无内容能力</h3>
+        <p>70%中小装企没有专业内容团队，抖音/小红书月均更新<5条。用户在手机上找装修信息的时间越来越长，装企在手机上能被找到的能力越来越弱。</p>
+      </div>
+      <div class="pain-card">
+        <div class="num">120%+</div>
+        <h3>搜索量爆发但无人接</h3>
+        <p>小红书装修内容搜索量同比增长120%+，抖音装修话题播放量超2,000亿。用户自己研究3-6个月才找装修公司——而这期间没有你的内容=你不在候选名单上。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Solutions -->
+<section id="solutions">
+  <div class="container">
+    <div class="section-header">
+      <h2>四大内容类型，建立信任漏斗</h2>
+      <p>不是发效果图——是帮客户在了解装修的过程中信任你</p>
+    </div>
+    <div class="solution-grid">
+      <div class="solution-card">
+        <div class="icon">🛡️</div>
+        <h3>避坑型内容 · 建立初步信任</h3>
+        <p>报价单怎么看/水电验收标准/合同条款避坑。让客户觉得"这个人懂行、不骗人"。</p>
+        <div class="content-types">
+          <span class="tag">报价避坑</span><span class="tag">合同条款</span><span class="tag">水电验收</span><span class="tag">材料鉴别</span>
+        </div>
+      </div>
+      <div class="solution-card">
+        <div class="icon">📊</div>
+        <h3>透明型内容 · 消除信息不对称</h3>
+        <p>分城市/分户型/分档次的真实预算参考。装修成本构成透明化。报价背后每一项说清楚。</p>
+        <div class="content-types">
+          <span class="tag">预算参考</span><span class="tag">成本拆解</span><span class="tag">10万vs30万</span><span class="tag">费用明细</span>
+        </div>
+      </div>
+      <div class="solution-card">
+        <div class="icon">🔨</div>
+        <h3>工艺型内容 · 强化专业感知</h3>
+        <p>施工细节展示/验收标准/材料工艺对比。让客户"看见"你的施工质量——不是你说好，是他自己看出好。</p>
+        <div class="content-types">
+          <span class="tag">工地实拍</span><span class="tag">防水工艺</span><span class="tag">瓷砖铺贴</span><span class="tag">水电走线</span>
+        </div>
+      </div>
+      <div class="solution-card">
+        <div class="icon">🏡</div>
+        <h3>案例型内容 · 建立选择偏好</h3>
+        <p>真实案例完整复盘：问题→方案→结果→花费。不是效果图合集，是"这个客户原来的问题，我们怎么解决的"。</p>
+        <div class="content-types">
+          <span class="tag">旧房改造</span><span class="tag">前后对比</span><span class="tag">费用公开</span><span class="tag">业主回访</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section style="background:var(--surface);">
+  <div class="container">
+    <div class="section-header"><h2>30天，从0到1建立内容获客体系</h2></div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3 style="color:#fff;">第1-7天</h3>
+        <p style="color:var(--text2);">建立内容基础<br>3篇避坑+5个案例+账号搭建</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3 style="color:#fff;">第8-14天</h3>
+        <p style="color:var(--text2);">开始日更发布<br>每天1篇+回复评论+群分享</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3 style="color:#fff;">第15-21天</h3>
+        <p style="color:var(--text2);">优化方向<br>数据好的加倍投入</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <h3 style="color:#fff;">第22-30天</h3>
+        <p style="color:var(--text2);">建立节奏<br>日更+周复盘+扩量</p>
+      </div>
+    </div>
+
+    <div class="roi-box">
+      <h3>内容获客 vs 平台买量：30天对比</h3>
+      <div class="roi-grid">
+        <div class="roi-item">
+          <div class="label">线索成本</div>
+          <div class="before">800-1,200元/条</div>
+          <div class="after"><50元/条</div>
+        </div>
+        <div class="roi-item">
+          <div class="label">有效期</div>
+          <div class="before">不续费=立刻停</div>
+          <div class="after">发布后2年持续带流量</div>
+        </div>
+        <div class="roi-item">
+          <div class="label">信任度</div>
+          <div class="before">用户知道是广告</div>
+          <div class="after">用户觉得是"自己找到的"</div>
+        </div>
+        <div class="roi-item">
+          <div class="label">投入</div>
+          <div class="before">月投1-3万</div>
+          <div class="after">AI工具¥99/月+时间</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="cta">
+  <div class="container">
+    <h2>用AI批量生产装修内容</h2>
+    <p>20+装修内容模板 · 4大内容类型 · 一键生成 · 去AI腔 · 检测通过再发布</p>
+    <a href="index.html#cta" class="btn btn-primary" style="font-size:1.1rem;padding:14px 40px;">🚀 免费获取装修内容模板包</a>
+    <p style="margin-top:12px;color:var(--text2);font-size:0.85rem;">含: 20篇装修内容模板 + 避坑清单 + 预算参考表 + 施工方评估框架</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container"><p>© 2026 云数科技 · 装修行业方案 · 内容获客系统</p></div>
+</footer>
+
+</body>
+</html>

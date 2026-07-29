@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="云数科技 — AI数字营销中台，23工具·6引擎。内容创作/图文二创/视频生产/知识管理一站式。AI写得出，检测过得去，发布不用改。">
+<meta name="keywords" content="AI内容创作工具,小红书文案生成器,AI视频脚本,去AI腔,数字营销中台,云数科技,装修获客,内容营销">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="author" content="云数科技">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://cloudtech.ai/">
+<!-- Open Graph -->
+<meta property="og:title" content="云数科技 — AI数字营销中台 | 23工具·6引擎">
+<meta property="og:description" content="AI写得出，检测过得去，发布不用改。200+装修企业信赖的内容中台。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="云数科技">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="云数科技 — AI数字营销中台">
+<meta name="twitter:description" content="AI写得出，检测过得去，发布不用改。7天免费试用。">
+<!-- Schema.org -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"云数科技","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"AI数字营销中台，23工具·6引擎","offers":{"@type":"Offer","price":"99","priceCurrency":"CNY","priceValidUntil":"2027-12-31"}}
+</script>
+<title>云数科技 — AI数字营销中台 | 23工具·6引擎·1键出内容</title>
+<link rel="stylesheet" href="design-system.css">
+<style>
+  /* ── Hero ── */
+  .hero {
+    padding: 160px 0 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-tagline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: rgba(108, 92, 231, 0.1);
+    color: var(--accent2);
+    border: 1px solid rgba(108, 92, 231, 0.15);
+    margin-bottom: 24px;
+    letter-spacing: 0.3px;
+  }
+
+  .hero h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    line-height: 1.2;
+    position: relative;
+  }
+
+  .hero h1 .gradient-text {
+    background: linear-gradient(135deg, var(--accent2), #818cf8, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--text2);
+    max-width: 560px;
+    margin: 0 auto 12px;
+    line-height: 1.7;
+  }
+
+  .hero-claim {
+    font-size: 1rem;
+    color: var(--green);
+    margin-bottom: 36px;
+    font-weight: 500;
+  }
+
+  .hero-claim span {
+    background: var(--green-bg);
+    padding: 2px 10px;
+    border-radius: 6px;
+  }
+
+  .hero .btn-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    justify-content: center;
+    margin-top: 60px;
+  }
+
+  .hero-stats .stat {
+    text-align: center;
+  }
+
+  .hero-stats .num {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .hero-stats .label {
+    font-size: 0.82rem;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(42, 42, 62, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42, 42, 62, 0.15) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 600px 400px at 50% 20%, black, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 600px 400px at 50% 20%, black, transparent);
+    pointer-events: none;
+  }
+
+  /* ── Engine Cards ── */
+  #engines { position: relative; }
+
+  .engine-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    transition: all 0.3s var(--ease);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .engine-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.3s var(--ease);
+  }
+
+  .engine-card:hover::before { opacity: 1; }
+
+  .engine-card:hover {
+    border-color: rgba(108, 92, 231, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), 0 0 40px rgba(108, 92, 231, 0.08);
+  }
+
+  .engine-card .icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+
+  .engine-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .engine-card .eng-desc {
+    color: var(--text2);
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .engine-card .features {
+    list-style: none;
+  }
+
+  .engine-card .features li {
+    color: var(--text2);
+    font-size: 0.84rem;
+    padding: 5px 0;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .engine-card .features li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 11px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    opacity: 0.6;
+  }
+
+  .engine-card .tool-count {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(108, 92, 231, 0.08);
+    color: var(--accent2);
+  }
+
+  /* ── Use Cases ── */
+  #cases { background: var(--bg2); }
+
+  .cases-tabs {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+
+  .case-tab {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    transition: all 0.3s var(--ease);
+  }
+
+  .case-tab:hover {
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .case-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .case-panel {
+    display: none;
+    animation: fadeInUp 0.5s var(--ease) forwards;
+  }
+
+  .case-panel.active {
+    display: block;
+  }
+
+  .case-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .case-content .info h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  .case-content .info .tagline {
+    color: var(--accent2);
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .case-content .info p {
+    color: var(--text2);
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .case-content .info .workflow-steps {
+    list-style: none;
+  }
+
+  .case-content .info .workflow-steps li {
+    color: var(--text2);
+    font-size: 0.88rem;
+    padding: 6px 0;
+    padding-left: 28px;
+    position: relative;
+  }
+
+  .case-content .info .workflow-steps li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent2);
+    font-weight: 700;
+  }
+
+  .case-visual {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .case-visual .emoji-big {
+    font-size: 3.5rem;
+    margin-bottom: 16px;
+  }
+
+  .case-visual h4 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .case-visual p {
+    color: var(--text2);
+    font-size: 0.85rem;
+    max-width: 240px;
+    margin: 0 auto;
+  }
+
+  .case-visual .metrics {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .case-visual .metrics .m-item {
+    text-align: center;
+  }
+
+  .case-visual .metrics .m-num {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent2);
+  }
+
+  .case-visual .metrics .m-label {
+    font-size: 0.75rem;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  /* ── Social Proof ── */
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .testimonial-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: all 0.3s var(--ease);
+  }
+
+  .testimonial-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .testimonial-card .stars {
+    color: #f59e0b;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+  }
+
+  .testimonial-card blockquote {
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    font-style: normal;
+  }
+
+  .testimonial-card .author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .testimonial-card .author .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .testimonial-card .author .name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .testimonial-card .author .role {
+    font-size: 0.78rem;
+    color: var(--text3);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .testimonials-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+    .case-content { grid-template-columns: 1fr; }
+    .cases-tabs { flex-direction: column; align-items: stretch; max-width: 300px; margin: 0 auto 32px; }
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 2rem; }
+    .hero-subtitle { font-size: 1rem; }
+    .hero-stats { gap: 24px; }
+    .hero-stats .num { font-size: 1.5rem; }
+    .hero-grid-bg { background-size: 40px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav" id="nav">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">云</span>
+      云数<span>科技</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#engines">引擎</a>
+      <a href="#cases">场景</a>
+      <a href="features.html">功能</a>
+      <a href="pricing.html">定价</a>
+      <a href="#testimonials">口碑</a>
+      <a href="#cta" class="btn btn-primary" style="padding:8px 20px;font-size:0.85rem;">免费开始</a>
+    </div>
+    <button class="mobile-toggle" id="mobileToggle" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-tagline animate-in">🚀 AI数字营销中台 v6.1 已发布</div>
+    <h1 class="animate-in animate-in-d1">
+      <span class="gradient-text">AI数字营销中台</span><br>
+      输入主题，拿到可发布内容
+    </h1>
+    <p class="hero-subtitle animate-in animate-in-d2">
+      23个AI工具 · 6大专业引擎 · 1个桌面端搞定<br>
+      内容创作、图文二创、视频生产、知识管理一站式
+    </p>
+    <p class="hero-claim animate-in animate-in-d3">
+      <span>AI写得出，检测过得去，发布不用改。</span>
+    </p>
+    <div class="btn-group animate-in animate-in-d4">
+      <a href="/dist/CloudTech-Portable-v2.0.0.zip" class="btn btn-primary btn-lg" download>⬇ 免费下载 Win版 (.zip 便携包)</a>
+      <a href="/admin" class="btn btn-outline btn-lg">🔧 管理后台 →</a>
+    </div>
+    <div class="hero-stats animate-in animate-in-d5">
+      <div class="stat"><div class="num">23</div><div class="label">内置工具</div></div>
+      <div class="stat"><div class="num">6</div><div class="label">AI引擎</div></div>
+      <div class="stat"><div class="num">4</div><div class="label">风格模型</div></div>
+      <div class="stat"><div class="num">&lt;1s</div><div class="label">启动速度</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Engines -->
+<section id="engines">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge">6大引擎 · 23工具</span>
+      <h2>不只是写文案，是完整的数字营销中台</h2>
+      <p>每个引擎都是一个专业Agent团队，协同工作，闭环输出</p>
+    </div>
+    <div class="grid-auto">
+      <div class="engine-card reveal animate-in-d1">
+        <div class="icon">✍️</div>
+        <h3>内容创作引擎</h3>
+        <p class="eng-desc">4大创作者风格库，覆盖小红书/公众号/抖音/知乎/B站/朋友圈</p>
+        <ul class="features">
+          <li>6种情绪基调 + 5种内容类型</li>
+          <li>去AI腔 · 自然口语化输出</li>
+          <li>违禁词检测 + 人工特征评分</li>
+        </ul>
+        <span class="tool-count">7工具</span>
+      </div>
+      <div class="engine-card reveal animate-in-d2">
+        <div class="icon">🎨</div>
+        <h3>图文二创引擎</h3>
+        <p class="eng-desc">粘贴链接 → AI拆解结构 → 风格DNA注入 → 生成原创内容</p>
+        <ul class="features">
+          <li>爆款结构拆解 + 原创重组</li>
+          <li>图片焕新去重（MD5+pHash+噪点）</li>
+          <li>产品图 → 种草文案自动生成</li>
+        </ul>
+        <span class="tool-count">4工具</span>
+      </div>
+      <div class="engine-card reveal animate-in-d3">
+        <div class="icon">🎥</div>
+        <h3>视频生产引擎</h3>
+        <p class="eng-desc">从脚本到成品MP4全流程。Whisper转译+TTS配音+自动剪辑</p>
+        <ul class="features">
+          <li>参考URL → 脚本 → 配音 → 剪辑</li>
+          <li>5种画面风格 + 6种TTS音色</li>
+          <li>faster-whisper引擎 10x转译速度</li>
+        </ul>
+        <span class="tool-count">4工具</span>
+      </div>
+      <div class="engine-card reveal animate-in-d4">
+        <div class="icon">📚</div>
+        <h3>知识管理引擎</h3>
+        <p class="eng-desc">内容拆解→模式抽取→模型写入→能力提取。越用越强</p>
+        <ul class="features">
+          <li>创作者DNA自动学习（≥5篇可训练）</li>
+          <li>知识库全量同步 + 封面视觉提取</li>
+          <li>自我进化闭环（生成→检测→修复→再生）</li>
+        </ul>
+        <span class="tool-count">3工具</span>
+      </div>
+      <div class="engine-card reveal animate-in-d5">
+        <div class="icon">🌐</div>
+        <h3>互联网搜索引擎</h3>
+        <p class="eng-desc">Tavily AI实时搜索 + 自动摘要 + 结构化返回。写内容不再靠猜</p>
+        <ul class="features">
+          <li>网页/新闻双模式搜索</li>
+          <li>AI自动摘要 + 结构化输出</li>
+          <li>竞品分析一键生成报告</li>
+        </ul>
+        <span class="tool-count">2工具</span>
+      </div>
+      <div class="engine-card reveal animate-in-d6">
+        <div class="icon">🧬</div>
+        <h3>自我进化引擎</h3>
+        <p class="eng-desc">生成→验证→诊断根因→搜索修复→迭代。10轮自动进化</p>
+        <ul class="features">
+          <li>A/B内容测试（5-7变体自动评分）</li>
+          <li>笔记诊断（健康度+问题清单+建议）</li>
+          <li>三检闭环（人工特征+健康+违禁词）</li>
+        </ul>
+        <span class="tool-count">3工具</span>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px;" class="reveal">
+      <a href="features.html" class="btn btn-outline">查看全部功能详情 →</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Use Cases -->
+<section id="cases">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge">使用场景</span>
+      <h2>三种角色，一个工作台</h2>
+      <p>无论独立创作者、装企团队还是代理商——云数科技适配你的工作流</p>
+    </div>
+
+    <div class="cases-tabs reveal">
+      <button class="case-tab active" data-tab="creator" onclick="switchCase('creator', this)">👤 创作者</button>
+      <button class="case-tab" data-tab="renovation" onclick="switchCase('renovation', this)">🏠 装企</button>
+      <button class="case-tab" data-tab="agency" onclick="switchCase('agency', this)">🏢 代理商</button>
+    </div>
+
+    <!-- Creator Panel -->
+    <div class="case-panel active" id="panel-creator">
+      <div class="case-content">
+        <div class="info">
+          <div class="tagline">一个人就是一个内容团队</div>
+          <h3>独立内容创作者</h3>
+          <p>日更压力大？风格不稳定？1个主题 → AI生成多平台适配内容 → 自动去AI腔 → 检测通过直接发布。日更从4小时变成20分钟。</p>
+          <ul class="workflow-steps">
+            <li>输入主题或参考链接</li>
+            <li>选择平台×风格×情绪基调</li>
+            <li>AI生成 → 去AI腔 → 检测评分</li>
+            <li>一键发布或导出</li>
+          </ul>
+        </div>
+        <div class="case-visual">
+          <div class="emoji-big">✍️</div>
+          <h4>典型工作流</h4>
+          <p>1个主题 → 30篇内容 · 跨6个平台 · 带封面图</p>
+          <div class="metrics">
+            <div class="m-item"><div class="m-num">4h→20min</div><div class="m-label">单日内容时间</div></div>
+            <div class="m-item"><div class="m-num">10x</div><div class="m-label">产出效率</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Renovation Panel -->
+    <div class="case-panel" id="panel-renovation">
+      <div class="case-content">
+        <div class="info">
+          <div class="tagline">装修获客 · 内容先行</div>
+          <h3>装修企业</h3>
+          <p>获客成本暴涨130%？不懂做内容？四大内容类型模板开箱即用：避坑内容建立信任、真实案例展示能力、透明报价消除疑虑。让客户在搜索时找到你。</p>
+          <ul class="workflow-steps">
+            <li>选择内容类型（避坑/案例/工艺/报价）</li>
+            <li>填入你的项目信息</li>
+            <li>AI生成 → 按平台适配 → 检测</li>
+            <li>发布到抖音/小红书/公众号</li>
+          </ul>
+        </div>
+        <div class="case-visual">
+          <div class="emoji-big">🏠</div>
+          <h4>内容获客效果</h4>
+          <p>AI工具¥99/月 · 取代月投1-3万平台买量</p>
+          <div class="metrics">
+            <div class="m-item"><div class="m-num">&lt;50元</div><div class="m-label">单条线索成本</div></div>
+            <div class="m-item"><div class="m-num">20+</div><div class="m-label">装修模板</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agency Panel -->
+    <div class="case-panel" id="panel-agency">
+      <div class="case-content">
+        <div class="info">
+          <div class="tagline">你的品牌 · 我们的技术</div>
+          <h3>代理商 / 白标合作</h3>
+          <p>手上有企业客户资源？贴牌云数科技，换成你的Logo和品牌。23个AI工具变成你的产品，多租户管理+API接入，批量服务终端客户。</p>
+          <ul class="workflow-steps">
+            <li>申请代理商 → 白标配置</li>
+            <li>导入客户 → 多租户管理</li>
+            <li>自有定价 · 零技术运维</li>
+            <li>客户续费=你的经常性收入</li>
+          </ul>
+        </div>
+        <div class="case-visual">
+          <div class="emoji-big">🏢</div>
+          <h4>合作模式</h4>
+          <p>100%白标 · 自有定价权 · API接入</p>
+          <div class="metrics">
+            <div class="m-item"><div class="m-num">60-70%</div><div class="m-label">毛利率</div></div>
+            <div class="m-item"><div class="m-num">¥999起</div><div class="m-label">月费/10客户</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Social Proof -->
+<section id="testimonials">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge">用户口碑</span>
+      <h2>创作者用云数科技在做什么</h2>
+      <p>内测用户覆盖内容创作者、装修企业和数字营销团队</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card reveal animate-in-d1">
+        <div class="stars">★★★★★</div>
+        <blockquote>"日更两个号，以前每天花4小时写稿改稿。现在20分钟搞定6篇，去AI腔检测一次过。这工具最牛的是真的不用学——双击打开就能用。"</blockquote>
+        <div class="author">
+          <div class="avatar">李</div>
+          <div>
+            <div class="name">李敏</div>
+            <div class="role">小红书博主 · 6万粉</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal animate-in-d3">
+        <div class="stars">★★★★★</div>
+        <blockquote>"帮我们装修公司搭建了完整的内容矩阵。以前请人写一篇800块，AI生成的质量不比人差，成本降了90%。最值的是那个避坑内容模板，客户看完直接来约测量。"</blockquote>
+        <div class="author">
+          <div class="avatar">张</div>
+          <div>
+            <div class="name">张伟</div>
+            <div class="role">装修公司创始人</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal animate-in-d5">
+        <div class="stars">★★★★★</div>
+        <blockquote>"白标之后完全看不出是第三方工具。API接进我们的系统，客户以为是我们自己开发的。多租户管理很方便，50个客户一个后台搞定。"</blockquote>
+        <div class="author">
+          <div class="avatar">王</div>
+          <div>
+            <div class="name">王磊</div>
+            <div class="role">数字营销代理商</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Pricing Preview -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge">定价</span>
+      <h2>从免费开始，按需升级</h2>
+      <p>免费版永久可用。Pro解锁全部23工具。Enterprise按需定制。</p>
+    </div>
+    <div class="grid-3" style="align-items:start;">
+      <div class="card reveal animate-in-d1" style="padding:36px 28px;">
+        <div class="badge">Free</div>
+        <div style="font-size:2.5rem;font-weight:800;color:#fff;margin:8px 0;">¥0<sub style="font-size:0.9rem;color:var(--text2);font-weight:400;">/月</sub></div>
+        <p style="color:var(--text2);font-size:0.88rem;margin-bottom:20px;">永久免费 · 核心功能体验</p>
+        <ul class="features" style="margin-bottom:24px;">
+          <li>5个基础工具</li>
+          <li>每月20次使用</li>
+          <li>含轻水印输出</li>
+          <li>社区支持</li>
+        </ul>
+        <a href="#cta" class="btn btn-outline btn-block" style="justify-content:center;">免费开始</a>
+      </div>
+      <div class="card card-surface2 reveal animate-in-d3" style="padding:36px 28px;border-color:var(--accent);position:relative;transform:scale(1.03);">
+        <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),#7c6ff7);color:#fff;padding:4px 20px;border-radius:12px;font-size:0.8rem;font-weight:600;">最受欢迎</div>
+        <div class="badge" style="background:rgba(108,92,231,0.2);">Pro</div>
+        <div style="font-size:2.5rem;font-weight:800;color:#fff;margin:8px 0;">¥99<sub style="font-size:0.9rem;color:var(--text2);font-weight:400;">/月</sub></div>
+        <p style="color:var(--text2);font-size:0.88rem;margin-bottom:20px;">全部23工具 · 无限使用</p>
+        <ul class="features" style="margin-bottom:24px;">
+          <li>全部23个工具</li>
+          <li>无限使用次数</li>
+          <li>无水印输出</li>
+          <li>去AI检测 + 优化</li>
+          <li>全部风格库 + DNA学习</li>
+          <li>优先技术支持</li>
+        </ul>
+        <a href="#cta" class="btn btn-primary btn-block" style="justify-content:center;">开始Pro试用</a>
+      </div>
+      <div class="card reveal animate-in-d5" style="padding:36px 28px;">
+        <div class="badge badge-orange">Enterprise</div>
+        <div style="font-size:2.5rem;font-weight:800;color:#fff;margin:8px 0;">¥999<sub style="font-size:0.9rem;color:var(--text2);font-weight:400;">/月起</sub></div>
+        <p style="color:var(--text2);font-size:0.88rem;margin-bottom:20px;">白标+API · 按需定制</p>
+        <ul class="features" style="margin-bottom:24px;">
+          <li>Pro全部功能</li>
+          <li>白标定制（Logo+品牌）</li>
+          <li>API接入</li>
+          <li>多租户管理</li>
+          <li>SLA保障（99.5%）</li>
+          <li>专属技术支持</li>
+        </ul>
+        <a href="pricing.html" class="btn btn-outline btn-block" style="justify-content:center;">查看详情 →</a>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:32px;" class="reveal">
+      <a href="pricing.html" class="btn btn-ghost">查看完整功能对比表 →</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="container">
+    <h2 class="reveal">用AI加速你的内容生产</h2>
+    <p class="reveal">双击启动 · 1分钟上手 · 今天出第一篇内容</p>
+    <div class="reveal">
+      <a href="/dist/CloudTech-Portable-v2.0.0.zip" class="btn btn-primary btn-lg" download>⬇ 免费下载 Win版 (.zip)</a>
+      <a href="/pricing.html" class="btn btn-outline btn-lg" style="margin-left:12px;">查看定价 →</a>
+    </div>
+    <p style="margin-top:16px;color:var(--text2);font-size:0.85rem;" class="reveal">
+      支持 Windows 10/11 · 64位 · v6.1 · 约180MB
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="logo" style="margin-bottom:12px;">云数<span>科技</span></div>
+        <p style="max-width:260px;">AI数字营销中台 — 23工具·6引擎·1键出内容。独立安装，不依赖网络，你的内容只属于你。</p>
+      </div>
+      <div class="footer-col">
+        <h4>产品</h4>
+        <a href="features.html">全部功能</a>
+        <a href="pricing.html">定价</a>
+        <a href="industry-renovation.html">装修行业方案</a>
+        <a href="agency.html">代理商合作</a>
+      </div>
+      <div class="footer-col">
+        <h4>资源</h4>
+        <a href="#">使用教程</a>
+        <a href="#">API文档</a>
+        <a href="#">更新日志</a>
+        <a href="#">常见问题</a>
+      </div>
+      <div class="footer-col">
+        <h4>关于</h4>
+        <a href="#">关于云数</a>
+        <a href="#">联系我们</a>
+        <a href="#">隐私政策</a>
+        <a href="#">服务条款</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 云数科技 · AI数字营销中台 · All rights reserved.</p>
+      <div class="footer-socials">
+        <a href="#">小红书</a>
+        <a href="#">公众号</a>
+        <a href="#">抖音</a>
+        <a href="#">B站</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Mobile toggle ──
+document.getElementById('mobileToggle').addEventListener('click', function() {
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+// ── Nav scroll effect ──
+window.addEventListener('scroll', function() {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ── Case tab switching ──
+function switchCase(tab, btn) {
+  document.querySelectorAll('.case-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.case-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ── Scroll reveal ──
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+</script>
+
+</body>
+</html>

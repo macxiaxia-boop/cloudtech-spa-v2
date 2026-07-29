@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 提示词 Agent · 云数科技</title>
+<style>
+  :root { --bg: #0a0a0f; --card: #111118; --border: #1e1e2a; --accent: #6c5ce7; --accent2: #a78bfa; --green: #00c853; --red: #ff1744; --yellow: #ffd600; --text: #e0e0e0; --muted: #888; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system,"Microsoft YaHei",sans-serif; min-height:100vh; display:flex; }
+  .sidebar { width:220px; background:var(--card); border-right:1px solid var(--border); padding:24px 0; position:fixed; top:0; bottom:0; left:0; z-index:100; overflow-y:auto; }
+  .sidebar-logo { padding:0 20px 24px; border-bottom:1px solid var(--border); margin-bottom:24px; }
+  .sidebar-logo h2 { font-size:1.1rem; color:#fff; }
+  .sidebar-logo span { font-size:0.75rem; color:var(--accent2); }
+  .sidebar nav a { display:flex; align-items:center; gap:8px; padding:8px 20px; color:#999; text-decoration:none; font-size:0.85rem; transition:all .2s; }
+  .sidebar nav a:hover, .sidebar nav a.active { color:#fff; background:rgba(108,92,231,.1); }
+  .scene-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.7rem; background:rgba(108,92,231,.2); color:var(--accent2); margin-left:auto; }
+  .main { margin-left:220px; padding:28px 36px; flex:1; }
+  .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+  .header h1 { font-size:1.5rem; }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:6px; font-size:0.82rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--card); color:#ccc; transition:all .2s; }
+  .btn:hover { border-color:var(--accent); color:#fff; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.small { padding:4px 10px; font-size:0.75rem; }
+  .btn.danger { border-color:var(--red); color:var(--red); }
+  .tab-bar { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:20px; }
+  .tab { padding:10px 20px; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; font-size:0.9rem; transition:all .2s; }
+  .tab:hover { color:#fff; }
+  .tab.active { color:var(--accent2); border-bottom-color:var(--accent2); }
+  .panel { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:24px; margin-bottom:20px; }
+  .panel h3 { font-size:1rem; margin-bottom:16px; color:#fff; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  textarea, input, select { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px 12px; color:var(--text); font-size:0.85rem; font-family:inherit; }
+  textarea:focus, input:focus, select:focus { outline:none; border-color:var(--accent); }
+  textarea { min-height:100px; resize:vertical; }
+  label { display:block; font-size:0.82rem; color:var(--muted); margin-bottom:6px; }
+  .form-group { margin-bottom:16px; }
+  .card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:16px; cursor:pointer; transition:all .2s; }
+  .card:hover { border-color:var(--accent); }
+  .card h4 { font-size:0.9rem; margin-bottom:6px; }
+  .card p { font-size:0.78rem; color:var(--muted); line-height:1.4; }
+  .card .meta { font-size:0.7rem; color:var(--muted); margin-top:8px; display:flex; gap:12px; }
+  .toast { position:fixed; top:20px; right:20px; padding:12px 24px; border-radius:8px; font-size:0.85rem; z-index:9999; animation:slideIn .3s; }
+  @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+  .toast.success { background:rgba(0,200,83,.2); border:1px solid var(--green); color:var(--green); }
+  .toast.error { background:rgba(255,23,68,.2); border:1px solid var(--red); color:var(--red); }
+  pre { background:var(--bg); padding:12px; border-radius:6px; font-size:0.8rem; overflow-x:auto; max-height:300px; white-space:pre-wrap; }
+  .search-bar { display:flex; gap:8px; margin-bottom:16px; }
+  .search-bar input { flex:1; }
+  .loading { text-align:center; padding:40px; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <h2>🤖 AI 提示词 Agent</h2>
+    <span>云数科技 · 多场景提示词工程</span>
+  </div>
+  <nav>
+    <a href="#" class="active" onclick="switchScene('all',this)">📚 全部场景</a>
+    <a href="#" onclick="switchScene('video',this)">🎬 视频生成</a>
+    <a href="#" onclick="switchScene('content',this)">📝 内容生产</a>
+    <a href="#" onclick="switchScene('geo',this)">🌐 GEO优化</a>
+    <a href="#" onclick="switchScene('research',this)">🔬 深度研究</a>
+    <a href="#" onclick="switchScene('business',this)">💼 商业分析</a>
+    <a href="#" onclick="switchScene('code',this)">💻 代码生成</a>
+    <a href="#" onclick="switchScene('data',this)">📊 数据分析</a>
+    <a href="#" onclick="switchScene('marketing',this)">🎯 营销文案</a>
+    <a href="#" onclick="switchScene('service',this)">💬 客服对话</a>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <a href="/admin" style="color:var(--muted);">← 返回管理后台</a>
+    </div>
+  </nav>
+</div>
+
+<div class="main">
+  <div class="header">
+    <div>
+      <h1 id="pageTitle">📚 AI 提示词库</h1>
+      <p style="color:var(--muted);font-size:0.85rem;" id="sceneDesc">浏览和管理所有场景的AI提示词</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" onclick="switchTab('library')">📚 提示词库</button>
+      <button class="btn primary" onclick="switchTab('generator')">✨ 生成提示词</button>
+      <button class="btn" onclick="switchTab('deploy')">🚀 一键部署</button>
+    </div>
+  </div>
+
+  <!-- LIBRARY TAB -->
+  <div id="tab-library">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="搜索提示词..." oninput="renderLibrary()">
+      <select id="modelFilter" onchange="renderLibrary()" style="width:180px;">
+        <option value="">全部模型</option>
+        <option>DeepSeek V4 Pro</option>
+        <option>DeepSeek V4 Flash</option>
+        <option>即梦(图生视频)</option>
+        <option>可灵(Kling)</option>
+        <option>Seedance 2.0</option>
+      </select>
+    </div>
+    <div id="libraryContent" class="loading">加载中...</div>
+  </div>
+
+  <!-- GENERATOR TAB -->
+  <div id="tab-generator" style="display:none;">
+    <div class="panel">
+      <h3>✨ AI 提示词生成器</h3>
+      <p style="color:var(--muted);margin-bottom:16px;">输入需求 → AI自动生成适配多模型的专业提示词</p>
+      <div class="grid2">
+        <div class="form-group">
+          <label>场景</label>
+          <select id="genScene">
+            <option value="video">🎬 视频生成</option>
+            <option value="content">📝 内容生产</option>
+            <option value="geo">🌐 GEO优化</option>
+            <option value="research">🔬 深度研究</option>
+            <option value="business">💼 商业分析</option>
+            <option value="code">💻 代码生成</option>
+            <option value="data">📊 数据分析</option>
+            <option value="marketing">🎯 营销文案</option>
+            <option value="service">💬 客服对话</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>目标模型</label>
+          <select id="genModel">
+            <option>DeepSeek V4 Pro</option>
+            <option>DeepSeek V4 Flash</option>
+            <option>即梦(图生视频)</option>
+            <option>可灵(Kling)</option>
+            <option>Seedance 2.0</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>主题/需求描述</label>
+        <textarea id="genTopic" placeholder="例如: 写一篇厦门厨房装修避坑指南的小红书文案"></textarea>
+      </div>
+      <div class="form-group">
+        <label>特殊要求（可选）</label>
+        <textarea id="genReq" placeholder="· 字数要求&#10;· 风格调性&#10;· 必须包含的元素&#10;· 禁止出现的内容"></textarea>
+      </div>
+      <button class="btn primary" onclick="generatePrompt()" style="width:100%;padding:12px;">✨ AI 生成提示词</button>
+      <div id="genResult" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- DEPLOY TAB -->
+  <div id="tab-deploy" style="display:none;">
+    <div class="panel">
+      <h3>🚀 一键部署</h3>
+      <p style="color:var(--muted);margin-bottom:16px;">选择提示词 → 填入变量 → 调用AI → 查看结果</p>
+      <div class="grid2">
+        <div class="form-group">
+          <label>选择提示词</label>
+          <select id="deployPrompt" onchange="loadDeployPrompt()">
+            <option value="">-- 选择 --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>执行模型</label>
+          <select id="deployModel">
+            <option>deepseek-v4-pro</option>
+            <option>deepseek-v4-flash</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>变量值（格式: 变量名=值, 用逗号分隔）</label>
+        <input type="text" id="deployVars" placeholder="城市=厦门, 房间=厨房, 痛点=旧橱柜收纳不够">
+      </div>
+      <div id="deployPreview" style="margin-bottom:12px;"></div>
+      <button class="btn primary" onclick="deployPrompt()" style="width:100%;padding:12px;">🚀 执行部署</button>
+      <div id="deployResult" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES SIDEBAR -->
+  <div class="panel" id="templates-panel" style="margin-top:20px;">
+    <h3>📋 预设模板 <button class="btn small" onclick="loadTemplates()">🔄</button></h3>
+    <div id="templatesContent" class="grid3"></div>
+  </div>
+</div>
+
+<script>
+const SCENES = { video:"🎬 视频生成", content:"📝 内容生产", geo:"🌐 GEO优化", research:"🔬 深度研究", business:"💼 商业分析", code:"💻 代码生成", data:"📊 数据分析", marketing:"🎯 营销文案", service:"💬 客服对话", custom:"🔧 自定义" };
+let currentScene = 'all';
+let currentTab = 'library';
+let allPrompts = [];
+let allTemplates = [];
+
+function toast(msg, type='success') {
+  const t = document.createElement('div'); t.className='toast '+type; t.textContent=msg; document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+async function api(url, opts={}) {
+  const r = await fetch(url, {headers:{'Content-Type':'application/json'},...opts});
+  return r.json();
+}
+
+function switchScene(scene, el) {
+  currentScene = scene;
+  document.querySelectorAll('.sidebar nav a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('pageTitle').textContent = scene==='all' ? '📚 AI 提示词库' : SCENES[scene];
+  document.getElementById('sceneDesc').textContent = scene==='all' ? '浏览和管理所有场景的AI提示词' : `${SCENES[scene]}场景提示词`;
+  loadPrompts();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-library').style.display = tab==='library'?'block':'none';
+  document.getElementById('tab-generator').style.display = tab==='generator'?'block':'none';
+  document.getElementById('tab-deploy').style.display = tab==='deploy'?'block':'none';
+  if(tab==='deploy') loadDeployList();
+}
+
+async function loadPrompts() {
+  document.getElementById('libraryContent').innerHTML = '<div class="loading">加载中...</div>';
+  const url = currentScene==='all' ? '/api/prompts/list' : `/api/prompts/list?scene=${currentScene}`;
+  const data = await api(url);
+  allPrompts = data.prompts || [];
+  renderLibrary();
+}
+
+async function loadTemplates() {
+  const data = await api('/api/prompts/templates');
+  allTemplates = data.templates || [];
+  renderTemplates();
+}
+
+function renderLibrary() {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const modelF = (document.getElementById('modelFilter')?.value || '');
+  let filtered = allPrompts;
+  if(search) filtered = filtered.filter(p => (p.name||'').toLowerCase().includes(search) || (p.tags||'').toLowerCase().includes(search));
+  if(modelF) filtered = filtered.filter(p => (p.model||'') === modelF);
+
+  if(!filtered.length) {
+    document.getElementById('libraryContent').innerHTML = '<div class="loading">暂无提示词。去「✨ 生成提示词」创建第一条。</div>';
+    return;
+  }
+  document.getElementById('libraryContent').innerHTML = filtered.map(p => `
+    <div class="card" style="margin-bottom:12px;" onclick="viewPrompt(${p.id})">
+      <h4>${p.name||'未命名'} <span class="scene-badge">${SCENES[p.scene]||p.scene}</span></h4>
+      <p>${(p.user_prompt||'').substring(0,100)}...</p>
+      <div class="meta">
+        <span>🤖 ${p.model||'N/A'}</span>
+        <span>⭐ ${p.effect_score||'-'}/10</span>
+        <span>🔄 v${p.version||1}</span>
+        <span>📅 ${(p.created_at||'').substring(0,10)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewPrompt(id) {
+  const p = allPrompts.find(x=>x.id===id);
+  if(!p) return;
+  const html = `
+    <div class="panel" style="position:fixed;top:10%;left:25%;right:25%;max-height:80%;overflow-y:auto;z-index:1000;box-shadow:0 0 40px rgba(0,0,0,.5);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3>${p.name} <span class="scene-badge">${SCENES[p.scene]||p.scene}</span></h3>
+        <button class="btn small" onclick="this.closest('.panel').remove()">✕</button>
+      </div>
+      <label>System Prompt</label><pre>${p.system_prompt||''}</pre>
+      <label>User Prompt</label><pre>${p.user_prompt||''}</pre>
+      <div class="meta">模型: ${p.model} | 标签: ${p.tags||'-'} | 评分: ${p.effect_score||'-'}/10 | 使用: ${p.usage_count||0}次</div>
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn primary small" onclick="copyPrompt(${id})">📋 复制</button>
+        <button class="btn small" onclick="loadToDeploy(${id})">🚀 部署</button>
+        <button class="btn danger small" onclick="deletePrompt(${id})">🗑 删除</button>
+      </div>
+    </div>
+    <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:999;" onclick="this.nextElementSibling?.remove();this.remove();"></div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function generatePrompt() {
+  const topic = document.getElementById('genTopic').value.trim();
+  if(!topic) { toast('请输入主题'); return; }
+  const btn = event.target; btn.disabled=true; btn.textContent='生成中...';
+  const data = await api('/api/prompts/generate', {
+    method:'POST', body:JSON.stringify({
+      topic, scene: document.getElementById('genScene').value,
+      requirements: document.getElementById('genReq').value,
+      model: document.getElementById('genModel').value
+    })
+  });
+  btn.disabled=false; btn.textContent='✨ AI 生成提示词';
+  if(data.status==='ok') {
+    document.getElementById('genResult').innerHTML = `
+      <div class="panel">
+        <h3>✅ 生成成功</h3>
+        <label>System Prompt</label><pre>${data.system_prompt||''}</pre>
+        <label>User Prompt</label><pre>${data.user_prompt||''}</pre>
+        <button class="btn primary small" onclick="saveGenerated('${topic.substring(0,40)}','${document.getElementById('genScene').value}','${document.getElementById('genModel').value}',this)">💾 保存到提示词库</button>
+      </div>`;
+  } else { toast(data.message||'生成失败','error'); }
+}
+
+async function saveGenerated(name, scene, model, btn) {
+  const panel = btn.closest('.panel');
+  const sys = panel.querySelectorAll('pre')[0]?.textContent || '';
+  const usr = panel.querySelectorAll('pre')[1]?.textContent || '';
+  const data = await api('/api/prompts/create', {
+    method:'POST', body:JSON.stringify({name, scene, system_prompt:sys, user_prompt:usr, model})
+  });
+  if(data.status==='ok') { toast('✅ 已保存到提示词库'); loadPrompts(); }
+}
+
+async function loadDeployList() {
+  const data = await api('/api/prompts/list');
+  const sel = document.getElementById('deployPrompt');
+  sel.innerHTML = '<option value="">-- 选择 --</option>' + (data.prompts||[]).map(p =>
+    `<option value="${p.id}">${p.name} (${SCENES[p.scene]||p.scene})</option>`
+  ).join('');
+}
+
+function loadToDeploy(id) {
+  switchTab('deploy');
+  setTimeout(()=>{ document.getElementById('deployPrompt').value=id; loadDeployPrompt(); },200);
+}
+
+function loadDeployPrompt() {
+  const id = parseInt(document.getElementById('deployPrompt').value);
+  const p = allPrompts.find(x=>x.id===id);
+  if(!p) { document.getElementById('deployPreview').innerHTML=''; return; }
+  document.getElementById('deployPreview').innerHTML = `
+    <label>System</label><pre>${(p.system_prompt||'').substring(0,300)}</pre>
+    <label>User (变量: ${p.variables||'无'})</label><pre>${(p.user_prompt||'').substring(0,300)}</pre>`;
+}
+
+async function deployPrompt() {
+  const id = parseInt(document.getElementById('deployPrompt').value);
+  if(!id) { toast('请选择提示词'); return; }
+  const p = allPrompts.find(x=>x.id===id);
+  if(!p) return;
+
+  const varsStr = document.getElementById('deployVars').value;
+  const variables = {};
+  varsStr.split(',').forEach(kv=>{
+    const [k,v] = kv.split('=').map(s=>s.trim());
+    if(k&&v) variables[k]=v;
+  });
+
+  const btn = event.target; btn.disabled=true; btn.textContent='执行中...';
+  const data = await api('/api/prompts/deploy', {
+    method:'POST', body:JSON.stringify({
+      prompt_id: id, system_prompt: p.system_prompt, user_prompt: p.user_prompt,
+      model: document.getElementById('deployModel').value, variables
+    })
+  });
+  btn.disabled=false; btn.textContent='🚀 执行部署';
+
+  if(data.status==='ok') {
+    document.getElementById('deployResult').innerHTML = `
+      <div class="panel">
+        <h3>✅ 部署结果 (${data.response_time_ms||0}ms)</h3>
+        <pre>${data.output||''}</pre>
+      </div>`;
+  } else { toast(data.message||'部署失败','error'); }
+}
+
+function copyPrompt(id) {
+  const p = allPrompts.find(x=>x.id===id);
+  if(p) { navigator.clipboard.writeText(p.system_prompt+'\n\n'+p.user_prompt); toast('已复制'); }
+}
+
+async function deletePrompt(id) {
+  if(!confirm('确定删除？')) return;
+  await api(`/api/prompts/${id}`, {method:'DELETE'});
+  toast('已删除'); loadPrompts();
+}
+
+function renderTemplates() {
+  const filtered = currentScene==='all' ? allTemplates : allTemplates.filter(t=>t.scene===currentScene);
+  document.getElementById('templatesContent').innerHTML = filtered.slice(0,6).map(t => `
+    <div class="card" onclick="useTemplate('${t.name}','${t.scene}','${t.model}', this)">
+      <h4>${t.name} ${t.is_preset?'⭐':''}</h4>
+      <p>${(t.user_prompt||'').substring(0,60)}...</p>
+      <div class="meta"><span>🤖 ${t.model}</span></div>
+    </div>
+  `).join('') || '<p style="color:var(--muted);">暂无模板</p>';
+}
+
+async function useTemplate(name, scene, model, el) {
+  const s = allTemplates.find(t=>t.name===name);
+  if(!s) return;
+  await api('/api/prompts/create', {
+    method:'POST', body:JSON.stringify({
+      name, scene, system_prompt:s.system_prompt, user_prompt:s.user_prompt, model
+    })
+  });
+  toast('✅ 模板已添加到提示词库'); loadPrompts();
+}
+
+// Init
+loadPrompts();
+loadTemplates();
+</script>
+</body>
+</html>

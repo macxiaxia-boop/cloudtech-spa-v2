@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.env
+.jwt_secret
+*.db
+logs/
+data/
+.git
+*.md

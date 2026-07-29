@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云数科技 · 统一驾驶舱</title>
+<style>
+:root{--bg:#08080d;--card:#101015;--border:#1a1a24;--accent:#7c3aed;--accent2:#a78bfa;--green:#10b981;--red:#ef4444;--gold:#f59e0b;--text:#e2e2e9;--muted:#71717a;--surf:#14141b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"Microsoft YaHei",sans-serif;display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:0;position:fixed;top:0;bottom:0;left:0;z-index:100;overflow-y:auto;display:flex;flex-direction:column}
+.sb-brand{padding:16px 16px 12px;border-bottom:1px solid var(--border)}
+.sb-brand h2{font-size:.95rem;color:#fff;font-weight:800}
+.sb-brand span{font-size:.64rem;color:var(--accent2)}
+.sb-nav{flex:1;padding:8px 0}
+.sb-cat{padding:10px 16px 4px;font-size:.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.sb-cat::after{content:'';flex:1;height:1px;background:var(--border)}
+.sb-sub{display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;color:var(--muted);font-size:.78rem;cursor:pointer;transition:all .12s;border-left:2px solid transparent}
+.sb-sub:hover{color:#fff;background:rgba(124,58,237,.04)}
+.sb-sub.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(124,58,237,.06);font-weight:600}
+.sb-sub .ico{font-size:.85rem;width:20px;text-align:center}
+.sb-ext{display:flex;align-items:center;gap:6px;padding:5px 16px 5px 28px;color:#555;font-size:.74rem;text-decoration:none;transition:all .12s}
+.sb-ext:hover{color:var(--accent2)}
+
+/* ── Main ── */
+.main{margin-left:220px;padding:20px 28px;flex:1;max-width:1200px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.topbar h1{font-size:1.2rem;font-weight:700}.topbar .time{font-size:.74rem;color:var(--muted)}
+
+/* ── Panels ── */
+.panel{display:none}.panel.on{display:block}
+.panel-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.panel-card h3{font-size:.9rem;margin-bottom:14px;color:#fff;display:flex;align-items:center;gap:8px}
+.panel-card h3 .sub{font-size:.7rem;color:var(--muted);font-weight:400}
+.panel-card h4{font-size:.78rem;color:var(--text);margin-bottom:6px}
+
+/* ── KPI ── */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.kpi .l{font-size:.68rem;color:var(--muted);margin-bottom:4px}
+.kpi .v{font-size:1.1rem;font-weight:700}.kpi .v.g{color:var(--green)}.kpi .v.p{color:var(--accent2)}.kpi .v.r{color:var(--red)}.kpi .v.y{color:var(--gold)}
+
+/* ── Components ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:.76rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surf);color:#ccc;transition:all .15s}
+.btn:hover{border-color:var(--accent);color:#fff}.btn.go{background:var(--accent);border-color:var(--accent);color:#fff}.btn.go:hover{background:#8b5cf6}
+.btn.sm{padding:4px 10px;font-size:.68rem;border-radius:5px}.btn.danger{border-color:var(--red);color:var(--red)}.btn.danger:hover{background:var(--red);color:#fff}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.f-grp{margin-bottom:10px}.f-grp label{display:block;font-size:.74rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;background:var(--surf);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--text);font-size:.8rem;font-family:inherit;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{min-height:64px;resize:vertical}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2371717a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.result{background:var(--surf);border:1px solid var(--border);border-radius:7px;padding:12px;margin-top:10px;max-height:500px;overflow-y:auto;font-size:.78rem;line-height:1.65;white-space:pre-wrap;display:none}
+.result.show{display:block}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.025)}.row:last-child{border-bottom:none}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.66rem;font-weight:600}.badge.on{background:rgba(16,185,129,.12);color:var(--green)}.badge.off{background:rgba(239,68,68,.12);color:var(--red)}
+.tag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:.64rem;background:rgba(124,58,237,.15);color:var(--accent2)}
+
+/* ── Cards ── */
+.cards2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:900px){.cards2,.cards3,.cards4{grid-template-columns:1fr 1fr}}
+.card{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:14px;cursor:pointer;transition:all .15s}
+.card:hover{border-color:var(--accent)}
+.card h4{font-size:.82rem;margin-bottom:3px}.card p{font-size:.72rem;color:var(--muted)}.card .meta{font-size:.66rem;color:var(--muted);margin-top:4px;display:flex;gap:8px}
+
+/* ── Creator Cards ── */
+.c-card{background:linear-gradient(135deg,var(--surf),var(--card));border:1px solid var(--border);border-radius:10px;padding:16px;transition:all .2s}
+.c-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.c-card .c-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.c-card .c-icon{font-size:1.8rem}.c-card .c-name{font-size:.9rem;font-weight:700}
+.c-card .c-tagline{font-size:.7rem;color:var(--muted);margin-bottom:6px}
+.c-card .c-meta{display:flex;gap:6px;flex-wrap:wrap}
+.c-card .c-meta span{font-size:.64rem;padding:3px 8px;border-radius:4px;background:rgba(124,58,237,.1);color:var(--accent2)}
+
+/* ── Tones ── */
+.tones{display:flex;gap:4px;flex-wrap:wrap}
+.tone{padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:.7rem;cursor:pointer;transition:all .15s;background:var(--surf);color:var(--muted)}
+.tone:hover{border-color:var(--accent);color:#fff}
+.tone.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── Table ── */
+.tbl{width:100%;border-collapse:collapse;font-size:.74rem}
+.tbl th{background:var(--surf);color:var(--muted);font-weight:600;padding:8px 12px;text-align:left;font-size:.68rem;border-bottom:1px solid var(--border)}
+.tbl td{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.02)}
+.tbl tr:hover td{background:rgba(124,58,237,.03)}
+.pages{display:flex;align-items:center;gap:4px;margin-top:8px;justify-content:center;font-size:.72rem}
+.pages button{padding:3px 9px;border-radius:5px;font-size:.68rem;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer}
+.pages button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── Toast ── */
+.toast{position:fixed;top:16px;right:16px;padding:10px 20px;border-radius:8px;font-size:.8rem;z-index:9999;animation:slide .25s}
+@keyframes slide{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.ok{background:rgba(16,185,129,.16);border:1px solid var(--green);color:var(--green)}
+.toast.err{background:rgba(239,68,68,.16);border:1px solid var(--red);color:var(--red)}
+
+/* ── Modal ── */
+.mo{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);z-index:999;display:none}.mo.show{display:block}
+.md{position:fixed;top:6%;left:18%;right:18%;max-height:88%;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;z-index:1000;display:none;box-shadow:0 0 50px rgba(0,0,0,.6)}.md.show{display:block}
+.loading{text-align:center;padding:24px;color:var(--muted)}
+.log-box{background:#040408;border:1px solid var(--border);border-radius:7px;padding:10px;font-family:Consolas,monospace;font-size:.68rem;max-height:400px;overflow-y:auto;line-height:1.55}
+.qlink{display:flex;gap:8px;flex-wrap:wrap}
+.inline-tabs{display:flex;gap:3px;margin-bottom:10px}
+.inline-tabs span{padding:4px 11px;border-radius:5px;font-size:.72rem;cursor:pointer;color:var(--muted);background:var(--surf);border:1px solid var(--border)}
+.inline-tabs span.on{color:#fff;background:var(--accent);border-color:var(--accent)}
+.search-bar{display:flex;gap:6px;margin-bottom:8px}.search-bar input{flex:1}.search-bar select{width:110px}
+.status-msg{font-size:.72rem;padding:6px 10px;border-radius:5px;margin-top:6px;display:none}
+.status-msg.ok{display:block;background:rgba(16,185,129,.08);color:var(--green);border:1px solid rgba(16,185,129,.15)}
+.status-msg.err{display:block;background:rgba(239,68,68,.08);color:var(--red);border:1px solid rgba(239,68,68,.15)}
+.status-msg.info{display:block;background:rgba(124,58,237,.08);color:var(--accent2);border:1px solid rgba(124,58,237,.15)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN OVERLAY ═══════════ -->
+<div id="loginOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:40px;width:380px;text-align:center">
+    <div style="font-size:2rem;margin-bottom:8px">☁️</div>
+    <h2 style="margin-bottom:4px;color:#fff">云数科技</h2>
+    <p style="color:var(--muted);font-size:.78rem;margin-bottom:24px">统一驾驶舱 · 请登录</p>
+    <div class="f-grp" style="text-align:left"><label>邮箱</label><input id="loginEmail" placeholder="admin@cloudtech.com" value="admin@cloudtech.com"></div>
+    <div class="f-grp" style="text-align:left"><label>密码</label><input id="loginPass" type="password" placeholder="输入密码"></div>
+    <div id="loginError" style="color:var(--red);font-size:.72rem;margin-bottom:8px;display:none"></div>
+    <button class="btn go" onclick="doLogin()" style="width:100%">🔑 登录</button>
+  </div>
+</div>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<div class="sidebar">
+  <div class="sb-brand"><h2>☁️ 云数科技</h2><span>CloudTech v2.1</span></div>
+  <nav class="sb-nav">
+
+    <div class="sb-cat">📊 驾驶舱</div>
+    <span class="sb-sub active" data-panel="dashboard"><span class="ico">📊</span>系统总览</span>
+
+    <div class="sb-cat">✍️ 内容工厂</div>
+    <span class="sb-sub" data-panel="create"><span class="ico">🎭</span>创作中心</span>
+    <span class="sb-sub" data-panel="repurpose"><span class="ico">🔄</span>内容二创</span>
+    <span class="sb-sub" data-panel="zhuangqi"><span class="ico">🏗️</span>装企引擎</span>
+
+    <div class="sb-cat">🌐 GEO优化</div>
+    <span class="sb-sub" data-panel="geo"><span class="ico">🌐</span>GEO工具集</span>
+
+    <div class="sb-cat">🤖 提示词</div>
+    <span class="sb-sub" data-panel="prompts"><span class="ico">🤖</span>提示词工程</span>
+
+    <div class="sb-cat">📈 情报</div>
+    <span class="sb-sub" data-panel="intel"><span class="ico">📈</span>趋势情报</span>
+
+    <div class="sb-cat">🔧 管理</div>
+    <span class="sb-sub" data-panel="users"><span class="ico">👥</span>用户管理</span>
+    <span class="sb-sub" data-panel="apikeys"><span class="ico">🔑</span>授权管理</span>
+    <span class="sb-sub" data-panel="system"><span class="ico">⚙️</span>系统运维</span>
+
+  </nav>
+  <div style="padding:12px 16px;border-top:1px solid var(--border)">
+    <a class="sb-ext" href="/" target="_blank">🏠 官网首页 ↗</a>
+    <a class="sb-ext" href="/pricing.html" target="_blank">💰 定价方案 ↗</a>
+    <a class="sb-ext" href="/features.html" target="_blank">✨ 产品功能 ↗</a>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main">
+<div class="topbar"><h1 id="pageTitle">📊 系统总览</h1><span class="time" id="clock"></span></div>
+
+<!-- ═══════════ 1. DASHBOARD ═══════════ -->
+<div class="panel on" id="panel-dashboard">
+  <div class="panel-card"><h3>📊 系统总览</h3>
+    <div class="kpis" id="dash-kpis"></div>
+    <div class="panel-card" style="margin-bottom:10px"><h4>🖥️ 服务状态</h4>
+      <div class="row"><span>CloudTech 管理后台</span><span class="badge on">:5099</span></div>
+      <div class="row"><span>OpenClaw Gateway</span><span class="badge off" id="gw-badge">检测中</span></div>
+      <div class="row"><span>Streamlit AI仪表盘 :8501</span><span class="badge off" id="st-badge">检测中</span></div>
+      <div class="row"><span>飞书消息通道</span><span class="badge on">已连接</span></div>
+    </div>
+    <h4>🚀 快速入口</h4>
+    <div class="qlink">
+      <button class="btn go" onclick="navTo('create')">🎭 创作中心</button>
+      <button class="btn" onclick="navTo('repurpose')">🔄 二创</button>
+      <button class="btn" onclick="navTo('zhuangqi')">🏗️ 装企引擎</button>
+      <button class="btn" onclick="navTo('geo')">🌐 GEO</button>
+      <button class="btn" onclick="navTo('prompts')">🤖 提示词</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 2. CREATE CENTER ═══════════ -->
+<div class="panel" id="panel-create">
+  <!-- 创作者风格库 -->
+  <div class="panel-card"><h3>🎭 四大创作者风格库 <span class="sub">对标头部创作者 — 直男财经 · 小Lin说 · 高盖伦 · 小A学财经</span></h3>
+    <div class="cards4" id="creatorCards"></div>
+  </div>
+  <!-- 内容形式选择器 -->
+  <div class="panel-card"><h3>🎬 内容形式 <span class="sub">6种形式 — 口播/人设/故事/混剪/图文/短视频</span></h3>
+    <div class="cards3" id="formCards"></div>
+  </div>
+  <!-- 选题发现 + AI写作 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>🎯 选题发现</h3>
+      <div class="f-grp"><label>话题领域</label><input id="tdDomain" value="AI如何改变装修行业"></div>
+      <div class="f-grp"><label>对标创作者</label><div id="tdCreators" style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px"></div></div>
+      <button class="btn go" onclick="topicDiscovery()" style="width:100%">🔍 发现选题</button>
+      <div class="result" id="tdResult"></div>
+    </div>
+    <div class="panel-card"><h3>✍️ AI写作 <span class="sub">内容形式+创作者+平台+钩子+叙事+表达</span></h3>
+      <div class="f-grp"><label>创作主题</label><input id="cwTopic" placeholder="输入你想写的话题"></div>
+      <div class="f-row">
+        <div class="f-grp"><label>内容形式</label><select id="cwForm" onchange="cwFormChange()"><option value="voiceover">🎙️ 口播脚本</option><option value="persona">👤 人设IP</option><option value="storytelling">📖 故事叙事</option><option value="mashup">🎬 混剪快节奏</option><option value="article">📝 图文内容</option><option value="short_video">📱 短视频</option></select></div>
+        <div class="f-grp"><label>创作者</label><select id="cwCreator"><option value="zhinan">💼 直男财经</option><option value="xiaolin">📖 小Lin说</option><option value="gaogailun">⚡ 高盖伦</option><option value="xiaoa">🎓 小A学财经</option></select></div>
+      </div>
+      <div class="f-row">
+        <div class="f-grp"><label>平台</label><select id="cwPlatform"><option value="douyin">抖音</option><option value="bilibili">B站</option><option value="xiaohongshu">小红书</option><option value="wechat">公众号</option><option value="zhihu">知乎</option></select></div>
+        <div class="f-grp"><label>字数</label><input id="cwWords" type="number" value="1500"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-grp"><label>开头钩子</label><select id="cwHook"><option value="">-- 自动 --</option><option value="H1">H1 情绪引爆</option><option value="H2">H2 认知冲突</option><option value="H3">H3 反常识数据</option><option value="H4">H4 财富冲击</option><option value="H5">H5 收入冲击</option><option value="H6">H6 多信号并发</option></select></div>
+        <div class="f-grp"><label>叙事公式</label><select id="cwFormula"><option value="">-- 自动 --</option><option value="wealth">财富故事型</option><option value="cognitive">认知反差型</option><option value="curiosity">好奇心缺口型</option><option value="ranking">榜单排位型</option></select></div>
+      </div>
+      <div class="f-row">
+        <div class="f-grp"><label>表达风格</label><select id="cwExpression"><option value="">-- 自动 --</option><option value="bestie">闺蜜聊天体</option><option value="scholar">学霸聊天体</option><option value="business">生意人算账体</option></select></div>
+        <div class="f-grp"><label>额外要求</label><input id="cwExtra" placeholder="可选"></div>
+      </div>
+      <button class="btn go" onclick="aiWriteV2()" style="width:100%">🚀 开始创作</button>
+      <div class="result" id="cwResult"></div>
+    </div>
+  </div>
+  <!-- 多平台改写 + 风格克隆 + 去AI腔 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
+    <div class="panel-card"><h3>📱 多平台改写</h3>
+      <div class="f-grp"><label>主题</label><input id="mpTopic" placeholder="输入话题"></div>
+      <div class="f-grp"><label>创作者</label><select id="mpCreator"><option value="zhinan">💼 直男财经</option><option value="xiaolin">📖 小Lin说</option><option value="gaogailun">⚡ 高盖伦</option><option value="xiaoa">🎓 小A学财经</option></select></div>
+      <div class="f-grp"><label>参考内容</label><textarea id="mpBase" placeholder="可选，粘贴已有文章" style="min-height:50px"></textarea></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <label style="font-size:.7rem"><input type="checkbox" value="xiaohongshu" checked> 小红书</label>
+        <label style="font-size:.7rem"><input type="checkbox" value="douyin" checked> 抖音</label>
+        <label style="font-size:.7rem"><input type="checkbox" value="wechat" checked> 公众号</label>
+        <label style="font-size:.7rem"><input type="checkbox" value="zhihu"> 知乎</label>
+        <label style="font-size:.7rem"><input type="checkbox" value="bilibili"> B站</label>
+      </div>
+      <button class="btn go" onclick="multiPlatform()" style="width:100%">📱 生成</button>
+      <div class="result" id="mpResult"></div>
+    </div>
+    <div class="panel-card"><h3>🧬 风格克隆</h3>
+      <div class="f-grp"><label>参考文章(≥100字)</label><textarea id="scText" placeholder="粘贴参考文章，AI提取风格DNA" style="min-height:100px"></textarea></div>
+      <button class="btn go" onclick="styleClone()" style="width:100%">🧬 提取DNA</button>
+      <div class="result" id="scResult"></div>
+    </div>
+    <div class="panel-card"><h3>🔍 去AI腔检测</h3>
+      <div class="f-grp"><label>待检测文本(≥50字)</label><textarea id="daText" placeholder="粘贴AI生成的内容..." style="min-height:100px"></textarea></div>
+      <button class="btn go" onclick="deaiCheck()" style="width:100%">🔍 5维度检测</button>
+      <div class="result" id="daResult"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 3. REPURPOSE ═══════════ -->
+<div class="panel" id="panel-repurpose">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <!-- 左列 -->
+    <div>
+      <div class="panel-card"><h3>🔗 步骤1：粘贴链接</h3>
+        <div class="f-grp"><label>内容链接</label><input id="rpUrl" placeholder="粘贴小红书/公众号/知乎/抖音/B站链接..." oninput="rpDetect()"></div>
+        <div class="status-msg info" id="rpAutoDetect" style="display:none"></div>
+        <button class="btn go" onclick="rpExtract()" id="btnExtract" style="width:100%;margin-top:8px">🔍 提取内容+图片</button>
+        <div class="status-msg" id="rpExtractStatus"></div>
+        <div id="rpExtractMeta" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
+      </div>
+      <div class="panel-card"><h3>⚙️ 步骤2：二创设置</h3>
+        <div class="f-grp"><label>改写风格</label></div>
+        <div class="tones" id="rpTones">
+          <span class="tone on" data-style="去AI腔" onclick="rpSelectTone(this)">去AI腔</span>
+          <span class="tone" data-style="小红书风格" onclick="rpSelectTone(this)">小红书风格</span>
+          <span class="tone" data-style="公众号风格" onclick="rpSelectTone(this)">公众号风格</span>
+          <span class="tone" data-style="知乎风格" onclick="rpSelectTone(this)">知乎风格</span>
+          <span class="tone" data-style="抖音口播" onclick="rpSelectTone(this)">抖音口播</span>
+          <span class="tone" data-style="缩短精简" onclick="rpSelectTone(this)">缩短精简</span>
+          <span class="tone" data-style="扩写丰富" onclick="rpSelectTone(this)">扩写丰富</span>
+        </div>
+        <div class="f-grp" style="margin-top:12px"><label>自定义指令(可选)</label><textarea id="rpPrompt" placeholder="例如: 改成给50岁阿姨看的装修攻略..." rows="2"></textarea></div>
+        <button class="btn go" onclick="rpRewrite()" id="btnRewrite" disabled style="width:100%">✨ 开始二创</button>
+        <div class="status-msg" id="rpRewriteStatus"></div>
+      </div>
+    </div>
+    <!-- 右列 -->
+    <div>
+      <div class="panel-card"><h3>📄 步骤3：原始内容 <span class="sub" id="rpPlatformTag"></span></h3>
+        <div class="result show" id="rpOriginal" style="color:var(--muted);max-height:200px;font-size:.74rem;text-align:center;padding:20px">👆 先粘贴链接，点击"提取内容+图片"</div>
+        <div style="margin-top:10px"><h4>🖼️ 图片提取 <span id="rpImgCount" style="font-size:.66rem;color:var(--muted)"></span></h4>
+          <div class="result show" id="rpImages" style="color:var(--muted);max-height:200px;font-size:.74rem;text-align:center;padding:20px">等待提取...</div>
+        </div>
+      </div>
+      <div class="panel-card"><h3>✅ 步骤4：二创结果</h3>
+        <button class="btn sm" onclick="rpCopy()" style="margin-bottom:8px">📋 复制结果</button>
+        <div class="result show" id="rpRewritten" style="min-height:220px;color:var(--muted);font-size:.8rem;text-align:center;padding:30px">等待改写...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 4. ZHUANGQI ═══════════ -->
+<div class="panel" id="panel-zhuangqi">
+  <div class="panel-card"><h3>🏗️ 装企内容引擎 <span class="sub">8种格式 × 4平台 × 18个行业场景</span></h3>
+    <div class="kpis"><div class="kpi"><div class="l">内容格式</div><div class="v p" id="zqF">-</div></div><div class="kpi"><div class="l">行业场景</div><div class="v p" id="zqS">-</div></div><div class="kpi"><div class="l">Cookie</div><div class="v p" id="zqC">-</div></div><div class="kpi"><div class="l">进化</div><div class="v p" id="zqE">-</div></div></div>
+    <div class="f-row"><div class="f-grp"><label>城市</label><input id="zqCi" list="cityList" value="厦门"></div><div class="f-grp"><label>内容格式</label><select id="zqTp"><option>小红书图文</option><option>短视频口播</option><option>公众号文章</option></select></div></div>
+    <div class="f-grp"><label>行业场景</label><select id="zqScene"><option value="">-- 通用 --</option></select></div>
+    <button class="btn go" onclick="zqG()">🎬 生成Brief</button> <button class="btn" onclick="zqW()">📅 周计划</button> <button class="btn" onclick="zqEvo()">🧬 进化</button>
+    <div class="result" id="zqR"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 5. GEO ═══════════ -->
+<div class="panel" id="panel-geo">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>🔍 关键词研究</h3>
+      <div class="f-row"><div class="f-grp"><label>城市</label><input id="gCi" list="cityList" value="厦门"></div><div class="f-grp"><label>关键词</label><input id="gKw" value="装修设计, 装修报价"></div></div>
+      <button class="btn go" onclick="geoKW()" style="width:100%">🔍 开始研究</button><div class="result" id="gKwR"></div>
+    </div>
+    <div class="panel-card"><h3>📊 排名监测</h3>
+      <div class="f-row"><div class="f-grp"><label>城市</label><input id="gRCi" list="cityList" value="厦门"></div><div class="f-grp"><label>关键词</label><input id="gRKw" value="装修设计"></div></div>
+      <div style="display:flex;gap:10px;margin-bottom:8px"><label style="font-size:.74rem"><input type="checkbox" value="DeepSeek" checked> DeepSeek</label><label style="font-size:.74rem"><input type="checkbox" value="豆包" checked> 豆包</label><label style="font-size:.74rem"><input type="checkbox" value="Kimi" checked> Kimi</label></div>
+      <button class="btn go" onclick="geoRK()" style="width:100%">📊 执行检测</button><div class="result" id="gRR"></div>
+    </div>
+    <div class="panel-card"><h3>✍️ GEO内容生成</h3>
+      <div class="f-row"><div class="f-grp"><label>城市</label><input id="gCCi" list="cityList" value="厦门"></div><div class="f-grp"><label>关键词</label><input id="gCKw" value="装修设计"></div></div>
+      <div class="f-row"><div class="f-grp"><label>平台</label><select id="gCPl"><option>小红书</option><option>公众号</option><option>知乎</option><option>百度百家号</option></select></div><div class="f-grp"><label>调性</label><select id="gCTo"><option>实用避坑</option><option>专业可信</option><option>情感共鸣</option></select></div></div>
+      <button class="btn go" onclick="geoC()" style="width:100%">✍️ 生成内容</button><div class="result" id="gCR"></div>
+    </div>
+    <div class="panel-card"><h3>⚙️ GEO流水线</h3>
+      <div class="f-row"><div class="f-grp"><label>城市</label><input id="gPCi" list="cityList" value="厦门"></div><div class="f-grp"><label>关键词</label><input id="gPKw" value="装修设计"></div></div>
+      <button class="btn go" onclick="geoP()" style="width:100%">🚀 启动</button><div class="result" id="gPR"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 6. PROMPTS ═══════════ -->
+<div class="panel" id="panel-prompts">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>📚 提示词库</h3>
+      <div class="search-bar"><input id="pSearch" placeholder="搜索..." oninput="renderPCards()"><select id="pScene" onchange="renderPCards()"><option value="all">全部</option><option value="video">🎬视频</option><option value="content">📝内容</option><option value="geo">🌐GEO</option><option value="research">🔬研究</option><option value="business">💼商业</option><option value="code">💻代码</option><option value="data">📊数据</option><option value="marketing">🎯营销</option><option value="service">💬客服</option></select><button class="btn sm" onclick="loadPLib()">🔄</button></div>
+      <div id="pCards" class="loading">加载中...</div>
+    </div>
+    <div><div class="panel-card" style="margin-bottom:14px"><h3>✨ 生成提示词</h3>
+      <div class="f-row"><div class="f-grp"><label>场景</label><select id="pgScene"><option value="video">🎬视频</option><option value="content">📝内容</option><option value="geo">🌐GEO</option><option value="research">🔬研究</option><option value="business">💼商业</option><option value="code">💻代码</option><option value="data">📊数据</option><option value="marketing">🎯营销</option><option value="service">💬客服</option></select></div><div class="f-grp"><label>模型</label><select id="pgModel"><option>DeepSeek V4 Pro</option><option>DeepSeek V4 Flash</option></select></div></div>
+      <div class="f-grp"><label>需求</label><textarea id="pgTopic" placeholder="例如: 厦门厨房装修避坑指南小红书文案"></textarea></div>
+      <button class="btn go" onclick="promptG()" style="width:100%">✨ 生成</button><div class="result" id="pgR"></div>
+    </div>
+    <div class="panel-card"><h3>🚀 一键部署</h3>
+      <div class="f-row"><div class="f-grp"><label>提示词</label><select id="pdSel" onchange="pdPrev()"><option>--选择--</option></select></div><div class="f-grp"><label>模型</label><select id="pdModel"><option>deepseek-v4-pro</option><option>deepseek-v4-flash</option></select></div></div>
+      <div class="f-grp"><label>变量(逗号分隔)</label><input id="pdVars" placeholder="城市=厦门, 房间=厨房"></div><div id="pdPrev"></div>
+      <button class="btn go" onclick="promptD()" style="width:100%">🚀 执行</button><div class="result" id="pdR"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ═══════════ 7. INTEL ═══════════ -->
+<div class="panel" id="panel-intel">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>📈 趋势情报</h3>
+      <div class="kpis"><div class="kpi"><div class="l">🍪 小红书</div><div class="v" id="bs-xhs" style="font-size:.82rem">-</div></div><div class="kpi"><div class="l">🍪 抖音</div><div class="v" id="bs-dy" style="font-size:.82rem">-</div></div></div>
+      <div class="f-row"><div class="f-grp"><label>城市</label><input id="tCi" list="cityList" value="厦门"></div><div class="f-grp"><label>关键词</label><input id="tKw" value="装修"></div></div>
+      <button class="btn go" onclick="socialSearch()" style="width:100%;margin-bottom:6px">🔍 Tavily实时搜索</button>
+      <div style="display:flex;gap:6px"><button class="btn sm" onclick="tS()" style="flex:1">📈 趋势</button><button class="btn sm" onclick="tD()" style="flex:1">📊 仪表盘</button></div>
+      <div class="result" id="tR"></div>
+    </div>
+    <div class="panel-card"><h3>🌐 情报中心</h3>
+      <div class="f-row"><div class="f-grp"><label>关键词</label><input id="intelKw" value="装修 AI 2026"></div><div class="f-grp"><label>来源数</label><select id="intelCount"><option value="3">3个</option><option value="5" selected>5个</option><option value="10">10个</option></select></div></div>
+      <button class="btn go" onclick="intelSearch()" style="width:100%">🔍 搜索情报</button>
+      <div class="result" id="intelR"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 8. USERS ═══════════ -->
+<div class="panel" id="panel-users">
+  <div class="panel-card"><h3>👥 用户管理 <span class="sub" id="users-total"></span></h3>
+    <div class="search-bar"><input id="uSearch" placeholder="搜索邮箱或姓名..." onkeyup="if(event.key==='Enter')loadUsers()"><select id="uPageSize" onchange="loadUsers()"><option value="20">每页20</option><option value="50">每页50</option></select><button class="btn go sm" onclick="loadUsers()">🔍</button></div>
+    <div id="users-table"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 9. API KEYS ═══════════ -->
+<div class="panel" id="panel-apikeys">
+  <div class="panel-card"><h3>🔑 授权管理</h3>
+    <div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn go" onclick="genApiKey()">🔑 生成新Key</button><button class="btn sm" onclick="loadApiKeys()">🔄 刷新</button></div>
+    <div id="apikeys-table"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 10. SYSTEM ═══════════ -->
+<div class="panel" id="panel-system">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>💚 健康检查</h3><button class="btn go" onclick="sysH()">🩺 全量检查</button><div class="result" id="hR"></div></div>
+    <div class="panel-card"><h3>💾 数据备份</h3><button class="btn go" onclick="sysB()">📦 立即备份</button> <button class="btn" onclick="sysBS()">📋 状态</button><div class="result" id="bR"></div></div>
+    <div class="panel-card"><h3>💥 崩溃报告</h3><button class="btn go" onclick="loadCrashes()" style="margin-bottom:8px">🔄 加载</button><div id="crashes-content"></div></div>
+    <div class="panel-card"><h3>📋 系统日志</h3><button class="btn go" onclick="loadLogs()" style="margin-bottom:8px">🔄 加载</button><div id="logs-content"></div></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<datalist id="cityList">
+  <option value="厦门"><option value="泉州"><option value="漳州"><option value="福州">
+  <option value="北京"><option value="上海"><option value="广州"><option value="深圳">
+  <option value="杭州"><option value="南京"><option value="成都"><option value="重庆">
+  <option value="武汉"><option value="长沙"><option value="西安"><option value="苏州">
+</datalist>
+
+<div class="mo" id="mo" onclick="closeM()"></div><div class="md" id="md"></div>
+
+<script>
+// ═══════════ CORE ═══════════
+var _active='dashboard',_adminToken=localStorage.getItem('admin_token')||'';
+
+// ══ Login ══
+async function doLogin(){
+  var email=document.getElementById('loginEmail').value;
+  var pass=document.getElementById('loginPass').value;
+  var err=document.getElementById('loginError');
+  if(!email||!pass){err.textContent='请输入邮箱和密码';err.style.display='block';return}
+  err.style.display='none';
+  try{
+    var d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:email,password:pass})});
+    if(d.token){
+      _adminToken=d.token;
+      localStorage.setItem('admin_token',d.token);
+      document.getElementById('loginOverlay').style.display='none';
+      toast('登录成功');
+      loadDashboard();refreshStatus();
+    }else{
+      err.textContent=d.error||'登录失败';
+      err.style.display='block';
+    }
+  }catch(e){err.textContent='网络错误';err.style.display='block'}
+}
+// Auto-check existing token
+if(_adminToken){
+  document.getElementById('loginOverlay').style.display='none';
+} else {
+  // Try to auto-login or show login
+  document.getElementById('loginOverlay').style.display='flex';
+}
+
+function navTo(id){
+  _active=id;
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on')});
+  var el=document.getElementById('panel-'+id);if(el)el.classList.add('on');
+  document.querySelectorAll('.sb-sub').forEach(function(s){s.classList.remove('active')});
+  var sub=document.querySelector('.sb-sub[data-panel="'+id+'"]');if(sub)sub.classList.add('active');
+  document.getElementById('pageTitle').textContent=sub?sub.textContent.trim().replace(/^\S+\s*/,''):'';
+  if(id==='dashboard'){loadDashboard();refreshStatus()}
+  if(id==='create'){loadCreatorStyles();loadCreatorCheckboxes()}
+  if(id==='users')loadUsers();
+  if(id==='apikeys')loadApiKeys();
+}
+document.querySelectorAll('.sb-sub').forEach(function(s){
+  s.addEventListener('click',function(){navTo(this.getAttribute('data-panel'))});
+});
+function toast(m,t){var d=document.createElement('div');d.className='toast '+(t||'ok');d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.remove()},3000)}
+async function api(u,o){o=o||{};var h={'Content-Type':'application/json'};if(_adminToken)h['X-Admin-Token']=_adminToken;var r=await fetch(u,{headers:h,method:o.method||'GET',body:o.body||undefined});if(r.status===401){_adminToken='';localStorage.removeItem('admin_token');document.getElementById('loginOverlay').style.display='flex';return{status:'error',message:'请重新登录'}}return r.json()}
+setInterval(function(){document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN')},10000);
+document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN');
+
+// ═══════════ DASHBOARD ═══════════
+async function loadDashboard(){
+  try{var r=await api('/api/admin/dashboard');var s=r.stats||{};
+    document.getElementById('dash-kpis').innerHTML=
+      '<div class="kpi"><div class="l">版本</div><div class="v p">'+ (s.version||'-') +'</div></div>'+
+      '<div class="kpi"><div class="l">用户</div><div class="v y">'+ (s.total_users!=null?s.total_users:'-') +'</div></div>'+
+      '<div class="kpi"><div class="l">提示词</div><div class="v p">'+ (s.total_prompts!=null?s.total_prompts:'-') +'</div></div>'+
+      '<div class="kpi"><div class="l">崩溃</div><div class="v '+ ((s.crash_count||0)>0?'r':'g') +'">'+ (s.crash_count||0) +'</div></div>';
+  }catch(e){}
+}
+async function refreshStatus(){
+  try{var r=await api('/api/system/status');if(!r.services)return;
+    ['gw','st'].forEach(function(k){var m={gw:'gateway',st:'streamlit'};var ok=r.services[m[k]]==='running';var b=document.getElementById(k+'-badge');if(b){b.textContent=ok?'运行中':'已停止';b.className='badge '+(ok?'on':'off')}})}catch(e){}
+}
+refreshStatus();loadDashboard();setInterval(refreshStatus,30000);
+
+// ═══════════ CREATOR STYLES + CONTENT FORMS ═══════════
+var _styles=[],_platforms={},_forms=[];
+async function loadCreatorStyles(){
+  try{var d=await api('/api/create/styles');_styles=d.styles||[];_platforms=d.platforms||{};
+    document.getElementById('creatorCards').innerHTML=_styles.map(function(s){
+      return '<div class="c-card"><div class="c-head"><div class="c-icon">'+s.icon+'</div><div><div class="c-name">'+s.name+'</div><div class="c-tagline">'+s.tagline+'</div></div></div><div class="c-meta">'+ (s.best_platforms||[]).map(function(p){return'<span>'+p+'</span>'}).join('') +'</div></div>';
+    }).join('');
+  }catch(e){}
+  // Also load content forms
+  try{var f=await api('/api/create/forms');_forms=f.forms||[];
+    document.getElementById('formCards').innerHTML=_forms.map(function(f){
+      return '<div class="c-card" style="cursor:pointer" onclick="selectForm(\''+f.id+'\')"><div class="c-head"><div class="c-icon" style="font-size:1.3rem">'+f.icon+'</div><div><div class="c-name">'+f.name+'</div><div class="c-tagline">'+f.desc+'</div></div></div><div class="c-meta">'+ (f.best_platforms||[]).map(function(p){return'<span>'+p+'</span>'}).join('') +'</div></div>';
+    }).join('');
+  }catch(e){}
+}
+function selectForm(id){
+  document.getElementById('cwForm').value=id;cwFormChange();
+  document.querySelectorAll('#formCards .c-card').forEach(function(c,i){
+    c.style.borderColor=_forms[i]&&_forms[i].id===id?'var(--accent)':'var(--border)';
+  });
+}
+function cwFormChange(){
+  var def={voiceover:1500,persona:800,storytelling:2000,mashup:400,article:1500,short_video:200};
+  var f=document.getElementById('cwForm').value;
+  document.getElementById('cwWords').value=def[f]||1500;
+}
+function loadCreatorCheckboxes(){
+  if(!_styles.length){loadCreatorStyles().then(function(){rCB()});return}
+  rCB();
+  function rCB(){
+    document.getElementById('tdCreators').innerHTML=_styles.map(function(s){
+      return '<label style="font-size:.74rem;cursor:pointer"><input type="checkbox" value="'+s.id+'" '+(s.id==='zhinan'||s.id==='xiaolin'?'checked':'')+'> '+s.icon+' '+s.name+'</label>';
+    }).join('');
+  }
+}
+
+// ═══════════ TOPIC DISCOVERY ═══════════
+async function topicDiscovery(){
+  var b=document.getElementById('tdResult');b.classList.add('show');b.textContent='🔍 分析趋势中...';
+  var domain=document.getElementById('tdDomain').value;
+  var cbs=document.querySelectorAll('#tdCreators input:checked');var creators=[];
+  for(var i=0;i<cbs.length;i++)creators.push(cbs[i].value);
+  if(!creators.length){toast('请至少选择一位创作者','err');return}
+  var d=await api('/api/create/topic-discovery',{method:'POST',body:JSON.stringify({domain:domain,creators:creators,count:5})});
+  if(d.status!=='ok'){b.textContent=d.message||'失败';return}
+  b.innerHTML='<h4>🎯 '+d.domain+' · '+d.briefs.length+'个选题</h4>'+d.briefs.map(function(bf,i){
+    return '<div class="card" style="margin-bottom:6px;cursor:default"><h4>#'+(i+1)+' '+bf.title+'</h4><p style="margin:4px 0">📐 <b>角度:</b> '+bf.angle+' | <b>为什么:</b> '+bf.why+'</p><div class="meta">👤'+bf.creator+' · 📱'+bf.platform+' · 📏'+bf.word_range+'</div>'+(bf.outline&&bf.outline.length?'<div style="margin-top:4px;font-size:.68rem;color:var(--muted)">📋 '+bf.outline.map(function(o){return'• '+o}).join(' | ')+'</div>':'')+'</div>';
+  }).join('');
+}
+
+// ═══════════ AI WRITE V2 ═══════════
+async function aiWriteV2(){
+  var b=document.getElementById('cwResult');b.classList.add('show');b.textContent='🔬 阶段1/3: 研究简报...';
+  var topic=document.getElementById('cwTopic').value;
+  if(!topic){toast('请输入创作主题','err');return}
+  var d=await api('/api/create/generate-v2',{method:'POST',body:JSON.stringify({
+    topic:topic,
+    content_form:document.getElementById('cwForm').value,
+    creator:document.getElementById('cwCreator').value,
+    platform:document.getElementById('cwPlatform').value,
+    word_count:parseInt(document.getElementById('cwWords').value)||1500,
+    hook_type:document.getElementById('cwHook').value,
+    story_formula:document.getElementById('cwFormula').value,
+    expression:document.getElementById('cwExpression').value,
+    extra:document.getElementById('cwExtra').value
+  })});
+  if(d.status!=='ok'){b.textContent=d.message||'失败';return}
+  b.innerHTML=
+    '<div class="inline-tabs"><span class="on" onclick="switchWT(\'final\',this)">📝 终稿</span><span onclick="switchWT(\'research\',this)">🔬 研究</span><span onclick="switchWT(\'deai\',this)">🔍 去AI腔</span></div>'+
+    '<div id="wt-final"><h4>'+d.title+'</h4><div style="white-space:pre-wrap">'+d.body+'</div></div>'+
+    '<div id="wt-research" style="display:none"><div style="white-space:pre-wrap">'+(d.research_brief||'')+'</div></div>'+
+    '<div id="wt-deai" style="display:none"><div style="white-space:pre-wrap">'+(d.deai_report||'')+'</div></div>'+
+    '<div style="margin-top:8px;color:var(--muted);font-size:.7rem">🎬'+d.content_form+' · 👤'+d.creator+' · 📱'+d.platform+' · 📏'+(d.word_count_actual||0)+'字</div>';
+}
+function switchWT(tab,el){
+  el.parentElement.querySelectorAll('span').forEach(function(s){s.classList.remove('on')});
+  el.classList.add('on');
+  ['final','research','deai'].forEach(function(t){document.getElementById('wt-'+t).style.display=t===tab?'block':'none'});
+}
+
+// ═══════════ MULTI-PLATFORM ═══════════
+async function multiPlatform(){
+  var b=document.getElementById('mpResult');b.classList.add('show');b.textContent='📱 多平台改写中...';
+  var topic=document.getElementById('mpTopic').value;
+  if(!topic){toast('请输入主题','err');return}
+  var cbs=document.querySelectorAll('#panel-create input[type=checkbox]:checked');var platforms=[];
+  for(var i=0;i<cbs.length;i++)platforms.push(cbs[i].value);
+  var d=await api('/api/create/multi-platform',{method:'POST',body:JSON.stringify({
+    topic:topic,creator:document.getElementById('mpCreator').value,
+    base_content:document.getElementById('mpBase').value,platforms:platforms
+  })});
+  if(d.status!=='ok'){b.textContent=d.message||'失败';return}
+  var names={xiaohongshu:'📕小红书',douyin:'🎵抖音',wechat:'💬公众号',zhihu:'❓知乎',bilibili:'📺B站',pengyouquan:'👥朋友圈'};
+  var html='';for(var k in d.results){html+='<div class="card" style="margin-bottom:6px;cursor:default"><h4>'+(names[k]||k)+'</h4><div style="white-space:pre-wrap;font-size:.78rem;max-height:300px;overflow-y:auto">'+d.results[k]+'</div></div>'}
+  b.innerHTML=html;
+}
+
+// ═══════════ STYLE CLONE ═══════════
+async function styleClone(){
+  var b=document.getElementById('scResult');b.classList.add('show');b.textContent='🧬 分析中...';
+  var text=document.getElementById('scText').value;
+  if(!text||text.length<100){toast('请粘贴至少100字','err');return}
+  var d=await api('/api/create/style-clone',{method:'POST',body:JSON.stringify({text:text})});
+  b.textContent=d.style_dna||d.message||'失败';
+}
+
+// ═══════════ DE-AI CHECK ═══════════
+async function deaiCheck(){
+  var b=document.getElementById('daResult');b.classList.add('show');b.textContent='🔍 5维度检测中...';
+  var text=document.getElementById('daText').value;
+  if(!text||text.length<50){toast('请粘贴至少50字','err');return}
+  var d=await api('/api/create/deai-check',{method:'POST',body:JSON.stringify({text:text})});
+  b.textContent=d.report||d.message||'失败';
+}
+
+// ═══════════ REPURPOSE ═══════════
+var _rpText='',_rpFolder='',_rpStyle='去AI腔';
+function rpSelectTone(el){
+  document.querySelectorAll('#rpTones .tone').forEach(function(c){c.classList.remove('on')});
+  el.classList.add('on');_rpStyle=el.getAttribute('data-style');
+}
+function rpDetect(){
+  var u=document.getElementById('rpUrl').value.toLowerCase();
+  var hint='',s=document.getElementById('rpAutoDetect');
+  if(u.indexOf('xiaohongshu.com')>=0||u.indexOf('xhslink.com')>=0)hint='✅ 检测到：小红书链接';
+  else if(u.indexOf('mp.weixin.qq.com')>=0)hint='✅ 检测到：公众号链接';
+  else if(u.indexOf('zhihu.com')>=0)hint='✅ 检测到：知乎链接';
+  else if(u.indexOf('douyin.com')>=0)hint='✅ 检测到：抖音链接';
+  else if(u.indexOf('bilibili.com')>=0)hint='✅ 检测到：B站链接';
+  if(hint){s.style.display='block';s.textContent=hint;s.className='status-msg info'}else{s.style.display='none'}
+}
+async function rpExtract(){
+  var b=document.getElementById('rpOriginal'),s=document.getElementById('rpExtractStatus');
+  b.textContent='⏳ 正在提取内容...';b.style.color='var(--muted)';
+  s.className='status-msg info';s.textContent='⏳ 提取中...';
+  document.getElementById('btnExtract').disabled=true;
+  var d=await api('/api/repurpose/extract',{method:'POST',body:JSON.stringify({url:document.getElementById('rpUrl').value})});
+  document.getElementById('btnExtract').disabled=false;
+  if(d.status!=='ok'||d.data.error){s.className='status-msg err';s.textContent='❌ '+(d.data?d.data.error:d.message||'失败');return}
+  _rpText=d.data.text;_rpFolder=d.data.folder||'';
+  s.className='status-msg ok';s.textContent='✅ 提取成功！'+d.data.text_length+'字 · '+d.data.platform;
+  b.textContent=d.data.text||'(未提取到文本)';b.style.color='var(--text)';
+  document.getElementById('rpPlatformTag').textContent='· '+d.data.platform+' · '+d.data.title;
+  document.getElementById('rpImgCount').textContent=d.data.image_count+'张图片 · 已下载'+d.data.downloaded_images+'张';
+  document.getElementById('rpImages').innerHTML=d.data.image_count>0?
+    '<div style="text-align:center;padding:16px">🖼️ 已提取 <b>'+d.data.image_count+'</b> 张图片<br><span style="color:var(--muted);font-size:.7rem">原始图片已保存到本地文件夹<br/>📁 '+_rpFolder+'/images/</span></div>':
+    '<div style="text-align:center;padding:16px;color:var(--muted)">⚠️ 未检测到图片</div>';
+  var meta=[];if(d.data.title)meta.push('📝 '+d.data.title);if(d.data.author)meta.push('👤 '+d.data.author);
+  meta.push('📏 '+d.data.text_length+'字');meta.push('🖼️ '+d.data.image_count+'张图');
+  document.getElementById('rpExtractMeta').innerHTML=meta.map(function(m){return '<span class="tag">'+m+'</span>'}).join('');
+  document.getElementById('btnRewrite').disabled=false;
+}
+async function rpRewrite(){
+  if(!_rpText){toast('请先提取内容','err');return}
+  var btn=document.getElementById('btnRewrite'),bs=document.getElementById('rpRewriteStatus'),b=document.getElementById('rpRewritten');
+  btn.textContent='⏳ 改写中...';btn.disabled=true;
+  bs.className='status-msg info';bs.textContent='⏳ AI改写中...';
+  b.textContent='二创中...';b.style.color='var(--muted)';
+  var d=await api('/api/repurpose/rewrite',{method:'POST',body:JSON.stringify({text:_rpText,style:_rpStyle,custom_prompt:document.getElementById('rpPrompt').value,folder:_rpFolder})});
+  if(d.status==='ok'){
+    b.textContent=d.data.rewritten||d.data.text||'';b.style.color='var(--text)';
+    bs.className='status-msg ok';bs.textContent='✅ 二创完成！风格：'+_rpStyle+(d.data.tokens?' · '+d.data.tokens+' tokens':'');
+    toast('二创完成!');
+  }else{b.textContent='失败: '+(d.message||'');bs.className='status-msg err';bs.textContent='❌ 改写失败'}
+  btn.textContent='✨ 开始二创';btn.disabled=false;
+}
+function rpCopy(){
+  var t=document.getElementById('rpRewritten').textContent;
+  if(t&&t!=='等待改写...'){navigator.clipboard.writeText(t).then(function(){toast('已复制到剪贴板')})}
+  else toast('请先完成二创','err')
+}
+
+// ═══════════ ZHUANGQI ═══════════
+async function loadZQ(){try{var f=await api('/api/zhuangqi/formats');document.getElementById('zqF').textContent=(f.formats||[]).length+'种';var c=await api('/api/zhuangqi/cookies/status');document.getElementById('zqC').textContent=(c.xiaohongshu&&c.xiaohongshu.exists||c.douyin&&c.douyin.exists)?'有效':'无效';var e=await api('/api/zhuangqi/evolve/status');document.getElementById('zqE').textContent=e.status||'空闲';var s=await api('/api/zhuangqi/scenes');document.getElementById('zqS').textContent=(s.total||0)+'个';var sel=document.getElementById('zqScene');sel.innerHTML='<option value="">-- 通用 ('+(s.total||0)+'个行业场景) --</option>';(s.scenes||[]).forEach(function(sc){var kw=sc.keywords||[],sub=sc.subcategories||[];var opt=document.createElement('option');opt.value=sc.id;opt.textContent=(sub[0]||sc.id)+' ('+kw.slice(0,3).join(',')+')';sel.appendChild(opt)})}catch(e){}}
+async function zqG(){var b=document.getElementById('zqR');b.classList.add('show');b.textContent='生成中...';var d=await api('/api/zhuangqi/brief',{method:'POST',body:JSON.stringify({city:document.getElementById('zqCi').value,content_type:document.getElementById('zqTp').value})});if(d.error){b.textContent=d.error;return}b.innerHTML='<div class="panel-card"><h3>📋 '+d.platform_name+' · '+(d.type_name||'')+'</h3><p><b>调性:</b> '+(d.tone||'')+'</p><p><b>🎣 钩子:</b> '+(d.hook||'')+'</p><p><b>📐 结构:</b></p><ol>'+ (d.structure||[]).map(function(s){return'<li>'+s+'</li>'}).join('') +'</ol><p>😊Emoji: '+(d.emoji_density||'medium')+' | 🚫禁用: '+(d.forbidden_words||[]).join(', ')+'</p><button class="btn go" onclick="zqGenFull()">✍️ 生成完整内容</button></div>';window._lastBrief=d}
+async function zqGenFull(){if(!window._lastBrief)return;var b=document.getElementById('zqR');b.innerHTML+='<div class="result show">生成中...</div>';var d=await api('/api/zhuangqi/generate',{method:'POST',body:JSON.stringify({brief:window._lastBrief})});var rbs=b.querySelectorAll('.result');var last=rbs[rbs.length-1];if(d.error){last.textContent=d.error;return}last.innerHTML='<b>✅ '+(d.platform_name||'')+'</b>\n<hr>\n'+(d.title?'<h4>'+d.title+'</h4>':'')+(d.body||d.content||JSON.stringify(d))}
+async function zqW(){var b=document.getElementById('zqR');b.classList.add('show');b.textContent='生成中...';var d=await api('/api/zhuangqi/week-plan',{method:'POST',body:JSON.stringify({city:document.getElementById('zqCi').value})});if(d.error){b.textContent=d.error;return}var plan=Array.isArray(d)?d:(d.plan||[]);b.innerHTML='<h4>📅 7天计划</h4>'+plan.slice(0,14).map(function(p){return'<div class="card" style="margin-bottom:3px"><b>Day '+p.day+'</b> · '+(p.platform||'')+' · '+(p.account||'')+'<br><span style="font-size:.68rem;color:var(--muted)">'+(p.brief&&p.brief.hook||p.brief&&p.brief.title||'')+'</span></div>'}).join('')}
+async function zqEvo(){var b=document.getElementById('zqR');b.classList.add('show');b.textContent='进化中...';var d=await api('/api/zhuangqi/evolve',{method:'POST',body:JSON.stringify({})});b.textContent=JSON.stringify(d,null,2)}
+
+// ═══════════ GEO ═══════════
+async function geoKW(){var b=document.getElementById('gKwR');b.classList.add('show');b.textContent='分析中...';var d=await api('/api/geo/keyword-research',{method:'POST',body:JSON.stringify({city:document.getElementById('gCi').value,keywords:document.getElementById('gKw').value.split(',').map(function(s){return s.trim()})})});b.textContent=d.result||d.message||'无结果'}
+async function geoRK(){var b=document.getElementById('gRR');b.classList.add('show');b.textContent='检测中...';var cbs=document.querySelectorAll('#panel-geo input:checked');var pl=[];for(var i=0;i<cbs.length;i++)pl.push(cbs[i].value);var d=await api('/api/geo/rank-check',{method:'POST',body:JSON.stringify({city:document.getElementById('gRCi').value,keyword:document.getElementById('gRKw').value,platforms:pl})});b.innerHTML=d.results?Object.entries(d.results).map(function(e){return'<b>'+e[0]+':</b>\n'+e[1]}).join('\n<hr>\n'):d.message||'无结果'}
+async function geoC(){var b=document.getElementById('gCR');b.classList.add('show');b.textContent='生成中...';var d=await api('/api/geo/content-generate',{method:'POST',body:JSON.stringify({city:document.getElementById('gCCi').value,keyword:document.getElementById('gCKw').value,platform:document.getElementById('gCPl').value,tone:document.getElementById('gCTo').value})});b.textContent=d.content||d.message||'无结果'}
+async function geoP(){var b=document.getElementById('gPR');b.classList.add('show');b.textContent='执行中...';var d=await api('/api/geo/pipeline-run',{method:'POST',body:JSON.stringify({city:document.getElementById('gPCi').value,keyword:document.getElementById('gPKw').value})});b.innerHTML=d.steps?d.steps.map(function(s){return'<b>步骤'+s.step+': '+s.name+'</b>\n'+s.result}).join('\n<hr>\n'):d.message||'失败'}
+
+// ═══════════ PROMPTS ═══════════
+var AP=[];
+async function loadPLib(){var d=await api('/api/prompts/list');AP=d.prompts||[];renderPCards()}
+function renderPCards(){var s=(document.getElementById('pSearch')?document.getElementById('pSearch').value:'').toLowerCase();var sc=document.getElementById('pScene')?document.getElementById('pScene').value:'all';var f=AP;if(s)f=f.filter(function(p){return(p.name||'').toLowerCase().indexOf(s)>=0});if(sc!=='all')f=f.filter(function(p){return p.scene===sc});var L={video:'🎬',content:'📝',geo:'🌐',research:'🔬',business:'💼',code:'💻',data:'📊',marketing:'🎯',service:'💬'};document.getElementById('pCards').innerHTML=f.length?f.map(function(p){return'<div class="card" onclick="viewP('+p.id+')"><h4>'+(p.name||'?')+' <span class="tag">'+(L[p.scene]||p.scene)+'</span></h4><p>'+ (p.user_prompt||'').substring(0,70) +'...</p><div class="meta"><span>🤖'+p.model+'</span><span>⭐'+(p.effect_score||'-')+'</span></div></div>'}).join(''):'<div class="loading">暂无提示词</div>'}
+function viewP(id){var p=AP.find(function(x){return x.id===id});if(!p)return;document.getElementById('md').innerHTML='<h3>'+p.name+' <button class="btn sm" style="float:right" onclick="closeM()">✕</button></h3><p style="color:var(--muted);margin:6px 0">🤖'+p.model+' | v'+(p.version||1)+'</p><label>System</label><div class="result" style="display:block;max-height:120px">'+(p.system_prompt||'')+'</div><label>User</label><div class="result" style="display:block;max-height:120px">'+(p.user_prompt||'')+'</div><div style="margin-top:8px;display:flex;gap:6px"><button class="btn go sm" onclick="copyP('+id+')">📋复制</button><button class="btn sm" onclick="toDeploy('+id+');closeM()">🚀部署</button><button class="btn danger sm" onclick="delP('+id+')">🗑删除</button></div>';document.getElementById('mo').classList.add('show');document.getElementById('md').classList.add('show')}
+function closeM(){document.getElementById('mo').classList.remove('show');document.getElementById('md').classList.remove('show')}
+function copyP(id){var p=AP.find(function(x){return x.id===id});if(p){navigator.clipboard.writeText(p.system_prompt+'\n\n'+p.user_prompt);toast('已复制')}closeM()}
+async function delP(id){if(!confirm('确定?'))return;await api('/api/prompts/'+id,{method:'DELETE'});toast('已删除');closeM();loadPLib()}
+async function promptG(){var b=document.getElementById('pgR');b.classList.add('show');b.textContent='生成中...';var d=await api('/api/prompts/generate',{method:'POST',body:JSON.stringify({topic:document.getElementById('pgTopic').value,scene:document.getElementById('pgScene').value,requirements:document.getElementById('pgReq').value})});if(d.status==='ok'){window._g={s:d.system_prompt,u:d.user_prompt};b.innerHTML='<b>System:</b>\n'+(d.system_prompt||'')+'\n\n<b>User:</b>\n'+(d.user_prompt||'')+'<br><button class="btn go sm" style="margin-top:6px" onclick="saveG()">💾保存</button>'}else b.textContent=d.message||'失败'}
+async function saveG(){if(!window._g)return;await api('/api/prompts/create',{method:'POST',body:JSON.stringify({name:(document.getElementById('pgTopic').value||'未命名').substring(0,30),scene:document.getElementById('pgScene').value,system_prompt:window._g.s,user_prompt:window._g.u,model:document.getElementById('pgModel').value})});toast('已保存');loadPLib()}
+async function loadDep(){var d=await api('/api/prompts/list');document.getElementById('pdSel').innerHTML='<option>--选择--</option>'+(d.prompts||[]).map(function(p){return'<option value="'+p.id+'">'+p.name+'</option>'}).join('')}
+function toDeploy(id){navTo('prompts');setTimeout(function(){document.getElementById('pdSel').value=id;pdPrev()},400)}
+function pdPrev(){var p=AP.find(function(x){return x.id===parseInt(document.getElementById('pdSel').value)});document.getElementById('pdPrev').innerHTML=p?'<label>System</label><div class="result" style="display:block;max-height:80px;margin-bottom:6px">'+(p.system_prompt||'').substring(0,180)+'</div><label>User</label><div class="result" style="display:block;max-height:80px">'+(p.user_prompt||'').substring(0,180)+'</div>':''}
+async function promptD(){var id=parseInt(document.getElementById('pdSel').value);if(!id){toast('请选择','err');return}var p=AP.find(function(x){return x.id===id});if(!p)return;var v={};document.getElementById('pdVars').value.split(',').forEach(function(kv){var xy=kv.split('=').map(function(s){return s.trim()});if(xy[0]&&xy[1])v[xy[0]]=xy[1]});var b=document.getElementById('pdR');b.classList.add('show');b.textContent='执行中...';var d=await api('/api/prompts/deploy',{method:'POST',body:JSON.stringify({prompt_id:id,system_prompt:p.system_prompt,user_prompt:p.user_prompt,model:document.getElementById('pdModel').value,variables:v})});b.textContent=d.output||d.message||'失败'}
+
+// ═══════════ TRENDS + INTEL ═══════════
+async function checkBrowserStatus(){try{var d=await api('/api/browser/status');if(d.platforms){['xhs','dy'].forEach(function(k){var p=d.platforms[k==='xhs'?'xiaohongshu':'douyin'];var el=document.getElementById('bs-'+k);if(el){el.textContent=p.logged_in?'✅已登录('+p.size_kb+'KB)':'⬜未登录';el.className='v '+(p.logged_in?'g':'')}})}}catch(e){}}
+async function socialSearch(){var b=document.getElementById('tR');b.classList.add('show');b.textContent='🔍 Tavily搜索中...';var d=await api('/api/zhuangqi/social/search',{method:'POST',body:JSON.stringify({city:document.getElementById('tCi').value,keyword:document.getElementById('tKw').value,count:5})});if(d.status!=='ok'){b.textContent=d.message||'失败';return}b.innerHTML='<h4>📱 小红书 ('+(d.social_results?d.social_results.length:0)+'条)</h4>'+(d.social_results||[]).map(function(r){return'<div class="card" style="margin-bottom:3px"><b>'+(r.title||'')+'</b><br><span style="font-size:.68rem;color:var(--muted)">'+(r.content||'').substring(0,100)+'</span><br><span style="font-size:.64rem">🏷'+(r.hashtags||[]).join(' ')+' | ❤️'+(r.likes||0)+'</span></div>'}).join('')+'<h4 style="margin-top:8px">🌐 趋势 ('+(d.web_trends?d.web_trends.length:0)+'条)</h4>'+(d.web_trends||[]).map(function(r){return'<div class="card" style="margin-bottom:3px"><b>'+(r.title||'')+'</b><br><span style="font-size:.68rem;color:var(--muted)">'+(r.content||'').substring(0,120)+'</span></div>'}).join('')}
+async function tS(){var b=document.getElementById('tR');b.classList.add('show');b.textContent='搜索中...';var d=await api('/api/zhuangqi/trends/search',{method:'POST',body:JSON.stringify({city:document.getElementById('tCi').value,keyword:document.getElementById('tKw').value})});b.textContent=JSON.stringify(d,null,2)}
+async function tD(){var b=document.getElementById('tR');b.classList.add('show');b.textContent='加载中...';var d=await api('/api/zhuangqi/trends/dashboard');b.textContent=JSON.stringify(d,null,2)}
+async function intelSearch(){
+  var b=document.getElementById('intelR');b.classList.add('show');b.textContent='🔍 搜索情报中...';
+  var kw=document.getElementById('intelKw').value,count=parseInt(document.getElementById('intelCount').value);
+  try{var d=await api('/api/zhuangqi/social/search',{method:'POST',body:JSON.stringify({keyword:kw,city:'全国',count:count})});
+    b.innerHTML='<h4>🌐 情报 ('+(d.web_trends?d.web_trends.length:0)+'条)</h4>'+(d.web_trends||[]).map(function(r){return'<div class="card" style="margin-bottom:4px"><b>'+(r.title||'')+'</b><br><p>'+(r.content||'').substring(0,200)+'</p><a href="'+(r.url||'#')+'" target="_blank" style="font-size:.64rem;color:var(--accent2)">查看原文 →</a></div>'}).join('')||'无结果'
+  }catch(e){b.textContent='失败: '+e.message}
+}
+checkBrowserStatus();
+
+// ═══════════ USERS ═══════════
+var _userPage=1;
+async function loadUsers(){
+  var s=document.getElementById('uSearch').value,lim=parseInt(document.getElementById('uPageSize').value);
+  var d=await api('/api/admin/users?search='+encodeURIComponent(s)+'&page='+_userPage+'&limit='+lim);
+  document.getElementById('users-total').textContent='共'+(d.total||0)+'人';
+  var h='<table class="tbl"><thead><tr><th>ID</th><th>姓名</th><th>邮箱</th><th>角色</th><th>注册</th><th>操作</th></tr></thead><tbody>';
+  (d.users||[]).forEach(function(u){h+='<tr><td>'+u.id+'</td><td>'+(u.name||'-')+'</td><td>'+(u.email||'-')+'</td><td><span class="tag">'+(u.role||'user')+'</span></td><td>'+(u.created_at||'').substring(0,10)+'</td><td><button class="btn danger sm" onclick="delUser('+u.id+')">删除</button></td></tr>'});
+  h+='</tbody></table>';
+  if(d.total>lim){var pgs=Math.ceil(d.total/lim);h+='<div class="pages">';for(var i=1;i<=pgs;i++)h+='<button class="'+(i===_userPage?'on':'')+'" onclick="_userPage='+i+';loadUsers()">'+i+'</button>';h+='</div>'}
+  document.getElementById('users-table').innerHTML=h;
+}
+async function delUser(id){if(!confirm('删除 #'+id+'?'))return;await api('/api/admin/users/'+id,{method:'DELETE'});toast('已删除');loadUsers()}
+
+// ═══════════ API KEYS ═══════════
+async function loadApiKeys(){
+  var d=await api('/api/admin/api-keys');
+  var h='<table class="tbl"><thead><tr><th>Key</th><th>名称</th><th>创建</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+  (d.keys||[]).forEach(function(k){h+='<tr><td style="font-family:Consolas;font-size:.68rem">'+(k.id||(k.key||'').substring(0,12))+'...</td><td>'+(k.name||'-')+'</td><td>'+(k.created||'').substring(0,10)+'</td><td><span class="badge '+(k.enabled!==false?'on':'off')+'">'+(k.enabled!==false?'启用':'禁用')+'</span></td><td><button class="btn danger sm" onclick="revokeKey(\''+(k.id||k.key)+'\')">吊销</button></td></tr>'});
+  h+='</tbody></table>';
+  document.getElementById('apikeys-table').innerHTML=(d.keys||[]).length?h:'<div class="loading">暂无Key</div>';
+}
+async function genApiKey(){
+  var name=prompt('Key名称:','Admin');
+  var d=await api('/api/admin/api-keys/generate',{method:'POST',body:JSON.stringify({name:name||'Admin'})});
+  if(d.status==='ok'){var k=d.key&&d.key.key||JSON.stringify(d.key);document.getElementById('apikeys-table').innerHTML='<div class="panel-card" style="background:rgba(16,185,129,.06);border-color:var(--green)"><h3 style="color:var(--green)">✅ Key已生成</h3><p style="font-family:Consolas;word-break:break-all;font-size:.8rem">'+k+'</p><p style="color:var(--red);font-size:.66rem">⚠️ 仅显示一次！请立即复制保存</p><button class="btn go" onclick="navigator.clipboard.writeText(\''+k+'\');toast(\'已复制\')">📋复制</button></div>'}
+  else toast('生成失败','err')
+}
+async function revokeKey(id){if(!confirm('确定?'))return;await api('/api/admin/api-keys/'+id+'/revoke',{method:'POST'});toast('已吊销');loadApiKeys()}
+
+// ═══════════ CRASHES ═══════════
+async function loadCrashes(){
+  try{var d=await api('/api/admin/crashes');var s=d.stats||{},r=d.recent||[];
+    document.getElementById('crashes-content').innerHTML=
+      '<div class="kpis"><div class="kpi"><div class="l">崩溃总数</div><div class="v '+((s.total||0)>0?'r':'g')+'">'+(s.total||0)+'</div></div></div>'+
+      (r.length?r.slice(0,15).map(function(e,i){return'<div class="card" style="margin-bottom:3px"><b>#'+(i+1)+' '+(e.type||e.error||'')+'</b><br><span style="font-size:.64rem;color:var(--muted)">'+(e.timestamp||e.time||'')+' · '+(e.message||'')+'</span></div>'}).join(''):'<div class="loading">✅ 无崩溃记录</div>');
+  }catch(e){document.getElementById('crashes-content').innerHTML='<div class="loading">'+e.message+'</div>'}
+}
+
+// ═══════════ LOGS ═══════════
+async function loadLogs(){
+  var d=await api('/api/admin/logs'),lines=d.lines||[];
+  var h='<div class="kpis"><div class="kpi"><div class="l">日志行数</div><div class="v p">'+(d.total||0)+'</div></div></div><div class="log-box">';
+  lines.forEach(function(l){var c=l.text&&l.text.toLowerCase().indexOf('error')>=0?'red':l.text&&l.text.toLowerCase().indexOf('warn')>=0?'gold':'text';h+='<div style="color:var(--'+c+')">'+(l.text||'')+'</div>'});
+  h+='</div>';
+  document.getElementById('logs-content').innerHTML=lines.length?h:'<div class="loading">暂无日志</div>';
+}
+
+// ═══════════ SYSTEM ═══════════
+async function sysH(){var b=document.getElementById('hR');b.classList.add('show');b.textContent='检查中...';var d=await api('/api/health/full');b.textContent=JSON.stringify(d,null,2)}
+async function sysB(){var b=document.getElementById('bR');b.classList.add('show');b.textContent='备份中...';var d=await api('/api/admin/backup',{method:'POST'});b.textContent=JSON.stringify(d,null,2)}
+async function sysBS(){var b=document.getElementById('bR');b.classList.add('show');b.textContent='加载中...';var d=await api('/api/admin/backup/status');b.textContent=JSON.stringify(d,null,2)}
+
+// ═══════════ INIT ═══════════
+loadCreatorStyles();loadPLib();loadDep();loadZQ();
+loadDashboard();loadUsers();loadApiKeys();loadCrashes();loadLogs();
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>内容二创管线 · 云数科技</title>
+<style>
+  :root { --bg:#0a0a0f; --card:#111118; --border:#1e1e2a; --accent:#6c5ce7; --accent2:#a78bfa; --green:#00c853; --red:#ff1744; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:#e0e0e0; font-family:-apple-system,"Microsoft YaHei",sans-serif; min-height:100vh; }
+  .topbar { background:var(--card); border-bottom:1px solid var(--border); padding:14px 32px; display:flex; align-items:center; gap:16px; }
+  .topbar a { color:var(--accent2); text-decoration:none; font-size:0.85rem; }
+  .topbar h2 { font-size:1.1rem; color:#fff; }
+  .container { max-width:1400px; margin:0 auto; padding:32px; }
+  .workflow { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .panel { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:24px; }
+  .panel h3 { font-size:1rem; margin-bottom:16px; color:#fff; display:flex; align-items:center; gap:8px; }
+  .panel h3 .step { background:var(--accent); color:#fff; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; }
+  input, textarea, select { width:100%; padding:10px 14px; background:#0a0a0f; border:1px solid var(--border); border-radius:6px; color:#e0e0e0; font-size:0.9rem; font-family:inherit; }
+  textarea { resize:vertical; min-height:120px; }
+  input:focus, textarea:focus, select:focus { outline:none; border-color:var(--accent); }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:6px; font-size:0.85rem; font-weight:600; cursor:pointer; border:none; transition:all .2s; }
+  .btn.primary { background:var(--accent); color:#fff; }
+  .btn.primary:hover { background:#7c6ff7; }
+  .btn.secondary { background:var(--card); color:#ccc; border:1px solid var(--border); }
+  .btn.secondary:hover { border-color:var(--accent); }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .result-box { background:#0a0a0f; border:1px solid var(--border); border-radius:8px; padding:16px; max-height:500px; overflow-y:auto; white-space:pre-wrap; font-size:0.88rem; line-height:1.7; margin-top:12px; }
+  .meta { display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; }
+  .meta-tag { font-size:0.78rem; padding:4px 10px; border-radius:12px; background:rgba(108,92,231,.15); color:var(--accent2); }
+  .status { font-size:0.82rem; padding:8px 14px; border-radius:6px; margin:12px 0; display:none; }
+  .status.ok { display:block; background:rgba(0,200,83,.1); color:var(--green); border:1px solid rgba(0,200,83,.2); }
+  .status.err { display:block; background:rgba(255,23,68,.1); color:var(--red); border:1px solid rgba(255,23,68,.2); }
+  .tone-grid { display:flex; gap:8px; flex-wrap:wrap; }
+  .tone-chip { padding:6px 14px; border-radius:20px; border:1px solid var(--border); cursor:pointer; font-size:0.8rem; transition:all .2s; }
+  .tone-chip.active, .tone-chip:hover { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .full-width { grid-column:1/-1; }
+  .loading { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,.2); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .diff-view { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .diff-view .result-box { max-height:400px; }
+  .diff-view h4 { font-size:0.82rem; color:#888; margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/admin">← 管理后台</a>
+  <h2>🔄 内容二创管线</h2>
+  <span style="color:#666;font-size:0.8rem">粘贴链接 → 提取内容 → AI改写 → 下载图片</span>
+</div>
+
+<div class="container">
+
+<div class="workflow">
+  <!-- Step 1: Input -->
+  <div class="panel">
+    <h3><span class="step">1</span> 粘贴笔记链接</h3>
+    <input type="url" id="sourceUrl" placeholder="粘贴小红书/公众号/知乎/抖音链接..." style="margin-bottom:8px">
+    <div style="display:flex;gap:8px">
+      <button class="btn primary" onclick="extract()" id="btnExtract">🔍 提取内容</button>
+      <span style="font-size:0.78rem;color:#666;line-height:2.5">支持：小红书 · 公众号 · 知乎 · 抖音 · 通用网页</span>
+    </div>
+    <div class="status" id="extractStatus"></div>
+    <div class="meta" id="extractMeta"></div>
+  </div>
+
+  <!-- Step 2: Rewrite Settings -->
+  <div class="panel">
+    <h3><span class="step">2</span> 二创设置</h3>
+    <label style="font-size:0.82rem;color:#888;display:block;margin-bottom:6px">改写风格</label>
+    <div class="tone-grid" id="toneGrid">
+      <span class="tone-chip active" data-style="去AI腔">去AI腔</span>
+      <span class="tone-chip" data-style="小红书风格">小红书风格</span>
+      <span class="tone-chip" data-style="公众号风格">公众号风格</span>
+      <span class="tone-chip" data-style="知乎风格">知乎风格</span>
+      <span class="tone-chip" data-style="抖音口播">抖音口播</span>
+      <span class="tone-chip" data-style="缩短精简">缩短精简</span>
+      <span class="tone-chip" data-style="扩写丰富">扩写丰富</span>
+    </div>
+    <label style="font-size:0.82rem;color:#888;display:block;margin:16px 0 6px">自定义改写指令 <span style="color:#555">(可选，覆盖上方风格)</span></label>
+    <textarea id="customPrompt" placeholder="例如：把这段内容改成给50岁阿姨看的装修攻略，语气亲切，多用生活化的比喻..." rows="2"></textarea>
+    <button class="btn primary" onclick="rewrite()" id="btnRewrite" disabled style="margin-top:12px;width:100%">✨ 开始二创</button>
+    <div class="status" id="rewriteStatus"></div>
+  </div>
+
+  <!-- Step 3: Original -->
+  <div class="panel">
+    <h3><span class="step">3</span> 原始内容 <span style="font-size:0.75rem;color:var(--accent2)" id="platformTag"></span></h3>
+    <div class="diff-view">
+      <div><h4>📄 原文</h4><div class="result-box" id="originalText" style="color:#999">等待提取...</div></div>
+      <div><h4>📸 图片 <span id="imgCount" style="font-size:0.78rem;color:#888"></span></h4>
+        <div class="result-box" id="imageList" style="color:#999;text-align:center;padding:40px">等待提取...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Rewritten -->
+  <div class="panel">
+    <h3><span class="step">4</span> 二创结果 <button class="btn secondary" onclick="copyResult()" style="font-size:0.75rem;padding:4px 10px;margin-left:auto">📋 复制</button></h3>
+    <div class="result-box" id="rewrittenText" style="color:#999;min-height:150px">等待改写...</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+let extractedText = '';
+let extractedFolder = '';
+let selectedStyle = '去AI腔';
+
+document.querySelectorAll('#toneGrid .tone-chip').forEach(chip => {
+  chip.onclick = function() {
+    document.querySelectorAll('#toneGrid .tone-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    selectedStyle = this.dataset.style;
+  };
+});
+
+async function extract() {
+  const url = document.getElementById('sourceUrl').value.trim();
+  if (!url) return showStatus('extractStatus', '请粘贴链接', 'err');
+
+  const btn = document.getElementById('btnExtract');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> 提取中...';
+  showStatus('extractStatus', '', '');
+
+  try {
+    const r = await fetch('/api/repurpose/extract', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({url})
+    });
+    const d = await r.json();
+
+    if (d.status !== 'ok' || d.data.error) {
+      showStatus('extractStatus', d.data?.error || d.message || '提取失败', 'err');
+      btn.disabled = false;
+      btn.innerHTML = '🔍 提取内容';
+      return;
+    }
+
+    extractedText = d.data.text;
+    extractedFolder = d.data.folder || '';
+    document.getElementById('originalText').textContent = d.data.text || '(未提取到文本)';
+    document.getElementById('platformTag').textContent = '· ' + d.data.platform;
+    document.getElementById('imgCount').textContent = d.data.image_count + '张 · 已下载' + d.data.downloaded_images + '张';
+
+    let meta = [];
+    if (d.data.title) meta.push('📝 ' + d.data.title);
+    if (d.data.author) meta.push('👤 ' + d.data.author);
+    meta.push('📏 ' + d.data.text_length + '字');
+    meta.push('🖼️ ' + d.data.image_count + '张图');
+    if (extractedFolder) meta.push('📁 ' + extractedFolder);
+    document.getElementById('extractMeta').innerHTML = meta.map(m => '<span class="meta-tag">'+m+'</span>').join('');
+
+    document.getElementById('btnRewrite').disabled = false;
+    showStatus('extractStatus', '✅ 提取成功！' + d.data.text_length + '字 · ' + d.data.platform, 'ok');
+
+    // Show images
+    if (d.data.image_count > 0) {
+      document.getElementById('imageList').innerHTML = '🖼️ 已提取 ' + d.data.image_count + ' 张图片<br><span style="color:#888;font-size:0.8rem">原始图片已保存到 repurpose_output/images/</span>';
+    } else {
+      document.getElementById('imageList').innerHTML = '⚠️ 未检测到图片';
+    }
+  } catch(e) {
+    showStatus('extractStatus', '网络错误: ' + e.message, 'err');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '🔍 提取内容';
+}
+
+async function rewrite() {
+  if (!extractedText) return;
+
+  const btn = document.getElementById('btnRewrite');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> AI改写中...';
+  showStatus('rewriteStatus', '', '');
+
+  const customPrompt = document.getElementById('customPrompt').value.trim();
+
+  try {
+    const r = await fetch('/api/repurpose/rewrite', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({text: extractedText, style: selectedStyle, custom_prompt: customPrompt, folder: extractedFolder})
+    });
+    const d = await r.json();
+
+    if (d.status !== 'ok' || d.data.error) {
+      showStatus('rewriteStatus', d.data?.error || '改写失败', 'err');
+      btn.disabled = false;
+      btn.innerHTML = '✨ 开始二创';
+      return;
+    }
+
+    document.getElementById('rewrittenText').textContent = d.data.rewritten;
+    document.getElementById('rewrittenText').style.color = '#e0e0e0';
+    const tokens = d.data.tokens ? ' · 消耗 ' + d.data.tokens + ' tokens' : '';
+    showStatus('rewriteStatus', '✅ 二创完成！风格：' + selectedStyle + tokens, 'ok');
+  } catch(e) {
+    showStatus('rewriteStatus', '改写错误: ' + e.message, 'err');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '✨ 开始二创';
+}
+
+function showStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + (type || '');
+  el.textContent = msg;
+  el.style.display = type ? 'block' : 'none';
+}
+
+function copyResult() {
+  const text = document.getElementById('rewrittenText').textContent;
+  if (text && text !== '等待改写...') {
+    navigator.clipboard.writeText(text).then(() => {
+      showStatus('rewriteStatus', '✅ 已复制到剪贴板', 'ok');
+    });
+  }
+}
+
+// Auto-detect platform on URL input
+document.getElementById('sourceUrl').addEventListener('input', function() {
+  const u = this.value.toLowerCase();
+  let hint = '';
+  if (u.includes('xiaohongshu.com') || u.includes('xhslink.com')) hint = '检测到：小红书链接';
+  else if (u.includes('mp.weixin.qq.com')) hint = '检测到：公众号链接';
+  else if (u.includes('zhihu.com')) hint = '检测到：知乎链接';
+  else if (u.includes('douyin.com')) hint = '检测到：抖音链接';
+  else if (u.includes('bilibili.com')) hint = '检测到：B站链接';
+  if (hint) document.getElementById('platformTag').textContent = '· ' + hint;
+});
+</script>
+</body>
+</html>
