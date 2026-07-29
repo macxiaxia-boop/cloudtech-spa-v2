@@ -152,10 +152,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
     <div class="sb-cat">📊 运营</div>
     <span class="sb-sub" data-panel="pipeline"><span class="ico">🚀</span>管线监控</span>
+    <span class="sb-sub" data-panel="content-overview"><span class="ico">📄</span>内容总览</span>
     <span class="sb-sub" data-panel="postmortem"><span class="ico">📋</span>复盘日志</span>
 
     <div class="sb-cat">🔧 管理</div>
     <span class="sb-sub" data-panel="users"><span class="ico">👥</span>用户管理</span>
+    <span class="sb-sub" data-panel="tenants-panel"><span class="ico">🏢</span>租户管理</span>
     <span class="sb-sub" data-panel="apikeys"><span class="ico">🔑</span>授权管理</span>
     <span class="sb-sub" data-panel="system"><span class="ico">⚙️</span>系统运维</span>
 
@@ -416,6 +418,26 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <button class="btn go" onclick="loadPostmortem()" style="margin-bottom:8px">🔄 加载</button>
     <button class="btn" onclick="runPostmortem()" style="margin-bottom:8px">🧠 执行复盘</button>
     <div id="postmortem-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 11.5 CONTENT OVERVIEW ═══════════ -->
+<div class="panel" id="panel-content-overview">
+  <div class="panel-card"><h3>📄 内容总览 <span class="sub">最近15篇产出·含评分</span></h3>
+    <button class="btn go" onclick="loadContentOverview()" style="margin-bottom:8px">🔄 加载</button>
+    <div class="kpis" id="content-kpis"></div>
+    <div id="content-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 11.6 TENANTS ═══════════ -->
+<div class="panel" id="panel-tenants-panel">
+  <div class="panel-card"><h3>🏢 租户管理 <span class="sub">多租户SaaS</span></h3>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button class="btn go" onclick="loadTenants()">🔄 刷新</button>
+      <button class="btn" onclick="createTenant()">➕ 新建租户</button>
+    </div>
+    <div id="tenants-table"></div>
   </div>
 </div>
 
@@ -823,6 +845,40 @@ async function runPostmortem(){
   var d=await api('/api/admin/postmortem/run',{method:'POST'});
   toast('复盘完成 · '+d.total_records+'条记录');
   loadPostmortem();
+}
+
+// ═══════════ CONTENT OVERVIEW ═══════════
+async function loadContentOverview(){
+  var d=await api('/api/admin/pipeline/recent'),items=d.recent||[];
+  var total=items.length,scored=items.filter(function(i){return i.score}).length;
+  var avgScore=scored?(items.reduce(function(s,i){return s+(i.score||0)},0)/scored).toFixed(1):'-';
+  document.getElementById('content-kpis').innerHTML=
+    '<div class="kpi"><div class="l">总产出</div><div class="v p">'+total+'</div></div>'+
+    '<div class="kpi"><div class="l">已评分</div><div class="v p">'+scored+'</div></div>'+
+    '<div class="kpi"><div class="l">均分</div><div class="v g">'+avgScore+'</div></div>'+
+    '<div class="kpi"><div class="l">总大小</div><div class="v">'+(items.reduce(function(s,i){return s+(i.size||0)},0)/1024).toFixed(0)+'KB</div></div>';
+  document.getElementById('content-list').innerHTML=items.map(function(i){
+    var sc=i.score?'<span style=\"color:'+(i.score>=8?'var(--green)':i.score>=6?'var(--gold)':'var(--red)')+'\">'+i.score+'/10</span>':'未评分';
+    return '<div class="card" style="margin-bottom:3px"><b>'+i.title+'</b> <span style=\"float:right;font-size:.7rem\">'+sc+'</span><br><span style=\"font-size:.66rem;color:var(--muted)\">'+i.time+' · '+(i.creator||'')+' · '+(i.size/1024).toFixed(1)+'KB</span></div>';
+  }).join('');
+}
+
+// ═══════════ TENANTS ═══════════
+async function loadTenants(){
+  var d=await api('/api/admin/tenants');
+  var h='<table class="tbl"><thead><tr><th>ID</th><th>名称</th><th>套餐</th><th>状态</th><th>创建</th></tr></thead><tbody>';
+  (d.tenants||[]).forEach(function(t){h+='<tr><td>'+t.id+'</td><td>'+t.name+'</td><td><span class=\"tag\">'+t.plan+'</span></td><td><span class=\"badge '+(t.status==='active'?'on':'off')+'\">'+t.status+'</span></td><td>'+(t.created_at||'').substring(0,10)+'</td></tr>'});
+  h+='</tbody></table>';
+  document.getElementById('tenants-table').innerHTML=(d.tenants||[]).length?h:'<div class=\"loading\">暂无租户</div>';
+}
+async function createTenant(){
+  var name=prompt('租户名称:','新客户');
+  if(!name)return;
+  var email=prompt('联系邮箱:',name+'@example.com');
+  var plan=prompt('套餐(starter/pro/enterprise):','pro');
+  var d=await api('/api/admin/tenants/create',{method:'POST',body:JSON.stringify({name:name,email:email,plan:plan})});
+  if(d.status==='ok'){toast('租户已创建: '+d.tenant_id);loadTenants()}
+  else toast('创建失败: '+(d.error||''),'err');
 }
 
 // ═══════════ INIT ═══════════

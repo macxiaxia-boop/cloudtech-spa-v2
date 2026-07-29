@@ -3,7 +3,7 @@
 ==========================================
 Flask 管理后台 + Landing Page 服务 + API 平台集成 + 运营后台
 """
-import os
+import os, re
 import json
 from pathlib import Path
 from dotenv import load_dotenv
@@ -1773,6 +1773,65 @@ def api_zhuangqi_batch():
         "count": count,
     })
 
+
+@app.route("/api/admin/tenants")
+def api_admin_tenants():
+    """多租户列表"""
+    from database import Database
+    db = Database().connect()
+    rows = db.fetch_all("SELECT * FROM tenants ORDER BY created_at DESC")
+    return jsonify({"status": "ok", "tenants": [dict(r) for r in rows]})
+
+@app.route("/api/admin/tenants/create", methods=["POST"])
+def api_tenant_create():
+    """创建新租户"""
+    from database import Database
+    import secrets, time as _time
+    data = request.get_json() or {}
+    tid = data.get("id", f"tenant-{secrets.token_hex(4)}")
+
+    # Retry up to 3 times on DB lock
+    for attempt in range(3):
+        try:
+            db = Database().connect()
+            db.insert("tenants", {
+                "id": tid, "name": data.get("name", "新租户"),
+                "email": data.get("email", f"{tid}@cloudtech.com"),
+                "company": data.get("company", ""), "plan": data.get("plan", "pro"),
+                "status": "active", "api_key": f"ak-{secrets.token_hex(16)}",
+                "api_key_hash": secrets.token_hex(32)
+            })
+            return jsonify({"status": "ok", "tenant_id": tid})
+        except Exception as e:
+            if "locked" in str(e).lower() and attempt < 2:
+                _time.sleep(1)
+                continue
+            return jsonify({"error": str(e)}), 400
+
+@app.route("/api/admin/pipeline/recent")
+def api_pipeline_recent():
+    """最近管线产出(含评分)"""
+    import glob as _g
+    results = []
+    pattern = "D:/个人文件/AI/05 项目生产系统/内容生产/**/*.md"
+    files = sorted(_g.iglob(pattern, recursive=True), key=lambda f: Path(f).stat().st_mtime, reverse=True)[:15]
+    for fpath in files:
+        try:
+            f = Path(fpath)
+            text = f.read_text(encoding="utf-8")[:600]
+            title = text.split("\n")[0].replace("# ", "").strip()[:60]
+            score_match = re.search(r'评分[：:]\s*(\d+)/10', text)
+            creator_match = re.search(r'>\s*(.+?)\s*\|', text)
+            results.append({
+                "title": title, "file": str(f),
+                "size": f.stat().st_size,
+                "score": int(score_match.group(1)) if score_match else None,
+                "creator": creator_match.group(1) if creator_match else None,
+                "time": datetime.fromtimestamp(f.stat().st_mtime).strftime("%m-%d %H:%M")
+            })
+        except:
+            pass
+    return jsonify({"status": "ok", "recent": results})
 
 @app.route("/api/admin/content/score", methods=["POST"])
 def api_content_score():
