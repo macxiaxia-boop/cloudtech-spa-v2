@@ -71,7 +71,7 @@ def migrate():
 
         print(f"🔄 {mf.name} — applying...")
         try:
-            sql = mf.read_text()
+            sql = mf.read_text(encoding="utf-8")
             cur.execute(sql)
             cur.execute("INSERT INTO _migrations (filename) VALUES (%s)", [mf.name])
             conn.commit()
