@@ -1748,13 +1748,53 @@ def api_knowledge_convert():
 
 @app.route("/api/admin/zhuangqi/batch", methods=["POST"])
 def api_zhuangqi_batch():
-    """装企批量生产: 7系列×39账号"""
+    """装企批量生产: 7系列×39账号 (异步后台执行)"""
     from pipeline_engine import batch_produce
+    import threading as _th
     data = request.get_json() or {}
     series = data.get("series")  # None = all
     count = int(data.get("count", 3))
-    result = batch_produce(series, count)
-    return jsonify({"status": "ok", "result": result})
+
+    # Fire background thread
+    result_holder = {}
+    def _run():
+        try:
+            result_holder["result"] = batch_produce(series, count)
+        except Exception as e:
+            result_holder["error"] = str(e)
+    t = _th.Thread(target=_run, daemon=True)
+    t.start()
+
+    # Return immediately with status
+    return jsonify({
+        "status": "ok",
+        "message": f"批量生产已启动: {series or '全部系列'} × {count}个账号, 后台执行中",
+        "series": series,
+        "count": count,
+    })
+
+
+@app.route("/api/admin/content/score", methods=["POST"])
+def api_content_score():
+    """内容质量自动评分: AI对产出进行5维度打分"""
+    data = request.get_json() or {}
+    text = data.get("text", "")
+    if len(text) < 100:
+        return jsonify({"status": "error", "message": "文本太短(需≥100字)"}), 400
+
+    dims = [
+        "标题吸引力(是否有钩子?令人想点击?)",
+        "信息密度(是否有数据/案例/观点?)",
+        "结构清晰度(逻辑是否流畅?分段是否合理?)",
+        "AI痕迹(是否用'首先其次''总而言之'等模板词?)",
+        "行动引导(结尾是否有CTA?是否推动读者行动?)"
+    ]
+    sys_p = f"你是内容质量评审专家。对以下内容5维度打分(1-10)并给出总分和一句话改进建议。输出格式:\n得分: X/10 | 标题: X | 信息: X | 结构: X | AI痕迹: X | 行动: X\n建议: ..."
+    try:
+        report = _deepseek_call(sys_p, f"评审以下内容:\n\n{text[:2000]}", max_tokens=500)
+        return jsonify({"status": "ok", "report": report})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 # ═══════════════════════════════════════════════════════

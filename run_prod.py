@@ -23,4 +23,4 @@ if __name__ == "__main__":
     print(f"  Host:   {HOST}:{PORT}")
     print(f"  Threads: {WORKERS}")
     print(f"  Admin:  http://{HOST}:{PORT}/admin")
-    serve(app, host=HOST, port=PORT, threads=WORKERS)
+    serve(app, host=HOST, port=PORT, threads=WORKERS, channel_timeout=600)
