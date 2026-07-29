@@ -1685,48 +1685,75 @@ def api_pipeline_status():
 
 @app.route("/api/admin/pipeline/trigger", methods=["POST"])
 def api_pipeline_trigger():
-    """手动触发内容管线：情报扫描→选题发现→内容生产"""
+    """手动触发内容管线：选题发现→多平台生产→保存发布"""
+    from datetime import datetime
     data = request.get_json() or {}
-    topic = data.get("topic", "AI如何改变装修行业")
-    result = {"steps": []}
+    topic = data.get("topic", "装修设计")
+    creator = data.get("creator", "zhinan")
+    count = int(data.get("count", 1))
 
-    # Step 1: 情报扫描
+    result = {"steps": [], "topic": topic, "started_at": datetime.now().isoformat()[:19]}
+
+    # Step 1: 选题发现
     try:
-        from social_scraper import SocialCollector
-        c = SocialCollector()
-        notes = c.search_xiaohongshu(f"{topic}", 3)
-        result["steps"].append({"step": 1, "name": "情报扫描", "status": "ok", "count": len(notes)})
+        cn = CREATOR_STYLES.get(creator, CREATOR_STYLES["zhinan"])["name"]
+        sys_p = f"你是选题策划师。对标「{cn}」风格，为「{topic}」发现{count}个最值得做的选题。每个选题一行，格式: 标题||平台||角度||大纲"
+        raw = _deepseek_call(sys_p, f"领域: {topic}", max_tokens=800, temperature=0.8)
+        briefs = [l.strip() for l in raw.split("\n") if "||" in l][:count]
+        result["steps"].append({"step": 1, "name": "选题发现", "status": "ok", "count": len(briefs), "briefs": briefs})
     except Exception as e:
-        result["steps"].append({"step": 1, "name": "情报扫描", "status": "failed", "error": str(e)})
+        result["steps"].append({"step": 1, "name": "选题发现", "status": "failed", "error": str(e)[:100]})
 
-    # Step 2: 选题发现 (call DeepSeek)
-    try:
-        creator_names = [CREATOR_STYLES[c]["name"] for c in ["zhinan", "xiaolin"]]
-        sys_p = f"发现「{topic}」领域3个选题。对标: {', '.join(creator_names)}。格式: 标题|创作者|平台|角度|大纲"
-        raw = _deepseek_call(sys_p, f"领域: {topic}", max_tokens=1500, temperature=0.8)
-        briefs = [l.strip() for l in raw.split("\n") if l.strip() and "|" in l][:3]
-        result["steps"].append({"step": 2, "name": "选题发现", "status": "ok", "briefs": briefs})
-    except Exception as e:
-        result["steps"].append({"step": 2, "name": "选题发现", "status": "failed", "error": str(e)})
+    # Step 2: 批量内容生产
+    produced = []
+    for i in range(min(count, 5)):
+        try:
+            cur_topic = briefs[i].split("||")[0].strip() if i < len(briefs) else f"{topic} #{i+1}"
+            form = CONTENT_FORMS["article"]
+            cr = CREATOR_STYLES.get(creator, CREATOR_STYLES["zhinan"])
+            pl = PLATFORMS["xiaohongshu"]
 
-    # Step 3: 内容生产
-    try:
-        form = CONTENT_FORMS["voiceover"]
-        creator = CREATOR_STYLES["zhinan"]
-        platform = PLATFORMS["douyin"]
-        sys_p = f"{form['name']}: {form['desc']}\n对标{creator['name']}: {creator['tone']}\n平台: {platform['name']}"
-        content = _deepseek_call(sys_p, f"主题: {topic}", max_tokens=2000)
-        result["steps"].append({"step": 3, "name": "内容生产", "status": "ok", "word_count": len(content)})
+            parts = [
+                f"你是顶尖内容创作者。对标「{cr['name']}」: {cr['tone']}",
+                f"结构: {' → '.join(form['structure'])}",
+                f"平台: {pl['name']}（{pl['style']}）字数600-800字",
+                f"禁用词: {', '.join(cr['forbidden'])}",
+            ]
+            content = _deepseek_call("\n".join(parts), f"主题: {cur_topic}", max_tokens=1500)
+            title = content.split("\n")[0] if content else cur_topic
 
-        # 保存产出
-        out_dir = Path("D:/个人文件/AI/05 项目生产系统/内容生产")
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_file = out_dir / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{topic[:20]}.md"
-        out_file.write_text(f"# {topic}\n\n{content}", encoding="utf-8")
-        result["steps"].append({"step": 4, "name": "保存发布", "status": "ok", "file": str(out_file)})
-    except Exception as e:
-        result["steps"].append({"step": 3, "name": "内容生产", "status": "failed", "error": str(e)})
+            # 保存
+            out_dir = Path("D:/个人文件/AI/05 项目生产系统/内容生产")
+            out_dir.mkdir(parents=True, exist_ok=True)
+            safe_name = cur_topic[:30].replace("/", "_").replace("\\", "_")
+            out_file = out_dir / f"{datetime.now().strftime('%Y%m%d_%H%M')}_{safe_name}.md"
+            out_file.write_text(f"# {title}\n\n> 创作者: {cr['name']} | 平台: {pl['name']} | 生成: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n{content}", encoding="utf-8")
+            produced.append({"title": title, "file": str(out_file), "words": len(content)})
+        except Exception as e:
+            produced.append({"title": cur_topic, "error": str(e)[:100]})
 
+    result["steps"].append({"step": 2, "name": "内容生产", "status": "ok", "produced": len(produced), "items": produced})
+    return jsonify({"status": "ok", "result": result})
+
+
+@app.route("/api/admin/knowledge/convert", methods=["POST"])
+def api_knowledge_convert():
+    """触发知识转化: Inbox → Knowledge → Pattern → Rule"""
+    from pipeline_engine import convert_knowledge
+    data = request.get_json() or {}
+    max_items = int(data.get("max_items", 10))
+    result = convert_knowledge(max_items)
+    return jsonify({"status": "ok", "result": result})
+
+
+@app.route("/api/admin/zhuangqi/batch", methods=["POST"])
+def api_zhuangqi_batch():
+    """装企批量生产: 7系列×39账号"""
+    from pipeline_engine import batch_produce
+    data = request.get_json() or {}
+    series = data.get("series")  # None = all
+    count = int(data.get("count", 3))
+    result = batch_produce(series, count)
     return jsonify({"status": "ok", "result": result})
 
 
