@@ -72,36 +72,43 @@ def convert_knowledge(max_items: int = 10) -> dict:
 
 
 def _classify(content: str) -> str:
-    """Auto-classify content into category"""
+    """Auto-classify content into category (Chinese-aware)"""
     text = content.lower()
-    if any(kw in text for kw in ["装修", "装饰", "家居", "设计"]): return "装修家居"
-    if any(kw in text for kw in ["ai", "模型", "gpt", "llm", "agent"]): return "AI技术"
-    if any(kw in text for kw in ["营销", "广告", "投放", "获客"]): return "数字营销"
-    if any(kw in text for kw in ["视频", "剪辑", "口播", "脚本"]): return "内容创作"
-    if any(kw in text for kw in ["商业", "模式", "盈利", "增长"]): return "商业策略"
+    if any(kw in text for kw in ["装修", "装饰", "家居", "设计", "改造", "翻新"]): return "装修家居"
+    if any(kw in text for kw in ["ai", "模型", "gpt", "llm", "agent", "人工智能"]): return "AI技术"
+    if any(kw in text for kw in ["营销", "广告", "投放", "获客", "流量"]): return "数字营销"
+    if any(kw in text for kw in ["视频", "剪辑", "口播", "脚本", "拍摄"]): return "内容创作"
+    if any(kw in text for kw in ["商业", "模式", "盈利", "增长", "变现"]): return "商业策略"
+    if any(kw in text for kw in ["合同", "避坑", "踩坑", "预算", "报价", "省钱"]): return "装修实战"
     return "通用知识"
 
 
 def _extract_patterns(content: str, source: str) -> list:
-    """Extract reusable patterns from content"""
+    """Extract reusable patterns from content (Chinese-aware)"""
     patterns = []
-    # Pattern: 数字+单位  (e.g., "3000万用户", "增长45%")
-    nums = re.findall(r'(\d+(?:\.\d+)?)\s*(万|亿|%|倍|倍以上)', content)
+    # 数据锚点: 数字+单位
+    nums = re.findall(r'(\d+(?:\.\d+)?)\s*(万|亿|%|倍|元|平|㎡|m²)', content)
     if nums:
         patterns.append({"type": "数据锚点", "key": f"data_{source[:15]}",
-                         "value": f"可引用数据点: {', '.join([f'{n[0]}{n[1]}' for n in nums[:5]])}"})
+                         "value": f"数据点: {', '.join([f'{n[0]}{n[1]}' for n in nums[:5]])}"})
 
-    # Pattern: "X比Y更Z" 比较结构
-    compares = re.findall(r'([^，。\n]{5,30}(?:比|相比|超过|领先)[^，。\n]{5,30})', content)
+    # 比较框架: 中文比较结构
+    compares = re.findall(r'([^，。\n]{5,40}(?:比|相比|超过|领先|不如|优于)[^，。\n]{5,40})', content)
     if compares:
         patterns.append({"type": "比较框架", "key": f"compare_{source[:15]}",
-                         "value": f"对比锚点: {' | '.join(compares[:3])}"})
+                         "value": f"对比: {' | '.join(compares[:3])}"})
 
-    # Pattern: "因为X所以Y" 因果链
-    causals = re.findall(r'(因为[^，。\n]{10,40}(?:所以|导致|因此)[^，。\n]{10,40})', content)
+    # 避坑规则: 包含"不要/避免/注意/千万别"
+    avoids = re.findall(r'([^。\n]{5,60}(?:不要|避免|注意|千万别|切记)[^。\n]{5,60})', content)
+    if avoids:
+        patterns.append({"type": "避坑规则", "key": f"avoid_{source[:15]}",
+                         "value": f"避坑: {' | '.join(avoids[:3])}"})
+
+    # 因果链: 中文因果
+    causals = re.findall(r'([^。\n]{5,40}(?:因为|所以|导致|因此|于是)[^。\n]{5,40})', content)
     if causals:
         patterns.append({"type": "因果链", "key": f"causal_{source[:15]}",
-                         "value": f"因果逻辑: {causals[0][:100]}"})
+                         "value": f"因果: {causals[0][:120]}"})
 
     return patterns
 
