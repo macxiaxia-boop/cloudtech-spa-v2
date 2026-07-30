@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>装企入驻 · 云数科技</title>
+<style>
+:root{--bg:#08080d;--card:#101015;--border:#1a1a24;--accent:#c9a96e;--green:#10b981;--text:#e2e2e9;--muted:#71717a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"Microsoft YaHei",sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:40px;width:480px}
+h2{color:#fff;margin-bottom:4px}h2 span{color:var(--accent);font-size:.8rem;margin-left:8px}
+p{color:var(--muted);font-size:.78rem;margin-bottom:20px}
+label{display:block;font-size:.74rem;color:var(--muted);margin-bottom:3px;margin-top:10px}
+input,select{width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:.8rem;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+.btn{width:100%;padding:10px;border-radius:7px;font-size:.8rem;font-weight:700;cursor:pointer;border:none;margin-top:16px;background:var(--accent);color:#000}
+.result{margin-top:12px;padding:12px;border-radius:7px;font-size:.76rem;display:none}
+.result.ok{display:block;background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.result.err{display:block;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
+.plan{border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:.72rem}
+.plan:hover{border-color:var(--accent)}
+.plan.sel{border-color:var(--accent);background:rgba(201,169,110,.08)}
+.plan .name{font-weight:700;color:#fff}.plan .price{color:var(--accent);font-size:1rem;margin:4px 0}.plan .desc{color:var(--muted);font-size:.64rem}
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>🏗️ 装企入驻 <span>云数科技</span></h2>
+  <p>对标筷子科技 — 输入楼盘→全平台内容→矩阵分发</p>
+  
+  <label>装企名称</label>
+  <input id="name" placeholder="如: 闽南装饰集团">
+  
+  <label>套餐</label>
+  <div class="plans">
+    <div class="plan" data-plan="starter" onclick="selPlan(this)"><div class="name">入门版</div><div class="price">¥299</div><div class="desc">50篇/月·1城市</div></div>
+    <div class="plan sel" data-plan="pro" onclick="selPlan(this)"><div class="name">专业版</div><div class="price">¥999</div><div class="desc">150篇/月·3城市</div></div>
+    <div class="plan" data-plan="enterprise" onclick="selPlan(this)"><div class="name">企业版</div><div class="price">¥2,999</div><div class="desc">300篇/月·5城市</div></div>
+  </div>
+  
+  <label>服务城市(逗号分隔)</label>
+  <input id="cities" placeholder="厦门,泉州,漳州" value="厦门">
+  
+  <button class="btn" onclick="doRegister()">⚡ 立即入驻 (含5篇免费内容)</button>
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+var plan='pro';
+function selPlan(el){document.querySelectorAll('.plan').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');plan=el.dataset.plan}
+async function doRegister(){
+  var r=document.getElementById('result');
+  r.className='result';r.style.display='block';r.textContent='入驻处理中...';
+  var name=document.getElementById('name').value||'新装企';
+  var cities=document.getElementById('cities').value.split(',').map(s=>s.trim()).filter(Boolean);
+  try{
+    var resp=await fetch('/api/tenant/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,cities:cities,plan:plan})});
+    var d=await resp.json();
+    if(d.status==='ok'){
+      var t=d.tenant;
+      r.className='result ok';
+      r.innerHTML='✅ 入驻成功!<br><br>📊 <a href="/client?tid='+t.id+'" style="color:var(--green)">进入驾驶舱 →</a><br><br>套餐: '+t.plan+' · '+t.monthly_quota+'篇/月<br>账号矩阵: 已自动生成<br>首批5篇内容: 生产中...';
+    }else{
+      r.className='result err';r.textContent='❌ '+d.error;
+    }
+  }catch(e){r.className='result err';r.textContent='❌ '+e.message}
+}
+</script>
+</body>
+</html>

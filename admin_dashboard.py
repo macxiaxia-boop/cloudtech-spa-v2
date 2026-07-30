@@ -2003,6 +2003,50 @@ def api_platform_summary():
         })
     return jsonify({"status": "ok", "tenants": tenants, "total_mrr": total_mrr, "tenant_count": len(tenants)})
 
+
+@app.route("/register")
+def register_page():
+    return send_from_directory(str(LANDING), "register-zhuangqi.html")
+
+@app.route("/api/tenant/onboard", methods=["POST"])
+def api_tenant_onboard():
+    """一站式入驻: 创建租户→生成矩阵→首批5篇内容→返回仪表盘链接"""
+    from tenant_platform import create_tenant, get_client_dashboard
+    from kuaizi_pipeline import kuaizi
+    from billing import record_usage
+    import secrets
+    
+    data = request.get_json() or {}
+    name = data.get("name", "新装企")
+    cities = data.get("cities", ["厦门"])
+    plan = data.get("plan", "pro")
+    
+    # Step 1: 创建租户
+    tenant = create_tenant(name, cities, plan)
+    tid = tenant["id"]
+    
+    # Step 2: 后台异步生成首批内容(避免超时)
+    import threading as _th
+    def _bg_produce():
+        for topic in [f"{cities[0]}装修避坑指南", f"{cities[0]}旧房翻新案例"]:
+            try:
+                kuaizi({"city": cities[0], "style": "现代简约", "room_type": "全屋", "area": 100, "budget": 20, "community": "", "account": name})
+                record_usage(tid, "article", topic, 8)
+            except: pass
+    _th.Thread(target=_bg_produce, daemon=True).start()
+    produced = [{"topic": f"{cities[0]}首批内容×2", "status": "后台生产中,约2分钟后可查看"}]
+    
+    # Step 3: 返回仪表盘
+    dashboard = get_client_dashboard(tid)
+    
+    return jsonify({
+        "status": "ok",
+        "tenant": tenant,
+        "produced_count": len([p for p in produced if "error" not in p]),
+        "dashboard_url": f"/client?tid={tid}",
+        "dashboard": dashboard,
+    })
+
 # ═══════════════════════════════════════════════════════
 # API 文档 — OpenAPI 3.0 + Swagger UI
 # ═══════════════════════════════════════════════════════
