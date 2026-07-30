@@ -1817,11 +1817,10 @@ def api_tenant_create():
 
 @app.route("/api/admin/pipeline/recent")
 def api_pipeline_recent():
-    """最近管线产出(含评分)"""
-    results = []
-    out = Path("D:/个人文件/AI/05 项目生产系统/内容生产")
-    if not out.exists():
-        return jsonify({"status": "ok", "recent": []})
+    cache = Path(__file__).parent / "data" / "content_cache.json"
+    if cache.exists():
+        return jsonify({"status": "ok", "recent": json.loads(cache.read_text(encoding="utf-8"))})
+    return jsonify({"status": "ok", "recent": []})
     files = sorted(
         [(f, f.stat().st_mtime) for f in out.rglob("*.md") if f.is_file()],
         key=lambda x: x[1], reverse=True
