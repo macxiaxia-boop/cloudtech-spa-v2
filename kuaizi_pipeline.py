@@ -26,6 +26,8 @@ def kuaizi(input_data: dict) -> dict:
       community: 小区名(可选)
       pain_point: 痛点(可选)
       account: 发布账号名(可选)
+      creator_id: 创作者风格 (zhinan/xiaolin/gaogailun/xiaoa, 默认zhinan)
+      content_form: 内容形式 (voiceover/persona/storytelling/mashup/article/short_video)
 
     输出:
       creative_brief: 创意简报(升机智能体)
@@ -50,6 +52,12 @@ def kuaizi(input_data: dict) -> dict:
     pain = input_data.get("pain_point", "")
     account = input_data.get("account", f"{city}装修号")
     tid = input_data.get("tenant_id", "zq-5bb59623")  # 默认闽南装饰
+    creator_id = input_data.get("creator_id", "zhinan")
+    content_form_id = input_data.get("content_form", "article")
+
+    # 获取选定的创作者风格和内容形式
+    creator = CREATOR_STYLES.get(creator_id, CREATOR_STYLES["zhinan"])
+    content_form = CONTENT_FORMS.get(content_form_id, CONTENT_FORMS["article"])
 
     # 行业知识注入
     local = INDUSTRY_KNOWLEDGE["本地热点"].get(city, [])[:3]
@@ -58,10 +66,22 @@ def kuaizi(input_data: dict) -> dict:
     output = {
         "input": input_data,
         "generated_at": datetime.now().isoformat()[:19],
+        "creator": creator["name"],
+        "content_form": content_form["name"],
     }
 
-    # ═══ 筷子核心: 一个System Prompt驱动全链路 ═══
-    master_prompt = f"""你是装企AI内容工厂。对标筷子科技Kuaizi AI平台。
+    # ═══ 筷子核心: 一个System Prompt驱动全链路，注入创作者风格 ═══
+    master_prompt = f"""你是装企AI内容工厂。你现在严格对标「{creator['name']}」的创作风格。
+
+## 🎭 创作者风格DNA（必须严格遵守）
+- 风格定位：{creator['tone']}
+- 内容结构：{creator['structure']}
+- 钩子模板：{' | '.join(creator['hook_templates'])}
+- 禁用词（绝对不能出现）：{', '.join(creator['forbidden'])}
+- Emoji密度：{creator['emoji']}（low=尽量不用，medium=适度，high=大量使用）
+- 字数范围：{creator['word_range'][0]}-{creator['word_range'][1]}字
+- 推荐平台：{'/'.join(creator['best_platforms'])}
+- 内容形式：{content_form['name']} — {content_form['desc']}
 
 ## 客户档案
 - 城市: {city} | 小区: {community or '未指定'}
@@ -71,17 +91,19 @@ def kuaizi(input_data: dict) -> dict:
 - 风格要素: {style_info.get('核心','')} | {style_info.get('配色','')}
 
 ## 要求: 一次性输出以下全部内容，用 ===SECTION=== 分隔
+所有平台内容必须贯穿「{creator['name']}」风格，不能串味。
 
 ===XHS===
-小红书图文(600-800字): 口语化·emoji·话题标签·第一人称视角·像朋友安利
-钩子: 前3句必须制造认知冲突或情绪共鸣
+小红书图文(600-800字): 用{creator['name']}的风格写，语气贯穿到底
+钩子: 用{creator['hook_templates'][0]}的句式
 
 ===DY===
-抖音口播脚本(含Scene标注): 3秒钩子→痛点共鸣→解决方案→效果展示→CTA
+抖音口播脚本(含Scene标注): 用{creator['name']}的节奏感和句式
 格式: [Scene X·时长] 画面描述 | 口播文案 | [Visual]画面提示
+3秒钩子必须符合{creator['name']}的开头特征
 
 ===WX===
-公众号长文(1500-2500字): 专业深度·有数据有案例·结构化·可读性强
+公众号长文(1500-2500字): 保持{creator['name']}的深度和调性
 含: 引子故事→问题分析→方案拆解→细节展开→总结
 
 ===VIDEO===

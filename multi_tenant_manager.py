@@ -37,35 +37,35 @@ class MultiTenantManager:
 
     PLANS = {
         "starter": {
-            "name": "Starter",
-            "price_monthly": 4800,   # RMB
-            "price_annual": 48000,
+            "name": "入门版",
+            "price_monthly": 299,   # RMB
+            "price_annual": 2990,
             "pipelines": 1,
             "platforms": 2,
             "creators": 1,
-            "content_per_month": 30,
+            "content_per_month": 50,
             "support": "email",
             "features": ["auto_publish", "basic_analytics"],
         },
-        "professional": {
-            "name": "Professional",
-            "price_monthly": 9800,
-            "price_annual": 98000,
+        "pro": {
+            "name": "专业版",
+            "price_monthly": 999,
+            "price_annual": 9990,
             "pipelines": 3,
             "platforms": 5,
             "creators": 3,
-            "content_per_month": 100,
+            "content_per_month": 150,
             "support": "priority",
             "features": ["auto_publish", "advanced_analytics", "ab_testing", "model_calibration", "multi_creator"],
         },
         "enterprise": {
-            "name": "Enterprise",
-            "price_monthly": 16800,
-            "price_annual": 168000,
+            "name": "企业版",
+            "price_monthly": 2999,
+            "price_annual": 29990,
             "pipelines": -1,  # unlimited
             "platforms": -1,
             "creators": -1,
-            "content_per_month": -1,
+            "content_per_month": 300,
             "support": "dedicated",
             "features": ["all_pro_features", "custom_models", "api_access", "white_label", "dedicated_support", "sla_guarantee"],
         },

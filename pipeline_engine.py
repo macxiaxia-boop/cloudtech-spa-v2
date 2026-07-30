@@ -183,7 +183,7 @@ ZHUANGQI_SERIES = {
     "G-好物推荐": ["家居好物开箱", "闽南非遗家居", "平替材料研究所"],
 }
 
-def batch_produce(series: str = None, count: int = 5) -> dict:
+def batch_produce(series: str = None, count: int = 5, creator_id: str = "zhinan") -> dict:
     """批量生产装企内容"""
     from admin_dashboard import CREATOR_STYLES, CONTENT_FORMS, PLATFORMS, _deepseek_call
 
@@ -194,7 +194,7 @@ def batch_produce(series: str = None, count: int = 5) -> dict:
         for acc in accounts[:count]:
             try:
                 form = CONTENT_FORMS["article"]
-                creator = CREATOR_STYLES["zhinan"]
+                creator = CREATOR_STYLES.get(creator_id, CREATOR_STYLES["zhinan"])
                 platform = PLATFORMS["xiaohongshu"]
 
                 topic = f"{acc}装修案例"

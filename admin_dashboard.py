@@ -3,11 +3,13 @@
 ==========================================
 Flask 管理后台 + Landing Page 服务 + API 平台集成 + 运营后台
 """
-import os, re
+import os, re, time
 import json
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent / ".env")
+
+_START_TIME = time.time()
 
 from flask import Flask, send_from_directory, jsonify, request
 
@@ -914,62 +916,62 @@ def api_prompts_templates():
 CREATOR_STYLES = {
     "zhinan": {
         "id": "zhinan", "name": "直男财经", "icon": "💼",
-        "tagline": "硬核直给·数据打脸·节奏快",
-        "tone": "硬核直给，不绕弯子。用数据和事实说话，节奏快，适合抖音/视频号口播。开头先抛争议观点或反常识数据，中间用案例和数据支撑，结尾给明确结论或行动建议。",
-        "structure": "争议观点(前3秒) → 数据拆解 → 案例佐证 → 反转/真相 → 金句总结",
+        "tagline": "数字砸脸·判词前置·节奏快·0-3秒出钩子",
+        "tone": "【直男财经风格】硬核直给，不铺垫不绕弯。核心技法：数字砸脸(0-3秒必须出现极端数字或极端动词)。前15字必须包含至少一项：具体数字(225万/暴跌30%)、反问句(为何？怎么？)、极端动词(暴跌/暴涨/崩盘)。四种开头模式：数字砸脸40%、问句钩子30%、危机冲突20%、故事悬念10%。语言口语+自嘲，观众关系是\"兄弟\". 杜绝铺垫超过15字、数字不极端、问句太软、像新闻标题。",
+        "structure": "极端数字/争议观点(前3秒) → 数据拆解 → 案例佐证 → 反转/真相 → 金句总结",
         "word_range": (800, 1800),
         "best_platforms": ["抖音", "视频号", "B站", "公众号"],
         "hook_templates": [
+            "{极端数字}！这是什么概念？",
             "99%的人不知道，{topic}的真相其实是...",
-            "{topic}到底有多暴利？一组数据让你看清",
-            "别再被割韭菜了，{topic}的底层逻辑就这3点",
+            "活久见！{topic}暴跌99.97%！",
         ],
-        "forbidden": ["我觉得", "可能", "大概", "据说", "小编"],
+        "forbidden": ["我觉得", "可能", "大概", "据说", "小编", "最近", "随着...的发展"],
         "emoji": "low",
     },
     "xiaolin": {
         "id": "xiaolin", "name": "小Lin说", "icon": "📖",
-        "tagline": "娓娓道来·故事化·把复杂的讲简单",
-        "tone": "娓娓道来，像在跟朋友聊天。用故事和比喻把复杂概念讲简单。不急不躁，层层递进。适合知乎、B站、公众号长文。引人入胜的叙事节奏，读完有收获感。",
-        "structure": "故事引入 → 问题拆解 → 核心概念(比喻) → 深度分析 → 总结升华",
+        "tagline": "认知转折·第一秒认知失调·把复杂的讲简单",
+        "tone": "【小Lin说风格】娓娓道来，核心技法：第一秒制造认知失调——观众脑子里想的必须是\"等等这不对吧？\"而不是\"然后呢？\"。四种开头模式：暴力类比25%(交易员一个电话让半个加州停电)、具体谜题30%(蒙眼喝可乐为何结果反转)、坦白困惑25%(之前不太敢讲因为越研究越不明白)、反差重构20%。绝不做：线性叙事开头(致命)、砸数字(那是直男财经)、说教感、过度情绪化。语气温和好奇，像学姐分享，不像老师上课。",
+        "structure": "认知转折开场(谜题/类比/坦白) → 问题拆解 → 核心概念(比喻) → 深度分析 → 总结升华",
         "word_range": (1500, 3500),
         "best_platforms": ["B站", "知乎", "公众号", "小红书"],
         "hook_templates": [
             "今天聊一个很有意思的话题：{topic}",
             "你有没有想过，为什么{topic}会这样？",
-            "讲一个关于{topic}的故事，听完你会明白的",
+            "一个{画面级比喻}，就让{topic}崩了",
         ],
-        "forbidden": ["震惊", "必看", "速看", "绝了"],
+        "forbidden": ["震惊", "必看", "速看", "绝了", "首先其次最后", "综上所述"],
         "emoji": "medium",
     },
     "gaogailun": {
         "id": "gaogailun", "name": "高盖伦", "icon": "⚡",
-        "tagline": "犀利吐槽·情绪共鸣·网感强",
-        "tone": "犀利吐槽风格，情绪饱满，网感强。用年轻人的语言体系，敢说敢怼。善于捕捉社会情绪和职场痛点。适合短视频口播、小红书图文。金句密度高，适合截屏传播。",
-        "structure": "情绪钩子(前3秒) → 痛点共鸣 → 犀利吐槽 → 反转/自嘲 → 态度金句",
+        "tagline": "事件堆叠·认知反转·犀利吐槽·网感强",
+        "tone": "【高盖伦风格】犀利冷静，核心技法：事件堆叠+认知反转——把大众的道德判断扭转为权力分析。三种开头模式：事件堆叠反转50%(泼水门、骂空姐、推老人——他们脑子里在想什么？)、反直觉提问30%(让你当胖东来老板三年能进富豪榜吗？)、现象+定调20%。必须完成转换：道德解释→权力解释，不是\"这个人太坏了\"而是\"权力让TA退化到本能反应层级\"。语言理性冷峻，和观众保持距离=权威感。绝不做：开头砸数字(那是直男财经)、反转不够深(只到表面现象)、讨好观众(破坏距离感)、事件不够具体。",
+        "structure": "3个具体事件堆叠(前3秒) → 认知反转一句话 → 权力/系统层分析 → 历史类比 → 冷静收束不下结论",
         "word_range": (400, 1200),
         "best_platforms": ["抖音", "小红书", "视频号", "微博"],
         "hook_templates": [
+            "{事件A}、{事件B}、{事件C}——他们脑子里在想什么？",
             "说个得罪人的大实话：{topic}",
-            "{topic}这件事，我真的忍不了了",
-            "打工人最破防的一集：{topic}",
+            "让你做{topic}，三年能成功吗？",
         ],
-        "forbidden": ["官方认证", "权威", "专家说"],
+        "forbidden": ["官方认证", "权威", "专家说", "兄弟们", "我觉得"],
         "emoji": "high",
     },
     "xiaoa": {
         "id": "xiaoa", "name": "小A学财经", "icon": "🎓",
-        "tagline": "学霸视角·系统拆解·干货密度高",
-        "tone": "学霸视角，系统框架思维。用模型和框架拆解问题，逻辑清晰。喜欢做图表、做对比、建模型。适合公众号深度文章、知乎回答、知识付费内容。信息量大但不枯燥。",
-        "structure": "核心问题 → 分析框架 → 分点拆解 → 对比/模型 → 行动清单",
+        "tagline": "反常识揭露·你以为A其实是B·干货密度最高",
+        "tone": "【小A学财经风格】学霸视角，核心技法：第一句就建立\"表面vs实际\"的反转框架。不是在\"分享信息\"，是在\"揭露一个你被隐瞒的真相\"。三种开头模式：反常识揭露45%(为什么贫富差距最大的国家却用最富有的王室？)、数字+框架预告30%(430亿美元、2亿婚礼——泰国王室到底多有钱？)、从X到Y变化弧线25%。信息密度是四创作者中最高的，要求：信息爆破点/分钟≥5(爆破点=具体数字/人名/机构名/案例/法规/平台数据)。语气温和但坚定，武器是逻辑链拆解+精准数字(只用1-2个，不砸)。绝不做：开头没有反转框架(致命)、反转太浅、砸数字(那是直男财经)、用权力框架分析(那是高盖伦)。",
+        "structure": "反常识揭露(\"你以为A其实是B\") → 利益逻辑链拆解 → 1-2个精准数字 → 框架/模型对比 → 认知闭环给框架",
         "word_range": (1200, 3000),
         "best_platforms": ["公众号", "知乎", "知识星球", "B站"],
         "hook_templates": [
-            "用一张图给你讲清楚{topic}",
-            "{topic}最全拆解：从入门到精通只需这3步",
-            "我研究了{num}个案例，总结出{topic}的底层框架",
+            "你以为{常见认知}？实际上，真正驱动的是{颠覆性真相}",
+            "为什么{反直觉现象}？答案在你的认知盲区里",
+            "用一张图给你讲清楚{topic}的底层框架",
         ],
-        "forbidden": ["绝对", "保证", "100%", "独一无二"],
+        "forbidden": ["绝对", "保证", "100%", "独一无二", "最近很火"],
         "emoji": "low",
     },
 }
@@ -1027,11 +1029,19 @@ def _deepseek_call(system_prompt, user_prompt, max_tokens=2000, temperature=0.7)
 
 @app.route("/api/create/styles")
 def api_create_styles():
-    """返回4大创作者风格定义"""
+    """返回4大创作者风格定义（完整版含技法）"""
     styles = []
     for k, v in CREATOR_STYLES.items():
-        styles.append({"id": v["id"], "name": v["name"], "icon": v["icon"],
-                       "tagline": v["tagline"], "best_platforms": v["best_platforms"]})
+        styles.append({
+            "id": v["id"], "name": v["name"], "icon": v["icon"],
+            "tagline": v["tagline"], "best_platforms": v["best_platforms"],
+            "tone": v["tone"][:120] + "...",  # 截取前120字做卡片预览
+            "structure": v["structure"],
+            "hook_templates": v["hook_templates"],
+            "forbidden": v["forbidden"],
+            "emoji": v["emoji"],
+            "word_range": v["word_range"],
+        })
     return jsonify({"status": "ok", "styles": styles, "platforms": PLATFORMS})
 
 
@@ -1445,7 +1455,7 @@ def api_admin_dashboard():
     }
     # Uptime
     try:
-        stats["uptime_seconds"] = round(_time.time() - _time.time())  # placeholder
+        stats["uptime_seconds"] = round(time.time() - _START_TIME)
     except: pass
     # User count
     try:
@@ -1819,28 +1829,38 @@ def api_tenant_create():
 def api_pipeline_recent():
     cache = Path(__file__).parent / "data" / "content_cache.json"
     if cache.exists():
-        return jsonify({"status": "ok", "recent": json.loads(cache.read_text(encoding="utf-8"))})
-    return jsonify({"status": "ok", "recent": []})
-    return jsonify({"status": "ok", "recent": []})
-    files = sorted(
-        [(f, f.stat().st_mtime) for f in out.rglob("*.md") if f.is_file()],
-        key=lambda x: x[1], reverse=True
-    )[:15]
-    for f, mtime in files:
         try:
-            text = f.read_text(encoding="utf-8")[:600]
-            title = text.split("\n")[0].replace("# ", "").strip()[:60]
-            score_match = re.search(r'评分[：:]\s*(\d+)/10', text)
-            creator_match = re.search(r'>\s*(.+?)\s*\|', text)
-            results.append({
-                "title": title, "file": str(f),
-                "size": f.stat().st_size,
-                "score": int(score_match.group(1)) if score_match else None,
-                "creator": creator_match.group(1) if creator_match else None,
-                "time": datetime.fromtimestamp(f.stat().st_mtime).strftime("%m-%d %H:%M")
-            })
+            return jsonify({"status": "ok", "recent": json.loads(cache.read_text(encoding="utf-8"))})
         except:
             pass
+    # Fallback: scan content directories
+    results = []
+    content_dirs = [
+        Path("D:/个人文件/AI/05 项目生产系统/内容生产"),
+        Path("D:/个人文件/AI/云数科技/tenants"),
+    ]
+    for base_dir in content_dirs:
+        if not base_dir.exists():
+            continue
+        files = sorted(
+            [(f, f.stat().st_mtime) for f in base_dir.rglob("*.md") if f.is_file()],
+            key=lambda x: x[1], reverse=True
+        )[:15]
+        for f, mtime in files:
+            try:
+                text = f.read_text(encoding="utf-8")[:600]
+                title = text.split("\n")[0].replace("# ", "").strip()[:60]
+                score_match = re.search(r'评分[：:]\s*(\d+)/10', text)
+                creator_match = re.search(r'>\s*(.+?)\s*\|', text)
+                results.append({
+                    "title": title, "file": str(f),
+                    "size": f.stat().st_size,
+                    "score": int(score_match.group(1)) if score_match else None,
+                    "creator": creator_match.group(1) if creator_match else None,
+                    "time": datetime.fromtimestamp(f.stat().st_mtime).strftime("%m-%d %H:%M")
+                })
+            except:
+                pass
     return jsonify({"status": "ok", "recent": results})
 
 
@@ -2008,6 +2028,11 @@ def api_platform_summary():
 def register_page():
     return send_from_directory(str(LANDING), "register-zhuangqi.html")
 
+@app.route("/register-account")
+def register_account_page():
+    """邮箱注册页面"""
+    return send_from_directory(str(LANDING), "register.html")
+
 @app.route("/api/tenant/onboard", methods=["POST"])
 def api_tenant_onboard():
     """一站式入驻: 创建租户→生成矩阵→首批5篇内容→返回仪表盘链接"""
@@ -2083,10 +2108,6 @@ def metrics():
     return "\n".join(lines) + "\n", 200, {"Content-Type": "text/plain; version=0.0.4"}
 
 
-
-    return send_from_directory(str(LANDING), "api-docs.html")
-
-
 # ⚠️ 通配路由必须放在最后，否则会拦截 /admin /health 等
 @app.route("/<path:filename>")
 def serve_static(filename):
@@ -2113,6 +2134,14 @@ def add_cors(response):
     return response
 
 if __name__ == "__main__":
+    # Register A/B test middleware
+    try:
+        from ab_test import ab_middleware
+        ab_middleware(app)
+        print("  A/B testing middleware registered")
+    except Exception as e:
+        print(f"  A/B middleware skipped: {e}")
+
     print("=" * 50)
     print("  云数科技 CloudTech v2.0.0 — Web 管理后台")
     print(f"  管理后台: http://localhost:5099/admin")

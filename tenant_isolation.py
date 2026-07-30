@@ -16,10 +16,11 @@ def get_current_tenant_id():
         return None
 
     try:
-        import jwt as pyjwt
-        from auth import JWT_SECRET
-        payload = pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        return payload.get("tenant_id")
+        # Use existing custom JWT verification from auth.py (not PyJWT)
+        from auth import AuthManager
+        auth = AuthManager()
+        payload = auth.verify_jwt(token)
+        return payload.get("tenant_id") if payload else None
     except Exception:
         return None
 

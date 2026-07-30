@@ -8,13 +8,15 @@ from database import get_db
 
 
 def get_mrr() -> dict:
-    """Monthly Recurring Revenue breakdown"""
+    """Monthly Recurring Revenue breakdown (from tenants table)"""
     try:
         db = get_db()
-        subscriptions = db.fetch_all("SELECT plan, amount, status, created_at FROM subscriptions")
+        subscriptions = db.fetch_all("SELECT plan, status, created_at FROM tenants")
         if not subscriptions:
             return _empty_mrr()
 
+        # Plan pricing from billing.py PLANS
+        PLAN_PRICES = {"starter": 299, "pro": 999, "enterprise": 2999}
         mrr = 0.0
         by_plan = {}
         active = 0
@@ -22,15 +24,15 @@ def get_mrr() -> dict:
 
         for sub in subscriptions:
             s = dict(sub)
-            plan = s.get("plan", "unknown")
-            amount = float(s.get("amount", 0))
+            plan = s.get("plan", "starter")
+            amount = PLAN_PRICES.get(plan, 299)
             status = s.get("status", "active")
 
             if status == "active":
                 mrr += amount
                 active += 1
                 by_plan[plan] = by_plan.get(plan, 0) + amount
-            elif status in ("cancelled", "expired"):
+            elif status in ("cancelled", "expired", "inactive"):
                 churned += 1
 
         return {
@@ -94,13 +96,12 @@ def get_tenant_stats() -> dict:
 
 
 def get_usage_overview() -> dict:
-    """Aggregated platform usage"""
+    """Aggregated platform usage (from audit_log table)"""
     try:
         db = get_db()
-        # Count API calls
         api_stats = {}
         try:
-            rows = db.fetch_all("SELECT key_id, COUNT(*) as cnt FROM api_usage GROUP BY key_id")
+            rows = db.fetch_all("SELECT resource_type, COUNT(*) as cnt FROM audit_log GROUP BY resource_type")
             api_stats["total_calls"] = sum(int(dict(r).get("cnt", 0)) for r in rows) if rows else 0
         except Exception:
             api_stats["total_calls"] = 0

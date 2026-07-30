@@ -222,6 +222,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <button class="btn" onclick="navTo('zhuangqi')">🏗️ 装企引擎</button>
       <button class="btn" onclick="navTo('geo')">🌐 GEO</button>
       <button class="btn" onclick="navTo('prompts')">🤖 提示词</button>
+      <button class="btn" onclick="navTo('kuaizi')">🥢 筷子流水线</button>
+      <button class="btn" onclick="navTo('video-panel')">🎬 视频引擎</button>
     </div>
   </div>
 </div>
@@ -800,7 +802,7 @@ function viewP(id){var p=AP.find(function(x){return x.id===id});if(!p)return;doc
 function closeM(){document.getElementById('mo').classList.remove('show');document.getElementById('md').classList.remove('show')}
 function copyP(id){var p=AP.find(function(x){return x.id===id});if(p){navigator.clipboard.writeText(p.system_prompt+'\n\n'+p.user_prompt);toast('已复制')}closeM()}
 async function delP(id){if(!confirm('确定?'))return;await api('/api/prompts/'+id,{method:'DELETE'});toast('已删除');closeM();loadPLib()}
-async function promptG(){var b=document.getElementById('pgR');b.classList.add('show');b.textContent='生成中...';var d=await api('/api/prompts/generate',{method:'POST',body:JSON.stringify({topic:document.getElementById('pgTopic').value,scene:document.getElementById('pgScene').value,requirements:document.getElementById('pgReq').value})});if(d.status==='ok'){window._g={s:d.system_prompt,u:d.user_prompt};b.innerHTML='<b>System:</b>\n'+(d.system_prompt||'')+'\n\n<b>User:</b>\n'+(d.user_prompt||'')+'<br><button class="btn go sm" style="margin-top:6px" onclick="saveG()">💾保存</button>'}else b.textContent=d.message||'失败'}
+async function promptG(){var b=document.getElementById('pgR');b.classList.add('show');b.textContent='生成中...';var reqEl=document.getElementById('pgReq');var d=await api('/api/prompts/generate',{method:'POST',body:JSON.stringify({topic:document.getElementById('pgTopic').value,scene:document.getElementById('pgScene').value,requirements:reqEl?reqEl.value:''})});if(d.status==='ok'){window._g={s:d.system_prompt,u:d.user_prompt};b.innerHTML='<b>System:</b>\n'+(d.system_prompt||'')+'\n\n<b>User:</b>\n'+(d.user_prompt||'')+'<br><button class="btn go sm" style="margin-top:6px" onclick="saveG()">💾保存</button>'}else b.textContent=d.message||'失败'}
 async function saveG(){if(!window._g)return;await api('/api/prompts/create',{method:'POST',body:JSON.stringify({name:(document.getElementById('pgTopic').value||'未命名').substring(0,30),scene:document.getElementById('pgScene').value,system_prompt:window._g.s,user_prompt:window._g.u,model:document.getElementById('pgModel').value})});toast('已保存');loadPLib()}
 async function loadDep(){var d=await api('/api/prompts/list');document.getElementById('pdSel').innerHTML='<option>--选择--</option>'+(d.prompts||[]).map(function(p){return'<option value="'+p.id+'">'+p.name+'</option>'}).join('')}
 function toDeploy(id){navTo('prompts');setTimeout(function(){document.getElementById('pdSel').value=id;pdPrev()},400)}

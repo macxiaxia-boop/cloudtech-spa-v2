@@ -117,10 +117,15 @@ def shengji_think(input_data: dict) -> dict:
     }
 
 
-def shengji_pipeline(input_data: dict, produce_count: int = 3) -> dict:
+def shengji_pipeline(input_data: dict, produce_count: int = 3, creator_id: str = "zhinan") -> dict:
     """
     升机全链路: 思考→筛选→生产→打包
     对标筷子: 创意智能体→内容工厂→分发
+
+    参数:
+      input_data: 楼盘/户型/风格/预算/城市
+      produce_count: 生产篇数(默认3)
+      creator_id: 对标创作者 (zhinan/xiaolin/gaogailun/xiaoa)
     """
     # Step 1: 升机思考(编)
     print(f"[升机] 思考中...")
@@ -137,7 +142,7 @@ def shengji_pipeline(input_data: dict, produce_count: int = 3) -> dict:
     for i, d in enumerate(top):
         print(f"  [{i+1}/{produce_count}] 生产: {d['title'][:40]}...")
         try:
-            creator = CREATOR_STYLES["zhinan"]
+            creator = CREATOR_STYLES.get(creator_id, CREATOR_STYLES["zhinan"])
             content_form = CONTENT_FORMS.get(
                 {"前后对比": "before_after", "空间漫游": "room_tour", "避坑指南": "mistake_guide",
                  "材料测评": "material_review", "本地案例": "local_case", "风格指南": "style_guide",
@@ -150,7 +155,18 @@ def shengji_pipeline(input_data: dict, produce_count: int = 3) -> dict:
                 PLATFORMS["xiaohongshu"]
             )
 
-            sys_p = f"装企内容专家。对标{creator['name']}。形式:{content_form['name']}。平台:{platform['name']}。钩子:{d['hook_type']}。角度:{d['angle']}。600-1500字。"
+            sys_p = f"""你是顶尖装企内容专家。严格对标「{creator['name']}」风格创作。
+风格要求: {creator['tone']}
+结构要求: {creator['structure']}
+禁用词: {', '.join(creator['forbidden'])}
+Emoji密度: {creator['emoji']}
+钩子参考: {' | '.join(creator['hook_templates'])}
+内容形式: {content_form['name']} — {content_form['desc']}
+目标平台: {platform['name']}（{platform['style']}）
+钩子类型: {d['hook_type']}
+创作角度: {d['angle']}
+字数: 600-1500字
+请严格按{creator['name']}风格输出，不能串味。"""
             content = _deepseek_call(sys_p, d["title"], max_tokens=2000)
             title = content.split("\n")[0][:60] if content else d["title"]
 
