@@ -146,18 +146,29 @@ async function load(){
 
   // Calendar placeholder
   var days=['一','二','三','四','五','六','日'];
-  var cal='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">';
-  days.forEach(function(d){cal+='<div style="font-size:.68rem;color:var(--muted)">周'+d+'</div>'});
-  var topics=['厨房改造','材料测评','避坑指南','本地案例','风格指南','施工日记','好物推荐'];
-  topics.forEach(function(t,i){
-    cal+='<div style="background:var(--bg);border-radius:6px;padding:8px 4px;font-size:.64rem;border:1px solid var(--border)"><div style="color:var(--accent)">'+t+'</div><div style="color:var(--muted)">3篇</div></div>';
+  // Real content calendar from dashboard
+  var recent=d.recent_content||[];
+  var cal='<div style="max-height:200px;overflow-y:auto">';
+  recent.forEach(function(r){
+    cal+='<div style="font-size:.7rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--accent)">'+(r.score||'?')+'/10</span> '+r.title.substring(0,50)+'</div>';
   });
+  if(!recent.length) cal+='<div style="color:var(--muted);font-size:.7rem">暂无内容产出</div>';
   cal+='</div>';
   document.getElementById('contentCalendar').innerHTML=cal;
 
   // GEO placeholder
-  document.getElementById('geoRanking').innerHTML=
-    '<div style="font-size:.74rem;line-height:2"><div>🔍 厦门·装修设计 — <span style="color:var(--green)">#3</span> (↑2)</div><div>🔍 泉州·旧房改造 — <span style="color:var(--green)">#5</span> (↑1)</div><div>🔍 漳州·厨房装修 — <span style="color:var(--accent)">#8</span> (→)</div><div style="margin-top:8px;color:var(--muted);font-size:.68rem">数据来源: DeepSeek/豆包/Kimi 交叉验证</div></div>';
+  // Real GEO data
+  try{
+    var gd=await api('/api/geo/ranking-board');
+    var geoHtml='';
+    if(gd.rankings&&gd.rankings.length){
+      gd.rankings.slice(0,4).forEach(function(r){
+        geoHtml+='<div style="font-size:.74rem;margin-bottom:4px">🔍 '+r.cities.join('·')+' — <span style="color:var(--green)">'+r.keywords.slice(0,2).join('·')+'</span></div>';
+      });
+    }else{geoHtml='<div style="color:var(--muted)">GEO数据采集中...</div>';}
+    geoHtml+='<div style="margin-top:8px;color:var(--muted);font-size:.68rem">数据来源: Tavily实时搜索</div>';
+    document.getElementById('geoRanking').innerHTML=geoHtml;
+  }catch(e){document.getElementById('geoRanking').innerHTML='GEO加载中...';}
 }
 
 
@@ -179,7 +190,9 @@ async function runKuaiziClient(){
     '</div>';
   }catch(e){b.innerHTML='<div style="padding:20px;color:var(--red)">❌ '+e.message+'</div>'}
 }
-load();
+// Simple auth: check if tid param is valid
+if(!TID||TID.length<5){document.body.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">请通过入驻链接访问仪表盘</div>';}else{
+load();}
 </script>
 </body>
 </html>
