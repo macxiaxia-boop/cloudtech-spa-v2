@@ -49,6 +49,7 @@ def kuaizi(input_data: dict) -> dict:
     community = input_data.get("community", "")
     pain = input_data.get("pain_point", "")
     account = input_data.get("account", f"{city}装修号")
+    tid = input_data.get("tenant_id", "zq-5bb59623")  # 默认闽南装饰
 
     # 行业知识注入
     local = INDUSTRY_KNOWLEDGE["本地热点"].get(city, [])[:3]
@@ -131,11 +132,11 @@ def kuaizi(input_data: dict) -> dict:
 
     # 分发计划
     from tenant_platform import distribute_content
-    dist = distribute_content("zq-5bb59623", f"{city}{community}{room}改造", "article")
+    dist = distribute_content(tid, f"{city}{community}{room}改造", "article")
     output["distribute"] = {"accounts": dist["total_distributions"], "plan": dist["plan"][:3]}
 
     # 保存产出
-    out_dir = Path(f"D:/个人文件/AI/云数科技/tenants/zq-5bb59623/content")
+    out_dir = Path(f"D:/个人文件/AI/云数科技/tenants/{tid}/content")
     out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M")
     pkg = out_dir / f"kuaizi_{ts}_{city}_{room}.md"
