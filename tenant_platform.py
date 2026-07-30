@@ -193,28 +193,34 @@ def distribute_content(tid: str, topic: str, content_type: str = "article") -> d
 # ═══════════════════════════════════
 
 def get_client_dashboard(tid: str) -> dict:
-    """装企客户看到的仪表盘数据"""
+    """装企客户看到的仪表盘数据（租户隔离）"""
     tenant = get_tenant(tid)
     if not tenant:
         return {"error": "租户不存在"}
 
-    # 统计产出
-    content_dir = Path("D:/个人文件/AI/05 项目生产系统/内容生产")
+    # 只统计该租户的内容目录
+    tenant_dir = Path(f"D:/个人文件/AI/云数科技/tenants/{tid}/content")
     produced = 0
     total_score = 0
     scored_count = 0
+    recent = []
 
-    for f in content_dir.rglob("*.md"):
-        try:
-            text = f.read_text(encoding="utf-8")[:500]
-            import re
-            sm = re.search(r'评分[：:]\s*(\d+)/10', text)
-            if sm:
-                total_score += int(sm.group(1))
-                scored_count += 1
-            produced += 1
-        except:
-            pass
+    if tenant_dir.exists():
+        import re
+        files = sorted(tenant_dir.rglob("*.md"), key=lambda f: f.stat().st_mtime, reverse=True)
+        for f in files:
+            try:
+                text = f.read_text(encoding="utf-8")[:500]
+                sm = re.search(r'评分[：:]\s*(\d+)/10', text)
+                title = text.split("\n")[0].replace("# ", "").strip()[:50]
+                if sm:
+                    total_score += int(sm.group(1))
+                    scored_count += 1
+                produced += 1
+                if len(recent) < 10:
+                    recent.append({"title": title, "score": int(sm.group(1)) if sm else None, "file": f.name})
+            except:
+                pass
 
     avg_score = round(total_score / max(scored_count, 1), 1)
 
@@ -229,6 +235,7 @@ def get_client_dashboard(tid: str) -> dict:
         "cities": len(tenant["cities"]),
         "total_accounts": sum(sum(v.values()) for v in tenant["accounts"].values()),
         "matrix": get_account_matrix(tid),
+        "recent_content": recent,
     }
 
 
