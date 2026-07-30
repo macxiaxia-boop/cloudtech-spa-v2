@@ -156,6 +156,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <span class="sb-sub" data-panel="postmortem"><span class="ico">📋</span>复盘日志</span>
 
     <div class="sb-cat">🏢 平台</div>
+    <span class="sb-sub" data-panel="platform"><span class="ico">📊</span>平台总览</span>
     <span class="sb-sub" data-panel="tenants-panel"><span class="ico">🏢</span>租户管理</span>
     <span class="sb-sub" data-panel="billing-panel"><span class="ico">💰</span>计费中心</span>
     <span class="sb-sub" data-panel="video-panel"><span class="ico">🎬</span>视频引擎</span>
@@ -168,6 +169,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
   </nav>
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
+    <a class="sb-ext" href="/register" target="_blank">🚀 装企入驻 ↗</a>
     <a class="sb-ext" href="/" target="_blank">🏠 官网首页 ↗</a>
     <a class="sb-ext" href="/pricing.html" target="_blank">💰 定价方案 ↗</a>
     <a class="sb-ext" href="/features.html" target="_blank">✨ 产品功能 ↗</a>
@@ -500,6 +502,16 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     </div>
     <button class="btn go" onclick="generateVideo()">🎬 生成视频方案</button>
     <div class="result" id="videoResult"></div>
+  </div>
+</div>
+
+
+<!-- ═══════════ PLATFORM ═══════════ -->
+<div class="panel" id="panel-platform">
+  <div class="panel-card"><h3>📊 平台总览 <span class="sub">全部租户·MRR·用量</span></h3>
+    <div class="kpis" id="platform-kpis"></div>
+    <button class="btn go" onclick="loadPlatform()">🔄 加载平台数据</button>
+    <div id="platform-table" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -1011,6 +1023,22 @@ async function runKuaizi(){
     '<div class="card"><h4>💬 公众号 ('+ (r.wechat_article||'').length +'字)</h4><div style="max-height:200px;overflow-y:auto;font-size:.74rem;white-space:pre-wrap">'+ (r.wechat_article||'').substring(0,500) +'</div></div>'+
     '<div class="card"><h4>📊 概览</h4><div style="font-size:.74rem">⏱ '+ r.elapsed_seconds +'秒 | 💰 ¥'+ (r.cost||{}).total +' | 📡 '+ (r.distribute||{}).accounts +'分发 | 📁 '+ (r.saved_to||'') +'</div><div style="margin-top:6px;font-size:.7rem;color:var(--muted)">🏷 '+ (r.tags||'') +'</div></div>'+
     '</div>';
+}
+
+// ═══════════ PLATFORM ═══════════
+async function loadPlatform(){
+  var d=await api('/api/admin/platform/summary');
+  document.getElementById('platform-kpis').innerHTML=
+    '<div class="kpi"><div class="l">租户数</div><div class="v p">'+d.tenant_count+'</div></div>'+
+    '<div class="kpi"><div class="l">MRR</div><div class="v g">¥'+d.total_mrr+'<span style="font-size:.7rem">/月</span></div></div>'+
+    '<div class="kpi"><div class="l">年化</div><div class="v p">¥'+(d.total_mrr*12)+'</div></div>'+
+    '<div class="kpi"><div class="l">总用量</div><div class="v">'+d.tenants.reduce(function(s,t){return s+t.monthly_used},0)+'篇</div></div>';
+  var h='<table class="tbl"><tr><th>租户</th><th>套餐</th><th>用量</th><th>评分</th><th>MRR</th><th>配额</th></tr>';
+  d.tenants.forEach(function(t){
+    h+='<tr><td><a href="/client?tid='+t.id+'" target="_blank" style="color:var(--accent2)">'+t.name+'</a></td><td><span class="tag">'+t.plan+'</span></td><td>'+t.monthly_used+'篇</td><td>'+t.avg_score+'/10</td><td>¥'+t.mrr+'</td><td>'+t.quota_pct+'%</td></tr>';
+  });
+  h+='</table>';
+  document.getElementById('platform-table').innerHTML=h;
 }
 
 // ═══════════ INIT ═══════════
