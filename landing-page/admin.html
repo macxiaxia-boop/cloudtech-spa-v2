@@ -539,6 +539,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <script>
 // ═══════════ CORE ═══════════
 var _active='dashboard',_adminToken=localStorage.getItem('admin_token')||'';
+// Clean up corrupted token from old bug (stored as [object Object])
+if(_adminToken && !_adminToken.startsWith('eyJ')){_adminToken='';localStorage.removeItem('admin_token');}
 
 // ══ Login ══
 async function doLogin(){
@@ -550,8 +552,8 @@ async function doLogin(){
   try{
     var d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:email,password:pass})});
     if(d.token){
-      _adminToken=d.token;
-      localStorage.setItem('admin_token',d.token);
+      _adminToken=d.token.token||d.token;
+      localStorage.setItem('admin_token',_adminToken);
       document.getElementById('loginOverlay').style.display='none';
       toast('登录成功');
       loadDashboard();refreshStatus();
