@@ -1821,6 +1821,7 @@ def api_pipeline_recent():
     if cache.exists():
         return jsonify({"status": "ok", "recent": json.loads(cache.read_text(encoding="utf-8"))})
     return jsonify({"status": "ok", "recent": []})
+    return jsonify({"status": "ok", "recent": []})
     files = sorted(
         [(f, f.stat().st_mtime) for f in out.rglob("*.md") if f.is_file()],
         key=lambda x: x[1], reverse=True
