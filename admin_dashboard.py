@@ -1901,6 +1901,43 @@ def api_tenant_tokens(tid):
     from tenant_platform import calculate_tokens
     return jsonify(calculate_tokens(tid))
 
+@app.route("/api/geo/ranking-board")
+def api_geo_ranking_board():
+    """GEO排名看板: 最近检测结果汇总"""
+    research_dir = Path("D:/个人文件/AI/Research")
+    rankings = []
+    for f in sorted(research_dir.glob("*排名*"), key=lambda x: x.stat().st_mtime, reverse=True)[:10]:
+        try:
+            text = f.read_text(encoding="utf-8")[:2000]
+            cities = re.findall(r'(厦门|泉州|漳州|福州|北京|上海|广州|深圳)', text)
+            keywords = re.findall(r'(装修[^，。\n]{0,10})', text)
+            rankings.append({
+                "file": f.name,
+                "date": datetime.fromtimestamp(f.stat().st_mtime).strftime("%m-%d"),
+                "cities": list(set(cities))[:3],
+                "keywords": list(set(keywords))[:3],
+            })
+        except:
+            pass
+    return jsonify({"status": "ok", "rankings": rankings})
+
+
+@app.route("/api/publish/tracker")
+def api_publish_tracker():
+    """发布追踪: 从发布追踪.csv读取"""
+    import csv
+    tracker = Path("C:/Users/xinzh/Desktop/发布追踪.csv")
+    items = []
+    if tracker.exists():
+        try:
+            reader = csv.DictReader(tracker.read_text(encoding="utf-8-sig").splitlines())
+            for row in reader:
+                items.append(row)
+        except:
+            pass
+    return jsonify({"status": "ok", "items": items[-20:], "total": len(items)})
+
+
 @app.route("/api/tenants/list")
 def api_tenants_list():
     """所有装企租户列表"""

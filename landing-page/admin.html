@@ -155,9 +155,14 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <span class="sb-sub" data-panel="content-overview"><span class="ico">📄</span>内容总览</span>
     <span class="sb-sub" data-panel="postmortem"><span class="ico">📋</span>复盘日志</span>
 
+    <div class="sb-cat">🏢 平台</div>
+    <span class="sb-sub" data-panel="tenants-panel"><span class="ico">🏢</span>租户管理</span>
+    <span class="sb-sub" data-panel="billing-panel"><span class="ico">💰</span>计费中心</span>
+    <span class="sb-sub" data-panel="video-panel"><span class="ico">🎬</span>视频引擎</span>
+    <a class="sb-sub" href="/client?tid=zq-5bb59623" target="_blank"><span class="ico">👤</span>客户视角 ↗</a>
+
     <div class="sb-cat">🔧 管理</div>
     <span class="sb-sub" data-panel="users"><span class="ico">👥</span>用户管理</span>
-    <span class="sb-sub" data-panel="tenants-panel"><span class="ico">🏢</span>租户管理</span>
     <span class="sb-sub" data-panel="apikeys"><span class="ico">🔑</span>授权管理</span>
     <span class="sb-sub" data-panel="system"><span class="ico">⚙️</span>系统运维</span>
 
@@ -441,7 +446,39 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
 </div>
 
-<!-- ═══════════ 12. SYSTEM ═══════════ -->
+<!-- ═══════════ 12.5 BILLING ═══════════ -->
+<div class="panel" id="panel-billing-panel">
+  <div class="panel-card"><h3>💰 计费中心 <span class="sub">Token计量·套餐管理·用量追踪</span></h3>
+    <div class="kpis" id="billing-kpis"></div>
+    <div class="f-row">
+      <div class="f-grp"><label>租户ID</label><input id="billTid" value="zq-5bb59623"></div>
+      <div class="f-grp"><label>内容类型</label><select id="billType"><option value="article">图文(8T)</option><option value="voiceover">口播(12T)</option><option value="video_generation">视频(50T)</option><option value="geo_research">GEO(5T)</option></select></div>
+    </div>
+    <button class="btn go" onclick="recordBill()">📝 记录消耗</button>
+    <button class="btn" onclick="loadBilling()" style="margin-left:6px">🔄 刷新</button>
+    <div class="result" id="billingResult"></div>
+    <div id="billingPlans" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 12.6 VIDEO ═══════════ -->
+<div class="panel" id="panel-video-panel">
+  <div class="panel-card"><h3>🎬 视频引擎 <span class="sub">4种视频模式·AI分镜脚本·素材匹配</span></h3>
+    <div class="kpis" id="video-kpis"></div>
+    <div class="f-row">
+      <div class="f-grp"><label>主题</label><input id="vidTopic" value="厦门厨房改造前后对比"></div>
+      <div class="f-grp"><label>视频模式</label><select id="vidMode"><option value="before_after">前后对比(30-60s)</option><option value="material_review">材料测评(45-90s)</option><option value="room_tour">空间漫游(60-90s)</option><option value="construction_diary">施工日记(30-45s)</option></select></div>
+    </div>
+    <div class="f-row">
+      <div class="f-grp"><label>城市</label><input id="vidCity" value="厦门"></div>
+      <div class="f-grp"><label>风格</label><input id="vidStyle" value="现代简约"></div>
+    </div>
+    <button class="btn go" onclick="generateVideo()">🎬 生成视频方案</button>
+    <div class="result" id="videoResult"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 13. SYSTEM ═══════════ -->
 <div class="panel" id="panel-system">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
     <div class="panel-card"><h3>💚 健康检查</h3><button class="btn go" onclick="sysH()">🩺 全量检查</button><div class="result" id="hR"></div></div>
@@ -879,6 +916,53 @@ async function createTenant(){
   var d=await api('/api/admin/tenants/create',{method:'POST',body:JSON.stringify({name:name,email:email,plan:plan})});
   if(d.status==='ok'){toast('租户已创建: '+d.tenant_id);loadTenants()}
   else toast('创建失败: '+(d.error||''),'err');
+}
+
+// ═══════════ BILLING ═══════════
+async function loadBilling(){
+  var tid=document.getElementById('billTid').value||'zq-5bb59623';
+  var d=await api('/api/tenant/'+tid+'/tokens');
+  document.getElementById('billing-kpis').innerHTML=
+    '<div class="kpi"><div class="l">已用Token</div><div class="v y">'+d.used_tokens+'<span style="font-size:.8rem">/'+d.monthly_quota_tokens+'T</span></div></div>'+
+    '<div class="kpi"><div class="l">剩余Token</div><div class="v g">'+d.remaining+'<span style="font-size:.8rem">T</span></div></div>'+
+    '<div class="kpi"><div class="l">单价</div><div class="v">¥'+d.unit_cost+'<span style="font-size:.8rem">/T</span></div></div>'+
+    '<div class="kpi"><div class="l">预估月费</div><div class="v p">¥'+d.estimated_cost+'</div></div>';
+  var plans='<h4>📋 套餐对比</h4><table class="tbl"><tr><th>套餐</th><th>月费</th><th>配额</th><th>城市</th><th>账号/城</th><th>视频</th><th>单价</th></tr>';
+  plans+='<tr><td>入门版</td><td>¥299</td><td>50篇</td><td>1</td><td>3</td><td>-</td><td>¥0.5/T</td></tr>';
+  plans+='<tr><td>专业版</td><td>¥999</td><td>150篇</td><td>3</td><td>5</td><td>2种</td><td>¥0.3/T</td></tr>';
+  plans+='<tr><td>企业版</td><td>¥2,999</td><td>300篇</td><td>5</td><td>7</td><td>4种</td><td>¥0.2/T</td></tr>';
+  plans+='</table>';
+  document.getElementById('billingPlans').innerHTML=plans;
+}
+async function recordBill(){
+  var tid=document.getElementById('billTid').value;
+  var type=document.getElementById('billType').value;
+  var topic=prompt('话题:','测试内容');
+  var d=await api('/api/tenant/'+tid+'/tokens');
+  document.getElementById('billingResult').innerHTML='✅ 已记录: '+type+' — '+d.used_tokens+'T used';
+  document.getElementById('billingResult').classList.add('show');
+  loadBilling();
+}
+
+// ═══════════ VIDEO ═══════════
+async function generateVideo(){
+  var b=document.getElementById('videoResult');b.classList.add('show');b.textContent='🎬 生成视频方案中...';
+  var d=await api('/api/video/generate',{method:'POST',body:JSON.stringify({
+    topic:document.getElementById('vidTopic').value,
+    mode:document.getElementById('vidMode').value,
+    context:{city:document.getElementById('vidCity').value,style:document.getElementById('vidStyle').value}
+  })});
+  var r=d.result||{};
+  b.innerHTML='<h4>🎬 '+r.mode+' ('+r.duration+')</h4>'+
+    '<p><b>BGM:</b> '+r.bgm+' | <b>成本:</b> '+r.estimated_cost+' | <b>匹配素材:</b> '+r.asset_count+'个</p>'+
+    '<p><b>分镜:</b></p><ol>'+ (r.scenes||[]).map(function(s){return'<li>'+s+'</li>'}).join('') +'</ol>'+
+    '<details><summary>📝 AI提示词</summary><pre style="white-space:pre-wrap;font-size:.7rem">'+r.prompt+'</pre></details>'+
+    (r.package?'<p>📁 <a href=\"#\" style=\"color:var(--accent2)\">'+r.package.package_dir+'</a></p>':'');
+  document.getElementById('video-kpis').innerHTML=
+    '<div class="kpi"><div class="l">模式</div><div class="v p">'+r.mode+'</div></div>'+
+    '<div class="kpi"><div class="l">时长</div><div class="v">'+r.duration+'</div></div>'+
+    '<div class="kpi"><div class="l">分镜数</div><div class="v p">'+(r.scenes||[]).length+'</div></div>'+
+    '<div class="kpi"><div class="l">素材</div><div class="v '+(r.asset_count>0?'g':'')+'">'+r.asset_count+'</div></div>';
 }
 
 // ═══════════ INIT ═══════════
