@@ -178,6 +178,31 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <div class="main">
 <div class="topbar"><h1 id="pageTitle">📊 系统总览</h1><span class="time" id="clock"></span></div>
 
+
+<!-- ═══════════ KUIZI PIPELINE ═══════════ -->
+<div class="panel" id="panel-kuaizi">
+  <div class="panel-card"><h3>⚡ 筷子流水线 <span class="sub">对标筷子科技 — 一键输入→全平台输出</span></h3>
+    <div class="f-row">
+      <div class="f-grp"><label>城市</label><input id="kzCity" list="cityList" value="厦门"></div>
+      <div class="f-grp"><label>风格</label><select id="kzStyle"><option>现代简约</option><option>奶油风</option><option>新中式</option><option>侘寂风</option><option>轻奢</option><option>北欧风</option></select></div>
+    </div>
+    <div class="f-row">
+      <div class="f-grp"><label>空间</label><select id="kzRoom"><option>全屋</option><option>厨房</option><option>卫生间</option><option>客厅</option><option>卧室</option><option>阳台</option></select></div>
+      <div class="f-grp"><label>面积(平)</label><input id="kzArea" type="number" value="100"></div>
+    </div>
+    <div class="f-row">
+      <div class="f-grp"><label>预算(万)</label><input id="kzBudget" type="number" value="20"></div>
+      <div class="f-grp"><label>小区(可选)</label><input id="kzCommunity" placeholder="如: 思明区老破小"></div>
+    </div>
+    <div class="f-grp"><label>痛点(可选)</label><input id="kzPain" placeholder="如: 空间小·采光差·收纳不足"></div>
+    <button class="btn go" onclick="runKuaizi()" style="width:100%;padding:12px">⚡ 一键生成全平台内容 (约120秒)</button>
+    <div class="result" id="kzResult"></div>
+    <div style="margin-top:10px;font-size:.68rem;color:var(--muted)">
+      💰 本次预估: 80T (¥16·企业版) — 输出: 小红书+抖音+公众号+视频方案+28账号分发
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ 1. DASHBOARD ═══════════ -->
 <div class="panel on" id="panel-dashboard">
   <div class="panel-card"><h3>📊 系统总览</h3>
@@ -963,6 +988,29 @@ async function generateVideo(){
     '<div class="kpi"><div class="l">时长</div><div class="v">'+r.duration+'</div></div>'+
     '<div class="kpi"><div class="l">分镜数</div><div class="v p">'+(r.scenes||[]).length+'</div></div>'+
     '<div class="kpi"><div class="l">素材</div><div class="v '+(r.asset_count>0?'g':'')+'">'+r.asset_count+'</div></div>';
+}
+
+// ═══════════ KUAIZI ═══════════
+async function runKuaizi(){
+  var b=document.getElementById('kzResult');b.classList.add('show');b.textContent='⚡ 筷子流水线运行中...约120秒';
+  var d=await api('/api/kuaizi/run',{method:'POST',body:JSON.stringify({
+    city:document.getElementById('kzCity').value,
+    style:document.getElementById('kzStyle').value,
+    room_type:document.getElementById('kzRoom').value,
+    area:parseInt(document.getElementById('kzArea').value)||100,
+    budget:parseInt(document.getElementById('kzBudget').value)||20,
+    community:document.getElementById('kzCommunity').value,
+    pain_point:document.getElementById('kzPain').value
+  })});
+  var r=d.result||{};
+  if(r.error){b.textContent='❌ '+r.error;return}
+  b.innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">'+
+    '<div class="card"><h4>📕 小红书 ('+ (r.xiaohongshu||'').length +'字)</h4><div style="max-height:200px;overflow-y:auto;font-size:.74rem;white-space:pre-wrap">'+ (r.xiaohongshu||'').substring(0,500) +'</div></div>'+
+    '<div class="card"><h4>🎵 抖音口播 ('+ (r.douyin_script||'').length +'字)</h4><div style="max-height:200px;overflow-y:auto;font-size:.74rem;white-space:pre-wrap">'+ (r.douyin_script||'').substring(0,500) +'</div></div>'+
+    '<div class="card"><h4>💬 公众号 ('+ (r.wechat_article||'').length +'字)</h4><div style="max-height:200px;overflow-y:auto;font-size:.74rem;white-space:pre-wrap">'+ (r.wechat_article||'').substring(0,500) +'</div></div>'+
+    '<div class="card"><h4>📊 概览</h4><div style="font-size:.74rem">⏱ '+ r.elapsed_seconds +'秒 | 💰 ¥'+ (r.cost||{}).total +' | 📡 '+ (r.distribute||{}).accounts +'分发 | 📁 '+ (r.saved_to||'') +'</div><div style="margin-top:6px;font-size:.7rem;color:var(--muted)">🏷 '+ (r.tags||'') +'</div></div>'+
+    '</div>';
 }
 
 // ═══════════ INIT ═══════════

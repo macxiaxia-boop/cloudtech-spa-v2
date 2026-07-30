@@ -1843,6 +1843,15 @@ def api_pipeline_recent():
             pass
     return jsonify({"status": "ok", "recent": results})
 
+
+@app.route("/api/kuaizi/run", methods=["POST"])
+def api_kuaizi_run():
+    """筷子流水线: 输入楼盘→全平台输出"""
+    from kuaizi_pipeline import kuaizi
+    data = request.get_json() or {}
+    result = kuaizi(data)
+    return jsonify({"status": "ok", "result": result})
+
 # ═══════════════════════════════════════════════════════
 # 视频引擎 API
 # ═══════════════════════════════════════════════════════
