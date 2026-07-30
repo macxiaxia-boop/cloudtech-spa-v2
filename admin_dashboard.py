@@ -1982,6 +1982,27 @@ def api_content_score():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+
+@app.route("/api/admin/platform/summary")
+def api_platform_summary():
+    """平台管理总览"""
+    from tenant_platform import get_all_tenants, get_client_dashboard
+    from billing import check_quota, PLANS
+    tenants = []
+    total_mrr = 0
+    for t in get_all_tenants():
+        d = get_client_dashboard(t["id"])
+        q = check_quota(t["id"])
+        plan = PLANS.get(t.get("plan","pro"), PLANS["pro"])
+        total_mrr += plan["price_monthly"]
+        tenants.append({
+            "id": t["id"], "name": t["name"], "plan": t["plan"],
+            "monthly_used": d["monthly_used"], "avg_score": d["avg_score"],
+            "accounts": d["total_accounts"], "mrr": plan["price_monthly"],
+            "quota_pct": d["quota_pct"], "token_used": q["used_tokens"],
+        })
+    return jsonify({"status": "ok", "tenants": tenants, "total_mrr": total_mrr, "tenant_count": len(tenants)})
+
 # ═══════════════════════════════════════════════════════
 # API 文档 — OpenAPI 3.0 + Swagger UI
 # ═══════════════════════════════════════════════════════
