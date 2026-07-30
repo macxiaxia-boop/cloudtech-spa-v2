@@ -1833,6 +1833,76 @@ def api_pipeline_recent():
             pass
     return jsonify({"status": "ok", "recent": results})
 
+# ═══════════════════════════════════════════════════════
+# 视频引擎 API
+# ═══════════════════════════════════════════════════════
+
+@app.route("/api/video/modes")
+def api_video_modes():
+    """视频生成模式列表"""
+    from video_engine import VIDEO_MODES
+    modes = [{"id": k, "name": v["name"], "duration": v["duration"], "scenes": v["scenes"]} for k, v in VIDEO_MODES.items()]
+    return jsonify({"status": "ok", "modes": modes})
+
+@app.route("/api/video/generate", methods=["POST"])
+def api_video_generate():
+    """生成视频脚本+素材匹配"""
+    from video_engine import generate_video_script, create_video_package
+    data = request.get_json() or {}
+    result = generate_video_script(
+        data.get("topic", ""),
+        data.get("mode", "before_after"),
+        data.get("context", {}),
+    )
+    pkg = create_video_package(result, data.get("account", "默认账号"))
+    result["package"] = pkg
+    return jsonify({"status": "ok", "result": result})
+
+
+# ═══════════════════════════════════════════════════════
+# 多租户平台 API
+# ═══════════════════════════════════════════════════════
+
+@app.route("/api/tenant/create", methods=["POST"])
+def api_create_zhuangqi_tenant():
+    """创建装企租户"""
+    from tenant_platform import create_tenant
+    data = request.get_json() or {}
+    t = create_tenant(data.get("name", "新装企"), data.get("cities", ["厦门"]), data.get("plan", "pro"))
+    return jsonify({"status": "ok", "tenant": t})
+
+@app.route("/api/tenant/<tid>/dashboard")
+def api_tenant_dashboard(tid):
+    """装企客户仪表盘"""
+    from tenant_platform import get_client_dashboard
+    return jsonify(get_client_dashboard(tid))
+
+@app.route("/api/tenant/<tid>/matrix")
+def api_tenant_matrix(tid):
+    """装企账号矩阵"""
+    from tenant_platform import get_account_matrix
+    return jsonify(get_account_matrix(tid))
+
+@app.route("/api/tenant/<tid>/distribute", methods=["POST"])
+def api_tenant_distribute(tid):
+    """内容分发到矩阵"""
+    from tenant_platform import distribute_content
+    data = request.get_json() or {}
+    return jsonify(distribute_content(tid, data.get("topic", ""), data.get("content_type", "article")))
+
+@app.route("/api/tenant/<tid>/tokens")
+def api_tenant_tokens(tid):
+    """Token计量"""
+    from tenant_platform import calculate_tokens
+    return jsonify(calculate_tokens(tid))
+
+@app.route("/api/tenants/list")
+def api_tenants_list():
+    """所有装企租户列表"""
+    from tenant_platform import get_all_tenants
+    return jsonify({"status": "ok", "tenants": get_all_tenants()})
+
+
 @app.route("/api/admin/content/score", methods=["POST"])
 def api_content_score():
     """内容质量自动评分: AI对产出进行5维度打分"""
