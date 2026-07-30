@@ -1676,13 +1676,15 @@ def api_knowledge_stats():
 @app.route("/api/admin/pipeline/status")
 def api_pipeline_status():
     """内容管线状态总览"""
-    import glob as _g
+    content_dir = Path("D:/个人文件/AI/05 项目生产系统/内容生产")
+    briefs_dir = Path("D:/个人文件/AI/01 世界模型系统/话题追踪/选题建议")
+    intel_dir = Path("D:/个人文件/AI/01 世界模型系统/情报日报")
     status = {
         "cron_jobs": 24,
         "cron_enabled": 24,
-        "content_produced_today": len(list(_g.iglob("D:/个人文件/AI/05 项目生产系统/内容生产/**/*.md", recursive=True))),
-        "briefs_generated": len(list(_g.iglob("D:/个人文件/AI/01 世界模型系统/话题追踪/选题建议/*.md", recursive=True))),
-        "intel_reports": len(list(_g.iglob("D:/个人文件/AI/01 世界模型系统/情报日报/*.md", recursive=True))),
+        "content_produced_today": len(list(content_dir.rglob("*.md"))) if content_dir.exists() else 0,
+        "briefs_generated": len(list(briefs_dir.rglob("*.md"))) if briefs_dir.exists() else 0,
+        "intel_reports": len(list(intel_dir.rglob("*.md"))) if intel_dir.exists() else 0,
     }
     status["pipeline_health"] = "active" if status["content_produced_today"] > 0 else "idle"
     return jsonify({"status": "ok", "pipeline": status})
@@ -1816,13 +1818,16 @@ def api_tenant_create():
 @app.route("/api/admin/pipeline/recent")
 def api_pipeline_recent():
     """最近管线产出(含评分)"""
-    import glob as _g
     results = []
-    pattern = "D:/个人文件/AI/05 项目生产系统/内容生产/**/*.md"
-    files = sorted(_g.iglob(pattern, recursive=True), key=lambda f: Path(f).stat().st_mtime, reverse=True)[:15]
-    for fpath in files:
+    out = Path("D:/个人文件/AI/05 项目生产系统/内容生产")
+    if not out.exists():
+        return jsonify({"status": "ok", "recent": []})
+    files = sorted(
+        [(f, f.stat().st_mtime) for f in out.rglob("*.md") if f.is_file()],
+        key=lambda x: x[1], reverse=True
+    )[:15]
+    for f, mtime in files:
         try:
-            f = Path(fpath)
             text = f.read_text(encoding="utf-8")[:600]
             title = text.split("\n")[0].replace("# ", "").strip()[:60]
             score_match = re.search(r'评分[：:]\s*(\d+)/10', text)
