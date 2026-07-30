@@ -43,7 +43,25 @@ td{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.02)}
 </div>
 
 <div class="container">
-  <div class="kpis" id="dashboardKpis"></div>
+  
+<div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(201,169,110,.08),rgba(201,169,110,.02));border-color:rgba(201,169,110,.2)">
+  <h3>⚡ 筷子流水线 <span style="font-size:.7rem;color:var(--muted)">输入楼盘→全平台内容→¥16/次</span></h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+    <div><input id="kzCity" list="cityList" value="厦门" placeholder="城市" style="font-size:.74rem"></div>
+    <div><select id="kzStyle" style="font-size:.74rem"><option>现代简约</option><option>奶油风</option><option>新中式</option><option>侘寂风</option></select></div>
+    <div><select id="kzRoom" style="font-size:.74rem"><option>全屋</option><option>厨房</option><option>卫生间</option><option>客厅</option></select></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+    <div><input id="kzArea" type="number" value="100" placeholder="面积(平)" style="font-size:.74rem"></div>
+    <div><input id="kzBudget" type="number" value="20" placeholder="预算(万)" style="font-size:.74rem"></div>
+    <div><input id="kzCommunity" placeholder="小区名(可选)" style="font-size:.74rem"></div>
+  </div>
+  <button class="btn go" onclick="runKuaiziClient()" style="width:100%">⚡ 一键生成全平台内容</button>
+  <div id="kzClientResult" style="margin-top:10px;display:none"></div>
+</div>
+
+<datalist id="cityList"><option value="厦门"><option value="泉州"><option value="漳州"><option value="福州"><option value="北京"><option value="上海"><option value="广州"><option value="深圳"></datalist>
+<div class="kpis" id="dashboardKpis"></div>
 
   <div class="grid2">
     <div class="card"><h3>📊 内容产出 <span class="badge on" id="quotaBadge">配额充足</span></h3>
@@ -142,6 +160,25 @@ async function load(){
     '<div style="font-size:.74rem;line-height:2"><div>🔍 厦门·装修设计 — <span style="color:var(--green)">#3</span> (↑2)</div><div>🔍 泉州·旧房改造 — <span style="color:var(--green)">#5</span> (↑1)</div><div>🔍 漳州·厨房装修 — <span style="color:var(--accent)">#8</span> (→)</div><div style="margin-top:8px;color:var(--muted);font-size:.68rem">数据来源: DeepSeek/豆包/Kimi 交叉验证</div></div>';
 }
 
+
+async function runKuaiziClient(){
+  var b=document.getElementById('kzClientResult');b.style.display='block';b.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">⚡ 筷子流水线运行中...约120秒</div>';
+  try{
+    var r=await fetch('/api/kuaizi/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      city:document.getElementById('kzCity').value, style:document.getElementById('kzStyle').value,
+      room_type:document.getElementById('kzRoom').value, area:parseInt(document.getElementById('kzArea').value)||100,
+      budget:parseInt(document.getElementById('kzBudget').value)||20, community:document.getElementById('kzCommunity').value
+    })});
+    var d=await r.json();var result=d.result||{};
+    if(result.error){b.innerHTML='<div style="padding:20px;color:var(--red)">❌ '+result.error+'</div>';return}
+    b.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+      '<div style="background:var(--bg);border-radius:8px;padding:12px"><b>📕 小红书</b> ('+result.xiaohongshu.length+'字)<div style="max-height:180px;overflow-y:auto;font-size:.72rem;margin-top:4px">'+result.xiaohongshu.substring(0,400)+'...</div></div>'+
+      '<div style="background:var(--bg);border-radius:8px;padding:12px"><b>🎵 抖音口播</b> ('+result.douyin_script.length+'字)<div style="max-height:180px;overflow-y:auto;font-size:.72rem;margin-top:4px">'+result.douyin_script.substring(0,400)+'...</div></div>'+
+      '<div style="background:var(--bg);border-radius:8px;padding:12px"><b>💬 公众号</b> ('+result.wechat_article.length+'字)<div style="max-height:180px;overflow-y:auto;font-size:.72rem;margin-top:4px">'+result.wechat_article.substring(0,400)+'...</div></div>'+
+      '<div style="background:var(--bg);border-radius:8px;padding:12px"><b>📊 成本</b><br>⏱ '+result.elapsed_seconds+'s<br>💰 ¥'+(result.cost||{}).total+'<br>📡 '+(result.distribute||{}).accounts+'账号分发</div>'+
+    '</div>';
+  }catch(e){b.innerHTML='<div style="padding:20px;color:var(--red)">❌ '+e.message+'</div>'}
+}
 load();
 </script>
 </body>
