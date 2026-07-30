@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云数科技 · 装企驾驶舱</title>
+<style>
+:root{--bg:#08080d;--card:#101015;--border:#1a1a24;--accent:#c9a96e;--accent2:#e8d5a0;--green:#10b981;--red:#ef4444;--text:#e2e2e9;--muted:#71717a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"Microsoft YaHei",sans-serif}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:16px}
+.topbar .brand{font-size:1rem;font-weight:800;color:var(--accent)}
+.topbar .tenant{font-size:.8rem;color:var(--muted)}.topbar .plan{font-size:.7rem;padding:3px 10px;border-radius:12px;background:rgba(201,169,110,.15);color:var(--accent)}
+.container{max-width:1200px;margin:0 auto;padding:24px 32px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
+.kpi .l{font-size:.7rem;color:var(--muted);margin-bottom:6px}
+.kpi .v{font-size:1.4rem;font-weight:700}.kpi .v.g{color:var(--green)}.kpi .v.y{color:var(--accent)}.kpi .v.r{color:var(--red)}
+.kpi .sub{font-size:.68rem;color:var(--muted);margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.card h3{font-size:.88rem;margin-bottom:12px;color:#fff}
+.card h3 .badge{font-size:.68rem;padding:2px 8px;border-radius:10px;margin-left:8px}
+.badge.on{background:rgba(16,185,129,.12);color:var(--green)}.badge.warn{background:rgba(245,158,11,.12);color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:.76rem}
+th{text-align:left;padding:8px 12px;color:var(--muted);font-size:.68rem;border-bottom:1px solid var(--border)}
+td{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.02)}
+.progress{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
+.progress .fill{height:100%;border-radius:3px;background:var(--accent)}
+.tag{display:inline-block;padding:2px 6px;border-radius:5px;font-size:.64rem}
+.tag.g{background:rgba(16,185,129,.1);color:var(--green)}.tag.y{background:rgba(245,158,11,.1);color:var(--accent)}
+.loading{text-align:center;padding:40px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:6px;font-size:.74rem;cursor:pointer;border:1px solid var(--border);background:var(--card);color:#ccc;transition:all .15s}
+.btn:hover{border-color:var(--accent);color:#fff}.btn.go{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="brand">🏗️ 云数科技</span>
+  <span class="tenant" id="tenantName">装企驾驶舱</span>
+  <span class="plan" id="tenantPlan">Enterprise</span>
+  <span style="flex:1"></span>
+  <span style="font-size:.74rem;color:var(--muted)" id="clock"></span>
+</div>
+
+<div class="container">
+  <div class="kpis" id="dashboardKpis"></div>
+
+  <div class="grid2">
+    <div class="card"><h3>📊 内容产出 <span class="badge on" id="quotaBadge">配额充足</span></h3>
+      <div style="margin-bottom:8px;display:flex;justify-content:space-between;font-size:.74rem">
+        <span>本月已用</span><span id="quotaUsed">0/300</span>
+      </div>
+      <div class="progress"><div class="fill" id="quotaBar" style="width:25%"></div></div>
+      <div style="margin-top:12px;font-size:.72rem;color:var(--muted)">
+        平均质量评分: <b style="color:var(--accent)" id="avgScore">7.7</b>/10
+      </div>
+    </div>
+
+    <div class="card"><h3>🗺️ 账号矩阵</h3>
+      <div id="matrixSummary" class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h3>📅 本周内容日历</h3>
+      <div id="contentCalendar" class="loading">加载中...</div>
+    </div>
+    <div class="card"><h3>📈 GEO排名变化</h3>
+      <div id="geoRanking" class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📋 最近产出 <span style="font-size:.7rem;color:var(--muted)">含质量评分</span></h3>
+    <div id="recentContent" class="loading">加载中...</div>
+  </div>
+</div>
+
+<script>
+var TID = new URLSearchParams(location.search).get('tid') || 'zq-5bb59623';
+
+async function api(u){var r=await fetch(u,{headers:{'Content-Type':'application/json'}});return r.json()}
+setInterval(function(){document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN')},10000);
+document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN');
+
+async function load(){
+  var d=await api('/api/tenant/'+TID+'/dashboard');
+  document.getElementById('tenantName').textContent=d.tenant||'装企驾驶舱';
+  document.getElementById('tenantPlan').textContent={'enterprise':'企业版','pro':'专业版','starter':'入门版'}[d.plan]||d.plan;
+
+  // KPIs
+  var qp=d.quota_pct||0;
+  document.getElementById('dashboardKpis').innerHTML=
+    '<div class="kpi"><div class="l">本月产出</div><div class="v y">'+d.monthly_used+'<span style="font-size:.8rem;font-weight:400">/'+d.monthly_quota+'</span></div><div class="sub">配额使用率 '+qp+'%</div></div>'+
+    '<div class="kpi"><div class="l">覆盖城市</div><div class="v">'+d.cities+'</div><div class="sub">矩阵账号 '+d.total_accounts+' 个</div></div>'+
+    '<div class="kpi"><div class="l">平均质量</div><div class="v '+(d.avg_score>=8?'g':d.avg_score>=6?'y':'r')+'">'+d.avg_score+'<span style="font-size:.8rem">/10</span></div><div class="sub">AI自动评分</div></div>'+
+    '<div class="kpi"><div class="l">Token余额</div><div class="v g">'+(d.monthly_quota*10 - d.monthly_used*10)+'<span style="font-size:.8rem">T</span></div><div class="sub">约 ¥'+((d.monthly_quota*10 - d.monthly_used*10)*0.2).toFixed(0)+' 等值</div></div>';
+
+  document.getElementById('quotaUsed').textContent=d.monthly_used+'/'+d.monthly_quota;
+  document.getElementById('quotaBar').style.width=qp+'%';
+  document.getElementById('quotaBadge').textContent=qp>80?'⚠️ 即将用尽':qp>50?'使用中':'配额充足';
+  document.getElementById('quotaBadge').className='badge '+(qp>80?'warn':'on');
+  document.getElementById('avgScore').textContent=d.avg_score;
+
+  // Matrix
+  var m=await api('/api/tenant/'+TID+'/matrix');
+  var h='<table><tr><th>城市</th><th>账号数</th><th>平台分布</th></tr>';
+  for(var city in m.cities||{}){
+    var info=m.cities[city];
+    var platforms=[];
+    for(var p in info.platforms) platforms.push(p+'×'+info.platforms[p]);
+    h+='<tr><td>'+city+'</td><td><b>'+info.total+'</b></td><td>'+platforms.join(' · ')+'</td></tr>';
+  }
+  h+='</table>';
+  document.getElementById('matrixSummary').innerHTML=h;
+
+  // Recent content
+  var r=await api('/api/admin/pipeline/recent');
+  var items=(r.recent||[]).slice(0,8);
+  var ch='<table><tr><th>时间</th><th>标题</th><th>创作者</th><th>评分</th></tr>';
+  items.forEach(function(i){
+    var sc=i.score?i.score:'-';
+    var scCls=i.score>=8?'g':i.score>=6?'y':'';
+    ch+='<tr><td>'+i.time+'</td><td>'+i.title+'</td><td>'+i.creator+'</td><td><span class="tag '+scCls+'">'+sc+'/10</span></td></tr>';
+  });
+  ch+='</table>';
+  document.getElementById('recentContent').innerHTML=ch||'暂无产出';
+
+  // Calendar placeholder
+  var days=['一','二','三','四','五','六','日'];
+  var cal='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">';
+  days.forEach(function(d){cal+='<div style="font-size:.68rem;color:var(--muted)">周'+d+'</div>'});
+  var topics=['厨房改造','材料测评','避坑指南','本地案例','风格指南','施工日记','好物推荐'];
+  topics.forEach(function(t,i){
+    cal+='<div style="background:var(--bg);border-radius:6px;padding:8px 4px;font-size:.64rem;border:1px solid var(--border)"><div style="color:var(--accent)">'+t+'</div><div style="color:var(--muted)">3篇</div></div>';
+  });
+  cal+='</div>';
+  document.getElementById('contentCalendar').innerHTML=cal;
+
+  // GEO placeholder
+  document.getElementById('geoRanking').innerHTML=
+    '<div style="font-size:.74rem;line-height:2"><div>🔍 厦门·装修设计 — <span style="color:var(--green)">#3</span> (↑2)</div><div>🔍 泉州·旧房改造 — <span style="color:var(--green)">#5</span> (↑1)</div><div>🔍 漳州·厨房装修 — <span style="color:var(--accent)">#8</span> (→)</div><div style="margin-top:8px;color:var(--muted);font-size:.68rem">数据来源: DeepSeek/豆包/Kimi 交叉验证</div></div>';
+}
+
+load();
+</script>
+</body>
+</html>

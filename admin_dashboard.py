@@ -70,6 +70,11 @@ def admin_guard():
         # For /admin page, redirect to login
         return send_from_directory(str(LANDING), "admin.html")  # admin.html has its own login check
 
+# ── 客户仪表盘 ──
+@app.route("/client")
+def client_dashboard():
+    return send_from_directory(str(LANDING), "client.html")
+
 # ── Landing Page 路由 ──
 @app.route("/")
 def index():
