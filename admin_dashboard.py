@@ -1459,13 +1459,35 @@ def api_create_generate_v2():
 @app.route("/api/admin/ab")
 def api_ab_stats():
     try:
-        from ab_test import HOMEPAGE_TEST, PRICING_TEST
+        from ab_test import HOMEPAGE_TEST, PRICING_TEST, CONTENT_TEST
         return jsonify({
             "homepage": HOMEPAGE_TEST.get_stats(),
             "pricing": PRICING_TEST.get_stats(),
+            "content": CONTENT_TEST.get_stats(),
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/api/admin/ab/assign", methods=["POST"])
+def api_ab_assign():
+    """为内容生产分配A/B测试变体（创作者风格随机分配）"""
+    from ab_test import CONTENT_TEST
+    data = request.get_json() or {}
+    user_id = data.get("user_id", "")
+    variant = CONTENT_TEST.assign(user_id or None)
+    return jsonify({"status": "ok", "variant": variant})
+
+@app.route("/api/admin/ab/track", methods=["POST"])
+def api_ab_track():
+    """追踪A/B测试转化"""
+    from ab_test import CONTENT_TEST
+    data = request.get_json() or {}
+    test_name = data.get("test", "content_style")
+    variant = data.get("variant", "")
+    converted = data.get("converted", True)
+    if test_name == "content_style":
+        CONTENT_TEST.track(variant, converted)
+    return jsonify({"status": "ok"})
 
 
 # ═══════════════════════════════════════════════════════

@@ -19,6 +19,10 @@ class ABTest:
         self.variants = variants
         self.traffic_split = traffic_split or [1.0 / len(variants)] * len(variants)
 
+HOMEPAGE_TEST = ABTest("homepage", ["A-原版", "B-数据驱动版", "C-视频优先版"], [0.33, 0.34, 0.33])
+PRICING_TEST = ABTest("pricing", ["A-三栏", "B-单列对比"], [0.5, 0.5])
+CONTENT_TEST = ABTest("content_style", ["直男财经", "小Lin说", "高盖伦", "小A学财经"], [0.25, 0.25, 0.25, 0.25])
+
     def assign(self, user_id: str = None) -> str:
         """Assign user to a variant. Deterministic by user_id if provided."""
         if user_id:
