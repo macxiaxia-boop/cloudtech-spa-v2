@@ -1935,6 +1935,50 @@ def api_video_generate():
     result["package"] = pkg
     return jsonify({"status": "ok", "result": result})
 
+@app.route("/api/video/job/<job_id>")
+def api_video_job(job_id):
+    """查询视频生成任务状态"""
+    from video_api import get_video_job
+    job = get_video_job(job_id)
+    if not job:
+        return jsonify({"status": "error", "message": "任务不存在"}), 404
+    return jsonify({"status": "ok", "job": job})
+
+@app.route("/api/video/jobs")
+def api_video_jobs():
+    """视频任务列表"""
+    from video_api import list_video_jobs
+    status = request.args.get("status", "")
+    jobs = list_video_jobs(status)
+    return jsonify({"status": "ok", "jobs": jobs, "total": len(jobs)})
+
+@app.route("/api/video/bulk", methods=["POST"])
+def api_video_bulk():
+    """批量视频生产"""
+    from video_api import bulk_produce_videos
+    data = request.get_json() or {}
+    topics = data.get("topics", [{"topic": "厨卫改造前后对比"}])
+    mode = data.get("mode", "before_after")
+    provider = data.get("provider", "jimeng")
+    result = bulk_produce_videos(topics, mode, provider)
+    return jsonify({"status": "ok", "result": result})
+
+@app.route("/api/video/analyze", methods=["POST"])
+def api_video_analyze():
+    """视频内容理解分析"""
+    from video_api import analyze_video_content
+    data = request.get_json() or {}
+    script = data.get("script")
+    video_path = data.get("path", "")
+    result = analyze_video_content(video_path, script)
+    return jsonify({"status": "ok", "analysis": result})
+
+@app.route("/api/video/providers")
+def api_video_providers():
+    """可用视频生成供应商列表"""
+    from video_api import PROVIDERS
+    return jsonify({"status": "ok", "providers": list(PROVIDERS.values())})
+
 
 # ═══════════════════════════════════════════════════════
 # 数字人版权中心 API
@@ -2140,6 +2184,52 @@ def register_account_page():
     """邮箱注册页面"""
     return send_from_directory(str(LANDING), "register.html")
 
+# ═══════════════════════════════════════════════════════
+# 内容日历 & 矩阵调度 API
+# ═══════════════════════════════════════════════════════
+
+@app.route("/api/schedule/queue/<tid>")
+def api_schedule_queue(tid):
+    from content_scheduler import get_queue
+    return jsonify({"status": "ok", "queue": get_queue(tid)})
+
+@app.route("/api/schedule/enqueue", methods=["POST"])
+def api_schedule_enqueue():
+    from content_scheduler import enqueue
+    data = request.get_json() or {}
+    tid = data.get("tid", _DEFAULT_TID)
+    result = enqueue(tid, data.get("content", {}))
+    return jsonify(result)
+
+@app.route("/api/schedule/publish", methods=["POST"])
+def api_schedule_publish():
+    from content_scheduler import publish_now
+    data = request.get_json() or {}
+    tid = data.get("tid", _DEFAULT_TID)
+    result = publish_now(tid, data.get("item_id"))
+    return jsonify(result)
+
+@app.route("/api/schedule/calendar/<tid>")
+def api_schedule_calendar(tid):
+    from content_scheduler import get_calendar
+    days = int(request.args.get("days", 7))
+    return jsonify({"status": "ok", "calendar": get_calendar(tid, days)})
+
+@app.route("/api/schedule/stats/<tid>")
+def api_schedule_stats(tid):
+    from content_scheduler import get_stats
+    return jsonify({"status": "ok", "stats": get_stats(tid)})
+
+@app.route("/api/schedule/distribute", methods=["POST"])
+def api_schedule_distribute():
+    """执行内容分发到矩阵"""
+    from content_scheduler import execute_distribution
+    data = request.get_json() or {}
+    tid = data.get("tid", _DEFAULT_TID)
+    result = execute_distribution(tid, data.get("topic", ""), data.get("content_type", "article"))
+    return jsonify(result)
+
+
 @app.route("/api/tenant/onboard", methods=["POST"])
 def api_tenant_onboard():
     """一站式入驻: 创建租户→生成矩阵→首批5篇内容→返回仪表盘链接"""
@@ -2248,6 +2338,14 @@ if __name__ == "__main__":
         print("  A/B testing middleware registered")
     except Exception as e:
         print(f"  A/B middleware skipped: {e}")
+
+    # Register OpenAPI platform routes
+    try:
+        from api_platform import register_api_routes
+        register_api_routes(app)
+        print("  API Platform (OpenAPI/SDK) activated")
+    except Exception as e:
+        print(f"  API Platform skipped: {e}")
 
     print("=" * 50)
     print("  云数科技 CloudTech v2.0.0 — Web 管理后台")
