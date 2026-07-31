@@ -12,6 +12,25 @@ load_dotenv(Path(__file__).parent / ".env")
 _START_TIME = time.time()
 
 # ═══════════════════════════════════════
+# API 速率限制
+# ═══════════════════════════════════════
+_rate_buckets = {}  # ip → {tokens, last_refill}
+
+def _rate_limit(ip: str, limit: int = 60, window: int = 60) -> bool:
+    """简单令牌桶: 返回True=放行, False=限流"""
+    now = time.time()
+    bucket = _rate_buckets.get(ip, {"tokens": limit, "last": now})
+    elapsed = now - bucket["last"]
+    bucket["tokens"] = min(limit, bucket["tokens"] + elapsed * (limit / window))
+    bucket["last"] = now
+    if bucket["tokens"] >= 1:
+        bucket["tokens"] -= 1
+        _rate_buckets[ip] = bucket
+        return True
+    _rate_buckets[ip] = bucket
+    return False
+
+# ═══════════════════════════════════════
 # 计费强制执行层
 # ═══════════════════════════════════════
 def _quota_guard(tid: str = "zq-5bb59623", content_type: str = "article"):
@@ -136,6 +155,22 @@ def api_export_content(tid):
         for f in sorted(content_dir.rglob("*.md"), key=lambda x: x.stat().st_mtime, reverse=True)[:50]:
             items.append({"file": f.name, "size": f.stat().st_size, "modified": f.stat().st_mtime})
     return jsonify({"status": "ok", "tenant_id": tid, "content_count": len(items), "items": items})
+
+# ═══════════════════════════════════════════════════════
+# 通知中心 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/notifications/<tid>")
+def api_notifications(tid):
+    from notifications import get_notifications, get_unread_count
+    unread = request.args.get("unread", "") == "1"
+    limit = int(request.args.get("limit", 20))
+    return jsonify({"status": "ok", "notifications": get_notifications(tid, limit, unread), "unread_count": get_unread_count(tid)})
+
+@app.route("/api/notifications/<tid>/read", methods=["POST"])
+def api_notifications_read(tid):
+    from notifications import mark_read
+    data = request.get_json() or {}
+    return jsonify(mark_read(tid, data.get("nid")))
 
 # ── 客户仪表盘 ──
 @app.route("/client")
@@ -1458,6 +1493,11 @@ def api_create_generate_v2():
     if not topic:
         return jsonify({"status": "error", "message": "请提供创作主题"}), 400
 
+    # 速率限制
+    client_ip = request.remote_addr or "127.0.0.1"
+    if not _rate_limit(client_ip, limit=30, window=60):
+        return jsonify({"status": "error", "message": "请求过于频繁，请稍后再试", "retry_after": 10}), 429
+
     # 配额检查
     quota_block = _quota_guard(_DEFAULT_TID, content_form)
     if quota_block:
@@ -1531,8 +1571,11 @@ def api_create_generate_v2():
         except:
             deai_report = "检测跳过"
 
-        # 记录用量
+        # 记录用量+发送通知
         _usage_log(_DEFAULT_TID, content_form, topic)
+        from notifications import notify_content_ready, notify_quota_warning
+        notify_content_ready(_DEFAULT_TID, topic)
+        q = check_quota(_DEFAULT_TID) if "check_quota" in dir() else None
 
         return jsonify({
             "status": "ok",
