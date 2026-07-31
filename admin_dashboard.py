@@ -1234,6 +1234,29 @@ def api_create_style_clone():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/api/create/style-generate", methods=["POST"])
+def api_create_style_generate():
+    """风格克隆+生成: 参考文本→提取DNA→注入DNA生成新内容"""
+    data = request.get_json() or {}
+    ref_text = data.get("ref_text", "")
+    topic = data.get("topic", "")
+    if not ref_text or not topic:
+        return jsonify({"status": "error", "message": "请提供参考文本和创作主题"}), 400
+    try:
+        # Phase 1: 提取风格DNA
+        dna = _deepseek_call(STYLE_CLONE_SYSTEM, f"分析以下文本的风格DNA：\n\n{ref_text[:3000]}", max_tokens=800)
+        # Phase 2: 用DNA生成新内容
+        gen_sys = f"""你是顶尖内容创作者。请严格模仿以下风格DNA创作：
+
+{dna}
+
+创作主题: {topic}
+要求: 句式和节奏完全模仿参考风格，用词偏好保持一致，情绪基调相同。800-1500字。"""
+        content = _deepseek_call(gen_sys, f"主题: {topic}", max_tokens=3000, temperature=0.8)
+        return jsonify({"status": "ok", "style_dna": dna, "content": content, "topic": topic})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route("/api/create/deai-check", methods=["POST"])
 @validate(DeaiCheckRequest)
 def api_create_deai_check():
@@ -1495,38 +1518,11 @@ def api_ab_track():
 # ═══════════════════════════════════════════════════════
 @app.route("/api/admin/dashboard")
 def api_admin_dashboard():
-    import time as _time, platform as _platform, socket as _socket
-    stats = {
-        "version": "v2.1.0",
-        "python": _platform.python_version(),
-        "platform": _platform.system() + " " + _platform.release(),
-        "hostname": _socket.gethostname(),
-    }
-    # Uptime
-    try:
-        stats["uptime_seconds"] = round(time.time() - _START_TIME)
-    except: pass
-    # User count
-    try:
-        from database import Database
-        db = Database().connect()
-        r = db.fetch_one("SELECT COUNT(*) as c FROM users")
-        stats["total_users"] = r["c"] if r else 0
-        r2 = db.fetch_one("SELECT COUNT(*) as c FROM prompts")
-        stats["total_prompts"] = r2["c"] if r2 else 0
-    except: pass
-    # Crash count
-    try:
-        from error_tracker import get_error_stats
-        err = get_error_stats()
-        stats["crash_count"] = err.get("total", 0) if isinstance(err, dict) else 0
-    except: pass
-    # Backup status
-    try:
-        from data_backup import get_backup_status
-        stats["backup"] = get_backup_status()
-    except: pass
-    return jsonify({"status":"ok","stats":stats})
+    from dashboard_stats import get_full_stats, get_system_health
+    stats = get_full_stats()
+    stats["version"] = "v2.1.0"
+    stats["uptime_seconds"] = round(time.time() - _START_TIME)
+    return jsonify({"status": "ok", "stats": stats})
 
 
 # ═══════════════════════════════════════════════════════
