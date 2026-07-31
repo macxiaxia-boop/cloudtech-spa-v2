@@ -225,6 +225,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <button class="btn" onclick="navTo('kuaizi')">🥢 筷子流水线</button>
       <button class="btn" onclick="navTo('video-panel')">🎬 视频引擎</button>
       <button class="btn" onclick="navTo('rights')">©️ 版权中心</button>
+      <button class="btn go" onclick="navTo('ops-center')">📡 运营中心</button>
     </div>
   </div>
 </div>
@@ -465,6 +466,28 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
 </div>
 
+<!-- ═══════════ OPS CENTER ═══════════ -->
+<div class="panel" id="panel-ops-center">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>📤 发布队列</h3>
+      <button class="btn go" onclick="loadPubQueue()" style="margin-bottom:8px">🔄 刷新</button>
+      <div id="pubQueueList"></div>
+    </div>
+    <div class="panel-card"><h3>📅 今日日历</h3>
+      <div id="todayCalendar"></div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+    <div class="panel-card"><h3>🎬 视频任务</h3>
+      <button class="btn go" onclick="loadVideoJobs()" style="margin-bottom:8px">🔄 刷新</button>
+      <div id="videoJobsList"></div>
+    </div>
+    <div class="panel-card"><h3>📊 运营KPI</h3>
+      <div class="kpis" id="opsKpis"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ 11.6 TENANTS ═══════════ -->
 <div class="panel" id="panel-tenants-panel">
   <div class="panel-card"><h3>🏢 租户管理 <span class="sub">多租户SaaS</span></h3>
@@ -607,6 +630,8 @@ function navTo(id){
   if(id==='create'){loadCreatorStyles();loadCreatorCheckboxes()}
   if(id==='users')loadUsers();
   if(id==='apikeys')loadApiKeys();
+  if(id==='ops-center')initOps();
+  if(id==='rights'){rightsList();rightsReport();}
 }
 document.querySelectorAll('.sb-sub').forEach(function(s){
   s.addEventListener('click',function(){navTo(this.getAttribute('data-panel'))});
@@ -1077,6 +1102,32 @@ async function rightsReport(){
   b.innerHTML='<div><b>总资产:</b> '+r.total_assets+' | <b>活跃:</b> '+r.active+' | <b>过期:</b> '+r.expired+' | <b>已撤销:</b> '+r.revoked+'</div>'+
     (r.soon_expired&&r.soon_expired.length?'<div style="margin-top:6px;color:var(--yellow)">⚠️ 即将过期: '+r.soon_expired.map(function(e){return e.title}).join(', ')+'</div>':'');
 }
+
+// ═══════════ OPS CENTER ═══════════
+async function loadPubQueue(){
+  var d=await api('/api/schedule/queue/zq-5bb59623');
+  var q=d.queue||{};
+  var all=[].concat((q.queue||[]).map(function(x){x._type='queue';return x}),(q.scheduled||[]).map(function(x){x._type='sched';return x}),(q.published||[]).map(function(x){x._type='pub';return x}));
+  if(!all.length){document.getElementById('pubQueueList').innerHTML='<div class=\"status-msg\">队列为空</div>';return}
+  document.getElementById('pubQueueList').innerHTML='<table class=\"tbl\"><tr><th>状态</th><th>账号</th><th>平台</th><th>主题</th></tr>'+
+    all.slice(-10).reverse().map(function(i){var s=i._type==='pub'?'已发布':i._type==='sched'?'排期中':'待发';return'<tr><td><span class=\"badge '+(s==='已发布'?'on':'')+'\">'+s+'</span></td><td>'+i.content.account+'</td><td>'+i.content.platform+'</td><td>'+i.content.topic.substring(0,30)+'</td></tr>'}).join('')+'</table>';
+}
+async function loadVideoJobs(){
+  var d=await api('/api/video/jobs');
+  if(!d.jobs||!d.jobs.length){document.getElementById('videoJobsList').innerHTML='<div class=\"status-msg\">无视频任务</div>';return}
+  document.getElementById('videoJobsList').innerHTML='<table class=\"tbl\"><tr><th>任务</th><th>状态</th><th>成本</th></tr>'+
+    d.jobs.slice(0,10).map(function(j){var s=j.status==='completed'?'on':j.status==='failed'?'off':'';return'<tr><td>'+j.id+'</td><td><span class=\"badge '+s+'\">'+j.status+'</span></td><td>¥'+((j.estimated_cost||{}).amount||0)+'</td></tr>'}).join('')+'</table>';
+}
+async function loadOpsKpis(){
+  var q=await api('/api/schedule/stats/zq-5bb59623');var s=q.stats||{};
+  var v=await api('/api/video/jobs');
+  document.getElementById('opsKpis').innerHTML=
+    '<div class=\"kpi\"><div class=\"l\">待发布</div><div class=\"v y\">'+s.queued+'</div></div>'+
+    '<div class=\"kpi\"><div class=\"l\">排期中</div><div class=\"v p\">'+s.scheduled+'</div></div>'+
+    '<div class=\"kpi\"><div class=\"l\">今日已发</div><div class=\"v g\">'+s.published_today+'</div></div>'+
+    '<div class=\"kpi\"><div class=\"l\">视频任务</div><div class=\"v\">'+(v.total||0)+'</div></div>';
+}
+function initOps(){loadPubQueue();loadVideoJobs();loadOpsKpis();}
 
 // ═══════════ PLATFORM ═══════════
 async function loadPlatform(){
