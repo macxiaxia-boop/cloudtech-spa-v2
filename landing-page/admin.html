@@ -573,7 +573,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <!-- ═══════════ 13. SYSTEM ═══════════ -->
 <div class="panel" id="panel-system">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div class="panel-card"><h3>💚 健康检查</h3><button class="btn go" onclick="sysH()">🩺 全量检查</button><div class="result" id="hR"></div></div>
+    <div class="panel-card"><h3>💚 健康检查</h3>
+      <div class="kpis" id="sysHealthKpis"></div>
+      <button class="btn go" onclick="sysH()" style="margin-top:8px">🩺 全量检查</button><div class="result" id="hR"></div></div>
     <div class="panel-card"><h3>💾 数据备份</h3><button class="btn go" onclick="sysB()">📦 立即备份</button> <button class="btn" onclick="sysBS()">📋 状态</button><div class="result" id="bR"></div></div>
     <div class="panel-card"><h3>💥 崩溃报告</h3><button class="btn go" onclick="loadCrashes()" style="margin-bottom:8px">🔄 加载</button><div id="crashes-content"></div></div>
     <div class="panel-card"><h3>📋 系统日志</h3><button class="btn go" onclick="loadLogs()" style="margin-bottom:8px">🔄 加载</button><div id="logs-content"></div></div>
@@ -927,7 +929,7 @@ async function loadLogs(){
 }
 
 // ═══════════ SYSTEM ═══════════
-async function sysH(){var b=document.getElementById('hR');b.classList.add('show');b.textContent='检查中...';var d=await api('/api/health/full');b.textContent=JSON.stringify(d,null,2)}
+async function sysH(){var b=document.getElementById('hR');b.classList.add('show');b.textContent='检查中...';try{var d=await api('/api/admin/dashboard');var s=d.stats||{};var sys=s.system||{};document.getElementById('sysHealthKpis').innerHTML='<div class=\"kpi\"><div class=\"l\">磁盘剩余</div><div class=\"v '+(sys.disk_free_gb>20?'g':'r')+'\">'+sys.disk_free_gb+'<span style=\"font-size:.7rem\">GB</span></div></div><div class=\"kpi\"><div class=\"l\">磁盘使用</div><div class=\"v\">'+sys.disk_usage_pct+'%</div></div><div class=\"kpi\"><div class=\"l\">Python进程</div><div class=\"v\">'+sys.python_processes+'</div></div><div class=\"kpi\"><div class=\"l\">主机</div><div class=\"v\" style=\"font-size:.7rem\">'+sys.hostname+'</div></div>';b.textContent=sys.disk_free_gb+'GB free, '+sys.python_processes+' py, '+sys.platform}catch(e){b.textContent='检查失败: '+e}}
 async function sysB(){var b=document.getElementById('bR');b.classList.add('show');b.textContent='备份中...';var d=await api('/api/admin/backup',{method:'POST'});b.textContent=JSON.stringify(d,null,2)}
 async function sysBS(){var b=document.getElementById('bR');b.classList.add('show');b.textContent='加载中...';var d=await api('/api/admin/backup/status');b.textContent=JSON.stringify(d,null,2)}
 
