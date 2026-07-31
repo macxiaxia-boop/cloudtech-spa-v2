@@ -675,6 +675,31 @@ def api_geo_content_generate():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route("/api/geo/to-topics", methods=["POST"])
+def api_geo_to_topics():
+    """GEO关键词→内容选题: 输入GEO关键词，自动生成内容选题"""
+    data = request.get_json() or {}
+    city = data.get("city", "厦门")
+    keywords = data.get("keywords", ["装修设计"])
+    count = int(data.get("count", 5))
+    if not keywords:
+        return jsonify({"status": "error", "message": "请提供关键词"}), 400
+    kw_str = "、".join(keywords[:5])
+    sys_p = f"""你是装企内容策略师。根据以下GEO关键词为{city}市场发现{count}个内容选题。
+关键词: {kw_str}
+每个选题一行: 标题||平台||内容形式||角度||预期效果
+要求: 50%本地化+30%干货+20%情感，标题带{city}地名"""
+    try:
+        raw = _deepseek_call(sys_p, f"为{city}发现{count}个选题基于: {kw_str}", max_tokens=1500)
+        topics = []
+        for line in raw.split("\n"):
+            parts = [p.strip() for p in line.split("||")]
+            if len(parts) >= 4:
+                topics.append({"title": parts[0], "platform": parts[1], "format": parts[2], "angle": parts[3]})
+        return jsonify({"status": "ok", "city": city, "keywords": keywords, "topics": topics[:count]})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route("/api/geo/pipeline-run", methods=["POST"])
 def api_geo_pipeline_run():
     import urllib.request as ur, time

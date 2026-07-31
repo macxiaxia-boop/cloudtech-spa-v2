@@ -35,7 +35,7 @@ class Database:
             import psycopg2
             self.conn = psycopg2.connect(PG_DSN)
         else:
-            self.conn = sqlite3.connect(str(DB_PATH), check_same_thread=False)
+            self.conn = sqlite3.connect(str(DB_PATH), check_same_thread=False, timeout=10)
             self.conn.row_factory = sqlite3.Row
             self.conn.execute("PRAGMA journal_mode=WAL")
             self.conn.execute("PRAGMA foreign_keys=ON")
