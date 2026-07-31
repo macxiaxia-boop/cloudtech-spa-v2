@@ -187,4 +187,10 @@ def kuaizi(input_data: dict) -> dict:
     output["elapsed_seconds"] = round(time.time() - t0, 1)
     output["summary"] = f"筷子流水线: {output['elapsed_seconds']}秒 → 小红书+抖音+公众号+视频+{output['distribute']['accounts']}分发 → {tokens_used}T(¥{output['cost']['total']})"
 
+    # 发送通知
+    try:
+        from notifications import notify_content_ready
+        notify_content_ready(tid, community or f"{city}{room}改造")
+    except: pass
+
     return output
