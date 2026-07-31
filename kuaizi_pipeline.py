@@ -153,7 +153,7 @@ def kuaizi(input_data: dict) -> dict:
     output["cost"] = {"total": round(tokens_used * plan_rate), "currency": "¥", "rate_per_token": plan_rate}
 
     # 分发计划
-    from tenant_platform import distribute_content
+    from tenant_service import distribute_content
     dist = distribute_content(tid, f"{city}{community}{room}改造", "article")
     output["distribute"] = {"accounts": dist["total_distributions"], "plan": dist["plan"][:3]}
 

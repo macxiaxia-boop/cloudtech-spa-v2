@@ -181,7 +181,7 @@ Emoji密度: {creator['emoji']}
             )
 
             # Token计费
-            from billing import record_usage
+            from tenant_service import record_usage
             record_usage("zq-5bb59623", d.get("content_form", "article"), title, 8)
 
             produced.append({"title": title, "file": str(fpath), "words": len(content)})
@@ -190,7 +190,7 @@ Emoji密度: {creator['emoji']}
             produced.append({"title": d["title"], "error": str(e)[:100]})
 
     # Step 4: 分发计划(投)
-    from tenant_platform import distribute_content
+    from tenant_service import distribute_content
     distribution = distribute_content("zq-5bb59623", input_data.get("community", "装修案例"), "article")
 
     return {

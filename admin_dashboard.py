@@ -216,9 +216,9 @@ def api_register():
         from auth import AuthManager
         auth = AuthManager()
         # Create tenant
-        from multi_tenant_manager import MultiTenantManager
-        mt = MultiTenantManager()
-        tenant = mt.create_tenant(name, email, plan, company)
+        from tenant_service import create_tenant as ts_create, get_plan
+        plan_info = get_plan(plan)
+        tenant = ts_create(name, [], plan, company, email)
         # Create user
         user = auth.create_user(tenant["id"], email, password, name, role="admin")
         # Login
@@ -1905,7 +1905,7 @@ def api_video_generate():
 @app.route("/api/tenant/create", methods=["POST"])
 def api_create_zhuangqi_tenant():
     """创建装企租户"""
-    from tenant_platform import create_tenant
+    from tenant_service import create_tenant
     data = request.get_json() or {}
     t = create_tenant(data.get("name", "新装企"), data.get("cities", ["厦门"]), data.get("plan", "pro"))
     return jsonify({"status": "ok", "tenant": t})
@@ -1913,27 +1913,27 @@ def api_create_zhuangqi_tenant():
 @app.route("/api/tenant/<tid>/dashboard")
 def api_tenant_dashboard(tid):
     """装企客户仪表盘"""
-    from tenant_platform import get_client_dashboard
+    from tenant_service import get_client_dashboard
     return jsonify(get_client_dashboard(tid))
 
 @app.route("/api/tenant/<tid>/matrix")
 def api_tenant_matrix(tid):
     """装企账号矩阵"""
-    from tenant_platform import get_account_matrix
+    from tenant_service import get_account_matrix
     return jsonify(get_account_matrix(tid))
 
 @app.route("/api/tenant/<tid>/distribute", methods=["POST"])
 def api_tenant_distribute(tid):
     """内容分发到矩阵"""
-    from tenant_platform import distribute_content
+    from tenant_service import distribute_content
     data = request.get_json() or {}
     return jsonify(distribute_content(tid, data.get("topic", ""), data.get("content_type", "article")))
 
 @app.route("/api/tenant/<tid>/tokens")
 def api_tenant_tokens(tid):
     """Token计量"""
-    from tenant_platform import calculate_tokens
-    return jsonify(calculate_tokens(tid))
+    from tenant_service import check_quota
+    return jsonify(check_quota(tid))
 
 @app.route("/api/geo/ranking-board")
 def api_geo_ranking_board():
@@ -1975,7 +1975,7 @@ def api_publish_tracker():
 @app.route("/api/tenants/list")
 def api_tenants_list():
     """所有装企租户列表"""
-    from tenant_platform import get_all_tenants
+    from tenant_service import get_all_tenants
     return jsonify({"status": "ok", "tenants": get_all_tenants()})
 
 
@@ -2006,8 +2006,8 @@ def api_content_score():
 @app.route("/api/admin/platform/summary")
 def api_platform_summary():
     """平台管理总览"""
-    from tenant_platform import get_all_tenants, get_client_dashboard
-    from billing import check_quota, PLANS
+    from tenant_service import get_all_tenants, get_client_dashboard
+    from tenant_service import check_quota, PLANS
     tenants = []
     total_mrr = 0
     for t in get_all_tenants():
@@ -2036,9 +2036,9 @@ def register_account_page():
 @app.route("/api/tenant/onboard", methods=["POST"])
 def api_tenant_onboard():
     """一站式入驻: 创建租户→生成矩阵→首批5篇内容→返回仪表盘链接"""
-    from tenant_platform import create_tenant, get_client_dashboard
+    from tenant_service import create_tenant, get_client_dashboard
     from kuaizi_pipeline import kuaizi
-    from billing import record_usage
+    from tenant_service import record_usage
     import secrets
     
     data = request.get_json() or {}
