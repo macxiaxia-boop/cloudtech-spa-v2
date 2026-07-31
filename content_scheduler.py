@@ -79,6 +79,13 @@ def publish_now(tid: str, item_id: str = None) -> dict:
     item["published_at"] = datetime.now().isoformat()[:19]
     q["published"].append(item)
     _save_queue(tid, q)
+
+    # 发送通知
+    try:
+        from notifications import notify_publish_done
+        notify_publish_done(tid, item["content"].get("account", ""), item["content"].get("platform", ""))
+    except: pass
+
     return {"ok": True, "item": item, "queue_remaining": len(q["queue"]) + len(q["scheduled"])}
 
 
