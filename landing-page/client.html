@@ -62,6 +62,7 @@ td{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.02)}
 
 <datalist id="cityList"><option value="厦门"><option value="泉州"><option value="漳州"><option value="福州"><option value="北京"><option value="上海"><option value="广州"><option value="深圳"></datalist>
 <div class="kpis" id="dashboardKpis"></div>
+<div class="card" style="margin-bottom:14px"><h3>📤 发布状态</h3><div class="kpis" id="publishKpis" style="margin-bottom:0"></div></div>
 
   <div class="grid2">
     <div class="card"><h3>📊 内容产出 <span class="badge on" id="quotaBadge">配额充足</span></h3>
@@ -144,20 +145,29 @@ async function load(){
   ch+='</table>';
   document.getElementById('recentContent').innerHTML=ch||'暂无产出';
 
-  // Calendar placeholder
-  var days=['一','二','三','四','五','六','日'];
-  // Real content calendar from dashboard
-  var recent=d.recent_content||[];
-  var cal='<div style="max-height:200px;overflow-y:auto">';
-  recent.forEach(function(r){
-    cal+='<div style="font-size:.7rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--accent)">'+(r.score||'?')+'/10</span> '+r.title.substring(0,50)+'</div>';
-  });
-  if(!recent.length) cal+='<div style="color:var(--muted);font-size:.7rem">暂无内容产出</div>';
-  cal+='</div>';
-  document.getElementById('contentCalendar').innerHTML=cal;
+  // Publish queue stats
+  try{
+    var sq=await api('/api/schedule/stats/'+TID);
+    var s=sq.stats||{};
+    document.getElementById('publishKpis').innerHTML=
+      '<div class="kpi"><div class="l">待发布</div><div class="v y">'+s.queued+'</div></div>'+
+      '<div class="kpi"><div class="l">排期中</div><div class="v">'+s.scheduled+'</div></div>'+
+      '<div class="kpi"><div class="l">今日已发</div><div class="v g">'+s.published_today+'</div></div>'+
+      '<div class="kpi"><div class="l">累计发布</div><div class="v">'+s.published_total+'</div></div>';
+  }catch(e){}
 
-  // GEO placeholder
-  // Real GEO data
+  // Content calendar from scheduler
+  try{
+    var sc=await api('/api/schedule/calendar/'+TID+'?days=7');
+    var cal='<table><tr><th>日期</th><th>排期</th><th>队列</th></tr>';
+    (sc.calendar.calendar||[]).slice(0,7).forEach(function(d){
+      cal+='<tr><td>'+d.date+' '+d.weekday+'</td><td>'+d.scheduled.length+'条</td><td>'+d.queued+'条</td></tr>';
+    });
+    cal+='</table>';
+    document.getElementById('contentCalendar').innerHTML=cal;
+  }catch(e){}
+
+  // GEO ranking
   try{
     var gd=await api('/api/geo/ranking-board');
     var geoHtml='';

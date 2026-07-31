@@ -459,8 +459,15 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- ═══════════ 11.5 CONTENT OVERVIEW ═══════════ -->
 <div class="panel" id="panel-content-overview">
-  <div class="panel-card"><h3>📄 内容总览 <span class="sub">最近15篇产出·含评分</span></h3>
-    <button class="btn go" onclick="loadContentOverview()" style="margin-bottom:8px">🔄 加载</button>
+  <div class="panel-card"><h3>📄 内容总览 <span class="sub">最近15篇产出·AI评分+去AI腔检测</span></h3>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button class="btn go" onclick="loadContentOverview()">🔄 加载</button>
+      <button class="btn" onclick="scoreContent()">🤖 AI评分</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input id="scoreText" placeholder="粘贴要评分的文案..." style="flex:1;font-size:.74rem">
+    </div>
+    <div class="result" id="scoreResult"></div>
     <div class="kpis" id="content-kpis"></div>
     <div id="content-list"></div>
   </div>
@@ -987,6 +994,18 @@ async function loadContentOverview(){
     var sc=i.score?'<span style=\"color:'+(i.score>=8?'var(--green)':i.score>=6?'var(--gold)':'var(--red)')+'\">'+i.score+'/10</span>':'未评分';
     return '<div class="card" style="margin-bottom:3px"><b>'+i.title+'</b> <span style=\"float:right;font-size:.7rem\">'+sc+'</span><br><span style=\"font-size:.66rem;color:var(--muted)\">'+i.time+' · '+(i.creator||'')+' · '+(i.size/1024).toFixed(1)+'KB</span></div>';
   }).join('');
+}
+async function scoreContent(){
+  var text=document.getElementById('scoreText').value;
+  if(!text||text.length<50){toast('请粘贴至少50字内容','err');return}
+  var b=document.getElementById('scoreResult');b.classList.add('show');b.textContent='🤖 AI评分中...';
+  try{
+    var d=await api('/api/admin/content/score',{method:'POST',body:JSON.stringify({text:text})});
+    var s=d.score||{};
+    b.innerHTML='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">'+
+      ['AI味','口语度','结构','信息量','吸引力'].map(function(k){var v=s[k];var cls=v>=8?'g':v>=5?'y':'r';return'<div class=\"kpi\"><div class=\"l\">'+k+'</div><div class=\"v '+cls+'\">'+(v||'-')+'</div></div>'}).join('')+
+      '</div>'+(s.advice?'<div style="margin-top:6px;font-size:.7rem;color:var(--muted)">💡 '+s.advice+'</div>':'');
+  }catch(e){b.textContent='评分失败'}
 }
 
 // ═══════════ TENANTS ═══════════
