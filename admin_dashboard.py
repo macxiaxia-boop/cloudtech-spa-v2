@@ -357,17 +357,29 @@ def api_login():
 @app.route("/api/payment/create-order", methods=["POST"])
 def api_create_order():
     data = request.get_json() or {}
-    plan_id = data.get("plan_id", "starter")
-    user_id = data.get("user_id", "guest")
+    plan_id = data.get("plan_id", "pro")
+    tid = data.get("tid", _DEFAULT_TID)
+    from payment_orders import create_order
+    result = create_order(tid, plan_id, data.get("method", "wechat"))
+    return jsonify(result)
 
-    try:
-        from wechat_pay import get_payment_qrcode, PRICING_PLANS
-        plan = PRICING_PLANS.get(plan_id, PRICING_PLANS["starter"])
-        result = get_payment_qrcode(plan["name"], plan["price_yuan"])
-        result["plan"] = plan
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+@app.route("/api/payment/confirm", methods=["POST"])
+def api_confirm_payment():
+    data = request.get_json() or {}
+    oid = data.get("order_id", "")
+    if not oid: return jsonify({"ok": False, "error": "缺少订单号"}), 400
+    from payment_orders import confirm_payment
+    return jsonify(confirm_payment(oid))
+
+@app.route("/api/payment/orders/<tid>")
+def api_payment_orders(tid):
+    from payment_orders import get_tenant_orders
+    return jsonify({"status": "ok", "orders": get_tenant_orders(tid)})
+
+@app.route("/api/payment/stats")
+def api_payment_stats():
+    from payment_orders import get_payment_stats
+    return jsonify({"status": "ok", "stats": get_payment_stats()})
 
 
 # ── 运营后台 API ──

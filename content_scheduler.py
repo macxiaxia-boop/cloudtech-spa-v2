@@ -131,7 +131,62 @@ def get_stats(tid: str) -> dict:
 
 
 # ═══════════════════════════════════
-# 矩阵分发执行（替代tenant_platform的queued-only）
+# 平台内容格式化引擎
+# ═══════════════════════════════════
+
+PLATFORM_FORMATS = {
+    "xiaohongshu": {
+        "name": "小红书", "max_chars": 800, "emoji": "rich",
+        "hashtag_count": 5, "tone": "第一人称·朋友安利·口语化",
+        "structure": "标题(20字内)→痛点共鸣(2-3句)→干货输出(3-5点)→行动号召→标签",
+    },
+    "douyin": {
+        "name": "抖音", "max_chars": 1500, "emoji": "moderate",
+        "hashtag_count": 3, "tone": "快节奏·强钩子·口语化",
+        "structure": "[Scene 0-3s] 钩子 → 痛点 → 解决方案 → CTA → 标签",
+    },
+    "wechat": {
+        "name": "公众号", "max_chars": 2500, "emoji": "minimal",
+        "hashtag_count": 0, "tone": "专业深度·结构化·可读性强",
+        "structure": "引子故事 → 问题分析 → 方案拆解 → 细节展开 → 总结",
+    },
+    "shipinhao": {
+        "name": "视频号", "max_chars": 1200, "emoji": "moderate",
+        "hashtag_count": 3, "tone": "温暖专业·社交信任感",
+        "structure": "价值承诺 → 内容主体 → 信任背书 → 关注引导",
+    },
+}
+
+def format_for_platform(content: dict, platform: str) -> dict:
+    """将原始内容格式化为平台适配版本"""
+    fmt = PLATFORM_FORMATS.get(platform, PLATFORM_FORMATS["xiaohongshu"])
+    topic = content.get("topic", "")
+    body = content.get("body", content.get("content", {}).get("topic", "装修内容"))
+
+    # 构建平台适配内容
+    formatted = f"【{fmt['name']}版】{topic}\n\n"
+    formatted += f"📌 适配规则: {fmt['tone']}\n"
+    formatted += f"📏 字数上限: {fmt['max_chars']}字\n"
+    formatted += f"📐 结构: {fmt['structure']}\n"
+    formatted += f"🏷️ 标签数: {fmt['hashtag_count']}个\n\n"
+    formatted += f"--- 待AI适配 ---\n{str(body)[:fmt['max_chars']]}"
+
+    # 保存格式化版本
+    out_dir = Path(f"D:/个人文件/AI/云数科技/distributions/{content.get('tenant_id','default')}")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    fpath = out_dir / f"{platform}_{content.get('account','unknown')}_{ts}.md"
+    fpath.write_text(formatted, encoding="utf-8")
+
+    return {
+        "platform": fmt["name"], "max_chars": fmt["max_chars"],
+        "tone": fmt["tone"], "structure": fmt["structure"],
+        "formatted_preview": formatted[:200], "saved_to": str(fpath),
+    }
+
+
+# ═══════════════════════════════════
+# 矩阵分发执行
 # ═══════════════════════════════════
 
 def execute_distribution(tid: str, topic: str, content_type: str = "article") -> dict:
@@ -142,9 +197,15 @@ def execute_distribution(tid: str, topic: str, content_type: str = "article") ->
     if not dist.get("plan"):
         return {"ok": False, "error": "无可用账号"}
 
-    # 每个分发项入队
+    # 每个分发项：格式化+入队
     enqueued = []
     for plan_item in dist["plan"]:
+        # 平台格式化
+        formatted = format_for_platform({
+            "topic": plan_item["topic"], "account": plan_item["account"],
+            "tenant_id": tid, "city": plan_item["city"],
+        }, plan_item["platform"])
+        # 入队
         result = enqueue(tid, {
             "topic": plan_item["topic"],
             "account": plan_item["account"],
@@ -152,6 +213,7 @@ def execute_distribution(tid: str, topic: str, content_type: str = "article") ->
             "platform": plan_item["platform"],
             "content_type": plan_item["content_type"],
             "priority": 5,
+            "formatted": formatted["saved_to"],
         })
         enqueued.append(result)
 
