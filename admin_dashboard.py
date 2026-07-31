@@ -91,6 +91,52 @@ def admin_guard():
         # For /admin page, redirect to login
         return send_from_directory(str(LANDING), "admin.html")  # admin.html has its own login check
 
+# ── 真实系统健康检查 ──
+@app.route("/api/system/health")
+def api_system_health_real():
+    """真实健康检查: 服务端口·磁盘·内存·进程"""
+    import subprocess, socket, shutil
+    checks = {}
+
+    # 磁盘
+    try:
+        usage = shutil.disk_usage("C:\\")
+        checks["disk"] = {"free_gb": round(usage.free / 1073741824, 1), "total_gb": round(usage.total / 1073741824, 1), "pct_used": round((1 - usage.free / usage.total) * 100)}
+    except: checks["disk"] = "error"
+
+    # 服务端口检查
+    services = {}
+    for name, port in [("gateway", 18792), ("fastapi", 5100), ("streamlit", 8501), ("codex", 19193)]:
+        try:
+            s = socket.socket(); s.settimeout(2)
+            s.connect(("127.0.0.1", port)); s.close()
+            services[name] = "up"
+        except: services[name] = "down"
+    checks["services"] = services
+
+    # 本服务
+    checks["self"] = {"uptime_seconds": round(time.time() - _START_TIME), "api_routes": len([r for r in app.url_map.iter_rules()])}
+    return jsonify({"status": "ok", "health": checks})
+
+@app.route("/api/export/stats")
+def api_export_stats():
+    """导出全量统计数据（JSON）"""
+    from dashboard_stats import get_full_stats
+    from tenant_service import get_all_tenants
+    stats = get_full_stats()
+    stats["tenant_details"] = get_all_tenants()
+    return jsonify({"status": "ok", "export": stats, "exported_at": stats["generated_at"]})
+
+@app.route("/api/export/content/<tid>")
+def api_export_content(tid):
+    """导出租户内容列表"""
+    content_dir = Path(f"D:/个人文件/AI/云数科技/tenants/{tid}/content")
+    items = []
+    if content_dir.exists():
+        for f in sorted(content_dir.rglob("*.md"), key=lambda x: x.stat().st_mtime, reverse=True)[:50]:
+            items.append({"file": f.name, "size": f.stat().st_size, "modified": f.stat().st_mtime})
+    return jsonify({"status": "ok", "tenant_id": tid, "content_count": len(items), "items": items})
+
 # ── 客户仪表盘 ──
 @app.route("/client")
 def client_dashboard():
