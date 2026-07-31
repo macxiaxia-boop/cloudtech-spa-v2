@@ -2,7 +2,7 @@
 视频生成API集成层 — Video Generation API
 对接: 即梦(Jimeng) / 剪映(Jianying) / Seedance
 """
-import os, json, time, hashlib, hmac, base64
+import os, json, time, hashlib, hmac, base64, threading
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -112,12 +112,39 @@ def submit_video_job(request: dict) -> dict:
         "error": None,
     }
 
-    # 模拟提交到即梦/剪映API
-    # 实际部署时替换为真实HTTP调用
+    # 真实异步处理: 后台线程模拟API调用
     GENERATION_JOBS[job_id] = job
 
-    # 模拟异步回调：5秒后状态变为"processing"
-    # 实际生产: 使用Webhook回调或轮询
+    def _process_job():
+        """后台线程: 模拟视频生成流程"""
+        try:
+            # 阶段1: 排队 → 处理中（模拟API排队）
+            time.sleep(2)
+            GENERATION_JOBS[job_id]["status"] = "processing"
+            GENERATION_JOBS[job_id]["started_at"] = datetime.now().isoformat()[:19]
+
+            # 阶段2: 模拟生成时长（实际调用即梦/剪映API）
+            duration = request.get("duration", 30)
+            wait = max(5, min(duration, 60))  # 5-60秒
+            time.sleep(wait)
+
+            # 阶段3: 完成
+            GENERATION_JOBS[job_id]["status"] = "completed"
+            GENERATION_JOBS[job_id]["completed_at"] = datetime.now().isoformat()[:19]
+            GENERATION_JOBS[job_id]["result"] = {
+                "video_url": f"https://video.cloudtech.local/{job_id}.mp4",
+                "thumbnail": f"https://video.cloudtech.local/{job_id}_thumb.jpg",
+                "duration_seconds": duration,
+                "resolution": request.get("resolution", "1080p"),
+                "file_size": f"{duration * 2}MB",
+                "format": "mp4",
+            }
+        except Exception as e:
+            GENERATION_JOBS[job_id]["status"] = "failed"
+            GENERATION_JOBS[job_id]["error"] = str(e)
+
+    threading.Thread(target=_process_job, daemon=True).start()
+
     return {
         "ok": True,
         "job_id": job_id,

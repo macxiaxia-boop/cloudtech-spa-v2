@@ -638,7 +638,11 @@ def register_api_routes(app):
         start = time.time()
         try:
             # 通过 model_router 分发
-            from model_router import get_router
+            try:
+                from model_router import get_router
+            except ImportError:
+                from admin_dashboard import _deepseek_call
+                get_router = lambda: type('r',(),{'route': lambda m,p: _deepseek_call(p, '')})()
             router = get_router()
             messages = [
                 {"role": "system", "content": f"你是{style}风格的内容创作者。目标平台：{platform}。语气：{tone}"},
@@ -688,7 +692,11 @@ def register_api_routes(app):
 
         start = time.time()
         try:
-            from model_router import get_router
+            try:
+                from model_router import get_router
+            except ImportError:
+                from admin_dashboard import _deepseek_call
+                get_router = lambda: type('r',(),{'route': lambda m,p: _deepseek_call(p, '')})()
             router = get_router()
             messages = [
                 {"role": "system", "content": f"你是内容二创专家。目标平台：{target_platform}。风格：{style}。请改写以下内容，保留核心信息但改变表达。"},

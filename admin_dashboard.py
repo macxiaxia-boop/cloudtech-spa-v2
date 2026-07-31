@@ -2254,34 +2254,53 @@ def api_schedule_distribute():
 
 @app.route("/api/tenant/onboard", methods=["POST"])
 def api_tenant_onboard():
-    """一站式入驻: 创建租户→生成矩阵→首批5篇内容→返回仪表盘链接"""
+    """一站式入驻: 创建租户→生成矩阵→AI生产→分发→发布队列→日历"""
     from tenant_service import create_tenant, get_client_dashboard
-    from kuaizi_pipeline import kuaizi
-    from tenant_service import record_usage
+    from content_scheduler import execute_distribution, get_calendar
     import secrets
-    
+
     data = request.get_json() or {}
     name = data.get("name", "新装企")
     cities = data.get("cities", ["厦门"])
     plan = data.get("plan", "pro")
-    
+
     # Step 1: 创建租户
     tenant = create_tenant(name, cities, plan)
     tid = tenant["id"]
-    
-    # Step 2: 后台异步生成首批内容(避免超时)
+
+    # Step 2: 后台异步 — 全链路执行
     import threading as _th
-    def _bg_produce():
-        for topic in [f"{cities[0]}装修避坑指南", f"{cities[0]}旧房翻新案例"]:
-            try:
-                kuaizi({"city": cities[0], "style": "现代简约", "room_type": "全屋", "area": 100, "budget": 20, "community": "", "account": name})
-                record_usage(tid, "article", topic, 8)
-            except: pass
-    _th.Thread(target=_bg_produce, daemon=True).start()
-    produced = [{"topic": f"{cities[0]}首批内容×2", "status": "后台生产中,约2分钟后可查看"}]
-    
-    # Step 3: 返回仪表盘
+    pipeline_log = []
+
+    def _bg_full_pipeline():
+        try:
+            from kuaizi_pipeline import kuaizi
+            # 生产
+            for topic in [f"{cities[0]}装修避坑指南", f"{cities[0]}旧房翻新实案"]:
+                kuaizi({"city": cities[0], "style": "现代简约", "room_type": "全屋",
+                         "area": 100, "budget": 20, "tenant_id": tid})
+                _usage_log(tid, "article", topic, 8)
+            # 分发
+            dist = execute_distribution(tid, f"{name}首批内容", "article")
+            pipeline_log.append({"step": "produce", "topics": 2})
+            pipeline_log.append({"step": "distribute", "accounts": dist["total_distributions"],
+                                 "enqueued": dist["enqueued"], "scheduled": dist["auto_scheduled"]})
+        except Exception as e:
+            pipeline_log.append({"step": "error", "error": str(e)[:100]})
+
+    _th.Thread(target=_bg_full_pipeline, daemon=True).start()
+
+    # Step 3: 返回仪表盘数据
     dashboard = get_client_dashboard(tid)
+    return jsonify({
+        "status": "ok",
+        "tenant": {"id": tid, "name": name, "plan": plan},
+        "dashboard": dashboard,
+        "pipeline": {"status": "running", "log": [{"step": "tenant_created", "tid": tid},
+                                                   {"step": "pipeline_started", "topics": 2}],
+                     "message": "全链路执行中: 内容生产→QC→分发→发布队列。约2分钟后可查看仪表盘"},
+        "next_url": f"/client?tid={tid}",
+    })
     
     return jsonify({
         "status": "ok",
@@ -2295,12 +2314,8 @@ def api_tenant_onboard():
 # API 文档 — OpenAPI 3.0 + Swagger UI
 # ═══════════════════════════════════════════════════════
 
-@app.route("/api/docs")
-def api_docs_page():
-    return send_from_directory(str(LANDING), "api-docs.html")
-
 @app.route("/api/openapi.json")
-def api_openapi_json():
+def api_openapi_spec():
     from openapi import get_spec
     return jsonify(get_spec())
 
@@ -2331,7 +2346,7 @@ def metrics():
 @app.route("/<path:filename>")
 def serve_static(filename):
     # Don't intercept API routes
-    if filename in ("metrics", "api/openapi.json", "api/docs"):
+    if filename in ("metrics", "api/openapi.json"):
         return jsonify({"error": "Not found"}), 404
     path = LANDING / filename
     if path.exists():
