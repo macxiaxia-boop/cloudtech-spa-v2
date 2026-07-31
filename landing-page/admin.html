@@ -224,6 +224,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <button class="btn" onclick="navTo('prompts')">🤖 提示词</button>
       <button class="btn" onclick="navTo('kuaizi')">🥢 筷子流水线</button>
       <button class="btn" onclick="navTo('video-panel')">🎬 视频引擎</button>
+      <button class="btn" onclick="navTo('rights')">©️ 版权中心</button>
     </div>
   </div>
 </div>
@@ -514,6 +515,28 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div class="kpis" id="platform-kpis"></div>
     <button class="btn go" onclick="loadPlatform()">🔄 加载平台数据</button>
     <div id="platform-table" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- ═══════════ COPYRIGHT CENTER ═══════════ -->
+<div class="panel" id="panel-rights">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>©️ 版权资产注册</h3>
+      <div class="f-grp"><label>类型</label><select id="raType"><option value="portrait">肖像权</option><option value="voice">声音权</option><option value="property">业主案例授权</option><option value="music">音乐版权</option><option value="footage">素材版权</option><option value="design">设计版权</option><option value="ai_generated">AI生成物</option></select></div>
+      <div class="f-grp"><label>标题</label><input id="raTitle" placeholder="资产描述"></div>
+      <div class="f-grp"><label>权利人</label><input id="raOwner" placeholder="权利所有人"></div>
+      <button class="btn go" onclick="rightsRegister()" style="width:100%">📝 注册</button>
+      <div class="result" id="raResult"></div>
+    </div>
+    <div class="panel-card"><h3>📊 合规总览</h3>
+      <button class="btn go" onclick="rightsReport()" style="width:100%;margin-bottom:8px">📋 查看报告</button>
+      <div class="result" id="rrResult"></div>
+    </div>
+  </div>
+  <div class="panel-card" style="margin-top:14px"><h3>📦 资产列表</h3>
+    <select id="raFilter" onchange="rightsList()" style="margin-right:8px"><option value="">全部类型</option><option value="portrait">肖像权</option><option value="voice">声音权</option><option value="property">业主授权</option><option value="music">音乐</option><option value="footage">素材</option><option value="design">设计</option></select>
+    <button class="btn go" onclick="rightsList()" style="margin-bottom:10px">🔄 刷新</button>
+    <div id="raList"></div>
   </div>
 </div>
 
@@ -1027,6 +1050,32 @@ async function runKuaizi(){
     '<div class="card"><h4>💬 公众号 ('+ (r.wechat_article||'').length +'字)</h4><div style="max-height:200px;overflow-y:auto;font-size:.74rem;white-space:pre-wrap">'+ (r.wechat_article||'').substring(0,500) +'</div></div>'+
     '<div class="card"><h4>📊 概览</h4><div style="font-size:.74rem">⏱ '+ r.elapsed_seconds +'秒 | 💰 ¥'+ (r.cost||{}).total +' | 📡 '+ (r.distribute||{}).accounts +'分发 | 📁 '+ (r.saved_to||'') +'</div><div style="margin-top:6px;font-size:.7rem;color:var(--muted)">🏷 '+ (r.tags||'') +'</div></div>'+
     '</div>';
+}
+
+// ═══════════ DIGITAL RIGHTS ═══════════
+async function rightsRegister(){
+  var b=document.getElementById('raResult');b.classList.add('show');b.textContent='注册中...';
+  var d=await api('/api/rights/register',{method:'POST',body:JSON.stringify({
+    type:document.getElementById('raType').value,
+    title:document.getElementById('raTitle').value,
+    owner:document.getElementById('raOwner').value
+  })});
+  if(d.ok){b.textContent='✅ 已注册: '+d.asset.id;rightsList()}else{b.textContent='❌ '+d.error}
+}
+async function rightsList(){
+  var b=document.getElementById('raList');
+  var ft=document.getElementById('raFilter').value;
+  var d=await api('/api/rights/assets'+(ft?'?type='+ft:''));
+  if(!d.assets||!d.assets.length){b.innerHTML='<div class="status-msg">暂无版权资产</div>';return}
+  b.innerHTML='<table class="tbl"><tr><th>ID</th><th>类型</th><th>标题</th><th>权利人</th><th>状态</th><th>使用次数</th></tr>'+
+    d.assets.map(function(a){return'<tr><td>'+a.id+'</td><td>'+a.type_name+'</td><td>'+a.title+'</td><td>'+a.owner+'</td><td><span class="badge '+(a.status==='active'?'on':'off')+'">'+a.status+'</span></td><td>'+a.usage_count+'</td></tr>'}).join('')+'</table>';
+}
+async function rightsReport(){
+  var b=document.getElementById('rrResult');b.classList.add('show');b.textContent='加载中...';
+  var d=await api('/api/rights/report');
+  var r=d.report||{};
+  b.innerHTML='<div><b>总资产:</b> '+r.total_assets+' | <b>活跃:</b> '+r.active+' | <b>过期:</b> '+r.expired+' | <b>已撤销:</b> '+r.revoked+'</div>'+
+    (r.soon_expired&&r.soon_expired.length?'<div style="margin-top:6px;color:var(--yellow)">⚠️ 即将过期: '+r.soon_expired.map(function(e){return e.title}).join(', ')+'</div>':'');
 }
 
 // ═══════════ PLATFORM ═══════════

@@ -11,6 +11,25 @@ load_dotenv(Path(__file__).parent / ".env")
 
 _START_TIME = time.time()
 
+# ═══════════════════════════════════════
+# 计费强制执行层
+# ═══════════════════════════════════════
+def _quota_guard(tid: str = "zq-5bb59623", content_type: str = "article"):
+    """配额守卫: 检查→拦截超额→返回状态。必须在内容生成前调用。"""
+    from tenant_service import check_quota
+    q = check_quota(tid)
+    if not q.get("ok"):
+        return q  # 超额，返回配额信息
+    return None  # 通过
+
+def _usage_log(tid: str, content_type: str, topic: str, tokens: int = None):
+    """用量记录: 内容生成成功后调用。"""
+    from tenant_service import record_usage
+    return record_usage(tid, content_type, topic, tokens)
+
+# 默认租户（Admin面板操作归属）
+_DEFAULT_TID = "zq-5bb59623"
+
 from flask import Flask, send_from_directory, jsonify, request
 
 from error_tracker import setup_error_handler
@@ -1345,6 +1364,11 @@ def api_create_generate_v2():
     if not topic:
         return jsonify({"status": "error", "message": "请提供创作主题"}), 400
 
+    # 配额检查
+    quota_block = _quota_guard(_DEFAULT_TID, content_form)
+    if quota_block:
+        return jsonify({"status": "error", "message": "配额已用完，请升级套餐", "quota": quota_block}), 429
+
     form = CONTENT_FORMS.get(content_form, CONTENT_FORMS["voiceover"])
     creator = CREATOR_STYLES.get(creator_id, CREATOR_STYLES["zhinan"])
     platform = PLATFORMS.get(platform_id, PLATFORMS["douyin"])
@@ -1412,6 +1436,9 @@ def api_create_generate_v2():
                 f"检测以下文本：\n\n{body[:1500]}", max_tokens=500)
         except:
             deai_report = "检测跳过"
+
+        # 记录用量
+        _usage_log(_DEFAULT_TID, content_form, topic)
 
         return jsonify({
             "status": "ok",
@@ -1866,10 +1893,21 @@ def api_pipeline_recent():
 
 @app.route("/api/kuaizi/run", methods=["POST"])
 def api_kuaizi_run():
-    """筷子流水线: 输入楼盘→全平台输出"""
-    from kuaizi_pipeline import kuaizi
+    """筷子流水线: 输入楼盘→全平台输出（含配额检查+用量记录）"""
     data = request.get_json() or {}
+    tid = data.get("tenant_id", _DEFAULT_TID)
+
+    # 配额检查
+    quota_block = _quota_guard(tid, "video_generation")
+    if quota_block:
+        return jsonify({"status": "error", "message": "配额已用完", "quota": quota_block}), 429
+
+    from kuaizi_pipeline import kuaizi
     result = kuaizi(data)
+
+    # 记录用量
+    _usage_log(tid, "video_generation", data.get("community", "装修案例"), 80)
+
     return jsonify({"status": "ok", "result": result})
 
 # ═══════════════════════════════════════════════════════
@@ -1896,6 +1934,75 @@ def api_video_generate():
     pkg = create_video_package(result, data.get("account", "默认账号"))
     result["package"] = pkg
     return jsonify({"status": "ok", "result": result})
+
+
+# ═══════════════════════════════════════════════════════
+# 数字人版权中心 API
+# ═══════════════════════════════════════════════════════
+
+@app.route("/api/rights/assets")
+def api_rights_assets():
+    """版权资产列表"""
+    from digital_rights import list_assets
+    atype = request.args.get("type", "")
+    status = request.args.get("status", "active")
+    assets = list_assets(atype, status)
+    return jsonify({"status": "ok", "assets": assets, "total": len(assets)})
+
+@app.route("/api/rights/register", methods=["POST"])
+def api_rights_register():
+    """注册版权资产"""
+    from digital_rights import register_asset
+    data = request.get_json() or {}
+    result = register_asset(
+        data.get("type", "portrait"),
+        data.get("title", ""),
+        data.get("owner", ""),
+        data.get("source_url", ""),
+        data.get("license"),
+        data.get("tags", []),
+    )
+    return jsonify(result)
+
+@app.route("/api/rights/asset/<aid>")
+def api_rights_asset(aid):
+    """查看单个版权资产"""
+    from digital_rights import get_asset
+    a = get_asset(aid)
+    if not a:
+        return jsonify({"status": "error", "message": "资产不存在"}), 404
+    return jsonify({"status": "ok", "asset": a})
+
+@app.route("/api/rights/use/<aid>", methods=["POST"])
+def api_rights_use(aid):
+    """记录版权资产使用"""
+    from digital_rights import record_usage
+    data = request.get_json() or {}
+    result = record_usage(aid, data.get("context", ""), data.get("tenant_id", ""))
+    return jsonify(result)
+
+@app.route("/api/rights/revoke/<aid>", methods=["POST"])
+def api_rights_revoke(aid):
+    """撤销版权授权"""
+    from digital_rights import revoke_asset
+    data = request.get_json() or {}
+    result = revoke_asset(aid, data.get("reason", ""))
+    return jsonify(result)
+
+@app.route("/api/rights/compliance")
+def api_rights_compliance():
+    """版权合规检查"""
+    from digital_rights import compliance_check
+    content_type = request.args.get("content_type", "article")
+    result = compliance_check(content_type)
+    return jsonify({"status": "ok", "compliance": result})
+
+@app.route("/api/rights/report")
+def api_rights_report():
+    """版权合规总览报告"""
+    from digital_rights import get_compliance_report
+    report = get_compliance_report()
+    return jsonify({"status": "ok", "report": report})
 
 
 # ═══════════════════════════════════════════════════════
