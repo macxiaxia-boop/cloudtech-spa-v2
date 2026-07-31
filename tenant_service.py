@@ -41,10 +41,10 @@ TOKEN_COSTS = {
 PLATFORM_NAMES = {"xiaohongshu": "小红书", "douyin": "抖音", "wechat": "公众号", "shipinhao": "视频号"}
 
 
-def create_tenant(name: str, cities: list, plan_id: str = "pro", company: str = "", email: str = "") -> dict:
+def create_tenant(name: str, cities: list, plan_id: str = "pro", company: str = "", email: str = "", tid: str = "") -> dict:
     """创建新租户"""
     plan = PLANS.get(plan_id, PLANS["pro"])
-    tid = f"zq-{secrets.token_hex(4)}"
+    tid = tid or f"zq-{secrets.token_hex(4)}"
 
     accounts = {}
     for city in cities[:plan["cities"]]:
