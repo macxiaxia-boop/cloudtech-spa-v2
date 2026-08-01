@@ -35,7 +35,7 @@ def get_notifications(tid: str, limit: int = 20, unread_only: bool = False) -> l
             notifications.append(n)
             if len(notifications) >= limit:
                 break
-        except:
+        except Exception:
             pass
     return notifications
 
@@ -53,7 +53,7 @@ def mark_read(tid: str, nid: str = None) -> dict:
                 n["read_at"] = datetime.now().isoformat()[:19]
                 f.write_text(json.dumps(n, ensure_ascii=False, indent=2), encoding="utf-8")
                 count += 1
-        except:
+        except Exception:
             pass
     return {"ok": True, "marked_read": count}
 

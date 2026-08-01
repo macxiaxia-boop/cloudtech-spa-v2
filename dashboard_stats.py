@@ -50,7 +50,7 @@ def get_tenant_stats() -> dict:
                 "total_tokens": t.get("total_tokens", 0),
                 "created": t.get("created", "")[:10],
             })
-        except:
+        except Exception:
             pass
     return {"total": len(tenants), "active": sum(1 for t in tenants if t.get("status") == "active"), "tenants": tenants}
 
@@ -65,7 +65,7 @@ def get_publish_stats() -> dict:
             total_queued += len(q.get("queue", []))
             total_scheduled += len(q.get("scheduled", []))
             total_published += len(q.get("published", []))
-        except:
+        except Exception:
             pass
     return {"queued": total_queued, "scheduled": total_scheduled, "published": total_published}
 
