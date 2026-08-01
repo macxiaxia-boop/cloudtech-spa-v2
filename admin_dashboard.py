@@ -515,6 +515,82 @@ def api_notifications_read(tid):
     data = request.get_json() or {}
     return jsonify(mark_read(tid, data.get("nid")))
 
+# ── 一键产品演示 ──
+@app.route("/api/demo/run", methods=["POST"])
+def api_demo_run():
+    """一键Demo: 创建租户→品牌→内容→分发→支付→通知→审计 全自动"""
+    import secrets, threading, time as _time
+    results = {"steps": [], "started_at": _time.time()}
+
+    # Step 1: 创建租户
+    from tenant_service import create_tenant
+    t = create_tenant(f"Demo装企-{secrets.token_hex(2)}", ["厦门", "泉州"], "pro")
+    tid = t["id"]
+    results["steps"].append({"step": 1, "name": "创建租户", "status": "ok", "tid": tid, "plan": "pro"})
+
+    # Step 2: 创建品牌
+    from brand_assets import create_brand, add_asset
+    b = create_brand(tid, f"{t['name']}品牌")
+    add_asset(b["brand"]["id"], "logo", "品牌Logo", "/brands/logo.png")
+    add_asset(b["brand"]["id"], "color", "品牌色", "#c9a96e")
+    results["steps"].append({"step": 2, "name": "品牌资产", "status": "ok"})
+
+    # Step 3: 注册数字人
+    from digital_human import register_avatar, add_voice
+    av = register_avatar(tid, "装修顾问小云", "stock")
+    add_voice(av["avatar"]["id"], "标准女声", "/voices/female_zh.mp3")
+    results["steps"].append({"step": 3, "name": "数字人", "status": "ok"})
+
+    # Step 4: 内容生产(异步后台)
+    def _produce():
+        try:
+            from kuaizi_pipeline import kuaizi
+            kuaizi({"city": "厦门", "style": "现代简约", "room_type": "厨房", "area": 89, "budget": 15, "tenant_id": tid})
+        except Exception: pass
+    threading.Thread(target=_produce, daemon=True).start()
+    results["steps"].append({"step": 4, "name": "AI内容生产", "status": "running", "note": "后台执行中~120s"})
+
+    # Step 5: 分发+发布
+    from content_scheduler import execute_distribution, enqueue, publish_now
+    dist = execute_distribution(tid, "厦门厨房改造避坑指南", "article")
+    # 手动入队+发布
+    enqueue(tid, {"topic": "厦门厨房改造", "account": f"{t['name']}-小红书", "platform": "xiaohongshu", "priority": 10})
+    pub = publish_now(tid)
+    results["steps"].append({"step": 5, "name": "分发+发布", "status": "ok", "accounts": dist.get("total_distributions", 0), "published": pub.get("ok", False)})
+
+    # Step 6: 支付
+    from payment_orders import create_order, confirm_payment
+    o = create_order(tid, "pro")
+    confirm_payment(o["order"]["id"])
+    results["steps"].append({"step": 6, "name": "支付", "status": "ok", "amount": o["order"]["amount"]})
+
+    # Step 7: 版权+合规
+    from digital_rights import register_asset
+    from compliance_auto import run_compliance_check
+    register_asset("portrait", f"{t['name']}业主授权", t['name'])
+    comp = run_compliance_check({"text": "专业装修服务，厦门本地12年经验", "title": "Demo验证"})
+    results["steps"].append({"step": 7, "name": "版权+合规", "status": comp["status"]})
+
+    # Step 8: 通知
+    from notifications import notify
+    notify(tid, "system", "🎉 Demo完成", f"欢迎{t['name']}！您的装企AI平台已就绪。管理后台: /admin · 客户仪表盘: /client?tid={tid}", "success")
+    results["steps"].append({"step": 8, "name": "通知", "status": "ok"})
+
+    # Step 9: 审计
+    from audit_viewer import log_activity
+    log_activity(tid, "demo.completed", {"steps": len(results["steps"])})
+    results["steps"].append({"step": 9, "name": "审计记录", "status": "ok"})
+
+    elapsed = round(_time.time() - results["started_at"], 1)
+    results["elapsed_seconds"] = elapsed
+    results["tenant_id"] = tid
+    results["dashboard_url"] = f"/client?tid={tid}"
+    results["admin_url"] = "/admin"
+    results["summary"] = f"Demo完成！{elapsed}秒 · {len(results['steps'])}个步骤 · 租户ID: {tid}"
+
+    return jsonify({"status": "ok", "demo": results})
+
+
 # ── 统一客户端数据端点 ──
 @app.route("/api/client/full/<tid>")
 def api_client_full(tid):
