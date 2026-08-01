@@ -105,7 +105,7 @@ def _log(test: str, variant: str, event: str, user_id: str = "", url: str = ""):
 # ── 预定义测试实例 ──
 HOMEPAGE_TEST = ABTest("homepage", ["A-原版", "B-数据驱动版", "C-视频优先版"], [0.33, 0.34, 0.33])
 PRICING_TEST = ABTest("pricing", ["A-三栏", "B-单列对比"], [0.5, 0.5])
-CONTENT_TEST = ABTest("content_style", ["直男财经", "小Lin说", "高盖伦", "小A学财经"], [0.25, 0.25, 0.25, 0.25])
+CONTENT_TEST = ABTest("content_style", ["直男财经", "小Lin说", "高盖伦", "小A学财经", "亲情推荐"], [0.2, 0.2, 0.2, 0.2, 0.2])
 
 # Flask middleware for A/B testing
 def ab_middleware(app):

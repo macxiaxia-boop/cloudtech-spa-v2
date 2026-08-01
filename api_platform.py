@@ -743,7 +743,10 @@ def register_api_routes(app):
         start = time.time()
         try:
             import subprocess as sp, shlex
-            cmd = f'python "{TOOLS}\\compliance-checker.py" "{(text[:2000])}" "{platform}" "{industry}"'
+            checker = Path(TOOLS) / "compliance-checker.py"
+            if not checker.exists():
+                return jsonify({"success": False, "error": "合规检查模块未安装"}), 501
+            cmd = f'python "{checker}" "{(text[:2000])}" "{platform}" "{industry}"'
             env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
             result = sp.run(shlex.split(cmd), shell=False, capture_output=True, text=True,
                            timeout=60, encoding="utf-8", errors="replace", env=env)
@@ -783,7 +786,10 @@ def register_api_routes(app):
         start = time.time()
         try:
             import subprocess as sp, shlex
-            cmd = f'python "{TOOLS}\\competitor-analyzer.py" "{competitor}" "{depth}"'
+            analyzer = Path(TOOLS) / "competitor-analyzer.py"
+            if not analyzer.exists():
+                return jsonify({"success": False, "error": "竞品分析模块未安装"}), 501
+            cmd = f'python "{analyzer}" "{competitor}" "{depth}"'
             env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
             result = sp.run(shlex.split(cmd), shell=False, capture_output=True, text=True,
                            timeout=120, encoding="utf-8", errors="replace", env=env)
