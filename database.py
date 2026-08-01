@@ -39,6 +39,14 @@ class Database:
             self.conn.row_factory = sqlite3.Row
             self.conn.execute("PRAGMA journal_mode=WAL")
             self.conn.execute("PRAGMA foreign_keys=ON")
+            # Performance indexes
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_tenants_status ON tenants(status)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_tenants_plan ON tenants(plan)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_audit_tenant ON audit_log(tenant_id)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_audit_time ON audit_log(created_at)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)")
+            self.conn.execute("PRAGMA cache_size=-8000")  # 8MB cache
+            self.conn.execute("PRAGMA mmap_size=268435456")  # 256MB mmap
         return self
 
     @contextmanager

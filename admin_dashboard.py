@@ -102,6 +102,19 @@ def _check_admin_auth():
             pass
     return False
 
+# ── 自定义错误页 ──
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({"status": "error", "message": "接口不存在", "code": 404}), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({"status": "error", "message": "服务器内部错误", "code": 500}), 500
+
+@app.errorhandler(429)
+def rate_limited(e):
+    return jsonify({"status": "error", "message": "请求过于频繁", "code": 429, "retry_after": 10}), 429
+
 @app.before_request
 def admin_guard():
     if not _check_admin_auth():
@@ -156,6 +169,31 @@ def api_export_content(tid):
             items.append({"file": f.name, "size": f.stat().st_size, "modified": f.stat().st_mtime})
     return jsonify({"status": "ok", "tenant_id": tid, "content_count": len(items), "items": items})
 
+@app.route("/api/export/csv/<tid>")
+def api_export_csv(tid):
+    """导出租户内容为CSV"""
+    import csv, io
+    content_dir = Path(f"D:/个人文件/AI/云数科技/tenants/{tid}/content")
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["标题", "文件", "大小(KB)", "评分", "修改时间"])
+    from datetime import datetime as _dt
+    if content_dir.exists():
+        for f in sorted(content_dir.rglob("*.md"), key=lambda x: x.stat().st_mtime, reverse=True)[:100]:
+            try:
+                text = f.read_text(encoding="utf-8", errors="ignore")[:200]
+                title = text.split("\n")[0].replace("# ", "").strip()[:60]
+                score = ""
+                import re as _re
+                sm = _re.search(r'评分[：:]\s*(\d+)/10', text)
+                if sm: score = sm.group(1)
+                mtime = _dt.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+                writer.writerow([title, f.name, round(f.stat().st_size/1024,1), score, mtime])
+            except Exception: pass
+    csv_data = output.getvalue()
+    from flask import Response
+    return Response(csv_data, mimetype="text/csv", headers={"Content-Disposition": f"attachment;filename={tid}_content.csv"})
+
 # ═══════════════════════════════════════════════════════
 # 内容搜索 API
 # ═══════════════════════════════════════════════════════
@@ -174,6 +212,32 @@ def api_webhooks():
 def api_webhook_delete(wid):
     from webhooks import delete_webhook
     return jsonify(delete_webhook(wid))
+
+# ═══════════════════════════════════════════════════════
+# 批量操作 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/batch/produce", methods=["POST"])
+def api_batch_produce():
+    """批量内容生产"""
+    data = request.get_json() or {}
+    topics = data.get("topics", [])
+    if not topics:
+        return jsonify({"status": "error", "message": "请提供选题列表"}), 400
+    from kuaizi_pipeline import kuaizi
+    import threading as _th
+    results = []
+    def _produce(t):
+        try:
+            r = kuaizi({"city": t.get("city","厦门"), "style": t.get("style","现代简约"),
+                         "room_type": t.get("room","全屋"), "area": t.get("area",100),
+                         "budget": t.get("budget",20), "community": t.get("topic","")})
+            results.append({"topic": t.get("topic",""), "status": "ok", "saved": r.get("saved_to","")})
+        except Exception as e:
+            results.append({"topic": t.get("topic",""), "status": "failed", "error": str(e)[:80]})
+    threads = [_th.Thread(target=_produce, args=(t,)) for t in topics]
+    for t in threads: t.start()
+    for t in threads: t.join(timeout=180)
+    return jsonify({"status": "ok", "total": len(topics), "results": results})
 
 @app.route("/api/search/content")
 def api_search_content():
@@ -2629,6 +2693,7 @@ def add_cors(response):
     return response
 
 if __name__ == "__main__":
+    import os as _os
     # Register A/B test middleware
     try:
         from ab_test import ab_middleware
@@ -2645,10 +2710,27 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"  API Platform skipped: {e}")
 
-    print("=" * 50)
-    print("  云数科技 CloudTech v2.0.0 — Web 管理后台")
-    print(f"  管理后台: http://localhost:5099/admin")
-    print(f"  Landing: http://localhost:5099/")
-    print(f"  健康检查: http://localhost:5099/health")
-    print("=" * 50)
-    app.run(host="0.0.0.0", port=5099, debug=False)
+    host = _os.environ.get("CLOUDTECH_HOST", "0.0.0.0")
+    port = int(_os.environ.get("CLOUDTECH_PORT", "5099"))
+    prod = _os.environ.get("CLOUDTECH_PROD", "1")  # 默认生产模式
+
+    if prod == "1":
+        try:
+            from waitress import serve
+            threads = int(_os.environ.get("CLOUDTECH_WORKERS", "4"))
+            print("=" * 50)
+            print("  云数科技 CloudTech v2.0.0 — Production (Waitress)")
+            print(f"  管理后台: http://localhost:{port}/admin")
+            print(f"  Threads: {threads}")
+            print("=" * 50)
+            serve(app, host=host, port=port, threads=threads, channel_timeout=600)
+        except ImportError:
+            print("  Waitress not installed, falling back to Flask dev server")
+            prod = "0"
+
+    if prod != "1":
+        print("=" * 50)
+        print("  云数科技 CloudTech v2.0.0 — Development (Flask)")
+        print(f"  管理后台: http://localhost:{port}/admin")
+        print("=" * 50)
+        app.run(host=host, port=port, debug=False)
