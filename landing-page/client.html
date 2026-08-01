@@ -103,7 +103,8 @@ setInterval(function(){document.getElementById('clock').textContent=new Date().t
 document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN');
 
 async function load(){
-  var d=await api('/api/tenant/'+TID+'/dashboard');
+  var full=await api('/api/client/full/'+TID);
+  var d=full.data.tenant||full.data||{};  // unified endpoint with all modules
   document.getElementById('tenantName').textContent=d.tenant||'装企驾驶舱';
   document.getElementById('tenantPlan').textContent={'enterprise':'企业版','pro':'专业版','starter':'入门版'}[d.plan]||d.plan;
 

@@ -515,6 +515,43 @@ def api_notifications_read(tid):
     data = request.get_json() or {}
     return jsonify(mark_read(tid, data.get("nid")))
 
+# ── 统一客户端数据端点 ──
+@app.route("/api/client/full/<tid>")
+def api_client_full(tid):
+    """客户端一站式数据: 整合所有模块的租户视图"""
+    from tenant_service import get_client_dashboard, get_account_matrix, check_quota
+    from content_scheduler import get_stats as sched_stats, get_calendar
+    from content_analytics import get_content_performance
+    from approval_engine import get_approval_stats
+    from compliance_auto import get_compliance_stats
+    from brand_assets import list_brands, get_brand_stats
+    from digital_human import get_avatar_stats
+    from payment_orders import get_tenant_orders
+    from notifications import get_notifications, get_unread_count
+    from audit_viewer import get_tenant_activity, log_activity
+
+    log_activity(tid, "dashboard_view", {"endpoint": "client_full"})
+    dash = get_client_dashboard(tid)
+    if "error" in dash:
+        return jsonify({"status": "error", "message": dash["error"]}), 404
+
+    return jsonify({"status": "ok", "data": {
+        "tenant": dash,
+        "quota": check_quota(tid),
+        "matrix": get_account_matrix(tid),
+        "publish": sched_stats(tid),
+        "calendar": get_calendar(tid, 7),
+        "performance": get_content_performance(tid, 30),
+        "approvals": get_approval_stats(tid),
+        "compliance": get_compliance_stats(),
+        "brands": get_brand_stats(tid),
+        "avatars": get_avatar_stats(tid),
+        "payments": get_tenant_orders(tid, 5),
+        "notifications": get_notifications(tid, 5),
+        "unread": get_unread_count(tid),
+        "activities": get_tenant_activity(tid, 1, limit=10),
+    }})
+
 # ── 客户仪表盘 ──
 @app.route("/client")
 def client_dashboard():

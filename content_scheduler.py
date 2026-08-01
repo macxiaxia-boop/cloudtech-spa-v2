@@ -80,12 +80,23 @@ def publish_now(tid: str, item_id: str = None) -> dict:
     q["published"].append(item)
     _save_queue(tid, q)
 
-    # 发送通知
+    # 合规检查(发布前)
+    try:
+        from compliance_auto import run_compliance_check
+        comp = run_compliance_check({"text": str(item.get("content", {}))}, "article")
+        if not comp["passed"]:
+            item["compliance_warning"] = comp["issues"]
+    except Exception: pass
+
+    # 审计·通知·webhook
+    try:
+        from audit_viewer import log_activity
+        log_activity(tid, "content.published", {"account": item["content"].get("account", ""), "platform": item["content"].get("platform", "")})
+    except Exception: pass
     try:
         from notifications import notify_publish_done
         notify_publish_done(tid, item["content"].get("account", ""), item["content"].get("platform", ""))
     except Exception: pass
-    # 触发webhook
     try:
         from webhooks import trigger_event
         trigger_event("content.published", tid, {"account": item["content"].get("account", ""), "platform": item["content"].get("platform", "")})
