@@ -118,5 +118,5 @@ class TestAPIStress:
         assert r["ok"] is True
         data = r.get("data", {})
         styles = data.get("styles", [])
-        assert len(styles) == 4  # 4 creator styles
+        assert len(styles) == 5  # 5 creator styles (added family)
         print(f"  Response size: {len(json.dumps(data))} bytes, {len(styles)} styles")
