@@ -46,7 +46,7 @@ class LoginRequest(BaseModel):
 
 class GenerateRequest(BaseModel):
     topic: str = Field(..., min_length=1, max_length=500)
-    content_form: str = Field(default="voiceover", pattern="^(voiceover|persona|storytelling|mashup|article|short_video)$")
+    content_form: str = Field(default="voiceover", pattern="^(voiceover|persona|storytelling|mashup|article|short_video|renovation_showcase)$")
     creator: str = Field(default="zhinan", pattern="^(zhinan|xiaolin|gaogailun|xiaoa|family)$")
     platform: str = Field(default="douyin", pattern="^(douyin|xiaohongshu|wechat|zhihu|bilibili|pengyouquan)$")
     word_count: int = Field(default=1500, ge=50, le=10000)
