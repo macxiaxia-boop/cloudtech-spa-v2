@@ -90,7 +90,7 @@ def create_tenant(name: str, cities: list, plan: str = "pro") -> dict:
             "company": name, "plan": plan, "status": "active",
             "api_key": f"ak-{secrets.token_hex(16)}", "api_key_hash": secrets.token_hex(32),
         })
-    except:
+    except Exception:
         pass
 
     return tenant
@@ -110,7 +110,7 @@ def get_all_tenants() -> list:
     for f in sorted(TENANTS_DIR.glob("zq-*.json")):
         try:
             tenants.append(json.loads(f.read_text(encoding="utf-8")))
-        except:
+        except Exception:
             pass
     return tenants
 
@@ -219,7 +219,7 @@ def get_client_dashboard(tid: str) -> dict:
                 produced += 1
                 if len(recent) < 10:
                     recent.append({"title": title, "score": int(sm.group(1)) if sm else None, "file": f.name})
-            except:
+            except Exception:
                 pass
 
     avg_score = round(total_score / max(scored_count, 1), 1)

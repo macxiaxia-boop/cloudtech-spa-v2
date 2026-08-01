@@ -191,6 +191,6 @@ def kuaizi(input_data: dict) -> dict:
     try:
         from notifications import notify_content_ready
         notify_content_ready(tid, community or f"{city}{room}改造")
-    except: pass
+    except Exception: pass
 
     return output

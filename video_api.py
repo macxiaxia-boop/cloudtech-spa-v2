@@ -87,7 +87,7 @@ def _parse_duration(dur_str: str) -> int:
         parts = dur_str.replace("s", "").split("-")
         nums = [int(p.strip()) for p in parts if p.strip().isdigit()]
         return sum(nums) // len(nums) if nums else 30
-    except:
+    except Exception:
         return 30
 
 

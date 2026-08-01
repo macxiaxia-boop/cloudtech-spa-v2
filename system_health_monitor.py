@@ -266,7 +266,7 @@ def check_mcp_servers():
                         )
                     if result.returncode == 0:
                         cmd_path = result.stdout.strip().split('\n')[0]
-                except:
+                except Exception:
                     pass
 
             if cmd_path:

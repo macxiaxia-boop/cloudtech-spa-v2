@@ -65,9 +65,9 @@ def run():
                     score_raw = _deepseek_call(score_sys, content[:1500], max_tokens=100, temperature=0.3)
                     try:
                         score = int(score_raw.split("/")[0].strip())
-                    except:
+                    except Exception:
                         score = 7  # default if parsing fails
-                except:
+                except Exception:
                     pass
 
                 # 低于6分 → 重写

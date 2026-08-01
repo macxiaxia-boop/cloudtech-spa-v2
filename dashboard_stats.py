@@ -79,7 +79,7 @@ def get_system_health() -> dict:
         usage = shutil.disk_usage("C:\\")
         disk_free_gb = round(usage.free / 1024 / 1024 / 1024, 1)
         disk_pct = round((1 - usage.free / usage.total) * 100)
-    except:
+    except Exception:
         disk_free_gb, disk_pct = 0, 0
 
     # 内存（Windows）
@@ -87,14 +87,14 @@ def get_system_health() -> dict:
         import subprocess
         r = subprocess.run(["wmic", "OS", "get", "FreePhysicalMemory", "/Value"], capture_output=True, text=True, timeout=10)
         mem_free_mb = int(r.stdout.split("=")[-1].strip()) // 1024 if "=" in r.stdout else 0
-    except:
+    except Exception:
         mem_free_mb = 0
 
     # Python进程
     try:
         r = subprocess.run(["tasklist", "/FI", "IMAGENAME eq python.exe", "/FO", "CSV", "/NH"], capture_output=True, text=True, timeout=10)
         py_count = len([l for l in r.stdout.split("\n") if "python" in l.lower()])
-    except:
+    except Exception:
         py_count = 0
 
     return {

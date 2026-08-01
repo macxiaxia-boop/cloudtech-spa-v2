@@ -55,7 +55,7 @@ for d in OUT_DIRS.values():
 def load_json(path, default=None):
     try:
         return json.loads(Path(path).read_text(encoding="utf-8"))
-    except:
+    except Exception:
         return default or {}
 
 @st.cache_data(ttl=30)
@@ -256,7 +256,7 @@ elif "选题" in page:
             with st.expander("预览"):
                 try:
                     st.markdown(b.read_text(encoding="utf-8")[:500])
-                except:
+                except Exception:
                     pass
     else:
         st.info("暂无选题简报，运行选题发现来生成第一个")

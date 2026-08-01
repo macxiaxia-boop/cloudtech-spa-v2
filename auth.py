@@ -47,7 +47,7 @@ def verify_password(password: str, hashed: str) -> bool:
         rest, salt, stored = hashed.rsplit("$", 2)
         dk = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100000)
         return hmac.compare_digest(dk.hex(), stored)
-    except:
+    except Exception:
         return False
 
 
@@ -221,7 +221,7 @@ class AuthManager:
                 return None
 
             return payload
-        except:
+        except Exception:
             return None
 
     @staticmethod

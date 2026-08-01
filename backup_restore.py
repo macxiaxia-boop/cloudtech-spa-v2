@@ -101,7 +101,7 @@ def load_json(path, default=None):
         return default
     try:
         return json.loads(path.read_text(encoding='utf-8'))
-    except:
+    except Exception:
         return default
 
 
@@ -251,7 +251,7 @@ def list_backups():
             date_str = f"{parts[-2][:4]}-{parts[-2][4:6]}-{parts[-2][6:8]}"
             time_str = f"{parts[-1][:2]}:{parts[-1][2:4]}:{parts[-1][4:6]}"
             display_ts = f"{date_str} {time_str}"
-        except:
+        except Exception:
             display_ts = ts
 
         backups.append({
@@ -414,7 +414,7 @@ def show_backup_status():
             ts = ts.replace(tzinfo=CST)
             if oldest is None or ts < oldest:
                 oldest = ts
-        except:
+        except Exception:
             continue
 
     if oldest:

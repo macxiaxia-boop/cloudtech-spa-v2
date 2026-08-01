@@ -143,6 +143,6 @@ def get_billing_summary(tid: str) -> dict:
                 "items": len(data["items"]),
             })
             summary["total_spent"] += data["total_tokens"]
-        except:
+        except Exception:
             pass
     return summary

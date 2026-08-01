@@ -84,7 +84,7 @@ def publish_now(tid: str, item_id: str = None) -> dict:
     try:
         from notifications import notify_publish_done
         notify_publish_done(tid, item["content"].get("account", ""), item["content"].get("platform", ""))
-    except: pass
+    except Exception: pass
 
     return {"ok": True, "item": item, "queue_remaining": len(q["queue"]) + len(q["scheduled"])}
 

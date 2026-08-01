@@ -57,7 +57,7 @@ def _parse_time(ts_str):
         try:
             ts = ts_str.replace("+08:00", "").replace("Z", "")
             return datetime.strptime(ts[:19], "%Y-%m-%dT%H:%M:%S")
-        except:
+        except Exception:
             pass
     return None
 
@@ -72,7 +72,7 @@ def analyze_task(task):
 
     try:
         content = path.read_text(encoding="utf-8", errors="ignore")[:3000]
-    except:
+    except Exception:
         return None
 
     # 判断标准: 同样的方法可以用在≥2个不同场景？
@@ -167,7 +167,7 @@ def merge_to_rules():
             method = re.search(r'方法:\s*(.+)', text)
             if scene and method:
                 all_patterns.append({"scene": scene.group(1), "method": method.group(1), "file": f.name})
-        except:
+        except Exception:
             pass
 
     # 合并相似场景

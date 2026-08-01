@@ -81,7 +81,7 @@ def load_json(path, default=None):
         return default
     try:
         return json.loads(path.read_text(encoding='utf-8'))
-    except:
+    except Exception:
         return default
 
 
@@ -386,7 +386,7 @@ def show_system_status(args):
                 total_size = sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
                 size_mb = total_size / (1024 * 1024)
                 print(f"    {name}: {size_mb:.0f}MB ({len(list(path.rglob('*')))} 文件)")
-            except:
+            except Exception:
                 print(f"    {name}: ?")
 
     # 5. 最近恢复历史

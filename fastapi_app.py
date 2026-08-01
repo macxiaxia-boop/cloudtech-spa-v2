@@ -113,7 +113,7 @@ async def verify_admin(x_admin_token: str = Header(None)):
         return payload
     except HTTPException:
         raise
-    except:
+    except Exception:
         raise HTTPException(401, "Auth error")
 
 
@@ -139,7 +139,7 @@ async def metrics():
         usage = shutil.disk_usage("C:\\")
         lines.append("# HELP system_disk_free_bytes Disk free space on C:")
         lines.append(f"system_disk_free_bytes {usage.free}")
-    except:
+    except Exception:
         pass
     return PlainTextResponse("\n".join(lines) + "\n")
 

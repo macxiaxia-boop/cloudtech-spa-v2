@@ -130,7 +130,7 @@ def load_json(path, default=None):
         return default
     try:
         return json.loads(path.read_text(encoding='utf-8'))
-    except:
+    except Exception:
         return default
 
 
@@ -177,7 +177,7 @@ def get_recovery_history(days=7):
             ts = datetime.fromisoformat(e.get("ts_iso", ""))
             if ts.replace(tzinfo=CST) if ts.tzinfo is None else ts >= cutoff:
                 recent.append(e)
-        except:
+        except Exception:
             recent.append(e)
     return recent
 

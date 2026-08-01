@@ -41,7 +41,7 @@ try:
                 logged_in = True
                 time.sleep(2)
                 break
-        except:
+        except Exception:
             break
 
     print("保存登录态...", flush=True)
@@ -61,5 +61,5 @@ except Exception as e:
 print("\n按Enter退出...", flush=True)
 try:
     input()
-except:
+except Exception:
     pass

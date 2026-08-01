@@ -358,7 +358,7 @@ class Database:
             try:
                 rows = self.fetch_all(f"SELECT * FROM {table}")
                 dump["tables"][table] = [dict(r) for r in rows]
-            except:
+            except Exception:
                 dump["tables"][table] = []
 
         backup_path = Path(backup_path)

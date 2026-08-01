@@ -63,14 +63,14 @@ def confirm_payment(oid: str) -> dict:
             "monthly_quota": PLANS[order["plan_id"]]["quota"],
             "monthly_used": 0,
         })
-    except: pass
+    except Exception: pass
 
     # 发送通知
     try:
         from notifications import notify
         notify(order["tenant_id"], "billing", "支付成功",
                f"{order['plan_name']} ¥{order['amount']} 已到账", "success")
-    except: pass
+    except Exception: pass
 
     of = ORDERS_DIR / f"{oid}.json"
     of.write_text(json.dumps(order, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -85,7 +85,7 @@ def get_tenant_orders(tid: str, limit: int = 10) -> list:
             if o.get("tenant_id") == tid:
                 orders.append(o)
                 if len(orders) >= limit: break
-        except: pass
+        except Exception: pass
     return orders
 
 
@@ -102,5 +102,5 @@ def get_payment_stats() -> dict:
                 revenue += o["amount"]
             elif o["status"] == "pending":
                 pending += 1
-        except: pass
+        except Exception: pass
     return {"total_orders": total, "paid": paid, "pending": pending, "revenue": revenue}

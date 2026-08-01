@@ -16,8 +16,8 @@ _START_TIME = time.time()
 # ═══════════════════════════════════════
 _rate_buckets = {}  # ip → {tokens, last_refill}
 
-def _rate_limit(ip: str, limit: int = 60, window: int = 60) -> bool:
-    """简单令牌桶: 返回True=放行, False=限流"""
+def _rate_limit(ip: str, limit: int = 30, window: int = 10) -> bool:
+    """令牌桶限流: 默认30req/10s·返回True=放行 False=限流"""
     now = time.time()
     bucket = _rate_buckets.get(ip, {"tokens": limit, "last": now})
     elapsed = now - bucket["last"]
@@ -98,7 +98,7 @@ def _check_admin_auth():
             payload = auth.verify_jwt(token)
             if payload:
                 return True
-        except:
+        except Exception:
             pass
     return False
 
@@ -121,7 +121,7 @@ def api_system_health_real():
     try:
         usage = shutil.disk_usage("C:\\")
         checks["disk"] = {"free_gb": round(usage.free / 1073741824, 1), "total_gb": round(usage.total / 1073741824, 1), "pct_used": round((1 - usage.free / usage.total) * 100)}
-    except: checks["disk"] = "error"
+    except Exception: checks["disk"] = "error"
 
     # 服务端口检查
     services = {}
@@ -130,7 +130,7 @@ def api_system_health_real():
             s = socket.socket(); s.settimeout(2)
             s.connect(("127.0.0.1", port)); s.close()
             services[name] = "up"
-        except: services[name] = "down"
+        except Exception: services[name] = "down"
     checks["services"] = services
 
     # 本服务
@@ -187,6 +187,14 @@ def index():
 def health():
     return jsonify({"status": "ok", "app": "CloudTech v2.0.0", "service": "admin-dashboard"})
 
+@app.route("/api/debug/rate-limit-test")
+def api_rate_limit_test():
+    """速率限制测试端点: 快速连续请求触发429"""
+    ip = request.remote_addr or "127.0.0.1"
+    if _rate_limit(ip, limit=5, window=10):  # 5req/10s 严格限流
+        return jsonify({"status": "ok", "message": "请求通过"})
+    return jsonify({"status": "error", "message": "请求过于频繁", "retry_after": 2}), 429
+
 # ── 管理后台 ──
 @app.route("/admin")
 def admin():
@@ -203,7 +211,7 @@ def system_status():
         s.connect(("127.0.0.1", 18792))
         s.close()
         services["gateway"] = "running"
-    except:
+    except Exception:
         services["gateway"] = "stopped"
     # Streamlit
     try:
@@ -212,7 +220,7 @@ def system_status():
         s.connect(("127.0.0.1", 8501))
         s.close()
         services["streamlit"] = "running"
-    except:
+    except Exception:
         services["streamlit"] = "stopped"
     # 装企控制台
     try:
@@ -221,7 +229,7 @@ def system_status():
         s.connect(("127.0.0.1", 8502))
         s.close()
         services["zhuangqi"] = "running"
-    except:
+    except Exception:
         services["zhuangqi"] = "stopped"
     return jsonify({"status": "ok", "services": services, "app": "CloudTech v2.0.0"})
 
@@ -479,7 +487,7 @@ def api_zhuangqi_scenes():
                 data = json.loads(f.read_text(encoding="utf-8"))
                 scenes.append({"id": f.stem, "name": f.stem, "keywords": data.get("keywords",[]),
                                "subcategories": data.get("subcategories",[])})
-            except: pass
+            except Exception: pass
     return jsonify({"scenes": scenes, "total": len(scenes)})
 
 
@@ -1252,7 +1260,7 @@ def api_create_generate():
     research_user = f"为创作主题「{topic}」准备研究简报。包含：1)核心背景 2)3个关键数据点 3)2个争议/不同观点 4)可引用的案例或故事。300字内。"
     try:
         research = _deepseek_call(research_sys, research_user, max_tokens=800)
-    except:
+    except Exception:
         research = "研究阶段跳过"
 
     # Phase 2: Content generation with creator style
@@ -1289,7 +1297,7 @@ Emoji密度：{creator['emoji']}
         deai_user = f"检测以下文本的AI痕迹：\n\n{body[:1500]}"
         try:
             deai_report = _deepseek_call(deai_sys, deai_user, max_tokens=600)
-        except:
+        except Exception:
             deai_report = "检测跳过"
 
         return jsonify({
@@ -1331,7 +1339,7 @@ def api_create_multi_platform():
         user = f"主题：{topic}\n原始内容：{base_content[:1000] if base_content else '无'}\n\n请直接输出{p['name']}适配版内容。"
         try:
             results[pid] = _deepseek_call(sys, user, max_tokens=p["max_words"] * 2, temperature=0.7)
-        except:
+        except Exception:
             results[pid] = f"[{p['name']}] 生成失败"
 
     return jsonify({"status": "ok", "topic": topic, "creator": creator["name"], "results": results})
@@ -1507,7 +1515,7 @@ def api_create_generate_v2():
 
     # 速率限制
     client_ip = request.remote_addr or "127.0.0.1"
-    if not _rate_limit(client_ip, limit=30, window=60):
+    if not _rate_limit(client_ip):
         return jsonify({"status": "error", "message": "请求过于频繁，请稍后再试", "retry_after": 10}), 429
 
     # 配额检查
@@ -1572,7 +1580,7 @@ def api_create_generate_v2():
             research = _deepseek_call(
                 "你是资深研究员。提供背景资料、关键数据、核心观点。300字内。",
                 f"为创作主题「{topic}」准备研究简报。", max_tokens=600)
-        except:
+        except Exception:
             research = "研究阶段跳过"
 
         # 去AI腔检测
@@ -1580,7 +1588,7 @@ def api_create_generate_v2():
             deai_report = _deepseek_call(
                 "你是去AI腔检测专家。检测AI痕迹，5维度打分(1-10)+修改建议。",
                 f"检测以下文本：\n\n{body[:1500]}", max_tokens=500)
-        except:
+        except Exception:
             deai_report = "检测跳过"
 
         # 记录用量+发送通知
@@ -1718,7 +1726,7 @@ def api_admin_apikeys():
             db = Database().connect()
             rows = db.fetch_all("SELECT * FROM api_keys ORDER BY created_at DESC")
             return jsonify({"status":"ok","keys":[dict(r) for r in rows]})
-        except:
+        except Exception:
             return jsonify({"status":"ok","keys":[],"_note":str(e)})
 
 
@@ -1737,7 +1745,7 @@ def api_admin_apikey_generate():
             from database import Database
             db = Database().connect()
             db.insert("api_keys", {"key":new_key, "name":request.get_json().get("name","Admin"),"created_at":str(__import__('datetime').datetime.now())[:19],"enabled":1})
-        except: pass
+        except Exception: pass
         return jsonify({"status":"ok","key":{"key":new_key,"name":request.get_json().get("name","Admin")}})
 
 
@@ -1748,13 +1756,13 @@ def api_admin_apikey_revoke(key_id):
         km = APIKeyManager()
         km.revoke_key(key_id)
         return jsonify({"status":"ok","revoked":key_id})
-    except:
+    except Exception:
         try:
             from database import Database
             db = Database().connect()
             db.execute("UPDATE api_keys SET enabled=0 WHERE key LIKE ?", [f"{key_id}%"])
             db.conn.commit()
-        except: pass
+        except Exception: pass
         return jsonify({"status":"ok","revoked":key_id})
 
 
@@ -1793,7 +1801,7 @@ def api_admin_crashes():
             lines = crash_log.read_text(errors="ignore").strip().split("\n")[-50:]
             for line in lines:
                 try: recent.append(json.loads(line))
-                except: pass
+                except Exception: pass
         return jsonify({"status":"ok","stats":stats,"recent":recent})
     except Exception as e:
         return jsonify({"status":"error","message":str(e)}), 500
@@ -2002,7 +2010,7 @@ def api_pipeline_recent():
     if cache.exists():
         try:
             return jsonify({"status": "ok", "recent": json.loads(cache.read_text(encoding="utf-8"))})
-        except:
+        except Exception:
             pass
     # Fallback: scan content directories
     results = []
@@ -2030,7 +2038,7 @@ def api_pipeline_recent():
                     "creator": creator_match.group(1) if creator_match else None,
                     "time": datetime.fromtimestamp(f.stat().st_mtime).strftime("%m-%d %H:%M")
                 })
-            except:
+            except Exception:
                 pass
     return jsonify({"status": "ok", "recent": results})
 
@@ -2246,7 +2254,7 @@ def api_geo_ranking_board():
                 "cities": list(set(cities))[:3],
                 "keywords": list(set(keywords))[:3],
             })
-        except:
+        except Exception:
             pass
     return jsonify({"status": "ok", "rankings": rankings})
 
@@ -2262,7 +2270,7 @@ def api_publish_tracker():
             reader = csv.DictReader(tracker.read_text(encoding="utf-8-sig").splitlines())
             for row in reader:
                 items.append(row)
-        except:
+        except Exception:
             pass
     return jsonify({"status": "ok", "items": items[-20:], "total": len(items)})
 
@@ -2459,7 +2467,7 @@ def metrics():
         usage = _shutil.disk_usage("C:\\")
         lines.append("# HELP system_disk_free_bytes Disk free space on C:")
         lines.append(f"system_disk_free_bytes {usage.free}")
-    except:
+    except Exception:
         lines.append("system_disk_free_bytes 0")
     return "\n".join(lines) + "\n", 200, {"Content-Type": "text/plain; version=0.0.4"}
 
