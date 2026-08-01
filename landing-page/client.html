@@ -168,6 +168,14 @@ async function load(){
     document.getElementById('contentCalendar').innerHTML=cal;
   }catch(e){}
 
+  // Content recommendations
+  try{
+    var rec=await api('/api/recommend/topics?tid='+TID+'&count=4');
+    var recHtml='';
+    (rec.recommendations||[]).forEach(function(r){recHtml+='<div style=\"font-size:.7rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.03)\">💡 '+r.topic+' <span style=\"color:var(--accent);font-size:.64rem\">'+r.score+'分</span></div>'});
+    document.getElementById('contentCalendar').innerHTML='<h4>🤖 AI推荐选题</h4>'+recHtml+'<h4 style=\"margin-top:10px\">📅 7日日历</h4><div id=\"calContent\" class=\"loading\">加载中...</div>';
+  }catch(e){}
+
   // GEO ranking
   try{
     var gd=await api('/api/geo/ranking-board');
