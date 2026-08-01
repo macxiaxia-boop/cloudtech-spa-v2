@@ -39,6 +39,7 @@ class CreatorEnum(str, Enum):
     xiaolin = "xiaolin"
     gaogailun = "gaogailun"
     xiaoa = "xiaoa"
+    family = "family"
 
 class ContentFormEnum(str, Enum):
     voiceover = "voiceover"
