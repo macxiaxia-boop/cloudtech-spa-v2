@@ -737,7 +737,9 @@ async async function runDemo(){
   html+='<div style=\"margin-top:8px\"><a href=\"/client?tid='+r.tenant_id+'\" target=\"_blank\" class=\"btn go\">📊 查看客户仪表盘</a></div></div>';
   document.getElementById('demoResult').innerHTML=html;
   b.disabled=false;b.textContent='⚡ 一键产品演示';
-  loadDashboard();
+  loadDashboard();loadNotifications();
+  // Auto-open client dashboard in new tab
+  if(r.tenant_id) window.open('/client?tid='+r.tenant_id,'_blank');
 }
 function refreshStatus(){
   try{var r=await api('/api/system/status');if(!r.services)return;

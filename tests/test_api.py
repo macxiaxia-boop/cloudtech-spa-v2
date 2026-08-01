@@ -97,11 +97,11 @@ class TestContentCreation:
     def test_styles_200(self, client):
         d = json.loads(client.get('/api/create/styles').data)
         assert d['status'] == 'ok'
-        assert len(d['styles']) == 4
+        assert len(d['styles']) == 5
 
     def test_forms_200(self, client):
         d = json.loads(client.get('/api/create/forms').data)
-        assert len(d['forms']) == 6
+        assert len(d['forms']) == 7
         assert len(d['hook_types']) == 6
         assert len(d['story_formulas']) == 4
 
