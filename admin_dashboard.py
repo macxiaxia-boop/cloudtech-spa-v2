@@ -2811,6 +2811,17 @@ def api_platform_summary():
 def register_page():
     return send_from_directory(str(LANDING), "register-zhuangqi.html")
 
+@app.route("/trial")
+def trial_page():
+    """免费试用: 自动创建试用租户→跳转仪表盘"""
+    from tenant_service import create_tenant
+    import secrets
+    name = f"试用装企-{secrets.token_hex(2)}"
+    t = create_tenant(name, ["厦门"], "starter")
+    # 重定向到客户端仪表盘
+    from flask import redirect
+    return redirect(f"/client?tid={t['id']}&trial=1")
+
 @app.route("/register-account")
 def register_account_page():
     """邮箱注册页面"""
