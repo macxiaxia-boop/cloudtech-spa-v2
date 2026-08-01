@@ -677,7 +677,7 @@ async function refreshStatus(){
   try{var r=await api('/api/system/status');if(!r.services)return;
     ['gw','st'].forEach(function(k){var m={gw:'gateway',st:'streamlit'};var ok=r.services[m[k]]==='running';var b=document.getElementById(k+'-badge');if(b){b.textContent=ok?'运行中':'已停止';b.className='badge '+(ok?'on':'off')}})}catch(e){}
 }
-refreshStatus();loadDashboard();setInterval(refreshStatus,30000);
+refreshStatus();loadDashboard();setInterval(refreshStatus,30000);setInterval(loadDashboard,60000);setInterval(loadOpsKpis,60000);
 
 // ═══════════ CREATOR STYLES + CONTENT FORMS ═══════════
 var _styles=[],_platforms={},_forms=[];
