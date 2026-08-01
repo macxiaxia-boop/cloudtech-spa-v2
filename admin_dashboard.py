@@ -311,6 +311,58 @@ def api_i18n_translate():
     return jsonify(translate_content(data.get("text", ""), data.get("lang", "en")))
 
 # ═══════════════════════════════════════════════════════
+# 模板库 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/templates")
+def api_templates():
+    from template_library import list_templates, get_template_categories, apply_template
+    if request.args.get("apply"):
+        return jsonify(apply_template(request.args.get("apply"), {}))
+    return jsonify({"status": "ok", "templates": list_templates(request.args.get("category", ""), request.args.get("platform", "")), "categories": get_template_categories()})
+
+# ═══════════════════════════════════════════════════════
+# 审批工作流 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/approvals/<tid>")
+def api_approvals(tid):
+    from approval_engine import get_approvals, get_approval_stats
+    return jsonify({"status": "ok", "approvals": get_approvals(tid, request.args.get("status", "")), "stats": get_approval_stats(tid)})
+
+@app.route("/api/approvals/submit", methods=["POST"])
+def api_approval_submit():
+    from approval_engine import submit_for_review
+    data = request.get_json() or {}
+    return jsonify(submit_for_review(data.get("tid", _DEFAULT_TID), data.get("content_id", ""), data.get("title", ""), data.get("submitter", "admin")))
+
+@app.route("/api/approvals/<aid>/resolve", methods=["POST"])
+def api_approval_resolve(aid):
+    from approval_engine import approve, reject
+    data = request.get_json() or {}
+    action = data.get("action", "approve")
+    if action == "reject": return jsonify(reject(aid, data.get("reviewer", "admin"), data.get("comment", "")))
+    return jsonify(approve(aid, data.get("reviewer", "admin"), data.get("comment", "")))
+
+# ═══════════════════════════════════════════════════════
+# 数字人/虚拟角色 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/avatars")
+def api_avatars():
+    from digital_human import list_avatars, get_avatar_stats
+    return jsonify({"status": "ok", "avatars": list_avatars(request.args.get("tid", ""), request.args.get("type", "")), "stats": get_avatar_stats(request.args.get("tid", ""))})
+
+@app.route("/api/avatars/register", methods=["POST"])
+def api_avatar_register():
+    from digital_human import register_avatar
+    data = request.get_json() or {}
+    return jsonify(register_avatar(data.get("tid", _DEFAULT_TID), data.get("name", ""), data.get("type", "stock"), data.get("config")))
+
+@app.route("/api/avatars/<avatar_id>/voice", methods=["POST"])
+def api_avatar_voice(avatar_id):
+    from digital_human import add_voice
+    data = request.get_json() or {}
+    return jsonify(add_voice(avatar_id, data.get("name", ""), data.get("uri", ""), data.get("language", "zh-CN")))
+
+# ═══════════════════════════════════════════════════════
 # 批量操作 API
 # ═══════════════════════════════════════════════════════
 @app.route("/api/batch/produce", methods=["POST"])
