@@ -70,8 +70,18 @@ def kuaizi(input_data: dict) -> dict:
         "content_form": content_form["name"],
     }
 
+    # 品牌资产注入
+    brand_context = ""
+    try:
+        from brand_assets import list_brands
+        brands = list_brands(tid)
+        if brands:
+            b = brands[0]
+            brand_context = f"\n## 品牌规范\n- 品牌名: {b['name']}\n- 品牌配置: {json.dumps(b.get('config',{}), ensure_ascii=False)}"
+    except: pass
+
     # ═══ 筷子核心: 一个System Prompt驱动全链路，注入创作者风格 ═══
-    master_prompt = f"""你是装企AI内容工厂。你现在严格对标「{creator['name']}」的创作风格。
+    master_prompt = f"""你是装企AI内容工厂。你现在严格对标「{creator['name']}」的创作风格。{brand_context}
 
 ## 🎭 创作者风格DNA（必须严格遵守）
 - 风格定位：{creator['tone']}

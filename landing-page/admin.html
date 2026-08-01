@@ -232,6 +232,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <button class="btn" onclick="navTo('rights')">©️ 版权中心</button>
       <button class="btn go" onclick="navTo('ops-center')">📡 运营中心</button>
       <button class="btn" onclick="navTo('assets')">🎨 资产管理</button>
+      <button class="btn" onclick="navTo('audit-panel')">📋 审计日志</button>
     </div>
   </div>
 </div>
@@ -524,6 +525,21 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div class="panel-card"><h3>📋 模板库</h3>
       <button class="btn go" onclick="loadTemplates()" style="margin-bottom:8px">🔄 刷新</button>
       <div id="templateList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ AUDIT ═══════════ -->
+<div class="panel" id="panel-audit-panel">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>📋 活动日志</h3>
+      <select id="auditTid" onchange="loadAuditPanel()" style="margin-bottom:8px"><option value="zq-5bb59623">闽南装饰</option><option value="zq-e9118fd0">实战装企</option></select>
+      <button class="btn go" onclick="loadAuditPanel()" style="margin-bottom:8px">🔄 刷新</button>
+      <div id="auditLog"></div>
+    </div>
+    <div class="panel-card"><h3>📊 活动摘要</h3>
+      <button class="btn go" onclick="loadAuditSummary()" style="margin-bottom:8px">📊 加载摘要</button>
+      <div id="auditSummary"></div>
     </div>
   </div>
 </div>
@@ -1239,6 +1255,11 @@ async function loadAvatars(){var d=await api('/api/avatars');var as=(d.avatars||
 async function loadApprovals(){var d=await api('/api/approvals/zq-5bb59623');var as=(d.approvals||[]).slice(0,15);document.getElementById('approvalList').innerHTML=as.length?as.map(function(a){var s=a.status==='approved'?'on':a.status==='rejected'?'off':'';return'<div class=\"card\" style=\"margin-bottom:3px\"><b>'+a.title+'</b> <span class=\"badge '+s+'\">'+a.status+'</span><br><span style=\"font-size:.68rem;color:var(--muted)\">'+a.submitter+' → '+a.reviewer+'</span></div>'}).join(''):'<div class=\"status-msg\">无审批</div>'}
 async function loadTemplates(){var d=await api('/api/templates');var ts=d.templates||[];document.getElementById('templateList').innerHTML=ts.length?ts.map(function(t){return'<div class=\"card\" style=\"margin-bottom:3px\"><b>'+t.name+'</b> <span style=\"color:var(--muted);font-size:.7rem\">'+t.category+'</span><br><span style=\"font-size:.66rem\">'+t.structure+'</span></div>'}).join(''):'<div class=\"status-msg\">无模板</div>'}
 function initAssets(){loadBrands();loadAvatars();loadApprovals();loadTemplates();}
+
+// ═══════════ AUDIT ═══════════
+async function loadAuditPanel(){var tid=document.getElementById('auditTid').value;var d=await api('/api/audit/'+tid+'?days=7');var as=d.activities||[];document.getElementById('auditLog').innerHTML=as.length?as.map(function(a){return'<div class=\"card\" style=\"margin-bottom:2px;font-size:.72rem\"><b>'+a.action+'</b> <span style=\"color:var(--muted)\">'+a.time+'</span></div>'}).join(''):'<div class=\"status-msg\">无活动</div>'}
+async function loadAuditSummary(){var d=await api('/api/audit/summary?days=7');var s=d.summary||{};document.getElementById('auditSummary').innerHTML='<div class=\"kpi\"><div class=\"l\">总活动</div><div class=\"v\">'+s.total_activities+'</div></div><div class=\"kpi\"><div class=\"l\">活跃租户</div><div class=\"v\">'+Object.keys(s.top_tenants||{}).length+'</div></div>';}
+if(document.getElementById('auditTid')){document.getElementById('auditTid').addEventListener('change',loadAuditPanel)}
 
 // ═══════════ PLATFORM ═══════════
 async function loadPlatform(){
