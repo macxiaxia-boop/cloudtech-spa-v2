@@ -48,6 +48,7 @@ class ContentFormEnum(str, Enum):
     mashup = "mashup"
     article = "article"
     short_video = "short_video"
+    renovation_showcase = "renovation_showcase"
 
 class PlatformEnum(str, Enum):
     douyin = "douyin"
