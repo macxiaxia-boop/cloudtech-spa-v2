@@ -85,6 +85,11 @@ def publish_now(tid: str, item_id: str = None) -> dict:
         from notifications import notify_publish_done
         notify_publish_done(tid, item["content"].get("account", ""), item["content"].get("platform", ""))
     except Exception: pass
+    # 触发webhook
+    try:
+        from webhooks import trigger_event
+        trigger_event("content.published", tid, {"account": item["content"].get("account", ""), "platform": item["content"].get("platform", "")})
+    except Exception: pass
 
     return {"ok": True, "item": item, "queue_remaining": len(q["queue"]) + len(q["scheduled"])}
 

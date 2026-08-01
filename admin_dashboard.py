@@ -159,6 +159,22 @@ def api_export_content(tid):
 # ═══════════════════════════════════════════════════════
 # 内容搜索 API
 # ═══════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════
+# Webhook API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/webhooks", methods=["GET", "POST"])
+def api_webhooks():
+    from webhooks import list_webhooks, register_webhook
+    if request.method == "POST":
+        data = request.get_json() or {}
+        return jsonify(register_webhook(data.get("tid", ""), data.get("event", ""), data.get("url", ""), data.get("secret", "")))
+    return jsonify({"status": "ok", "webhooks": list_webhooks(request.args.get("tid", ""))})
+
+@app.route("/api/webhooks/<wid>", methods=["DELETE"])
+def api_webhook_delete(wid):
+    from webhooks import delete_webhook
+    return jsonify(delete_webhook(wid))
+
 @app.route("/api/search/content")
 def api_search_content():
     """全平台内容搜索: 关键词·租户·日期范围"""

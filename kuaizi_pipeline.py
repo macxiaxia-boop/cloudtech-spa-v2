@@ -192,5 +192,10 @@ def kuaizi(input_data: dict) -> dict:
         from notifications import notify_content_ready
         notify_content_ready(tid, community or f"{city}{room}改造")
     except Exception: pass
+    # 触发webhook
+    try:
+        from webhooks import trigger_event
+        trigger_event("content.created", tid, {"topic": community or f"{city}{room}改造", "tokens": tokens_used})
+    except Exception: pass
 
     return output
