@@ -363,6 +363,29 @@ def api_avatar_voice(avatar_id):
     return jsonify(add_voice(avatar_id, data.get("name", ""), data.get("uri", ""), data.get("language", "zh-CN")))
 
 # ═══════════════════════════════════════════════════════
+# 审计日志 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/audit/<tid>")
+def api_audit_tenant(tid):
+    from audit_viewer import get_tenant_activity, log_activity
+    log_activity(tid, "view_audit", {"endpoint": "audit_view"})
+    return jsonify({"status": "ok", "activities": get_tenant_activity(tid, int(request.args.get("days", 7)), request.args.get("action", ""))})
+
+@app.route("/api/audit/summary")
+def api_audit_summary():
+    from audit_viewer import get_activity_summary
+    return jsonify({"status": "ok", "summary": get_activity_summary(int(request.args.get("days", 7)))})
+
+# ═══════════════════════════════════════════════════════
+# 内容推荐 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/recommend/topics")
+def api_recommend_topics():
+    from content_recommender import recommend_topics
+    tid = request.args.get("tid", _DEFAULT_TID)
+    return jsonify(recommend_topics(tid, request.args.get("city", "厦门"), int(request.args.get("count", 5))))
+
+# ═══════════════════════════════════════════════════════
 # 批量操作 API
 # ═══════════════════════════════════════════════════════
 @app.route("/api/batch/produce", methods=["POST"])
@@ -767,22 +790,14 @@ def api_feedback_stats():
 # ── 备份 API ──
 @app.route("/api/admin/backup", methods=["POST"])
 def api_backup():
-    try:
-        from data_backup import backup_all, cleanup_old_backups
-        cleanup_old_backups()
-        result = backup_all()
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+    from backup_scheduler import run_backup, cleanup_old_backups
+    cleanup_old_backups()
+    return jsonify(run_backup(request.get_json(silent=True) or {}).get("label", "manual"))
 
 @app.route("/api/admin/backup/status")
 def api_backup_status():
-    try:
-        from data_backup import get_backup_status
-        return jsonify(get_backup_status())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    from backup_scheduler import get_backup_status, list_backups
+    return jsonify({"status": "ok", "backup_status": get_backup_status(), "recent_backups": list_backups(10)})
 
 
 # ── 装企内容引擎 API ──
