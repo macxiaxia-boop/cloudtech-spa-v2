@@ -421,6 +421,24 @@ def api_models():
     return jsonify({"status": "ok", "models": list_models(request.args.get("type", "")), "stats": get_model_stats()})
 
 # ═══════════════════════════════════════════════════════
+# 内容商业智能体 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/intel/predict")
+def api_intel_predict():
+    from content_intelligence import predict_performance
+    return jsonify(predict_performance(request.args.get("tid", _DEFAULT_TID), request.args.get("topic", ""), request.args.get("platform", "xiaohongshu"), request.args.get("type", "article")))
+
+@app.route("/api/intel/optimize")
+def api_intel_optimize():
+    from content_intelligence import get_optimization_tips
+    return jsonify(get_optimization_tips(request.args.get("tid", _DEFAULT_TID), request.args.get("topic", ""), request.args.get("platform", "xiaohongshu")))
+
+@app.route("/api/intel/supply-chain/<tid>")
+def api_intel_supply_chain(tid):
+    from content_intelligence import supply_chain_analysis
+    return jsonify(supply_chain_analysis(tid))
+
+# ═══════════════════════════════════════════════════════
 # 批量操作 API
 # ═══════════════════════════════════════════════════════
 @app.route("/api/batch/produce", methods=["POST"])
