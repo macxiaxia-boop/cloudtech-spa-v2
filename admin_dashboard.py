@@ -18,6 +18,18 @@ _rate_buckets = {}  # ip → {tokens, last_refill}
 
 def _rate_limit(ip: str, limit: int = 30, window: int = 10) -> bool:
     """令牌桶限流: 默认30req/10s·返回True=放行 False=限流"""
+
+def _rate_limit_tenant(tid: str, limit: int = None) -> bool:
+    """租户级限流: starter=20·pro=60·enterprise=200 req/min"""
+    if not limit:
+        from tenant_service import get_plan
+        limits = {"starter": 20, "pro": 60, "enterprise": 200}
+        try:
+            tenant = __import__('tenant_service', fromlist=['get_tenant']).get_tenant(tid)
+            plan = tenant.get("plan", "starter") if tenant else "starter"
+            limit = limits.get(plan, 20)
+        except: limit = 20
+    return _rate_limit(f"tenant:{tid}", limit=limit, window=60)
     now = time.time()
     bucket = _rate_buckets.get(ip, {"tokens": limit, "last": now})
     elapsed = now - bucket["last"]
@@ -212,6 +224,91 @@ def api_webhooks():
 def api_webhook_delete(wid):
     from webhooks import delete_webhook
     return jsonify(delete_webhook(wid))
+
+# ═══════════════════════════════════════════════════════
+# 品牌资产管理 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/brands", methods=["GET", "POST"])
+def api_brands():
+    from brand_assets import list_brands, create_brand
+    if request.method == "POST":
+        data = request.get_json() or {}
+        return jsonify(create_brand(data.get("tid", _DEFAULT_TID), data.get("name", "新品牌"), data.get("config")))
+    return jsonify({"status": "ok", "brands": list_brands(request.args.get("tid", ""))})
+
+@app.route("/api/brands/<bid>/assets", methods=["POST", "DELETE"])
+def api_brand_assets(bid):
+    from brand_assets import add_asset, remove_asset
+    if request.method == "POST":
+        data = request.get_json() or {}
+        return jsonify(add_asset(bid, data.get("type", "logo"), data.get("name", ""), data.get("uri", ""), data.get("meta")))
+    data = request.get_json() or {}
+    return jsonify(remove_asset(bid, data.get("type", ""), data.get("aid", "")))
+
+# ═══════════════════════════════════════════════════════
+# 内容效果分析 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/analytics/performance/<tid>")
+def api_analytics_performance(tid):
+    from content_analytics import get_content_performance, get_platform_breakdown, get_content_roi
+    days = int(request.args.get("days", 30))
+    return jsonify({"status": "ok", "performance": get_content_performance(tid, days),
+                    "by_platform": get_platform_breakdown(tid, days), "roi": get_content_roi(tid)})
+
+@app.route("/api/analytics/track", methods=["POST"])
+def api_analytics_track():
+    from content_analytics import track_content
+    data = request.get_json() or {}
+    return jsonify(track_content(data.get("tid", _DEFAULT_TID), data.get("content_id", ""), data.get("platform", "xiaohongshu"), data.get("metrics", {})))
+
+# ═══════════════════════════════════════════════════════
+# 团队协作 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/teams", methods=["GET", "POST"])
+def api_teams():
+    from team_collab import create_team, get_team
+    if request.method == "POST":
+        data = request.get_json() or {}
+        return jsonify(create_team(data.get("tid", _DEFAULT_TID), data.get("name", "新团队")))
+    tid = request.args.get("tid", "")
+    return jsonify({"status": "ok", "team": get_team(request.args.get("team_id", "")) if request.args.get("team_id") else None})
+
+@app.route("/api/teams/<team_id>/members", methods=["POST", "DELETE"])
+def api_team_members(team_id):
+    from team_collab import add_member, remove_member
+    data = request.get_json() or {}
+    if request.method == "POST":
+        return jsonify(add_member(team_id, data.get("email", ""), data.get("role", "editor")))
+    return jsonify(remove_member(team_id, data.get("email", "")))
+
+# ═══════════════════════════════════════════════════════
+# 合规自动化 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/compliance/check", methods=["POST"])
+def api_compliance_check():
+    from compliance_auto import run_compliance_check, get_compliance_stats
+    data = request.get_json() or {}
+    return jsonify(run_compliance_check(data, data.get("content_type", "article")))
+
+@app.route("/api/compliance/stats")
+def api_compliance_stats():
+    from compliance_auto import get_compliance_stats
+    return jsonify({"status": "ok", "stats": get_compliance_stats()})
+
+# ═══════════════════════════════════════════════════════
+# 多语言 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/i18n/languages")
+def api_i18n_languages():
+    from i18n import get_languages, t
+    return jsonify({"status": "ok", "languages": get_languages(), "sample": {"dashboard": t("dashboard"), "content": t("content")}})
+
+@app.route("/api/i18n/translate", methods=["POST"])
+def api_i18n_translate():
+    from i18n import translate_content, get_translation_jobs
+    data = request.get_json() or {}
+    if data.get("list"): return jsonify({"status": "ok", "jobs": get_translation_jobs()})
+    return jsonify(translate_content(data.get("text", ""), data.get("lang", "en")))
 
 # ═══════════════════════════════════════════════════════
 # 批量操作 API
