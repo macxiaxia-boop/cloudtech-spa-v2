@@ -231,6 +231,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <button class="btn" onclick="navTo('video-panel')">🎬 视频引擎</button>
       <button class="btn" onclick="navTo('rights')">©️ 版权中心</button>
       <button class="btn go" onclick="navTo('ops-center')">📡 运营中心</button>
+      <button class="btn" onclick="navTo('assets')">🎨 资产管理</button>
     </div>
   </div>
 </div>
@@ -500,6 +501,33 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
 </div>
 
+<!-- ═══════════ ASSET MANAGEMENT ═══════════ -->
+<div class="panel" id="panel-assets">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="panel-card"><h3>🎨 品牌资产</h3>
+      <div class="f-grp"><input id="brandName" placeholder="品牌名称"></div>
+      <button class="btn go" onclick="createBrand()" style="width:100%;margin-bottom:8px">+ 创建品牌</button>
+      <div id="brandList"></div>
+    </div>
+    <div class="panel-card"><h3>👤 数字人</h3>
+      <div class="f-grp"><input id="avName" placeholder="数字人名称"></div>
+      <select id="avType" style="margin-bottom:6px"><option value="stock">平台内置</option><option value="custom">定制</option><option value="clone">真人克隆</option></select>
+      <button class="btn go" onclick="createAvatar()" style="width:100%;margin-bottom:8px">+ 注册数字人</button>
+      <div id="avatarList"></div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+    <div class="panel-card"><h3>✅ 审批中心</h3>
+      <button class="btn go" onclick="loadApprovals()" style="margin-bottom:8px">🔄 刷新</button>
+      <div id="approvalList"></div>
+    </div>
+    <div class="panel-card"><h3>📋 模板库</h3>
+      <button class="btn go" onclick="loadTemplates()" style="margin-bottom:8px">🔄 刷新</button>
+      <div id="templateList"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ 11.6 TENANTS ═══════════ -->
 <div class="panel" id="panel-tenants-panel">
   <div class="panel-card"><h3>🏢 租户管理 <span class="sub">多租户SaaS</span></h3>
@@ -661,6 +689,7 @@ function navTo(id){
   if(id==='apikeys')loadApiKeys();
   if(id==='ops-center')initOps();
   if(id==='rights'){rightsList();rightsReport();}
+  if(id==='assets')initAssets();
 }
 document.querySelectorAll('.sb-sub').forEach(function(s){
   s.addEventListener('click',function(){navTo(this.getAttribute('data-panel'))});
@@ -1201,6 +1230,15 @@ async function updateBell(){
   bell.textContent=u;bell.style.display=u>0?'inline':'none';
 }
 setInterval(updateBell,30000);updateBell();
+
+// ═══════════ ASSET MANAGEMENT ═══════════
+async function createBrand(){var n=document.getElementById('brandName').value;if(!n)return;var d=await api('/api/brands',{method:'POST',body:JSON.stringify({name:n})});if(d.status||d.ok){loadBrands()}}
+async function loadBrands(){var d=await api('/api/brands');var bs=(d.brands||[]).slice(0,10);document.getElementById('brandList').innerHTML=bs.length?bs.map(function(b){return'<div class=\"card\" style=\"margin-bottom:3px\"><b>'+b.name+'</b> <span style=\"color:var(--muted);font-size:.7rem\">'+b.id+'</span></div>'}).join(''):'<div class=\"status-msg\">无品牌</div>'}
+async function createAvatar(){var n=document.getElementById('avName').value;if(!n)return;var d=await api('/api/avatars/register',{method:'POST',body:JSON.stringify({name:n,type:document.getElementById('avType').value})});if(d.ok){loadAvatars()}}
+async function loadAvatars(){var d=await api('/api/avatars');var as=(d.avatars||[]).slice(0,10);document.getElementById('avatarList').innerHTML=as.length?as.map(function(a){return'<div class=\"card\" style=\"margin-bottom:3px\"><b>'+a.name+'</b> <span style=\"color:var(--muted);font-size:.7rem\">'+a.type_name+'</span></div>'}).join(''):'<div class=\"status-msg\">无数字人</div>'}
+async function loadApprovals(){var d=await api('/api/approvals/zq-5bb59623');var as=(d.approvals||[]).slice(0,15);document.getElementById('approvalList').innerHTML=as.length?as.map(function(a){var s=a.status==='approved'?'on':a.status==='rejected'?'off':'';return'<div class=\"card\" style=\"margin-bottom:3px\"><b>'+a.title+'</b> <span class=\"badge '+s+'\">'+a.status+'</span><br><span style=\"font-size:.68rem;color:var(--muted)\">'+a.submitter+' → '+a.reviewer+'</span></div>'}).join(''):'<div class=\"status-msg\">无审批</div>'}
+async function loadTemplates(){var d=await api('/api/templates');var ts=d.templates||[];document.getElementById('templateList').innerHTML=ts.length?ts.map(function(t){return'<div class=\"card\" style=\"margin-bottom:3px\"><b>'+t.name+'</b> <span style=\"color:var(--muted);font-size:.7rem\">'+t.category+'</span><br><span style=\"font-size:.66rem\">'+t.structure+'</span></div>'}).join(''):'<div class=\"status-msg\">无模板</div>'}
+function initAssets(){loadBrands();loadAvatars();loadApprovals();loadTemplates();}
 
 // ═══════════ PLATFORM ═══════════
 async function loadPlatform(){
