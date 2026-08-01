@@ -2419,14 +2419,21 @@ def api_video_modes():
 
 @app.route("/api/video/generate", methods=["POST"])
 def api_video_generate():
-    """生成视频脚本+素材匹配"""
+    """生成视频脚本+素材匹配·支持本地渲染"""
     from video_engine import generate_video_script, create_video_package
+    from video_api import build_video_request, render_video_locally
     data = request.get_json() or {}
-    result = generate_video_script(
-        data.get("topic", ""),
-        data.get("mode", "before_after"),
-        data.get("context", {}),
-    )
+    provider = data.get("provider", "local")
+    if provider == "local":
+        # 本地渲染: 不需要外部API
+        script = generate_video_script(data.get("topic", ""), data.get("mode", "before_after"), data.get("context", {}))
+        req = build_video_request(script, "jimeng", data.get("options", {}))
+        result = render_video_locally(req)
+        result["script"] = script
+        result["package"] = create_video_package(script, data.get("account", "默认账号"))
+        return jsonify({"status": "ok", "result": result})
+    # 外部API模式
+    result = generate_video_script(data.get("topic", ""), data.get("mode", "before_after"), data.get("context", {}))
     pkg = create_video_package(result, data.get("account", "默认账号"))
     result["package"] = pkg
     return jsonify({"status": "ok", "result": result})

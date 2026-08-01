@@ -44,18 +44,31 @@ def get_languages() -> dict:
 
 def translate_content(text: str, target_lang: str) -> dict:
     """
-    内容翻译（标记待AI翻译）
-    实际翻译通过DeepSeek API执行
+    内容翻译 — 通过DeepSeek API实际执行翻译
     """
     job_id = f"tr-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    lang_names = {"en": "English", "ja": "日本語", "ko": "한국어", "zh-TW": "繁體中文"}
+    target_name = lang_names.get(target_lang, target_lang)
+
+    # 尝试实际翻译
+    translated = ""
+    try:
+        from admin_dashboard import _deepseek_call
+        translated = _deepseek_call(
+            f"你是专业翻译。将以下中文翻译为{target_name}，保持原意和风格。只输出译文。",
+            text[:2000], max_tokens=2000, temperature=0.3
+        )
+    except Exception:
+        translated = ""  # fallback: 标记待翻译
+
     job = {
         "id": job_id, "source_lang": "zh-CN", "target_lang": target_lang,
-        "source_text": text[:3000], "status": "pending",
-        "translated_text": "", "created_at": datetime.now().isoformat()[:19],
+        "source_text": text[:3000], "status": "completed" if translated else "pending",
+        "translated_text": translated, "created_at": datetime.now().isoformat()[:19],
     }
     jf = I18N_DIR / f"{job_id}.json"
     jf.write_text(json.dumps(job, ensure_ascii=False, indent=2), encoding="utf-8")
-    return {"ok": True, "job": job, "hint": "实际翻译通过DeepSeek API异步执行"}
+    return {"ok": True, "job": job}
 
 
 def get_translation_jobs(limit: int = 20) -> list:

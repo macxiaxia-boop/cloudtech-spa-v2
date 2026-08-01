@@ -97,6 +97,57 @@ def _parse_duration(dur_str: str) -> int:
 
 GENERATION_JOBS = {}  # 内存状态（生产环境应持久化到DB）
 
+def render_video_locally(request: dict) -> dict:
+    """本地渲染模式: 不需要外部API·生成完整HTML预览+下载包"""
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = VIDEO_OUT / f"render_{ts}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    prompt = request.get("prompt", "")
+    scenes = request.get("scenes", [])
+    mode = request.get("metadata", {}).get("mode", "")
+    topic = request.get("metadata", {}).get("topic", "视频")
+
+    # 生成HTML预览
+    scenes_html = ""
+    for i, s in enumerate(scenes):
+        scenes_html += f"""<div class='scene'>
+  <div class='scene-num'>Scene {i+1}</div>
+  <div class='scene-desc'>{s}</div>
+  <div class='scene-bar' style='width:{(i+1)/len(scenes)*100}%'></div>
+</div>"""
+
+    html = f"""<!DOCTYPE html>
+<html lang='zh-CN'><head><meta charset='UTF-8'><title>{topic}</title>
+<style>
+body{{font-family:'Microsoft YaHei',sans-serif;max-width:400px;margin:0 auto;padding:16px;background:#0a0a0a;color:#eee}}
+.scene{{margin-bottom:12px;padding:12px;background:#1a1a1a;border-radius:8px}}
+.scene-num{{color:#c9a96e;font-weight:bold;margin-bottom:4px}}
+.scene-desc{{font-size:14px;line-height:1.6}}
+.scene-bar{{height:3px;background:linear-gradient(90deg,#c9a96e,transparent);margin-top:8px;border-radius:2px}}
+h2{{color:#c9a96e}} .meta{{font-size:12px;color:#777;margin-top:16px}}
+</style></head><body>
+<h2>🎬 {topic}</h2>
+<p style='color:#999'>{mode} · {len(scenes)}个分镜 · {request.get('duration',30)}秒</p>
+{scenes_html}
+<div class='meta'>云数科技 CloudTech · 本地渲染 · {ts}</div>
+</body></html>"""
+
+    html_path = output_dir / "preview.html"
+    html_path.write_text(html, encoding="utf-8")
+
+    # 保存完整方案
+    pkg_path = output_dir / "script.txt"
+    pkg_path.write_text(prompt, encoding="utf-8")
+
+    return {
+        "ok": True, "mode": "local_render",
+        "preview_html": str(html_path), "script_file": str(pkg_path),
+        "scenes": len(scenes), "duration_estimate": request.get("duration", 30),
+        "output_dir": str(output_dir),
+    }
+
+
 def submit_video_job(request: dict) -> dict:
     """提交视频生成任务（异步）"""
     job_id = f"vj-{hashlib.md5(str(time.time()).encode()).hexdigest()[:12]}"

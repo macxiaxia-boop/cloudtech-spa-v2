@@ -53,12 +53,29 @@ def get_template_categories() -> list:
     return sorted(cats)
 
 def apply_template(template_name: str, variables: dict) -> dict:
-    """应用模板: 填充变量→生成结构化提示"""
+    """应用模板: 填充变量→AI生成完整内容"""
     for cat, templates in PRESET_TEMPLATES.items():
         for t in templates:
             if t["name"] == template_name:
                 structure = t["structure"]
-                for k, v in variables.items():
-                    structure = structure.replace(f"{{{k}}}", str(v))
-                return {"ok": True, "template": t, "prompt_structure": structure, "variables_filled": variables}
+                city = variables.get("城市", "厦门")
+                topic = variables.get("topic", "装修")
+
+                # AI生成完整内容
+                content = ""
+                try:
+                    from admin_dashboard import _deepseek_call
+                    sys_p = f"""你是顶尖内容创作者。严格按照以下结构创作:
+模板: {t['name']}
+结构: {structure}
+平台: {'/'.join(t.get('platforms',['通用']))}
+字数: {t.get('word_range',(500,1000))[0]}-{t.get('word_range',(500,1000))[1]}字
+城市: {city}
+要求: 口语化·本地化细节·emoji适度·拒绝AI腔"""
+                    content = _deepseek_call(sys_p, f"创作主题: {topic}", max_tokens=2000, temperature=0.8)
+                except Exception:
+                    content = f"# {topic}\n\n> 按{t['name']}模板生成\n> 结构: {structure}"
+
+                return {"ok": True, "template": t, "structure": structure,
+                        "generated_content": content, "variables": variables}
     return {"ok": False, "error": "模板不存在"}
