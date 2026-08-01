@@ -208,7 +208,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <!-- ═══════════ 1. DASHBOARD ═══════════ -->
 <div class="panel on" id="panel-dashboard">
   <div class="panel-card"><h3>📊 系统总览</h3>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="searchInput" placeholder="🔍 搜索内容..." style="flex:1;font-size:.74rem" onkeyup="if(event.key==='Enter')searchContent()">
+      <button class="btn go" onclick="searchContent()">搜索</button>
+    </div>
     <div class="kpis" id="dash-kpis"></div>
+    <div id="searchResults"></div>
     <div class="panel-card" style="margin-bottom:10px"><h4>🖥️ 服务状态</h4>
       <div class="row"><span>CloudTech 管理后台</span><span class="badge on">:5099</span></div>
       <div class="row"><span>OpenClaw Gateway</span><span class="badge off" id="gw-badge">检测中</span></div>
@@ -1173,6 +1178,15 @@ async function loadNotifications(){
     await api('/api/notifications/zq-5bb59623/read',{method:'POST'});
     bell.textContent='0';bell.style.display='none';
   }
+}
+async function searchContent(){
+  var q=document.getElementById('searchInput').value;
+  if(!q){return}
+  var b=document.getElementById('searchResults');b.innerHTML='<div class=\"loading\">搜索中...</div>';
+  var d=await api('/api/search/content?q='+encodeURIComponent(q)+'&limit=15');
+  if(!d.results||!d.results.length){b.innerHTML='<div class=\"status-msg\">未找到匹配内容</div>';return}
+  b.innerHTML='<table class=\"tbl\"><tr><th>标题</th><th>评分</th><th>大小</th></tr>'+
+    d.results.map(function(r){return'<tr><td>'+r.title.substring(0,60)+'</td><td>'+(r.score||'-')+'</td><td>'+(r.size/1024).toFixed(1)+'KB</td></tr>'}).join('')+'</table>';
 }
 async function updateBell(){
   var d=await api('/api/notifications/zq-5bb59623?unread=1&limit=1');

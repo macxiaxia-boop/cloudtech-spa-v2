@@ -157,6 +157,97 @@ def api_export_content(tid):
     return jsonify({"status": "ok", "tenant_id": tid, "content_count": len(items), "items": items})
 
 # ═══════════════════════════════════════════════════════
+# 内容搜索 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/search/content")
+def api_search_content():
+    """全平台内容搜索: 关键词·租户·日期范围"""
+    import fnmatch
+    q = request.args.get("q", "").strip()
+    tid = request.args.get("tid", "")
+    limit = int(request.args.get("limit", 20))
+
+    results = []
+    search_dirs = [Path("D:/个人文件/AI/云数科技/tenants")]
+    if tid:
+        search_dirs = [Path(f"D:/个人文件/AI/云数科技/tenants/{tid}/content")]
+
+    scanned = 0
+    for base in search_dirs:
+        if not base.exists(): continue
+        for f in sorted(base.rglob("*.md"), key=lambda x: x.stat().st_mtime, reverse=True):
+            scanned += 1
+            try:
+                text = f.read_text(encoding="utf-8", errors="ignore")
+                if q and q not in text: continue
+                title = text.split("\n")[0].replace("# ", "").strip()[:80]
+                score = None
+                import re as _re
+                sm = _re.search(r'评分[：:]\s*(\d+)/10', text)
+                if sm: score = int(sm.group(1))
+                results.append({
+                    "title": title, "file": str(f), "size": f.stat().st_size,
+                    "score": score, "preview": text[100:250].replace("\n", " "),
+                    "modified": f.stat().st_mtime,
+                })
+                if len(results) >= limit: break
+            except Exception: pass
+        if len(results) >= limit: break
+        if scanned > 1000: break  # Don't scan forever
+
+    return jsonify({"status": "ok", "query": q, "results": results, "total": len(results), "scanned": scanned})
+
+@app.route("/api/stats/trends")
+def api_stats_trends():
+    """内容趋势: 按日统计产出量"""
+    from collections import defaultdict
+    daily = defaultdict(int)
+    for base in [Path("D:/个人文件/AI/云数科技/tenants")]:
+        if not base.exists(): continue
+        for f in base.rglob("*.md"):
+            try:
+                day = f.stat().st_mtime
+                import datetime as _dt
+                dkey = _dt.datetime.fromtimestamp(day).strftime("%Y-%m-%d")
+                daily[dkey] += 1
+            except Exception: pass
+
+    # Last 30 days sorted
+    sorted_days = sorted(daily.items())[-30:]
+    return jsonify({
+        "status": "ok",
+        "trends": [{"date": d, "count": c} for d, c in sorted_days],
+        "total_days": len(sorted_days),
+        "total_content": sum(daily.values()),
+    })
+
+@app.route("/api/stats/summary")
+def api_stats_summary():
+    """系统总览: 一站获取所有关键指标"""
+    from dashboard_stats import get_full_stats
+    from tenant_service import get_all_tenants
+    from payment_orders import get_payment_stats
+    from notifications import get_unread_count
+
+    stats = get_full_stats()
+    return jsonify({
+        "status": "ok",
+        "summary": {
+            "content_files": stats["content"]["total_files"],
+            "tenants": stats["tenants"]["total"],
+            "active_tenants": stats["tenants"]["active"],
+            "queue_pending": stats["publish"]["queued"],
+            "queue_scheduled": stats["publish"]["scheduled"],
+            "queue_published": stats["publish"]["published"],
+            "disk_free_gb": stats["system"]["disk_free_gb"],
+            "payment_revenue": get_payment_stats()["revenue"],
+            "notifications_unread": get_unread_count("zq-5bb59623"),
+        },
+        "generated_at": stats["generated_at"],
+    })
+
+
+# ═══════════════════════════════════════════════════════
 # 通知中心 API
 # ═══════════════════════════════════════════════════════
 @app.route("/api/notifications/<tid>")
