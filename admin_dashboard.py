@@ -386,6 +386,41 @@ def api_recommend_topics():
     return jsonify(recommend_topics(tid, request.args.get("city", "厦门"), int(request.args.get("count", 5))))
 
 # ═══════════════════════════════════════════════════════
+# 超级混剪 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/editor/materials", methods=["GET", "POST"])
+def api_editor_materials():
+    from super_editor import list_materials, import_material
+    if request.method == "POST":
+        data = request.get_json() or {}
+        return jsonify(import_material(data.get("tid", _DEFAULT_TID), data.get("name", ""), data.get("type", "video_clip"), data.get("uri", ""), data.get("tags", []), data.get("duration", 0)))
+    return jsonify({"status": "ok", "materials": list_materials(request.args.get("tid", _DEFAULT_TID), request.args.get("type", ""))})
+
+@app.route("/api/editor/mashup", methods=["POST"])
+def api_editor_mashup():
+    from super_editor import generate_mashup
+    data = request.get_json() or {}
+    return jsonify(generate_mashup(data.get("tid", _DEFAULT_TID), data.get("topic", ""), data.get("variants", 3), data.get("scenes", 6)))
+
+@app.route("/api/editor/compose", methods=["POST"])
+def api_editor_compose():
+    from super_editor import auto_compose
+    data = request.get_json() or {}
+    return jsonify(auto_compose(data.get("tid", _DEFAULT_TID), data.get("edit_id", ""), data.get("format", "9:16")))
+
+# ═══════════════════════════════════════════════════════
+# 多模型聚合 API
+# ═══════════════════════════════════════════════════════
+@app.route("/api/models")
+def api_models():
+    from model_aggregator import list_models, get_model_stats, route_model, compare_models
+    if request.args.get("route"):
+        return jsonify(route_model(request.args.get("route"), request.args.get("budget", "balanced")))
+    if request.args.get("compare"):
+        return jsonify(compare_models(request.args.get("compare").split(","), request.args.get("task", "")))
+    return jsonify({"status": "ok", "models": list_models(request.args.get("type", "")), "stats": get_model_stats()})
+
+# ═══════════════════════════════════════════════════════
 # 批量操作 API
 # ═══════════════════════════════════════════════════════
 @app.route("/api/batch/produce", methods=["POST"])
