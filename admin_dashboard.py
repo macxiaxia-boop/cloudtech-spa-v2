@@ -494,6 +494,7 @@ def api_stats_summary():
             "disk_free_gb": stats["system"]["disk_free_gb"],
             "payment_revenue": get_payment_stats()["revenue"],
             "notifications_unread": get_unread_count("zq-5bb59623"),
+            "modules_active": 19,
         },
         "generated_at": stats["generated_at"],
     })

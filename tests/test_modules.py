@@ -122,6 +122,94 @@ class TestContentScheduler:
             assert r["enqueued"] >= 1
 
 
+class TestNewModules:
+    """P2新增模块测试"""
+
+    def test_brand_assets(self):
+        from brand_assets import create_brand, add_asset, list_brands, get_brand_stats, remove_asset
+        import secrets
+        tid = f"zq-brand-{secrets.token_hex(4)}"
+        b = create_brand(tid, "测试品牌")
+        assert b["ok"]
+        a = add_asset(b["brand"]["id"], "logo", "Logo", "/test/logo.png")
+        assert a["ok"]
+        brands = list_brands(tid)
+        assert len(brands) >= 1
+        stats = get_brand_stats(tid)
+        assert stats["brand_count"] >= 1
+
+    def test_approval_engine(self):
+        from approval_engine import submit_for_review, approve, reject, get_approvals
+        import secrets
+        tid = f"zq-apr-{secrets.token_hex(4)}"
+        app = submit_for_review(tid, "c1", "测试审批", "admin")
+        assert app["ok"]
+        apr = approve(app["approval"]["id"], "reviewer", "通过")
+        assert apr["ok"]
+        assert apr["approval"]["status"] == "approved"
+        approvals = get_approvals(tid)
+        assert len(approvals) >= 1
+
+    def test_digital_human(self):
+        from digital_human import register_avatar, add_voice, list_avatars
+        import secrets
+        tid = f"zq-av-{secrets.token_hex(4)}"
+        av = register_avatar(tid, "测试数字人", "stock")
+        assert av["ok"]
+        vc = add_voice(av["avatar"]["id"], "测试声音", "/test.wav")
+        assert vc["ok"]
+        avatars = list_avatars(tid)
+        assert len(avatars) >= 1
+
+    def test_compliance_auto(self):
+        from compliance_auto import run_compliance_check, get_compliance_stats
+        r = run_compliance_check({"text": "100%保证最好的装修效果", "title": "测试"})
+        assert "status" in r
+        stats = get_compliance_stats()
+        assert "total_checks" in stats
+
+    def test_webhooks(self):
+        from webhooks import register_webhook, list_webhooks, delete_webhook
+        import secrets
+        tid = f"zq-wh-{secrets.token_hex(4)}"
+        wh = register_webhook(tid, "content.created", "https://example.com/hook")
+        assert wh["ok"]
+        hooks = list_webhooks(tid)
+        assert len(hooks) >= 1
+        delete_webhook(wh["webhook"]["id"])
+
+    def test_backup_scheduler(self):
+        from backup_scheduler import run_backup, list_backups, get_backup_status
+        r = run_backup("test")
+        assert r["ok"]
+        backups = list_backups(5)
+        assert len(backups) >= 1
+        status = get_backup_status()
+        assert status["total_backups"] >= 1
+
+    def test_audit_viewer(self):
+        from audit_viewer import log_activity, get_tenant_activity, get_activity_summary
+        import secrets
+        tid = f"zq-aud-{secrets.token_hex(4)}"
+        log_activity(tid, "test.action", {"key": "value"})
+        activities = get_tenant_activity(tid, 1)
+        assert len(activities) >= 1
+        summary = get_activity_summary(1)
+        assert "total_activities" in summary
+
+    def test_content_recommender(self):
+        from content_recommender import recommend_topics
+        r = recommend_topics("zq-test", "厦门", 3)
+        assert len(r["recommendations"]) == 3
+
+    def test_template_library(self):
+        from template_library import list_templates, get_template_categories
+        templates = list_templates()
+        assert len(templates) >= 5
+        cats = get_template_categories()
+        assert len(cats) >= 3
+
+
 class TestDashboardStats:
     def test_get_content_stats(self):
         from dashboard_stats import get_content_stats
