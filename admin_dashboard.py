@@ -93,8 +93,13 @@ def _check_admin_auth():
     # Admin login endpoint
     if request.path == "/api/auth/login" and request.method == "POST":
         return True
-    # Other public API endpoints (content creation, prompts, etc.)
-    if request.path.startswith("/api/") and not request.path.startswith("/api/admin"):
+    # Public endpoints: register, system health
+    if request.path == "/api/auth/register" and request.method == "POST":
+        return True
+    if request.path == "/api/system/health":
+        return True
+    # Allow OPTIONS preflight (CORS)
+    if request.method == "OPTIONS":
         return True
     # Static files
     if request.path.startswith("/static") or request.path.endswith((".html", ".css", ".js", ".ico", ".png")):
@@ -127,13 +132,79 @@ def server_error(e):
 def rate_limited(e):
     return jsonify({"status": "error", "message": "请求过于频繁", "code": 429, "retry_after": 10}), 429
 
+# ── 端点级速率限制（IP × 端点粒度）──
+_endpoint_limiters = {}
+def _check_endpoint_rate_limit(ip: str, endpoint: str, max_req: int, window_sec: int = 60) -> bool:
+    """端点级速率限制: 同IP同端点window_sec内最多max_req次"""
+    key = f"{ip}|{endpoint}"
+    now = time.time()
+    if key not in _endpoint_limiters:
+        _endpoint_limiters[key] = []
+    timestamps = _endpoint_limiters[key]
+    timestamps[:] = [t for t in timestamps if now - t < window_sec]
+    if len(timestamps) >= max_req:
+        return False
+    timestamps.append(now)
+    return True
+
+# ── SSRF 防护 ──
+import ipaddress
+_SSRF_BLOCKED = [ipaddress.ip_network(n) for n in ("127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "169.254.0.0/16")]
+_SSRF_BLOCKED_HOSTS = {"localhost", "0.0.0.0", "[::1]", "::1"}
+
+def _is_url_safe(url_str: str) -> bool:
+    """检查URL是否安全（防止SSRF攻击）"""
+    from urllib.parse import urlparse
+    try:
+        parsed = urlparse(url_str)
+        if parsed.scheme not in ("http", "https"):
+            return False
+        hostname = (parsed.hostname or "").lower()
+        if hostname in _SSRF_BLOCKED_HOSTS:
+            return False
+        try:
+            ip = ipaddress.ip_address(hostname)
+            if any(ip in net for net in _SSRF_BLOCKED):
+                return False
+        except ValueError:
+            pass
+        return True
+    except Exception:
+        return False
+
 @app.before_request
 def admin_guard():
+    # ── 端点级速率限制 ──
+    ip = request.remote_addr or request.headers.get("X-Forwarded-For", "127.0.0.1").split(",")[0].strip()
+    
+    if request.path == "/api/auth/register" and request.method == "POST":
+        if not _check_endpoint_rate_limit(ip, "register", max_req=3, window_sec=60):
+            return jsonify({"error": "注册请求过于频繁，请稍后再试", "retry_after": 60}), 429
+    
+    if request.path == "/api/auth/login" and request.method == "POST":
+        if not _check_endpoint_rate_limit(ip, "login", max_req=10, window_sec=60):
+            return jsonify({"error": "登录请求过于频繁，请稍后再试", "retry_after": 60}), 429
+    
+    if request.path.startswith("/api/create/"):
+        if not _check_endpoint_rate_limit(ip, "ai_create", max_req=20, window_sec=60):
+            return jsonify({"error": "AI 内容生成请求过于频繁，请稍后再试", "retry_after": 60}), 429
+    
+    # ── CSRF 保护: POST/PUT/DELETE 检查同源 ──
+    if request.method in ("POST", "PUT", "DELETE"):
+        origin = request.headers.get("Origin", "")
+        referer = request.headers.get("Referer", "")
+        xrw = request.headers.get("X-Requested-With", "")
+        if origin or referer:
+            host = request.host.split(":")[0]
+            is_same_origin = (host in origin or host in referer or xrw == "XMLHttpRequest")
+            if not is_same_origin and request.path.startswith("/api/"):
+                return jsonify({"error": "CSRF validation failed"}), 403
+    
+    # ── 认证检查 ──
     if not _check_admin_auth():
         if request.path.startswith("/api/"):
             return jsonify({"error": "Authentication required", "login_url": "/admin"}), 401
-        # For /admin page, redirect to login
-        return send_from_directory(str(LANDING), "admin.html")  # admin.html has its own login check
+        return send_from_directory(str(LANDING), "admin.html")
 
 # ── 真实系统健康检查 ──
 @app.route("/api/system/health")
@@ -781,6 +852,8 @@ def api_repurpose_extract():
         url = data.get("url", "").strip()
         if not url:
             return jsonify({"status": "error", "message": "未提供URL"}), 400
+        if not _is_url_safe(url):
+            return jsonify({"status": "error", "message": "不安全的URL"}), 400
         from repurpose_pipeline import extract_content
         result = extract_content(url)
         return jsonify({"status": "ok", "data": {
@@ -3039,6 +3112,7 @@ def add_cors(response):
     response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
     return response
 
 if __name__ == "__main__":

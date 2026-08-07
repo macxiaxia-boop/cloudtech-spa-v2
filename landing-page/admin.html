@@ -736,7 +736,7 @@ async function loadDashboard(){
       '<div class="kpi"><div class="l">崩溃</div><div class="v '+ ((s.crash_count||0)>0?'r':'g') +'">'+ (s.crash_count||0) +'</div></div>';
   }catch(e){}
 }
-async async function runDemo(){
+async function runDemo(){
   var b=document.getElementById('demoBtn');b.disabled=true;b.textContent='⚡ Demo运行中...';
   var d=await api('/api/demo/run',{method:'POST'});
   var r=d.demo||{};
@@ -750,7 +750,7 @@ async async function runDemo(){
   // Auto-open client dashboard in new tab
   if(r.tenant_id) window.open('/client?tid='+r.tenant_id,'_blank');
 }
-function refreshStatus(){
+async function refreshStatus(){
   try{var r=await api('/api/system/status');if(!r.services)return;
     ['gw','st'].forEach(function(k){var m={gw:'gateway',st:'streamlit'};var ok=r.services[m[k]]==='running';var b=document.getElementById(k+'-badge');if(b){b.textContent=ok?'运行中':'已停止';b.className='badge '+(ok?'on':'off')}})}catch(e){}
 }
