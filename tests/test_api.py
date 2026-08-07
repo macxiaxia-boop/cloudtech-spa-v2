@@ -28,8 +28,8 @@ class TestSystem:
         assert r.status_code == 200
         assert json.loads(r.data)['status'] == 'ok'
 
-    def test_system_status(self, client):
-        r = client.get('/api/system/status')
+    def test_system_status(self, client, admin_token):
+        r = client.get('/api/system/status', headers=_h(admin_token))
         assert r.status_code == 200
         d = json.loads(r.data)
         assert 'services' in d
