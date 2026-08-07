@@ -146,3 +146,74 @@ def get_billing_summary(tid: str) -> dict:
         except Exception:
             pass
     return summary
+
+
+def update_tokens(tid: str, plan_id: str, reset_monthly: bool = True) -> dict:
+    """
+    更新租户Token配额（支付完成后调用）。
+    根据套餐计划刷新租户的月度Token配额和单价。
+    
+    Args:
+        tid: 租户ID
+        plan_id: 套餐ID (starter/pro/enterprise)
+        reset_monthly: 是否重置本月已用Token
+    
+    Returns:
+        {"ok": True, "plan": "...", "monthly_quota": ..., "token_rate": ...}
+    """
+    plan = PLANS.get(plan_id, PLANS["starter"])
+    
+    # 查找是否有全局Token配置（非月度usage）
+    token_config_file = BILLING_DIR / f"{tid}_config.json"
+    config = {}
+    if token_config_file.exists():
+        try:
+            config = json.loads(token_config_file.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            pass
+    
+    # 更新配置
+    config.update({
+        "tenant_id": tid,
+        "plan": plan_id,
+        "plan_name": plan["name"],
+        "monthly_quota": plan["monthly_quota"],
+        "token_rate": plan["token_rate"],
+        "updated_at": datetime.now().isoformat()[:19],
+    })
+    token_config_file.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+    
+    # 重置本月已用Token
+    if reset_monthly:
+        month = datetime.now().strftime("%Y-%m")
+        usage_file = BILLING_DIR / f"{tid}_{month}.json"
+        if usage_file.exists():
+            try:
+                usage = json.loads(usage_file.read_text(encoding="utf-8"))
+                usage["total_tokens"] = 0
+                usage["items"] = []
+                usage["reset_at"] = datetime.now().isoformat()[:19]
+                usage["reset_reason"] = f"plan_upgrade_to_{plan_id}"
+                usage_file.write_text(json.dumps(usage, ensure_ascii=False, indent=2), encoding="utf-8")
+            except Exception:
+                pass
+    
+    # 同步到tenant_service
+    try:
+        from tenant_service import update_tenant
+        update_tenant(tid, {
+            "plan": plan_id,
+            "monthly_quota": plan["monthly_quota"],
+            "monthly_used": 0,
+        })
+    except Exception:
+        pass
+    
+    return {
+        "ok": True,
+        "tenant_id": tid,
+        "plan": plan_id,
+        "plan_name": plan["name"],
+        "monthly_quota": plan["monthly_quota"],
+        "token_rate": plan["token_rate"],
+    }

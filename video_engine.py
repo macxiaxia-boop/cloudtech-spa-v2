@@ -2,7 +2,7 @@
 视频生成引擎 — Video Production Engine
 ========================================
 口播脚本 → AI视频生成 → 素材自动匹配 → 多版本混剪
-接入: 即梦(Jimeng) / Seedance / 剪映API
+接入: 即梦(Jimeng) / 可灵(Kling) / Seedance / 剪映API
 """
 import json, os, time, hashlib
 from pathlib import Path
@@ -260,3 +260,437 @@ def create_video_package(script: dict, account_name: str) -> dict:
         files["assets"] = str(assets_list)
 
     return {"package_dir": str(pkg_dir), "files": files, "account": account_name}
+
+
+# ═══════════════════════════════════
+# Content → Video Pipeline (auto_pipeline消费)
+# ═══════════════════════════════════
+
+def generate_video_from_content(
+    title: str = "",
+    content: str = "",
+    provider: str = "mock",
+    template: str = "before_after",
+    config: dict = None,
+) -> dict:
+    """
+    从文本内容一键生成视频
+
+    消费方: auto_pipeline._stage_video_production
+    调用链: 内容解析 → 分镜拆解 → 脚本增强(DeepSeek) → mix/mock渲染
+
+    Args:
+        title:   视频标题，如"现代简约装修设计"
+        content: 正文内容（口播稿/小红书内容/纯文本）
+        provider: 生成后端 "mock"|"jimeng"|"seedance"
+        template: 混剪模板名（对应 MIX_TEMPLATES 的 key）
+        config:   可选附加配置
+
+    Returns:
+        {"ok": True, "path": "output/video_xxx.mp4", "duration": 45.0, "segments": 5, "script": {...}}
+        or {"ok": False, "error": "reason"}
+    """
+    import re
+    cfg = config or {}
+
+    # ── 1. 内容归一化 ──────────────────────────────────
+    if isinstance(content, dict):
+        content = content.get("content", content.get("text", str(content)))
+    if not content or not content.strip():
+        content = title or "装修设计视频"
+
+    # ── 2. 段落拆解 → 分镜段落 ─────────────────────────
+    paragraphs = _split_into_paragraphs(content)
+    segments = []
+
+    for idx, para in enumerate(paragraphs):
+        if not para.strip():
+            continue
+        char_len = len(para)
+        # 根据长度和位置决定场景类型
+        if idx == 0:
+            stype = "title"
+            dur = 3
+        elif char_len < 20:
+            stype = "text"
+            dur = min(3, max(2, char_len // 10))
+        elif any(kw in para for kw in ["对比", "vs", "改造前", "改造后", "before", "after"]):
+            stype = "image"
+            dur = 5
+        elif any(kw in para for kw in ["花费", "预算", "价格", "元", "万"]):
+            stype = "text"
+            dur = 4
+        elif any(kw in para for kw in ["步骤", "方法", "流程", "如何", "怎么", "技巧"]):
+            stype = "text"
+            dur = 5
+        else:
+            stype = "text"
+            dur = max(2, min(6, char_len // 30))
+
+        segments.append({
+            "type": stype,
+            "text": para.strip()[:200],
+            "duration": dur,
+            "effect": "fade" if idx % 3 == 0 else ("slide_up" if idx % 3 == 1 else "zoom_in"),
+        })
+
+    if not segments:
+        segments = [{"type": "text", "text": content[:200] or title, "duration": 8, "effect": "fade"}]
+
+    total_duration = sum(s.get("duration", 3) for s in segments)
+
+    # ── 3. 尝试 DeepSeek 脚本增强 ───────────────────────
+    script_prompt = ""
+    try:
+        from admin_dashboard import _deepseek_call
+        sys_prompt = (
+            "你是AI视频导演。根据以下内容生成一个完整的竖版短视频分镜脚本。"
+            "输出包含: 标题、每个分镜的时间码(秒)、画面描述、字幕文案、转场效果。"
+            + '格式: JSON {"title":"...", "scenes": [{"time":"0-3s", "visual":"...", "subtitle":"..."}]}' + " "
+            + f"视频类型: {template} | 内容: {content[:1500]}"
+        )
+        enhanced = _deepseek_call(sys_prompt, content[:2000], max_tokens=1200)
+        script_prompt = enhanced
+    except Exception:
+        script_prompt = f"# {title}\n\n" + "\n\n".join(
+            f"[{i*3}-{i*3+s.get('duration',3)}s] {s['text']}" for i, s in enumerate(segments)
+        )
+
+    # ── 4. 生成视频（dry_run 模式输出方案） ─────────────
+    try:
+        from video_mixer import mix_video, MIX_TEMPLATES
+
+        # 确保模板存在
+        actual_template = template if template in MIX_TEMPLATES else "before_after"
+
+        # 构建 clips_data
+        clips_data = [
+            {"type": "text", "text": s["text"], "duration": s["duration"], "effect": s["effect"]}
+            for s in segments
+        ]
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_name = f"content_video_{ts}"
+
+        mix_result = mix_video(
+            clips_data=clips_data,
+            output_name=output_name,
+            template=actual_template,
+            dry_run=True,  # 首先生成方案；实际渲染需要素材
+        )
+
+        output_path = str(VIDEO_OUT / f"{output_name}.mp4")
+
+        # 持久化脚本到文件（便于后续实际渲染）
+        script_file = VIDEO_OUT / f"{output_name}_script.json"
+        script_payload = {
+            "title": title,
+            "template": actual_template,
+            "provider": provider,
+            "segments": segments,
+            "total_duration": total_duration,
+            "prompt": script_prompt,
+            "created_at": datetime.now().isoformat()[:19],
+        }
+        script_file.write_text(json.dumps(script_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        return {
+            "ok": True,
+            "path": output_path,
+            "script_file": str(script_file),
+            "duration": total_duration,
+            "segments": len(segments),
+            "template": actual_template,
+            "provider": provider,
+            "script": {
+                "prompt": script_prompt,
+                "scenes": len(segments),
+                "mode": actual_template,
+                "duration": f"{total_duration}s",
+            },
+            "mix_result": mix_result,
+        }
+
+    except ImportError as e:
+        return {"ok": False, "error": f"依赖缺失: {e}. 请安装 moviepy"}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"ok": False, "error": f"视频生成失败: {str(e)[:200]}"}
+
+
+def ai_generate_video(
+    prompt: str,
+    style: str = "modern",
+    duration: int = 30,
+    provider: str = "auto",
+) -> dict:
+    """
+    AI 视频生成 — 实时调用云端API或本地Mock
+
+    调用链: DeepSeek增强prompt → 即梦API(优先) → video_api本地渲染 → Mock降级
+    降级策略: 即梦不可用 → 本地MoviePy渲染 → 文字转视频(Mock)
+
+    Args:
+        prompt:   视频描述/脚本提示词
+        style:    风格 "modern"|"minimal"|"chinese"|"luxury"
+        duration: 目标时长（秒），默认30
+        provider: 生成后端 "auto"|"jimeng"|"seedance"|"mock"
+
+    Returns:
+        {"ok": True, "path": "output/ai_video_xxx.mp4", "provider": "jimeng"|"mock", "duration": 30}
+        or {"ok": False, "error": "reason"}
+    """
+    import re
+
+    # ── 1. 用 DeepSeek 优化提示词 ────────────────────────
+    enhanced_prompt = prompt
+    try:
+        from admin_dashboard import _deepseek_call
+        sys_prompt = (
+            "你是AI视频生成专家。优化以下提示词，使其更适合视频生成模型(即梦/Seedance)。"
+            "添加详细的视觉描述: 镜头语言、光线、色彩、运镜方式、场景细节。"
+            f"视频风格: {style} | 目标时长: {duration}秒"
+        )
+        enhanced_prompt = _deepseek_call(sys_prompt, prompt[:1500], max_tokens=800)
+    except Exception:
+        pass
+
+    # ── 2. 尝试即梦 API 真实生成 ──────────────────────────
+    use_jimeng = provider in ("auto", "jimeng")
+    if use_jimeng:
+        try:
+            from jimeng_api import text_to_video as jimeng_t2v, AK as jimeng_ak
+
+            if jimeng_ak:
+                jimeng_result = jimeng_t2v(
+                    prompt=enhanced_prompt,
+                    duration=min(duration, 30),  # 即梦免费额度限制30s
+                    resolution="720p",
+                    style="realistic",
+                )
+
+                if jimeng_result.get("ok"):
+                    video_url = jimeng_result.get("video_url", "")
+                    task_id = jimeng_result.get("task_id", "")
+
+                    # 尝试下载视频
+                    video_path = ""
+                    try:
+                        from jimeng_api import generate_renovation_video
+                        dl_result = generate_renovation_video(
+                            {"prompt": enhanced_prompt},
+                            mode="text_to_video",
+                        )
+                        video_path = dl_result.get("video_path", "")
+                    except Exception:
+                        pass
+
+                    return {
+                        "ok": True,
+                        "path": video_path or video_url,
+                        "video_url": video_url,
+                        "task_id": task_id,
+                        "provider": "jimeng",
+                        "duration": duration,
+                        "prompt_enhanced": enhanced_prompt,
+                        "style": style,
+                        "render_mode": "jimeng_api",
+                    }
+                else:
+                    # 即梦失败 → 记录原因，继续降级
+                    jimeng_error = jimeng_result.get("error", "未知错误")
+            else:
+                jimeng_error = "JIMENG_ACCESS_KEY 未配置"
+        except ImportError:
+            jimeng_error = "jimeng_api 模块未安装"
+        except Exception as e:
+            jimeng_error = str(e)[:100]
+    else:
+        jimeng_error = f"provider={provider} 跳过即梦"
+
+    # ── 2.5. 尝试可灵 API ───────────────────────────────────
+    use_kling = provider in ("auto", "kling")
+    kling_error = None
+    if use_kling:
+        try:
+            from kling_api import text_to_video as kling_t2v, check_status as kling_check
+
+            kling_status = kling_check()
+            if kling_status.get("configured"):
+                kling_result = kling_t2v(
+                    prompt=enhanced_prompt,
+                    duration=str(min(duration, 10)),  # Kling: 5 or 10
+                    mode="std",
+                    aspect_ratio="9:16",
+                )
+
+                if kling_result.get("ok"):
+                    return {
+                        "ok": True,
+                        "path": kling_result.get("task_id", ""),
+                        "task_id": kling_result.get("task_id", ""),
+                        "provider": "kling",
+                        "duration": duration,
+                        "prompt_enhanced": enhanced_prompt,
+                        "style": style,
+                        "render_mode": "kling_api",
+                        "jimeng_attempted": use_jimeng,
+                        "jimeng_error": jimeng_error if use_jimeng else None,
+                    }
+                else:
+                    kling_error = kling_result.get("error", "未知错误")
+            else:
+                kling_error = "Kling API 未正确配置: " + "; ".join(kling_status.get("issues", []))
+        except ImportError:
+            kling_error = "kling_api 模块未安装"
+        except Exception as e:
+            kling_error = str(e)[:100]
+
+    # ── 3. 尝试 video_api 本地渲染 ────────────────────────
+    try:
+        from video_api import render_video_locally, submit_video_job
+
+        script = {
+            "prompt": enhanced_prompt,
+            "duration": f"{duration}s",
+            "visual_style": _style_to_visual(style),
+            "scenes": _generate_mock_scenes(enhanced_prompt, duration),
+            "mode": f"ai_gen_{style}",
+            "topic": prompt[:50],
+        }
+
+        local_result = render_video_locally({
+            "prompt": enhanced_prompt,
+            "duration": duration,
+            "scenes": script["scenes"],
+            "metadata": {"mode": style, "topic": prompt[:50]},
+        })
+
+        if local_result.get("ok"):
+            return {
+                "ok": True,
+                "path": local_result.get("preview_html", local_result.get("output_dir", "")),
+                "provider": "mock",
+                "duration": duration,
+                "prompt_enhanced": enhanced_prompt,
+                "style": style,
+                "render_mode": "local",
+                "details": local_result,
+                "jimeng_attempted": use_jimeng,
+                "jimeng_error": jimeng_error if use_jimeng else None,
+                "kling_attempted": use_kling,
+                "kling_error": kling_error if use_kling else None,
+            }
+
+    except ImportError:
+        pass
+    except Exception:
+        pass
+
+    # ── 4. Mock 降级: 文字转视频 ─────────────────────────
+    try:
+        from video_mixer import mix_video
+
+        words = re.split(r"[。，；\n]", prompt)
+        paragraphs = [w.strip() for w in words if len(w.strip()) > 3]
+        if not paragraphs:
+            paragraphs = [prompt[:200]]
+
+        slot_dur = max(2, duration // max(len(paragraphs), 1))
+        clips = []
+        for i, p in enumerate(paragraphs[:12]):
+            clips.append({
+                "type": "text",
+                "text": p[:160],
+                "duration": min(slot_dur, 6),
+                "effect": "fade" if i % 2 == 0 else "slide_up",
+            })
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_name = f"ai_video_{ts}"
+
+        mix_result = mix_video(
+            clips_data=clips,
+            output_name=output_name,
+            template="before_after",
+            dry_run=True,
+        )
+
+        output_path = str(VIDEO_OUT / f"{output_name}.mp4")
+
+        return {
+            "ok": True,
+            "path": output_path,
+            "provider": "mock",
+            "duration": duration,
+            "prompt_enhanced": enhanced_prompt,
+            "style": style,
+            "render_mode": "mock_text_overlay",
+            "clips": len(clips),
+            "mix_result": mix_result,
+            "jimeng_attempted": use_jimeng,
+            "jimeng_error": jimeng_error if use_jimeng else None,
+            "kling_attempted": use_kling,
+            "kling_error": kling_error if use_kling else None,
+        }
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"ok": False, "error": f"AI视频生成失败: {str(e)[:200]}"}
+
+
+# ═══════════════════════════════════
+# 内部工具函数
+# ═══════════════════════════════════
+
+def _split_into_paragraphs(text: str) -> list:
+    """智能分段: 按段落/句号/分号/换行 拆解"""
+    import re
+    # 先按双换行分
+    parts = re.split(r"\n\s*\n", text)
+    result = []
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        # 如果段落太长，按句号/分号继续拆分
+        if len(part) > 120:
+            sub = re.split(r"[。；!?！？]", part)
+            result.extend(s.strip() + "。" for s in sub if s.strip())
+        else:
+            result.append(part)
+    return result
+
+
+def _style_to_visual(style: str) -> str:
+    """风格名 → visual_style 映射"""
+    mapping = {
+        "modern": "cinematic",
+        "minimal": "clean_bright",
+        "chinese": "warm_heritage",
+        "luxury": "dark_elegant",
+        "industrial": "raw_urban",
+        "scandinavian": "airy_natural",
+    }
+    return mapping.get(style, "cinematic")
+
+
+def _generate_mock_scenes(prompt: str, duration: int) -> list:
+    """根据prompt和时长生成模拟分镜列表"""
+    import re
+    sentences = re.split(r"[。；\n]", prompt)
+    parts = [s.strip() for s in sentences if len(s.strip()) > 2]
+    if not parts:
+        return [f"{duration}s: {prompt[:80]}"]
+
+    slot_count = max(3, min(len(parts), 8))
+    slot_dur = duration // slot_count
+    scenes = []
+    for i in range(slot_count):
+        text = parts[i % len(parts)][:80]
+        start = i * slot_dur
+        end = start + slot_dur if i < slot_count - 1 else duration
+        scenes.append(f"{start}-{end}s: {text}")
+    return scenes
