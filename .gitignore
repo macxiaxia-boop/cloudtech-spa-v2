@@ -22,12 +22,13 @@ build/
 Thumbs.db
 
 # Data
-data/*.jsonl
-data/*.json
-data/social_raw/
-data/browser_profiles/
+data/
 backups/
 repurpose_output/
+
+# Generated output
+output/
+test_output/
 
 # Logs
 *.log

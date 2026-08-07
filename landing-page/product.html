@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云数科技 · 装企AI店长</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    background: #0a0a0f; 
+    color: #fff; 
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .topbar {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(102,126,234,0.2);
+    height: 48px;
+  }
+  .topbar .logo { font-weight: 800; font-size: 1.1rem; color: #667eea; }
+  .topbar .nav-links { display: flex; gap: 16px; }
+  .topbar .nav-links a {
+    color: #a0a0b0;
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    border-radius: 6px;
+    transition: 0.2s;
+  }
+  .topbar .nav-links a:hover, .topbar .nav-links a.active {
+    color: #fff;
+    background: rgba(102,126,234,0.15);
+  }
+  .topbar .user-info { color: #a0a0b0; font-size: 0.85rem; }
+
+  iframe {
+    width: 100%;
+    height: calc(100vh - 48px);
+    border: none;
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="logo">🏠 云数科技 · 装企AI店长</div>
+    <div class="nav-links">
+      <a href="#" class="active">首页</a>
+      <a href="http://localhost:5099/admin">管理后台</a>
+      <a href="http://localhost:8501" target="_blank">数据仪表盘</a>
+    </div>
+    <div class="user-info">👤 漳州张总 · 专业版</div>
+  </div>
+  <iframe src="http://localhost:8599" title="云数科技产品界面"></iframe>
+</body>
+</html>

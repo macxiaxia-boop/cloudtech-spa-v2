@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "description": "CloudTech AI 系统 Cron 基础设施定义 — 永久权威版本。如 cron 丢失，运行 restore_crons.js 重建。",
+  "lastUpdated": "2026-08-07T14:01:00+08:00",
+  "jobs": [
+    {
+      "name": "Heartbeat-30min",
+      "schedule": { "kind": "every", "everyMs": 1800000 },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "HEARTBEAT CHECK: 1) 读取 MEMORY.md 2) 检查宕机/磁盘满/过期任务 3) 白天超过2小时无产出则推任务 4) 正常则静默记录",
+        "timeoutSeconds": 120,
+        "thinking": "off"
+      },
+      "delivery": { "mode": "none" }
+    },
+    {
+      "name": "NightConductor",
+      "schedule": { "kind": "cron", "expr": "0 22 * * *", "tz": "Asia/Shanghai" },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "夜间总结: 1) 检查今日产出 2) 更新 MEMORY.md 3) 补充 knowledgeGaps 4) 生成明日队列",
+        "timeoutSeconds": 300,
+        "thinking": "off"
+      },
+      "delivery": { "mode": "none" }
+    },
+    {
+      "name": "HealthMonitor",
+      "schedule": { "kind": "every", "everyMs": 3600000 },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "系统健康检查: 1) netstat 5099/8501/18792 2) 磁盘 C: D: 3) 僵尸进程 4) 异常推飞书",
+        "timeoutSeconds": 60,
+        "thinking": "off"
+      },
+      "delivery": { "mode": "none" }
+    },
+    {
+      "name": "KnowledgeConverter",
+      "schedule": { "kind": "cron", "expr": "7 22 * * *", "tz": "Asia/Shanghai" },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "知识转化: 扫描今日产出 .md，提取关键发现写入 MEMORY.md，模式升级为规则",
+        "timeoutSeconds": 180,
+        "thinking": "off"
+      },
+      "delivery": { "mode": "none" }
+    },
+    {
+      "name": "GatewayWatchdog",
+      "schedule": { "kind": "every", "everyMs": 1800000 },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Gateway Watchdog: 检查18792端口，不在则重启 Gateway 并推飞书",
+        "timeoutSeconds": 30,
+        "thinking": "off"
+      },
+      "delivery": { "mode": "none" }
+    },
+    {
+      "name": "CloudTechWatchdog",
+      "schedule": { "kind": "every", "everyMs": 1800000 },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "CloudTech Watchdog: 检查5099/8501端口，不在则启动服务并推飞书",
+        "timeoutSeconds": 30,
+        "thinking": "off"
+      },
+      "delivery": { "mode": "none" }
+    },
+    {
+      "name": "CronSentinel",
+      "schedule": { "kind": "every", "everyMs": 7200000 },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Cron Sentinel: 1) 列出所有 cron 2) 与 C:\\Users\\xinzh\\.openclaw\\workspace\\cron_definitions.json 对比 3) 缺失则自动重建 4) 推送飞书报告",
+        "timeoutSeconds": 60,
+        "thinking": "off"
+      },
+      "delivery": { "mode": "none" }
+    }
+  ]
+}
