@@ -1,0 +1,385 @@
+# Cloud SaaS OpenAPI 3.0 规范
+# Phase 48.D86 · 15 个 API 端点 + 鉴权 + 错误码
+# 实际端点来源：D8-12 FastAPI Gateway (fastapi_app.py)
+# 鉴权：Bearer Token（LoginResponse.access_token）
+# 红线 #22：实际调用需用户拍板（API key 申请 / 调用额度）
+
+openapi: 3.0.3
+info:
+  title: Cloud SaaS API
+  description: |
+    Cloud = AI 数字员工 SaaS · 1 人 + AI 跑出整家公司。
+    本文档覆盖 15 个核心 API 端点，按 5 大功能域分组：
+    - System (健康检查 + 监控)
+    - Auth (登录鉴权)
+    - Content Creation (内容生成)
+    - Repurpose (改写复用)
+    - Admin (管理后台)
+    - IM (企业 IM 集成)
+  version: 2.1.0
+  contact:
+    name: Cloud Support
+    url: https://cloud.example.com/docs/api
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.cloud.example.com
+    description: 生产环境
+  - url: https://staging-api.cloud.example.com
+    description: 预发布环境
+
+tags:
+  - name: System
+    description: 健康检查 + 监控指标
+  - name: Auth
+    description: 登录鉴权
+  - name: Content Creation
+    description: 内容生成（5 AI 数字员工核心能力）
+  - name: Repurpose
+    description: 内容改写复用
+  - name: Admin
+    description: 管理后台
+  - name: IM
+    description: 企业 IM（企业微信/飞书/钉钉）
+
+paths:
+  # ===== System =====
+  /api/v2/health:
+    get:
+      tags: [System]
+      summary: 健康检查
+      description: 检查 Cloud 服务可用性，返回所有依赖状态
+      responses:
+        '200':
+          description: 健康
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: healthy }
+                  version: { type: string, example: 2.1.0 }
+                  uptime_seconds: { type: integer, example: 12345 }
+                  dependencies:
+                    type: object
+                    properties:
+                      database: { type: string, example: ok }
+                      redis: { type: string, example: ok }
+                      llm_gateway: { type: string, example: ok }
+  /api/v2/metrics:
+    get:
+      tags: [System]
+      summary: 监控指标（Prometheus 格式）
+      responses:
+        '200':
+          description: 指标数据
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  # ===== Auth =====
+  /api/v2/auth/login:
+    post:
+      tags: [Auth]
+      summary: 用户登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ===== Content Creation =====
+  /api/v2/create/styles:
+    get:
+      tags: [Content Creation]
+      summary: 获取可用内容风格（5 AI 数字员工风格库）
+      responses:
+        '200':
+          description: 风格列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Style'
+  /api/v2/create/forms:
+    get:
+      tags: [Content Creation]
+      summary: 获取可用内容形式（小红书/公众号/抖音/朋友圈等）
+      responses:
+        '200':
+          description: 形式列表
+  /api/v2/create/generate:
+    post:
+      tags: [Content Creation]
+      summary: AI 生成内容（核心接口）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+      responses:
+        '200':
+          description: 生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+        '402':
+          $ref: '#/components/responses/QuotaExceeded'
+  /api/v2/create/topic-discovery:
+    post:
+      tags: [Content Creation]
+      summary: 选题发现（AI 主动找热点 + 行业话题）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicDiscoveryRequest'
+      responses:
+        '200':
+          description: 选题列表
+
+  # ===== Repurpose =====
+  /api/v2/repurpose/extract:
+    post:
+      tags: [Repurpose]
+      summary: 从原文提取关键要素（标题/金句/数据/案例）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepurposeExtractRequest'
+      responses:
+        '200':
+          description: 提取成功
+  /api/v2/repurpose/rewrite:
+    post:
+      tags: [Repurpose]
+      summary: 内容改写（一篇 → 5 平台适配）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepurposeRewriteRequest'
+      responses:
+        '200':
+          description: 改写成功
+
+  # ===== Admin =====
+  /api/v2/admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: 管理仪表盘（漏斗 + 营收 + 监控）
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 仪表盘数据
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v2/admin/users:
+    get:
+      tags: [Admin]
+      summary: 用户列表（搜索 + 分页）
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: 用户列表
+
+  # ===== IM =====
+  /api/v2/im/chat:
+    post:
+      tags: [IM]
+      summary: IM 聊天（接收用户消息 → AI 回复）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IMChatRequest'
+      responses:
+        '200':
+          description: AI 回复
+  /api/v2/im/wecom/send:
+    post:
+      tags: [IM]
+      summary: 主动发送企业微信消息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IMChatRequest'
+      responses:
+        '200':
+          description: 发送成功
+  /api/v2/im/wecom/callback:
+    get:
+      tags: [IM]
+      summary: 企业微信回调验证
+      parameters:
+        - in: query
+          name: msg_signature
+          schema: { type: string }
+        - in: query
+          name: timestamp
+          schema: { type: string }
+        - in: query
+          name: nonce
+          schema: { type: string }
+        - in: query
+          name: echostr
+          schema: { type: string }
+      responses:
+        '200':
+          description: 验证成功
+    post:
+      tags: [IM]
+      summary: 企业微信回调接收（用户消息事件）
+      responses:
+        '200':
+          description: 处理成功
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: 未鉴权
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: 无权限
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    QuotaExceeded:
+      description: 配额超限
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: integer, example: 40001 }
+        message: { type: string, example: Invalid request }
+        request_id: { type: string, example: req_abc123 }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, example: user@example.com }
+        password: { type: string, format: password, minLength: 8 }
+
+    LoginResponse:
+      type: object
+      properties:
+        access_token: { type: string, example: eyJhbGc... }
+        refresh_token: { type: string, example: eyJhbGc... }
+        expires_in: { type: integer, example: 3600 }
+        user:
+          type: object
+          properties:
+            id: { type: string }
+            email: { type: string }
+            role: { type: string, enum: [user, admin] }
+
+    Style:
+      type: object
+      properties:
+        id: { type: string, example: hermes_governance }
+        name: { type: string, example: Hermes · 治理 }
+        description: { type: string }
+        emoji: { type: string, example: 🛡️ }
+
+    GenerateRequest:
+      type: object
+      required: [topic, style_id, form_id]
+      properties:
+        topic: { type: string, example: OPC 模式适合什么规模的公司 }
+        style_id: { type: string, example: hermes_governance }
+        form_id: { type: string, example: wechat_article }
+        max_tokens: { type: integer, default: 4000, maximum: 16000 }
+        temperature: { type: number, default: 0.7, minimum: 0, maximum: 2 }
+
+    GenerateResponse:
+      type: object
+      properties:
+        content: { type: string }
+        tokens_used: { type: integer, example: 1234 }
+        style_id: { type: string }
+        form_id: { type: string }
+        redline_violations: { type: array, items: { type: string } }
+
+    TopicDiscoveryRequest:
+      type: object
+      required: [industry, keywords]
+      properties:
+        industry: { type: string, enum: [decoration, medical, saas, retail, education] }
+        keywords: { type: array, items: { type: string }, maxItems: 10 }
+        max_results: { type: integer, default: 20 }
+
+    RepurposeExtractRequest:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string, description: 原文内容 }
+        extract_types:
+          type: array
+          items: { type: string, enum: [title, hook, data, case, quote] }
+          default: [title, hook, data, case, quote]
+
+    RepurposeRewriteRequest:
+      type: object
+      required: [content, target_form]
+      properties:
+        content: { type: string, description: 原文 }
+        target_form: { type: string, enum: [wechat, xiaohongshu, douyin, moments, linkedin] }
+        max_length: { type: integer, description: 目标字数上限 }
+
+    IMChatRequest:
+      type: object
+      required: [user_id, message]
+      properties:
+        user_id: { type: string }
+        message: { type: string }
+        context: { type: array, items: { type: object }, description: 历史对话上下文 }
