@@ -184,9 +184,9 @@ export function DocumentsPage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative py-16 bg-gradient-to-br from-slate-50 via-white to-gray-50">
-        <div className="max-w-page mx-auto px-6">
-          <div className="max-w-3xl">
+      <section className="relative py-16 bg-gradient-to-br from-slate-50 via-white to-gray-50 overflow-hidden">
+        <div className="max-w-page mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+          <div>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm mb-4">
               <FileText className="w-3 h-3" /> Phase 46 D53-60 · OPC 公司文档中心
             </span>
@@ -195,33 +195,36 @@ export function DocumentsPage() {
               <br />
               <span className="text-slate-600">合同 + HR + 财务 + 营业执照</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 mb-6">
               Phase 46 段 3 (D53-60) 收官 — 所有内部文档就绪。
               红 #22 边界：内部文档 AI 可主动干，外部签字 / 钱 / 触达必用户拍板。
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-6 border-t border-gray-200">
+              <div>
+                <p className="text-2xl font-bold text-slate-700">{totalDocs}</p>
                 <p className="text-xs text-gray-500">文档总数</p>
-                <p className="text-3xl font-bold text-slate-700">{totalDocs}</p>
-                <p className="text-xs text-gray-400 mt-1">4 类别</p>
               </div>
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">红 #22 必拍板项</p>
-                <p className="text-3xl font-bold text-red-600">{totalApprovals}</p>
-                <p className="text-xs text-gray-400 mt-1">不可自治</p>
+              <div>
+                <p className="text-2xl font-bold text-red-600">{totalApprovals}</p>
+                <p className="text-xs text-gray-500">红 #22 项</p>
               </div>
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">法务/营业执照</p>
-                <p className="text-3xl font-bold text-red-600">{grouped.legal?.length || 0}</p>
-                <p className="text-xs text-gray-400 mt-1">文档</p>
+              <div>
+                <p className="text-2xl font-bold text-red-600">{grouped.legal?.length || 0}</p>
+                <p className="text-xs text-gray-500">法务</p>
               </div>
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
+              <div>
+                <p className="text-2xl font-bold text-blue-600">{grouped.hr?.length || 0}</p>
                 <p className="text-xs text-gray-500">HR</p>
-                <p className="text-3xl font-bold text-blue-600">{grouped.hr?.length || 0}</p>
-                <p className="text-xs text-gray-400 mt-1">文档</p>
               </div>
             </div>
+          </div>
+          <div>
+            <img
+              src="/images/documents-hero.jpeg"
+              alt="公司文档中心"
+              className="rounded-2xl shadow-2xl w-full"
+            />
           </div>
         </div>
       </section>

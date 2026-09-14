@@ -130,17 +130,42 @@ export function BlogPage() {
 
   return (
     <>
-      <section className="py-16 bg-gradient-to-br from-green-50 via-white to-blue-50">
-        <div className="max-w-page mx-auto px-6 text-center">
-          <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm mb-4">
-            📝 博客 · OPC 故事 + 行业洞察
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            1 人 + AI 的 <span className="text-brand-500">实战手记</span>
-          </h1>
-          <p className="text-lg text-gray-600">
-            阿劲 + 5 AI 员工的真实运营记录 · 行业案例 · 技术内幕
-          </p>
+      <section className="py-16 bg-gradient-to-br from-green-50 via-white to-blue-50 overflow-hidden">
+        <div className="max-w-page mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm mb-4">
+              📝 博客 · OPC 故事 + 行业洞察
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-[1.1]">
+              1 人 + AI 的
+              <br />
+              <span className="text-brand-500">实战手记</span>
+            </h1>
+            <p className="text-lg text-gray-600 mb-6">
+              阿劲 + 5 AI 员工的真实运营记录 · 行业案例 · 技术内幕
+            </p>
+            <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200">
+              <div>
+                <p className="text-2xl font-bold text-brand-500">9 篇</p>
+                <p className="text-xs text-gray-500">已发布</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-brand-500">4 类</p>
+                <p className="text-xs text-gray-500">主题分类</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-brand-500">30 天</p>
+                <p className="text-xs text-gray-500">OPC 实证</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <img
+              src="/images/blog-hero.jpeg"
+              alt="博客 · OPC 实战手记"
+              className="rounded-2xl shadow-2xl w-full"
+            />
+          </div>
         </div>
       </section>
 

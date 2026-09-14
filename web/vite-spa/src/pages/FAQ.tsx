@@ -130,19 +130,45 @@ export function FAQPage() {
 
   return (
     <>
-      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="max-w-page mx-auto px-6 text-center">
-          <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm mb-4">
-            💬 帮助中心
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            你想问的，<span className="text-brand-500">都在这</span>
-          </h1>
-          <p className="text-lg text-gray-600 mb-8">
-            15 个最常见问题 · 按分类找 · 搜不到就联系我们
-          </p>
+      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
+        <div className="max-w-page mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+          <div className="text-center md:text-left">
+            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm mb-4">
+              💬 帮助中心
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              你想问的，<span className="text-brand-500">都在这</span>
+            </h1>
+            <p className="text-lg text-gray-600 mb-6">
+              15 个最常见问题 · 按分类找 · 搜不到就联系我们
+            </p>
+            <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-gray-200">
+              <div>
+                <p className="text-2xl font-bold text-brand-500">15</p>
+                <p className="text-xs text-gray-500">常见问题</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-brand-500">5</p>
+                <p className="text-xs text-gray-500">分类</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-brand-500">1280+</p>
+                <p className="text-xs text-gray-500">helpful 数</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <img
+              src="/images/faq-hero.jpeg"
+              alt="FAQ 帮助中心"
+              className="rounded-2xl shadow-2xl w-full"
+            />
+          </div>
+        </div>
+      </section>
 
-          {/* 搜索 */}
+      <section className="py-8 bg-white border-b border-gray-200">
+        <div className="max-w-page mx-auto px-6">
           <div className="max-w-2xl mx-auto relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input

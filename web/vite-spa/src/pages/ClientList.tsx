@@ -156,9 +156,9 @@ export function ClientListPage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative py-16 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-        <div className="max-w-page mx-auto px-6">
-          <div className="max-w-3xl">
+      <section className="relative py-16 bg-gradient-to-br from-emerald-50 via-white to-teal-50 overflow-hidden">
+        <div className="max-w-page mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+          <div>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm mb-4">
               <Users className="w-3 h-3" /> Phase 46 D49-52 · OPC 首批 80 家触达清单
             </span>
@@ -167,14 +167,38 @@ export function ClientListPage() {
               <br />
               <span className="text-emerald-500">50 装企 + 30 医美 · 全国 20 城</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 mb-6">
               Phase 46 段 2 收官 — 内容 SOP 已就绪，下一步是跑客户触达。
               红线 #22 触达动作（外部资源）= 用户拍板后执行。
             </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-6 border-t border-gray-200">
+              <div>
+                <p className="text-2xl font-bold text-yellow-600">50</p>
+                <p className="text-xs text-gray-500">装企</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-pink-600">30</p>
+                <p className="text-xs text-gray-500">医美</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-emerald-600">80</p>
+                <p className="text-xs text-gray-500">总客户</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-emerald-600">20</p>
+                <p className="text-xs text-gray-500">城市</p>
+              </div>
+            </div>
           </div>
-
-          {/* 顶部统计 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          <div>
+            <img
+              src="/images/clients-hero.jpeg"
+              alt="80 家客户清单"
+              className="rounded-2xl shadow-2xl w-full"
+            />
+          </div>
+        </div>
+      </section>
             <div className="p-4 bg-white rounded-lg border border-gray-200">
               <p className="text-xs text-gray-500">装企</p>
               <p className="text-3xl font-bold text-yellow-600">{decoClients.length}</p>
