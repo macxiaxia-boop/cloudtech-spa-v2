@@ -14,14 +14,14 @@ interface FAQ {
 
 const FAQS: FAQ[] = [
   {
-    q: 'CloudTech 适合什么规模的公司？',
-    a: 'OPC 模式专为 1-10 人小公司设计。如果你有 1-2 名员工 + 想要 AI 帮跑业务，CloudTech 就是为你做的。超过 50 人团队建议考虑定制版。',
+    q: 'Cloud 适合什么规模的公司？',
+    a: 'OPC 模式专为 1-10 人小公司设计。如果你有 1-2 名员工 + 想要 AI 帮跑业务，Cloud 就是为你做的。超过 50 人团队建议考虑定制版。',
     category: 'getting-started',
     helpful: 128,
   },
   {
     q: '我完全不懂技术也能用吗？',
-    a: '可以。CloudTech 是 SaaS，开箱即用。你只需要：① 注册账号 ② 选 5 AI 员工 ③ 告诉它们你想跑啥。技术细节（数据库/API/cron）全部由 AI 自己搞定。',
+    a: '可以。Cloud 是 SaaS，开箱即用。你只需要：① 注册账号 ② 选 5 AI 员工 ③ 告诉它们你想跑啥。技术细节（数据库/API/cron）全部由 AI 自己搞定。',
     category: 'getting-started',
     helpful: 256,
   },
@@ -81,7 +81,7 @@ const FAQS: FAQ[] = [
   },
   {
     q: 'OPC 模式是什么？',
-    a: 'OPC = One Person + Company = 1 人 + AI 的整家公司。CloudTech 自己是 OPC 模式跑出来的（创始人阿劲 1 人 + 5 AI 员工）。我们把同样的工具开放给你。',
+    a: 'OPC = One Person + Company = 1 人 + AI 的整家公司。Cloud 自己是 OPC 模式跑出来的（创始人心之所向便是光 1 人 + 5 AI 员工）。我们把同样的工具开放给你。',
     category: 'getting-started',
     helpful: 312,
   },

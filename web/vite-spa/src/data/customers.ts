@@ -25,7 +25,7 @@ export const CUSTOMER_LOGOS: CustomerLogo[] = [
 
 export const TESTIMONIALS = [
   {
-    quote: 'CloudTech 让我把 80 家客户的跟进从"想起来才做"变成"7×24 自动跑"。1 个月签约率从 5% 干到 12%。',
+    quote: 'Cloud 让我把 80 家客户的跟进从"想起来才做"变成"7×24 自动跑"。1 个月签约率从 5% 干到 12%。',
     author: '王总',
     role: '成都华宁装饰 · 总经理',
     industry: 'decoration' as const,

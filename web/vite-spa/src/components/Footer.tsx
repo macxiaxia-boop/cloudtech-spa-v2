@@ -11,12 +11,12 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center gap-2 text-xl font-bold text-brand-500 mb-3">
               <Sparkles className="w-5 h-5" />
-              CloudTech · AI 数字员工
+              Cloud · AI 数字员工
             </Link>
             <p className="text-sm text-gray-600 mb-4">
               1 人 + AI 的整家公司 SaaS
               <br />
-              OPC 模式开创者 · 灵策智算出品
+              OPC 模式开创者 · Cloud出品
             </p>
             <div className="flex gap-3 text-sm">
               <a href="#" className="text-gray-500 hover:text-brand-500">
@@ -80,7 +80,7 @@ export function Footer() {
 
         {/* 版权 + 备案 */}
         <div className="border-t border-gray-200 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <p>© 2026 灵策智算 · CloudTech SaaS · 1 人 + AI 跑出 OPC 实证</p>
+          <p>© 2026 Cloud SaaS · 1 人 + AI 跑出 OPC 实证</p>
           <div className="flex gap-4">
             <span>京 ICP 备 XXXXXX 号</span>
             <span>京公网安备 XXXXXX 号</span>

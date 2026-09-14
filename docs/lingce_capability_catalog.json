@@ -1,0 +1,71 @@
+{
+  "catalog_version": "1.0.0",
+  "product": "Cloud AI 数字员工能力目录",
+  "source": "Cloud功能说明（2026-08-17 runtime catalog）+ Cloud 现有架构映射",
+  "positioning": "企业级 AI 数字员工平台；私有化部署；对外表达聚焦赚钱、省钱、标准化",
+  "principles": [
+    "能力按岗位编排、技能、知识、工作流、结果五层建模",
+    "目录项是能力声明，不等于每个功能都必须开发成独立页面",
+    "交付物类能力必须 draft -> human_approval -> generate -> verify",
+    "高风险行业能力必须保留来源、人工复核和合规门",
+    "数量是内部资产，不作为第一对外卖点"
+  ],
+  "scene_catalog": [
+    {"id":"platform_operations","name":"平台运营","count":5,"capabilities":["公众号助手","快手助手","淘宝助手","多平台内容适配","平台数据复盘"],"cloudtech_strategy":"已有 content/publisher/analytics，优先统一为平台账号与内容版本模型"},
+    {"id":"marketing","name":"营销","count":7,"capabilities":["公文写作","营销策划","品牌与素材","活动推广","渠道触达","营销分析","获客归因"],"cloudtech_strategy":"Cloud 第一主战场：内容+GEO+CRM+报价/合同/投标"},
+    {"id":"content","name":"内容","count":9,"capabilities":["脚本拆解","内容创作","长文","分镜脚本","短视频脚本","种草笔记","标题优化","内容排版","内容复盘"],"cloudtech_strategy":"接入 G1-G6，形成母内容到多平台版本和反馈回流"},
+    {"id":"ecommerce","name":"电商","count":12,"capabilities":["商品文案优化","用户评价分析","接单智能体","客服话术","店铺运营","SKU 文案","平台合规","广告分析","订单整理","差评处理","卖点提炼","转化复盘"],"cloudtech_strategy":"作为泛电商行业包，商品/评价/客服/广告/订单形成闭环"},
+    {"id":"cross_border","name":"跨境","count":8,"capabilities":["PI 制作","跨境客服翻译","广告投放分析","多语言本地化","纠纷沟通","差评处理","关键词表现","预算建议"],"cloudtech_strategy":"联网搜索、翻译、Office、广告数据和企业知识库组合实现"},
+    {"id":"finance","name":"财务","count":10,"capabilities":["财报分析","经营分析","三表解读","杜邦 ROE 拆解","预算差异","KPI 仪表盘","财务造假识别","现金流分析","财务报告","经营预警"],"cloudtech_strategy":"数据分析引擎+经营驾驶舱+自动报告"},
+    {"id":"legal","name":"法律","count":5,"capabilities":["合同起草","合同审查","服务协议","NDA","劳动/租赁合同"],"cloudtech_strategy":"律所行业包，模板库、条款风险、审批门、Office 交付"},
+    {"id":"hr","name":"人力","count":3,"capabilities":["周报日报","月报","飞书记录汇总","绩效材料","入职流程"],"cloudtech_strategy":"接入企业 IM/文档后实现，不作为首攻主场景"},
+    {"id":"education","name":"教育","count":9,"capabilities":["文献综述","高考专家","培训方案","论文拆解","学术写作","引用规范","志愿填报","院校专业调研","课件生成"],"cloudtech_strategy":"教育行业包，知识来源与引用规范优先"},
+    {"id":"medical_health","name":"医疗健康","count":14,"capabilities":["健身训练计划","健康报告","病历分析","医药代表资料助手","心理咨询陪伴","体检解读","健康数据","中医体质辨识","病历结构化","诊断辅助","医疗实体提取","产品资料","拜访提纲","危机检测与转介"],"cloudtech_strategy":"强合规行业包，医疗判断必须专业人员复核；营销与医疗服务隔离"},
+    {"id":"design","name":"设计","count":3,"capabilities":["交互设计","用户画像","UI/UX","可用性审计","前端实现"],"cloudtech_strategy":"接入多模态、UI/UX 和前端资产能力"},
+    {"id":"technology","name":"技术","count":5,"capabilities":["自动化测试","单测生成","E2E","API 测试","覆盖率矩阵"],"cloudtech_strategy":"内部提效技能，沙箱执行、权限隔离、结果报告"},
+    {"id":"logistics","name":"物流","count":5,"capabilities":["仓储库存助手","盘点","库位","补货预警","滞销分析"],"cloudtech_strategy":"行业包，数据导入、阈值规则、预警和工单"},
+    {"id":"metaphysics","name":"玄学","count":6,"capabilities":["黄历择吉","易经起卦","八字命理","历法查询","传统文化内容","生活娱乐分析"],"cloudtech_strategy":"可选生活包，明确娱乐/文化属性，不作医疗投资建议"},
+    {"id":"finance_investment","name":"金融/投资","count":1,"capabilities":["股票数据","指标分析","研究报告","风险提示"],"cloudtech_strategy":"工具型行业包，数据源、风险提示、权限和合规独立"}
+  ],
+  "skill_catalog": [
+    {"id":"office","name":"办公","count":13,"skills":["Word","公文排版","周报日报生成","工作报告 PPT","腾讯文档","飞书周报","Excel","PDF","Office 交付物契约","文档预览","版本管理","确认门"]},
+    {"id":"industry_professional","name":"行业专业","count":27,"skills":["财报分析","财报造假指数","合同智能助手","法律顾问","医疗病历","学术研究","论文分析","行业知识包","SOP 模板","行业红线","来源核验","人工复核"]},
+    {"id":"life_service","name":"生活服务","count":28,"skills":["八字命理","黄历","健身教练","健康管理","心理咨询","六爻","梅花易数","健康资料结构化","风险提示","真人转介"]},
+    {"id":"education","name":"教育","count":10,"skills":["高考顾问","培训设计","论文助手","课程体系","课件生成","文献综述","引用规范","院校专业调研","志愿填报","学习路径"]},
+    {"id":"data_analysis","name":"数据分析","count":6,"skills":["自动数据分析","商业智能","财务报告分析","图表生成","股票数据","经营指标分析"]},
+    {"id":"content_creation","name":"内容创作","count":7,"skills":["视频剧本","短剧","分镜脚本","体制内写作","公众号长文","多平台适配","内容复盘"]},
+    {"id":"programming","name":"编程","count":7,"skills":["测试用例生成","API 测试","E2E 测试","TDD","代码分析","覆盖率矩阵","缺陷报告"]},
+    {"id":"knowledge_management","name":"知识管理","count":5,"skills":["知识库问答","黄历/节日查询","转录成文","文档解析","版本知识库"]},
+    {"id":"design_multimedia","name":"设计多媒体","count":4,"skills":["UI 审计","UI/UX 设计","视频脚本/制作","图片/数字人资产"]},
+    {"id":"commercial_operations","name":"商业运营","count":1,"skills":["预算执行差异分析"]},
+    {"id":"other","name":"其他","count":9,"skills":["文章写作","内容规划","每日热点","PDF","Excel","网络搜索","美团接单","跨平台发布","数据回流"]}
+  ],
+  "business_scenarios": [
+    {"id":"content_acquisition","value":"赚钱/获客","pain":"不会做内容，等客上门","solution":["公众号助手","内容创作","脚本拆解","多平台适配"],"result":"内容主动引流"},
+    {"id":"ecommerce_conversion","value":"赚钱/转化","pain":"商品文案弱，差评没人分析","solution":["商品文案优化","评价分析","客服话术","广告分析"],"result":"提升转化并反推产品改进"},
+    {"id":"ad_roi","value":"赚钱/ROI","pain":"广告报表看不懂","solution":["广告报表解析","ACOS/ROAS","关键词分析","预算建议"],"result":"减少无效投放"},
+    {"id":"platform_matrix","value":"赚钱/规模","pain":"多平台运营没人手","solution":["平台助手","内容引擎","发布适配","互动复盘"],"result":"一人完成矩阵运营"},
+    {"id":"document_efficiency","value":"省钱/提效","pain":"文档慢、格式错","solution":["公文/合同/周报/PPT/Office","人工确认门"],"result":"分钟级交付"},
+    {"id":"data_analysis","value":"省钱/决策","pain":"数据散、发现异常太晚","solution":["财报/经营分析","库存预警","KPI 仪表盘"],"result":"异常提前发现"},
+    {"id":"testing_efficiency","value":"省钱/质量","pain":"回归慢、发版不稳","solution":["单测","E2E","API 测试","覆盖率"],"result":"测试自动化"},
+    {"id":"knowledge_retention","value":"标准化","pain":"经验随员工流失","solution":["企业知识库","数字员工","RAG 引用","版本管理"],"result":"经验可复用"},
+    {"id":"industry_standardization","value":"标准化","pain":"专业岗位质量和速度不稳定","solution":["病历结构化/合同起草/财报分析/培训方案","模板化","人工复核"],"result":"专业输出稳定"}
+  ],
+  "pipeline_templates": [
+    {"id":"G1","name":"信号扫描","inputs":["行业","城市","平台","时间窗","账号"],"outputs":["趋势","用户问题","竞品动作","风险词"],"gate":"来源与时间有效"},
+    {"id":"G2","name":"选题生成","inputs":["信号","品牌定位","目标人群","历史表现"],"outputs":["母题","角度","关键词","证据需求"],"gate":"必须回答赚钱/省钱/提效至少一问"},
+    {"id":"G2.5","name":"原创角度","inputs":["候选选题","竞品内容","品牌声音"],"outputs":["冲突点","反常识","差异化切口"],"gate":"不得无来源编造"},
+    {"id":"G3","name":"内容生产","inputs":["母题","平台","格式","素材","授权"],"outputs":["母稿","脚本","分镜","素材清单"],"gate":"事实、版权、AI味、敏感词"},
+    {"id":"G3.5","name":"事实核查","inputs":["草稿","引用","数据","素材元数据"],"outputs":["证实项","待证实项","错误","修改建议"],"gate":"高风险行业人工复核"},
+    {"id":"G4","name":"品控","inputs":["草稿","平台规则","品牌 SOP","审核规则"],"outputs":["评分","阻断项","审批包"],"gate":"未通过不得分发"},
+    {"id":"G4.5","name":"品牌化","inputs":["草稿","brand voice","禁用词","客群"],"outputs":["品牌版本","语言风险","可发布版本"],"gate":"品牌红线"},
+    {"id":"G5","name":"分发","inputs":["通过审核内容","平台","账号","时间"],"outputs":["发布任务","平台版本","链接","失败记录"],"gate":"平台规则/授权"},
+    {"id":"G6","name":"反馈","inputs":["曝光","点击","互动","线索","成交","成本"],"outputs":["内容评分","归因","下轮策略","实验"],"gate":"反馈必须反哺 G1/G2/G4"}
+  ],
+  "workflow_types": ["automatic","scheduled","fullchain","knowledge","workflow"],
+  "artifact_contract": {
+    "fields":["artifact_id","tenant_id","type","status","draft_id","final_uri","preview_uri","source_refs","checksum","risk_level","created_by","created_at","verified_at"],
+    "required_flow":["draft","human_approval","generate","verify","deliver"],
+    "high_risk_requires": ["source_refs","professional_review","approval_record"]
+  }
+}

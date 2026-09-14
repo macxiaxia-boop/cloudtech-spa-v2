@@ -18,7 +18,7 @@ const DOCUMENTS: Document[] = [
     id: 'doc-customer-service',
     category: 'legal',
     title: '客户主服务协议',
-    desc: '灵策智算与客户的标准 SaaS 服务协议，含 SLA/数据归属/退费',
+    desc: 'Cloud与客户的标准 SaaS 服务协议，含 SLA/数据归属/退费',
     path: 'legal/contracts/customer_service_agreement.md',
     redlines: ['#22 合同签字'],
     requires_user_approval: ['真实工商主体', '套餐定价', 'SLA 指标', '法务终审', '实际签字'],

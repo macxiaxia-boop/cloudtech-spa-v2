@@ -34,7 +34,7 @@ import { OnboardingTrigger } from './components/OnboardingTrigger';
 //  /cases                         — 10 客户案例库（5 装企 + 5 医美）
 //  /blog                          — 博客（OPC 故事 + 行业洞察）
 //  /faq                           — 帮助中心
-//  /opc-story                     — 阿劲的今天 · 创始人后台
+//  /opc-story                     — 心之所向便是光的今天 · 创始人后台
 //  /clients                       — 80 家客户清单
 //  /documents                     — 公司文档中心
 //  /monitoring                    — 监控与财务中心

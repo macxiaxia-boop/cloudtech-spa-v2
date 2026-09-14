@@ -1,4 +1,4 @@
-// OPC 故事页 · 阿劲的今天 · 创始人后台
+// OPC 故事页 · 心之所向便是光的今天 · 创始人后台
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, TrendingUp, Users, DollarSign, Heart, Code, FileText, Target, Award, ArrowRight } from 'lucide-react';
 
@@ -41,12 +41,12 @@ const PHILOSOPHY = [
   {
     icon: '⚙️',
     title: '8 daemon + 3 detector = 自我修复',
-    desc: 'CloudTech 内部有 8 个守护 daemon + 3 个探测器（drift/stall/loop）+ 9 个 cron。系统跑偏会自动修复或冻结，绝不失控。',
+    desc: 'Cloud 内部有 8 个守护 daemon + 3 个探测器（drift/stall/loop）+ 9 个 cron。系统跑偏会自动修复或冻结，绝不失控。',
   },
   {
     icon: '📚',
     title: '先自用 · 再卖 · 案例化',
-    desc: '我自己就是 CloudTech 的第一个客户。我用 30 天跑出来的真实数据 = 你的案例。我经历的坑 = 你的避雷针。',
+    desc: '我自己就是 Cloud 的第一个客户。我用 30 天跑出来的真实数据 = 你的案例。我经历的坑 = 你的避雷针。',
   },
 ];
 
@@ -58,11 +58,11 @@ export function OPCStoryPage() {
           <div className="grid md:grid-cols-2 gap-10 items-center mb-10">
             <div>
               <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm mb-4">
-                👤 阿劲的今天 · 创始人后台
+                👤 心之所向便是光的今天 · 创始人后台
               </span>
               <div className="flex items-center gap-6 mb-6">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-3xl font-bold">
-                  阿劲
+                  心之所向便是光
                 </div>
                 <div>
                   <h1 className="text-4xl md:text-5xl font-bold mb-2 leading-[1.1]">
@@ -73,7 +73,7 @@ export function OPCStoryPage() {
                 </div>
               </div>
               <p className="text-lg text-gray-600 mb-4">
-                灵策智算创始人 · CloudTech OPC 模式实证 · Day 30 · 208/208 测试 PASS
+                Cloud创始人 · Cloud OPC 模式实证 · Day 30 · 208/208 测试 PASS
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link to="/try" className="px-5 py-2.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 inline-flex items-center gap-2 font-medium text-sm">
@@ -116,7 +116,7 @@ export function OPCStoryPage() {
       <section className="py-12 bg-white">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Calendar className="w-6 h-6" /> 阿劲的今天 · 时间线
+            <Calendar className="w-6 h-6" /> 心之所向便是光的今天 · 时间线
           </h2>
           <p className="text-gray-500 mb-8 text-sm">
             真实记录我每天 + 5 AI 员工在干啥。每条都附时间 + 任务 + 结果。8 节点 = 1 整天的 OPC 模式。
@@ -206,7 +206,7 @@ export function OPCStoryPage() {
         <div className="max-w-page mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold mb-4">你也想跑 OPC 模式？</h2>
           <p className="text-lg opacity-90 mb-8">
-            把阿劲的 5 AI 员工 + 11 SPA + 80 客户清单 + 16 文档 · 全部复制给你
+            把心之所向便是光的 5 AI 员工 + 11 SPA + 80 客户清单 + 16 文档 · 全部复制给你
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link

@@ -17,13 +17,13 @@ interface BlogPost {
 const POSTS: BlogPost[] = [
   {
     id: 'opc-day-1',
-    title: 'OPC Day 1：阿劲一个人 + 5 AI 数字员工，开了一家 SaaS 公司',
+    title: 'OPC Day 1：心之所向便是光一个人 + 5 AI 数字员工，开了一家 SaaS 公司',
     excerpt:
-      '我叫阿劲，灵策智算的创始人。今天是我一个人创办 SaaS 的第 1 天。团队 = 我 + 5 AI 员工（Hermes/Lyra/Athena/Apollo/Artemis）。我把今天干了啥写下来，给自己留个档。',
+      '我叫心之所向便是光，Cloud的创始人。今天是我一个人创办 SaaS 的第 1 天。团队 = 我 + 5 AI 员工（Hermes/Lyra/Athena/Apollo/Artemis）。我把今天干了啥写下来，给自己留个档。',
     category: 'opc-story',
     date: '2026-09-14',
     readTime: '8 分钟',
-    author: '阿劲',
+    author: '心之所向便是光',
     tags: ['OPC', '创业日记', 'AI 数字员工'],
     featured: true,
   },
@@ -35,18 +35,18 @@ const POSTS: BlogPost[] = [
     category: 'opc-story',
     date: '2026-09-14',
     readTime: '12 分钟',
-    author: '阿劲',
+    author: '心之所向便是光',
     tags: ['OPC', '复盘', 'SaaS'],
   },
   {
     id: 'phase-41-44-rules',
     title: 'Phase 41-44 内容生产：4 主题派最优规律（实战派深度型派 1.0）',
     excerpt:
-      '灵策智算 4 个主题的内容生产实证：金句型 → 派 2.0（Phase 41）/ 实战派深度型教训向 → 派 1.0（Phase 42）/ 方法论向 → 派 1.0（Phase 43）/ 场景向 → 派 1.0（Phase 44）。规律：实战派深度型 = 派 1.0 实证稳定。',
+      'Cloud 4 个主题的内容生产实证：金句型 → 派 2.0（Phase 41）/ 实战派深度型教训向 → 派 1.0（Phase 42）/ 方法论向 → 派 1.0（Phase 43）/ 场景向 → 派 1.0（Phase 44）。规律：实战派深度型 = 派 1.0 实证稳定。',
     category: 'tech',
     date: '2026-09-13',
     readTime: '15 分钟',
-    author: '阿劲 + Lyra AI',
+    author: '心之所向便是光 + Lyra AI',
     tags: ['内容生产', 'AI', '4 主题派最优'],
   },
   {
@@ -57,29 +57,29 @@ const POSTS: BlogPost[] = [
     category: 'tech',
     date: '2026-09-13',
     readTime: '10 分钟',
-    author: '阿劲 + Hermes AI',
+    author: '心之所向便是光 + Hermes AI',
     tags: ['OPC', '红 #22', '治理边界'],
   },
   {
     id: 'case-decoration-huaning',
     title: '案例：成都华宁装饰 1 个月把签约率从 5% 干到 12%',
     excerpt:
-      '成都华宁装饰老板王总的故事。单条线索 ¥80 → ¥28，签约 5% → 12%。怎么用 CloudTech 5 步法（客户画像 → 报价拆解 → 获客内容 → 工地直播 → AI 复盘）跑的。',
+      '成都华宁装饰老板王总的故事。单条线索 ¥80 → ¥28，签约 5% → 12%。怎么用 Cloud 5 步法（客户画像 → 报价拆解 → 获客内容 → 工地直播 → AI 复盘）跑的。',
     category: 'case',
     date: '2026-09-12',
     readTime: '8 分钟',
-    author: '阿劲',
+    author: '心之所向便是光',
     tags: ['装企案例', '成都', '获客'],
   },
   {
     id: 'case-medical-meilai',
     title: '案例：北京美莱医疗美容 6 红线守护 = 合规变成竞争力',
     excerpt:
-      '医美行业最大痛点 = 合规。北京美莱张院长用 CloudTech 6 红线守护 + AI 拦截违规话术 + 案例脱敏。0 违规，二次到店率 38%。',
+      '医美行业最大痛点 = 合规。北京美莱张院长用 Cloud 6 红线守护 + AI 拦截违规话术 + 案例脱敏。0 违规，二次到店率 38%。',
     category: 'case',
     date: '2026-09-12',
     readTime: '10 分钟',
-    author: '阿劲',
+    author: '心之所向便是光',
     tags: ['医美案例', '北京', '合规'],
   },
   {
@@ -90,7 +90,7 @@ const POSTS: BlogPost[] = [
     category: 'industry',
     date: '2026-09-10',
     readTime: '12 分钟',
-    author: '阿劲 + Artemis AI',
+    author: '心之所向便是光 + Artemis AI',
     tags: ['装企', '2026 趋势', '工地直播'],
   },
   {
@@ -101,18 +101,18 @@ const POSTS: BlogPost[] = [
     category: 'industry',
     date: '2026-09-08',
     readTime: '14 分钟',
-    author: '阿劲 + Hermes AI',
+    author: '心之所向便是光 + Hermes AI',
     tags: ['医美', '合规', '6 红线'],
   },
   {
     id: 'red-line-25-constitution',
     title: '红 #25 自治系统宪法：8 daemon + 3 detector + 9 cron 的自我修复',
     excerpt:
-      'CloudTech 内部的自我修复系统：8 daemon（D1-D8）+ 3 detector（drift/stall/loop）+ 9 cron 守护。8 分钟读懂这套 OPC 自治系统。',
+      'Cloud 内部的自我修复系统：8 daemon（D1-D8）+ 3 detector（drift/stall/loop）+ 9 cron 守护。8 分钟读懂这套 OPC 自治系统。',
     category: 'tech',
     date: '2026-09-05',
     readTime: '18 分钟',
-    author: '阿劲 + Athena AI',
+    author: '心之所向便是光 + Athena AI',
     tags: ['OPC', '红 #25', '自治系统'],
   },
 ];
@@ -142,7 +142,7 @@ export function BlogPage() {
               <span className="text-brand-500">实战手记</span>
             </h1>
             <p className="text-lg text-gray-600 mb-6">
-              阿劲 + 5 AI 员工的真实运营记录 · 行业案例 · 技术内幕
+              心之所向便是光 + 5 AI 员工的真实运营记录 · 行业案例 · 技术内幕
             </p>
             <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200">
               <div>

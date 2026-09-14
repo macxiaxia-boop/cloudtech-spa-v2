@@ -1,0 +1,175 @@
+version: 1.0
+updated_at: 2026-09-09
+owner: Cloud
+objective: "从功能目录追平为可运行、可验证、可行业复制的企业级 AI 数字员工平台"
+source_doc: "docs/Cloud能力模型与Cloud反哺蓝图.md"
+plan_doc: "docs/Cloud差距分析与Cloud追赶计划.md"
+
+current_baseline:
+  completed:
+    - "lingce_capability_catalog.json 能力目录"
+    - "capability_runtime.py G1-G6 内容运行时"
+    - "Artifact 草稿/审批/生成/校验"
+    - "pipeline_orchestrator content mode 路由"
+    - "G1-G6 单元测试和演示脚本"
+  partial:
+    - "数字员工工厂"
+    - "工作流引擎"
+    - "RAG/向量检索"
+    - "CRM/GEO/企微/Office"
+  not_started:
+    - "全量行业包"
+    - "真实平台发布适配器"
+    - "租户生产化验收"
+    - "署名客户与量化案例"
+
+acceptance_gates:
+  - id: GATE-01
+    name: "能力目录可解释"
+    check: "目录 JSON 可解析，15 类场景、11 类技能域、G1-G6 均有定义"
+    status: "passed"
+  - id: GATE-02
+    name: "G1-G6 端到端"
+    check: "信号→内容→事实→品控→分发清单→反馈等待全部产生 Trace"
+    status: "passed"
+  - id: GATE-03
+    name: "交付物确认门"
+    check: "无 approved 状态不能生成 verified 文件"
+    status: "pending"
+  - id: GATE-04
+    name: "线索归因"
+    check: "内容 run_id 可关联 lead、campaign、employee、source"
+    status: "pending"
+  - id: GATE-05
+    name: "真实平台回执"
+    check: "未授权适配器不返回发布成功"
+    status: "pending"
+  - id: GATE-06
+    name: "租户隔离"
+    check: "知识、文件、线索、反馈、配置跨租户检索结果为 0"
+    status: "pending"
+  - id: GATE-07
+    name: "行业案例"
+    check: "30 天内至少一个署名客户和一个可核验 ROI 案例"
+    status: "pending"
+
+phases:
+  - id: P0
+    name: "能力契约与可信执行"
+    days: "1-3"
+    depends_on: []
+    goals:
+      - "落地数字员工结构化 schema"
+      - "统一技能输入输出/风险/来源契约"
+      - "将 G1-G6 和 Artifact 接入统一任务 Trace"
+    tasks: [A02, A03, C01, C04, G01]
+    deliverables:
+      - "数字员工结构化迁移"
+      - "技能契约校验"
+      - "G1-G6 统一任务记录"
+    exit_criteria:
+      - "GATE-01 通过"
+      - "GATE-02 通过"
+      - "GATE-03 通过"
+  - id: P1
+    name: "知识、执行、获客、转化"
+    days: "4-10"
+    depends_on: [P0]
+    goals:
+      - "完成知识版本和租户隔离"
+      - "完成任务状态机、恢复、员工工作流绑定"
+      - "把内容、线索、触达、CRM 串起来"
+    tasks: [B01, B02, B03, C02, C03, C05, D01, D02]
+    deliverables:
+      - "知识引用链"
+      - "任务状态机"
+      - "lead/contact/opportunity/event 统一对象"
+      - "企微/平台适配器契约"
+    exit_criteria:
+      - "GATE-04 通过"
+      - "GATE-05 通过"
+  - id: P2
+    name: "行业包与交付物闭环"
+    days: "11-20"
+    depends_on: [P1]
+    goals:
+      - "装企、泛电商、医美、律所逐行业建立 E2E"
+      - "报价、合同、投标、方案统一审批和生成"
+      - "建立有来源的案例资产"
+    tasks: [A04, B04, D03, D04, D05, E01, E02, E03, E04, G02, G03]
+    deliverables:
+      - "行业包模板"
+      - "四类行业 E2E 路径"
+      - "案例与 ROI 证据库"
+    exit_criteria:
+      - "每个行业至少一条 E2E"
+      - "至少一个可核验量化案例"
+  - id: P3
+    name: "平台化、可观测和私有化生产化"
+    days: "21-35"
+    depends_on: [P2]
+    goals:
+      - "多租户、权限、密钥、审计、备份、恢复、迁移"
+      - "模型路由、任务监控、失败告警"
+      - "首页从功能数量改为经营结果"
+    tasks: [F01, F02, F03, F04, F05, G04]
+    deliverables:
+      - "租户级配置与凭证管理"
+      - "监控告警面板"
+      - "备份恢复演练"
+      - "线索/内容/经营结果首页"
+    exit_criteria:
+      - "GATE-06 通过"
+      - "备份恢复演练通过"
+      - "任务失败 5 分钟内可告警"
+  - id: P4
+    name: "规模化经营与案例复制"
+    days: "36+"
+    depends_on: [P3]
+    goals:
+      - "以装企为首个署名客户标杆"
+      - "复制到医美、泛电商、律所"
+      - "形成可脱离创始人的交付和 CSM 流程"
+    tasks: [G03, G04, E01, E02, E03, E04]
+    deliverables:
+      - "署名客户案例"
+      - "行业复制包"
+      - "客户成功和续费流程"
+    exit_criteria:
+      - "30 天内至少一个署名客户"
+      - "至少一个行业包可脱离创始人手工运行"
+      - "客户可查看内容、线索、任务、交付物和结果"
+
+task_index:
+  A01: {phase: P0, status: completed, area: capability, name: "能力目录模型", evidence: "docs/lingce_capability_catalog.json" }
+  A02: {phase: P0, status: todo, area: capability, name: "数字员工结构化", depends_on: [A01], acceptance: "mission/knowledge/workflow/risk/contracts 均可持久化" }
+  A03: {phase: P0, status: todo, area: capability, name: "技能契约", depends_on: [A01], acceptance: "每个技能可校验 input/output/source/risk" }
+  A04: {phase: P2, status: todo, area: industry, name: "行业包规范", depends_on: [A01, A02, A03], acceptance: "新行业包按模板导入" }
+  B01: {phase: P1, status: todo, area: knowledge, name: "知识版本与来源", depends_on: [B02], acceptance: "回答可显示来源、版本、有效期" }
+  B02: {phase: P1, status: todo, area: knowledge, name: "RAG 租户隔离", depends_on: [A01], acceptance: "跨租户检索结果为 0" }
+  B03: {phase: P1, status: todo, area: analytics, name: "指标字典", depends_on: [], acceptance: "线索、CTR、CPL、ROAS、ACOS 使用统一口径" }
+  B04: {phase: P2, status: todo, area: evidence, name: "案例资产", depends_on: [B01], acceptance: "案例发布前完成授权和来源检查" }
+  C01: {phase: P0, status: partial, area: pipeline, name: "Trace 全链路", depends_on: [], evidence: "capability_runtime.py" }
+  C02: {phase: P1, status: todo, area: pipeline, name: "任务状态机", depends_on: [C01], acceptance: "支持 pending/running/waiting/success/failed/cancel/retry" }
+  C03: {phase: P1, status: todo, area: workflow, name: "工作流绑定员工", depends_on: [A02, C02], acceptance: "@数字员工 只启动白名单工作流" }
+  C04: {phase: P0, status: partial, area: pipeline, name: "失败恢复", depends_on: [C01, C02], acceptance: "checkpoint 续跑不重复写入" }
+  C05: {phase: P1, status: todo, area: integration, name: "真实适配器接口", depends_on: [C01], acceptance: "无授权不报告发布成功" }
+  D01: {phase: P1, status: todo, area: growth, name: "获客闭环", depends_on: [B03, C05], acceptance: "内容 run_id 可关联 lead/campaign" }
+  D02: {phase: P1, status: todo, area: touch, name: "触达闭环", depends_on: [C05], acceptance: "消息有授权、回执、频控" }
+  D03: {phase: P2, status: partial, area: artifact, name: "报价合同投标", depends_on: [A03, C03], evidence: "现有 Office/审批/投标模块" }
+  D04: {phase: P2, status: partial, area: content, name: "内容反馈闭环", depends_on: [C01, C05], evidence: "capability_runtime.py" }
+  D05: {phase: P2, status: todo, area: analytics, name: "广告 ROI", depends_on: [B03], acceptance: "可计算 ROAS/ACOS/CPL" }
+  D06: {phase: P2, status: todo, area: distribution, name: "账号矩阵", depends_on: [C05], acceptance: "账号、角色、平台版本、回执可配置" }
+  E01: {phase: P2, status: partial, area: industry, name: "装企行业包", depends_on: [A04, D01, D02, D03, D04] }
+  E02: {phase: P2, status: todo, area: industry, name: "泛电商行业包", depends_on: [A04, D01, D02, D05] }
+  E03: {phase: P2, status: partial, area: industry, name: "医美行业包", depends_on: [A04, D01, D02] }
+  E04: {phase: P2, status: todo, area: industry, name: "律所行业包", depends_on: [A04, D01, D03] }
+  F01: {phase: P3, status: partial, area: platform, name: "多租户生产化", depends_on: [B02, C05], evidence: "现有 multi_tenant/tenant_isolation 模块" }
+  F02: {phase: P3, status: todo, area: platform, name: "任务与模型路由", depends_on: [C02], acceptance: "按风险/成本/能力路由并可降级" }
+  F03: {phase: P3, status: todo, area: security, name: "安全与审计", depends_on: [F01], acceptance: "关键动作有授权和审计" }
+  F04: {phase: P3, status: todo, area: observability, name: "监控与健康", depends_on: [C01], acceptance: "失败 5 分钟内告警" }
+  F05: {phase: P3, status: partial, area: reliability, name: "备份与迁移", depends_on: [F01], evidence: "现有 backup_restore/migrate_pg 模块" }
+  G01: {phase: P0, status: partial, area: validation, name: "E2E 验收脚本", depends_on: [C01], evidence: "tests/test_capability_runtime.py" }
+  G02: {phase: P2, status: todo, area: validation, name: "演示数据脱敏", depends_on: [F03] }
+  G03: {phase: P2, status: todo, area: business, name: "商业验收", depends_on: [E01, E02, E04], acceptance: "至少一个署名客户和量化案例" }
+  G04: {phase: P3, status: todo, area: business, name: "运营看板", depends_on: [B03, D01, D05], acceptance: "首页展示线索、待跟进、ROI、异常任务" }

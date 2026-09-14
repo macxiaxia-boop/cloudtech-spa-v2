@@ -64,7 +64,7 @@ export function Header() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 text-xl font-bold text-brand-500">
           <Sparkles className="w-5 h-5" />
-          CloudTech
+          Cloud
         </Link>
 
         {/* 4 大区导航 */}

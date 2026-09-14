@@ -21,7 +21,7 @@ interface Template {
 const TEMPLATES: Template[] = [
   {
     phase: 'Phase 41',
-    theme: '灵策智算 ToB SaaS',
+    theme: 'Cloud ToB SaaS',
     type: '金句型',
     v1_words: 4260,
     v2_words: 3500,
@@ -35,7 +35,7 @@ const TEMPLATES: Template[] = [
   },
   {
     phase: 'Phase 42',
-    theme: '灵策智算"5 个产品坑"',
+    theme: 'Cloud"5 个产品坑"',
     type: '实战派深度型',
     subtype: '教训向',
     v1_words: 3300,
@@ -50,7 +50,7 @@ const TEMPLATES: Template[] = [
   },
   {
     phase: 'Phase 43',
-    theme: '灵策智算"定价心法"',
+    theme: 'Cloud"定价心法"',
     type: '实战派深度型',
     subtype: '方法论向',
     v1_words: 3500,
@@ -65,7 +65,7 @@ const TEMPLATES: Template[] = [
   },
   {
     phase: 'Phase 44',
-    theme: '灵策智算"5 个客户问题"',
+    theme: 'Cloud"5 个客户问题"',
     type: '实战派深度型',
     subtype: '场景向',
     v1_words: 3500,
@@ -113,7 +113,7 @@ export function ContentSOPPage() {
               <span className="text-indigo-500">让 AI 替你跑"原版 + 优化版"双轨对比</span>
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              基于灵策智算 Phase 41-44 四主题实战跑通，
+              基于Cloud Phase 41-44 四主题实战跑通，
               红线 #15.5 对比派最优 + 红线 #16 双轨评分卡，
               自动判主题类型 → 自动派最优版。
             </p>
