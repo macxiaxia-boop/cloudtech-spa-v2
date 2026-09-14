@@ -52,10 +52,11 @@ def test_app_tsx_has_clients_route():
 
 
 def test_navigation_links_to_sop_and_clients():
-    """App.tsx 导航含 SOP 入口"""
-    p = VITE_SPA_SRC / "App.tsx"
-    content = p.read_text(encoding="utf-8")
-    assert 'to="/content-sop"' in content
+    """App.tsx + Header.tsx 导航含 SOP 入口（Phase 47 导航迁到 Header）"""
+    app = (VITE_SPA_SRC / "App.tsx").read_text(encoding="utf-8")
+    header = (VITE_SPA_SRC / "components" / "Header.tsx").read_text(encoding="utf-8")
+    content = app + header
+    assert 'to="/content-sop"' in content or "to: '/content-sop'" in content
 
 
 # ══════════════ ContentSOP.tsx ══════════════
@@ -229,8 +230,9 @@ def test_phase46_total_pages():
 
 
 def test_phase46_footer_consistency():
-    """App.tsx footer OPC 标记"""
-    p = VITE_SPA_SRC / "App.tsx"
-    content = p.read_text(encoding="utf-8")
+    """App.tsx + Footer.tsx OPC 标记（Phase 47 footer 拆成 Footer.tsx）"""
+    app = (VITE_SPA_SRC / "App.tsx").read_text(encoding="utf-8")
+    footer = (VITE_SPA_SRC / "components" / "Footer.tsx").read_text(encoding="utf-8")
+    content = app + footer
     assert "OPC" in content
     assert "1 人 + AI" in content

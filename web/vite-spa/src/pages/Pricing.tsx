@@ -10,8 +10,8 @@ const PLANS = [
     period: '/ 月',
     desc: '7 天体验，含 1 个 FE 员工',
     features: ['1 个 FE 数字员工', '100 次 / 月调用', '社区支持', '公开行业模板'],
-    cta: '注册体验',
-    href: '/login',
+    cta: '7 天免费试用',
+    href: '/try',
     highlight: false,
   },
   {

@@ -19,6 +19,7 @@ ROOT = Path("D:/CloudTech-Portable")
 FINANCE = ROOT / "finance"
 WEB_PAGES = ROOT / "web" / "vite-spa" / "src" / "pages"
 WEB_APP = ROOT / "web" / "vite-spa" / "src" / "App.tsx"
+WEB_HEADER = ROOT / "web" / "vite-spa" / "src" / "components" / "Header.tsx"
 
 
 # ─────────────────── 1. Grafana 仪表盘 ───────────────────
@@ -216,8 +217,11 @@ class TestAppRoutes:
         assert 'path="/monitoring"' in content, "缺 /monitoring 路由"
 
     def test_navigation_link(self):
-        content = (WEB_APP).read_text(encoding="utf-8")
-        assert 'to="/monitoring"' in content, "导航缺 /monitoring 链接"
+        """Phase 47: 导航迁到 Header.tsx，所以同时检查 App.tsx + Header.tsx"""
+        app_content = (WEB_APP).read_text(encoding="utf-8")
+        header_content = (WEB_HEADER).read_text(encoding="utf-8") if WEB_HEADER.exists() else ""
+        combined = app_content + header_content
+        assert 'to="/monitoring"' in combined or '"/monitoring"' in combined, "导航缺 /monitoring 链接"
 
     def test_all_previous_routes_preserved(self):
         content = (WEB_APP).read_text(encoding="utf-8")

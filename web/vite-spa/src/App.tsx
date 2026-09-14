@@ -10,72 +10,67 @@ import { ContentSOPPage } from './pages/ContentSOP';
 import { ClientListPage } from './pages/ClientList';
 import { DocumentsPage } from './pages/Documents';
 import { MonitoringPage } from './pages/Monitoring';
+import { CaseLibraryPage } from './pages/CaseLibrary';
+import { FAQPage } from './pages/FAQ';
+import { BlogPage } from './pages/Blog';
+import { TryNowPage } from './pages/TryNow';
+import { AIEmployeesPage } from './pages/AIEmployees';
+import { OPCStoryPage } from './pages/OPCStory';
 import { FEEmployeeMenu } from './components/FEEmployeeMenu';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+import { OnboardingTrigger } from './components/OnboardingTrigger';
 
-// Phase 46 D61-68: 段 4 完整就绪（监控 + 财务 + 客户漏斗）
+// Phase 47: 全部做（Stage 1+2+3）— 17 页面 + 完整导航 + Onboarding + 新监控
+// 4 大区导航：产品 / 行业 / 资源 / 我的
 // 路由:
-//  /                                   — 营销首页
-//  /pricing                            — 定价（公开）
-//  /industries/decoration              — 装企行业落地页（SEO）
-//  /industries/medical                 — 医美行业落地页（SEO + 合规）
-//  /content-sop                        — 内容生产 SOP 工具
-//  /clients                            — 80 家客户清单
-//  /documents                          — 公司文档中心（D53-60）
-//  /monitoring                         — 监控与财务中心（D61-68）
-//  /dashboard                          — 客户后台
-//  /settings                           — 账号设置
-//  /billing                            — 套餐切换
-//  /employees                          — FE 3 员工菜单
+//  /                              — 营销首页
+//  /pricing                       — 定价（公开）
+//  /try                           — 7 天试用（Stage 3 卖）
+//  /employees                     — 5 AI 数字员工完整工时表
+//  /industries/decoration         — 装企行业落地页（SEO）
+//  /industries/medical            — 医美行业落地页（SEO + 合规）
+//  /content-sop                   — 内容生产 SOP 工具
+//  /cases                         — 10 客户案例库（5 装企 + 5 医美）
+//  /blog                          — 博客（OPC 故事 + 行业洞察）
+//  /faq                           — 帮助中心
+//  /opc-story                     — 阿劲的今天 · 创始人后台
+//  /clients                       — 80 家客户清单
+//  /documents                     — 公司文档中心
+//  /monitoring                    — 监控与财务中心
+//  /dashboard                     — 客户后台
+//  /settings                      — 账号设置
+//  /billing                       — 套餐切换
 export default function App() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* 顶部导航 — Phase 46 D61-68 加 Monitoring 入口 */}
-      <header className="border-b border-gray-200">
-        <div className="max-w-page mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-brand-500">
-            CloudTech · AI 数字员工
-          </Link>
-          <nav className="flex items-center gap-6 text-sm">
-            <Link to="/" className="hover:text-brand-500">首页</Link>
-            <Link to="/industries/decoration" className="hover:text-brand-500">装企</Link>
-            <Link to="/industries/medical" className="hover:text-brand-500">医美</Link>
-            <Link to="/content-sop" className="hover:text-brand-500">SOP</Link>
-            <Link to="/clients" className="hover:text-brand-500">客户</Link>
-            <Link to="/documents" className="hover:text-brand-500">文档</Link>
-            <Link to="/monitoring" className="hover:text-brand-500">监控</Link>
-            <Link to="/pricing" className="hover:text-brand-500">定价</Link>
-            <Link to="/dashboard" className="hover:text-brand-500">后台</Link>
-            <Link to="/billing" className="hover:text-brand-500">套餐</Link>
-            <FEEmployeeMenu />
-            <Link to="/settings" className="hover:text-brand-500">设置</Link>
-            <Link to="/login" className="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
-              登录
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen bg-white flex flex-col">
+      <Header />
 
-      <main>
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<MarketingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/try" element={<TryNowPage />} />
+          <Route path="/employees" element={<AIEmployeesPage />} />
           <Route path="/industries/decoration" element={<IndustryDecorationPage />} />
           <Route path="/industries/medical" element={<IndustryMedicalPage />} />
           <Route path="/content-sop" element={<ContentSOPPage />} />
+          <Route path="/cases" element={<CaseLibraryPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/opc-story" element={<OPCStoryPage />} />
           <Route path="/clients" element={<ClientListPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/monitoring" element={<MonitoringPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/billing" element={<BillingPage />} />
-          <Route path="/employees" element={<FEEmployeeMenu />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 
-      <footer className="border-t border-gray-200 mt-20 py-8 text-center text-sm text-gray-500">
-        CloudTech SaaS · Phase 46 OPC · 1 人 + AI 的整家公司
-      </footer>
+      <Footer />
+      <OnboardingTrigger />
     </div>
   );
 }
@@ -83,7 +78,7 @@ export default function App() {
 function NotFound() {
   return (
     <div className="max-w-page mx-auto px-6 py-20 text-center">
-      <h1 className="text-3xl font-bold mb-4">404</h1>
+      <h1 className="text-3xl font-bold mb-4">404 · 没找到这页</h1>
       <Link to="/" className="text-brand-500 hover:underline">返回首页</Link>
     </div>
   );

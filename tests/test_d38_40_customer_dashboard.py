@@ -65,9 +65,10 @@ def test_app_tsx_has_billing_route():
 
 
 def test_app_tsx_footer_opc():
-    """页脚显示 OPC 模式"""
-    p = VITE_SPA_SRC / "App.tsx"
-    content = p.read_text(encoding="utf-8")
+    """页脚显示 OPC 模式（Phase 47 footer 拆成 Footer.tsx）"""
+    app = (VITE_SPA_SRC / "App.tsx").read_text(encoding="utf-8")
+    footer = (VITE_SPA_SRC / "components" / "Footer.tsx").read_text(encoding="utf-8")
+    content = app + footer
     assert "OPC" in content
     assert "1 人 + AI" in content
 
@@ -190,9 +191,10 @@ def test_phase46_footer_opc():
         # 这里不强求
 
 def test_navigation_links_to_dashboard():
-    """App.tsx 导航含 dashboard 入口"""
-    p = VITE_SPA_SRC / "App.tsx"
-    content = p.read_text(encoding="utf-8")
-    assert 'to="/dashboard"' in content
-    assert 'to="/settings"' in content
-    assert 'to="/billing"' in content
+    """App.tsx + Header.tsx 导航含 dashboard 入口（Phase 47 导航迁到 Header）"""
+    app = (VITE_SPA_SRC / "App.tsx").read_text(encoding="utf-8")
+    header = (VITE_SPA_SRC / "components" / "Header.tsx").read_text(encoding="utf-8")
+    content = app + header
+    assert 'to="/dashboard"' in content or "to: '/dashboard'" in content
+    assert 'to="/settings"' in content or "to: '/settings'" in content
+    assert 'to="/billing"' in content or "to: '/billing'" in content

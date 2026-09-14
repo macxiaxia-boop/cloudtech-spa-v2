@@ -125,10 +125,11 @@ def test_app_tsx_has_documents_route():
 
 
 def test_navigation_links_to_documents():
-    """App.tsx 导航含文档入口"""
-    p = VITE_SPA_SRC / "App.tsx"
-    content = p.read_text(encoding="utf-8")
-    assert 'to="/documents"' in content
+    """App.tsx + Header.tsx 导航含文档入口（Phase 47 导航迁到 Header）"""
+    app = (VITE_SPA_SRC / "App.tsx").read_text(encoding="utf-8")
+    header = (VITE_SPA_SRC / "components" / "Header.tsx").read_text(encoding="utf-8")
+    content = app + header
+    assert 'to="/documents"' in content or "to: '/documents'" in content
 
 
 def test_documents_lists_all_16():

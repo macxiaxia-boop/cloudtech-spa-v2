@@ -51,11 +51,12 @@ def test_app_tsx_has_medical_route():
 
 
 def test_navigation_links_to_industries():
-    """App.tsx 导航含装企 + 医美入口"""
-    p = VITE_SPA_SRC / "App.tsx"
-    content = p.read_text(encoding="utf-8")
-    assert 'to="/industries/decoration"' in content
-    assert 'to="/industries/medical"' in content
+    """App.tsx + Header.tsx 导航含装企 + 医美入口（Phase 47 导航迁到 Header）"""
+    app = (VITE_SPA_SRC / "App.tsx").read_text(encoding="utf-8")
+    header = (VITE_SPA_SRC / "components" / "Header.tsx").read_text(encoding="utf-8")
+    content = app + header
+    assert 'to="/industries/decoration"' in content or "to: '/industries/decoration'" in content
+    assert 'to="/industries/medical"' in content or "to: '/industries/medical'" in content
 
 
 # ══════════════ IndustryDecoration.tsx ══════════════
