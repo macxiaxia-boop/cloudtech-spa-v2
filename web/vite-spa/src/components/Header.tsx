@@ -22,6 +22,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: '定价', to: '/pricing' },
       { label: '5 AI 员工', to: '/employees', badge: 'HOT' },
       { label: '监控中心', to: '/monitoring', badge: 'NEW' },
+      { label: '漏斗转化', to: '/funnel', badge: 'NEW' },
       { label: '7 天试用', to: '/try', badge: 'FREE' },
     ],
   },

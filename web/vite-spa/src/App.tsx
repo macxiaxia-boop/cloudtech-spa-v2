@@ -16,18 +16,21 @@ import { BlogPage } from './pages/Blog';
 import { TryNowPage } from './pages/TryNow';
 import { AIEmployeesPage } from './pages/AIEmployees';
 import { OPCStoryPage } from './pages/OPCStory';
+import { FunnelPage } from './pages/Funnel';
 import { FEEmployeeMenu } from './components/FEEmployeeMenu';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { OnboardingTrigger } from './components/OnboardingTrigger';
 
 // Phase 47: 全部做（Stage 1+2+3）— 17 页面 + 完整导航 + Onboarding + 新监控
+// Phase 48.D84-87: Funnel + Revenue 接入 SPA（4 大补漏）
 // 4 大区导航：产品 / 行业 / 资源 / 我的
 // 路由:
-//  /                              — 营销首页
-//  /pricing                       — 定价（公开）
+//  /                              — 营销首页（4 关键数字嵌入）
+//  /pricing                       — 定价（含 Revenue 预测表）
 //  /try                           — 7 天试用（Stage 3 卖）
 //  /employees                     — 5 AI 数字员工完整工时表
+//  /funnel                        — 漏斗转化（5 状态机 + 4 洞察）
 //  /industries/decoration         — 装企行业落地页（SEO）
 //  /industries/medical            — 医美行业落地页（SEO + 合规）
 //  /content-sop                   — 内容生产 SOP 工具
@@ -52,6 +55,7 @@ export default function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/try" element={<TryNowPage />} />
           <Route path="/employees" element={<AIEmployeesPage />} />
+          <Route path="/funnel" element={<FunnelPage />} />
           <Route path="/industries/decoration" element={<IndustryDecorationPage />} />
           <Route path="/industries/medical" element={<IndustryMedicalPage />} />
           <Route path="/content-sop" element={<ContentSOPPage />} />

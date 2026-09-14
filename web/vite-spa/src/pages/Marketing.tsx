@@ -53,19 +53,23 @@ export function MarketingPage() {
                 看 10 客户案例 →
               </Link>
             </div>
-            {/* 关键数字 */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
+            {/* 关键数字 · Phase 48.D85 4 关键（80 家 / 1.25% / ¥999 / ¥3.99） */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-6 border-t border-gray-200">
               <div>
-                <p className="text-2xl font-bold text-brand-500">210+</p>
-                <p className="text-xs text-gray-500">累计服务客户</p>
+                <p className="text-2xl font-bold text-brand-500">80</p>
+                <p className="text-xs text-gray-500">P0 客户清单</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-brand-500">1500+</p>
-                <p className="text-xs text-gray-500">AI skill 模板</p>
+                <p className="text-2xl font-bold text-orange-500">1.25%</p>
+                <p className="text-xs text-gray-500">漏斗转化率</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-brand-500">99.5%</p>
-                <p className="text-xs text-gray-500">AI 员工成功率</p>
+                <p className="text-2xl font-bold text-green-500">¥999</p>
+                <p className="text-xs text-gray-500">标准版 / 月</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-brand-500">3.99</p>
+                <p className="text-xs text-gray-500">LTV/CAC（健康）</p>
               </div>
             </div>
           </div>
@@ -96,7 +100,7 @@ export function MarketingPage() {
       <section className="py-12 bg-white border-y border-gray-200">
         <div className="max-w-page mx-auto px-6">
           <p className="text-center text-xs uppercase font-bold text-gray-500 mb-6 tracking-wider">
-            <Building2 className="w-4 h-4 inline mr-1" /> 210+ 客户信赖 · 50 装企 + 30 医美 + 通用
+            <Building2 className="w-4 h-4 inline mr-1" /> 80+ P0 客户信赖 · 装企 + 医美 + 通用 SaaS
           </p>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {CUSTOMER_LOGOS.slice(0, 10).map((c) => (
@@ -150,7 +154,7 @@ export function MarketingPage() {
           </div>
           <div className="text-center mt-6">
             <Link to="/employees" className="text-brand-500 hover:underline text-sm">
-              看完整 1500+ skill 模板 →
+              看完整 5 AI 员工工时表 →
             </Link>
           </div>
         </div>

@@ -1,7 +1,8 @@
-// Phase 45-47: 定价页 · 3 套餐 + 客户 logo + 退款保证 + 比较表
+// Phase 45-47: 定价页 · 3 套餐 + 客户 logo + 退款保证 + 比较表 + Revenue 预测（Phase 48.D85）
 import { Link } from 'react-router-dom';
-import { Check, ArrowRight, Shield, Building2, Clock } from 'lucide-react';
+import { Check, ArrowRight, Shield, Building2, Clock, TrendingUp, DollarSign, Target, Calculator } from 'lucide-react';
 import { CUSTOMER_LOGOS, TESTIMONIALS } from '../data/customers';
+import { PRICING_TIERS, REVENUE_PROJECTIONS, REVENUE_KEY_METRICS } from '../data/revenue';
 
 const PLANS = [
   {
@@ -219,6 +220,68 @@ export function PricingPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Revenue 营收预测 · Phase 48.D85 */}
+        <div className="max-w-5xl mx-auto mb-16">
+          <h2 className="text-2xl font-bold mb-2 text-center flex items-center justify-center gap-2">
+            <TrendingUp className="w-6 h-6 text-green-600" />
+            营收预测（Phase 48.D85）
+          </h2>
+          <p className="text-center text-sm text-gray-500 mb-6">
+            保守 1 家签约 / 基准 3 家 / 乐观 5 家 · 12 个月模型 · 仅作规划参考
+          </p>
+
+          {/* 4 关键数字 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+              <DollarSign className="w-5 h-5 text-green-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-green-700">¥{REVENUE_KEY_METRICS.arpu_baseline}</p>
+              <p className="text-xs text-gray-600">ARPU（标准版基准）</p>
+            </div>
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+              <Target className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-blue-700">¥{REVENUE_KEY_METRICS.ltv_estimate.toLocaleString()}</p>
+              <p className="text-xs text-gray-600">LTV 估算（12 月）</p>
+            </div>
+            <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg text-center">
+              <Calculator className="w-5 h-5 text-purple-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-purple-700">{REVENUE_KEY_METRICS.ltv_cac_ratio.toFixed(2)}</p>
+              <p className="text-xs text-gray-600">LTV/CAC（健康 &gt; 3）</p>
+            </div>
+            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
+              <Clock className="w-5 h-5 text-orange-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-orange-700">{REVENUE_KEY_METRICS.payback_months} 月</p>
+              <p className="text-xs text-gray-600">回本周期</p>
+            </div>
+          </div>
+
+          {/* M1/M3/M6/M12 预测表 */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left font-medium">时间窗口</th>
+                  <th className="px-4 py-3 text-center font-medium text-gray-500">保守（1 家）</th>
+                  <th className="px-4 py-3 text-center font-medium bg-brand-50 text-brand-700">基准（3 家）⭐</th>
+                  <th className="px-4 py-3 text-center font-medium text-green-700">乐观（5 家）</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {REVENUE_PROJECTIONS.map((p) => (
+                  <tr key={p.period}>
+                    <td className="px-4 py-3 font-medium">{p.period}</td>
+                    <td className="px-4 py-3 text-center text-gray-500">¥{p.conservative.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-center bg-brand-50 font-bold text-brand-700">¥{p.baseline.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-center text-green-700 font-bold">¥{p.optimistic.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-500 mt-3 text-center">
+            * 数字为模型预测 · 实际签约必用户拍板（红线 #22 钱进出）
+          </p>
         </div>
 
         {/* CTA */}
