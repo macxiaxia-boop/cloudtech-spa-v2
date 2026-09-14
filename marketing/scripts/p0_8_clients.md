@@ -105,3 +105,5 @@ P1-P3 72 家：AI 外呼 → 30 家有意向 → 10 家 demo → 3 家签约
 ---
 
 > 📋 **AI 已就绪** · P0 8 家实际拨打必用户亲自（红 #22 触达边界守护不可逆）
+>
+> **配套文档**: [decision_cards/M0_decisions_2026-09-14.md](../../decision_cards/M0_decisions_2026-09-14.md) · [decision_cards/M0_action_plan_2026-09-14.md](../../decision_cards/M0_action_plan_2026-09-14.md)

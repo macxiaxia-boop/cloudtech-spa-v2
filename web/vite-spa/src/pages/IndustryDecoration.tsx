@@ -144,6 +144,48 @@ export function IndustryDecorationPage() {
         </div>
       </section>
 
+      {/* 📎 配套文档引用 */}
+      <section className="py-12 bg-gray-50 border-t border-gray-200">
+        <div className="max-w-page mx-auto px-6">
+          <h2 className="text-2xl font-bold mb-4">📎 配套文档</h2>
+          <p className="text-gray-600 mb-6">装企行业落地页的 SOP + 客户脚本 + 行业模板</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <a
+              href="/docs/marketing/scripts/outreach_decoration.md"
+              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+            >
+              <p className="text-xs text-emerald-600 mb-1">marketing/scripts/</p>
+              <p className="font-bold mb-1">outreach_decoration.md</p>
+              <p className="text-sm text-gray-600">装企 50 家外呼脚本 + 转化漏斗 + 4 步法</p>
+            </a>
+            <a
+              href="/docs/marketing/scripts/p0_8_clients.md"
+              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+            >
+              <p className="text-xs text-emerald-600 mb-1">marketing/scripts/</p>
+              <p className="font-bold mb-1">p0_8_clients.md</p>
+              <p className="text-sm text-gray-600">P0 8 家精选清单（含 3 家北京装企）</p>
+            </a>
+            <a
+              href="/docs/finance/financial_model.md"
+              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+            >
+              <p className="text-xs text-emerald-600 mb-1">finance/</p>
+              <p className="font-bold mb-1">financial_model.md</p>
+              <p className="text-sm text-gray-600">装企客户单价模型 + LTV + 续约率假设</p>
+            </a>
+            <a
+              href="/docs/clients"
+              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+            >
+              <p className="text-xs text-emerald-600 mb-1">→ SPA</p>
+              <p className="font-bold mb-1">/clients 80 家清单</p>
+              <p className="text-sm text-gray-600">装企 50 家 + 医美 30 家全量清单</p>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 bg-brand-500 text-white">
         <div className="max-w-page mx-auto px-6 text-center">

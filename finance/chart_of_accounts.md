@@ -180,3 +180,5 @@
 ---
 
 > 📋 **AI 已就绪** · 提交科目体系前必用户拍板确认（金蝶账号开通后·AI 可代填）
+>
+> **配套文档**: [decision_cards/M0_decisions_2026-09-14.md](../decision_cards/M0_decisions_2026-09-14.md) · [decision_cards/M0_action_plan_2026-09-14.md](../decision_cards/M0_action_plan_2026-09-14.md)

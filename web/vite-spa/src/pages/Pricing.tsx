@@ -82,6 +82,40 @@ export function PricingPage() {
           ))}
         </div>
       </div>
+
+      {/* 📎 配套文档引用 */}
+      <section className="py-12 bg-gray-50 border-t border-gray-200 mt-12">
+        <div className="max-w-page mx-auto px-6">
+          <h2 className="text-2xl font-bold mb-4">📎 定价背后的财务模型</h2>
+          <p className="text-gray-600 mb-6">3 套餐定价的 LTV / 续约率 / MRR 假设</p>
+          <div className="grid md:grid-cols-3 gap-4">
+            <a
+              href="/docs/finance/financial_model.md"
+              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow transition"
+            >
+              <p className="text-xs text-brand-600 mb-1">finance/</p>
+              <p className="font-bold mb-1">financial_model.md</p>
+              <p className="text-sm text-gray-600">3 套餐 LTV + MRR + 续约率假设</p>
+            </a>
+            <a
+              href="/docs/finance/saas_selection.md"
+              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow transition"
+            >
+              <p className="text-xs text-brand-600 mb-1">finance/</p>
+              <p className="font-bold mb-1">saas_selection.md</p>
+              <p className="text-sm text-gray-600">5 SaaS 选型（金蝶 / 飞书人事 / Grafana Cloud）</p>
+            </a>
+            <a
+              href="/docs/finance/monitoring_dashboard.md"
+              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow transition"
+            >
+              <p className="text-xs text-brand-600 mb-1">finance/</p>
+              <p className="font-bold mb-1">monitoring_dashboard.md</p>
+              <p className="text-sm text-gray-600">4 监控仪表盘 + MRR/P0/P1/P2 优先级</p>
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

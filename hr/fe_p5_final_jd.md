@@ -133,3 +133,5 @@
 ---
 
 > 📋 **AI 已就绪** · 实际发 offer 必用户签字 + 录用决定（红 #22 不可逆）
+>
+> **配套文档**: [decision_cards/M0_decisions_2026-09-14.md](../decision_cards/M0_decisions_2026-09-14.md) · [decision_cards/M0_action_plan_2026-09-14.md](../decision_cards/M0_action_plan_2026-09-14.md)

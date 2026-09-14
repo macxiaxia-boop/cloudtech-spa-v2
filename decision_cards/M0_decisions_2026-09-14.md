@@ -3,6 +3,15 @@
 > **OPC 模式** · Phase 46 全段收官后 · 用户「授权」→ 4 M0 决策逐项拍板
 > 决策基于 AskUserQuestion · 推荐项全部选中
 
+## 4 M0 决策配套文档
+
+| # | 决策项 | 决策卡 | 行动计划 | AI 准备文档 |
+|---|---|---|---|---|
+| 1 | 营业执照 | [M0_decisions_2026-09-14.md](M0_decisions_2026-09-14.md) | [M0_action_plan_2026-09-14.md](M0_action_plan_2026-09-14.md) | [legal/license/company_charter_draft.md](../legal/license/company_charter_draft.md) |
+| 2 | 财务 SaaS | 同上 | 同上 | [finance/chart_of_accounts.md](../finance/chart_of_accounts.md) |
+| 3 | 团队招募 | 同上 | 同上 | [hr/fe_p5_final_jd.md](../hr/fe_p5_final_jd.md) |
+| 4 | 跑客户节奏 | 同上 | 同上 | [marketing/scripts/p0_8_clients.md](../marketing/scripts/p0_8_clients.md) |
+
 ## 4 M0 决策
 
 | # | 决策项 | 用户选择 | 推荐度 |

@@ -162,3 +162,5 @@
 ---
 
 > 📋 **AI 已就绪** · 提交 e窗通前必用户扫脸 + 签字（红 #22 不可逆）
+>
+> **配套文档**: [decision_cards/M0_decisions_2026-09-14.md](../../decision_cards/M0_decisions_2026-09-14.md) · [decision_cards/M0_action_plan_2026-09-14.md](../../decision_cards/M0_action_plan_2026-09-14.md)

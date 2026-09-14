@@ -3,6 +3,15 @@
 > 接 [M0_decisions_2026-09-14.md](M0_decisions_2026-09-14.md) · 4 决策已拍板
 > 每行动分 **AI 自治** vs **必用户亲自** 两栏
 
+## 4 决策 AI 准备文档引用
+
+| # | 决策项 | AI 准备文档（已就绪） | 不可逆闸门（必用户亲自） |
+|---|---|---|---|
+| 1 | 营业执照 | [legal/license/company_charter_draft.md](../legal/license/company_charter_draft.md) | e窗通扫脸 + 法人签字 |
+| 2 | 财务 SaaS | [finance/chart_of_accounts.md](../finance/chart_of_accounts.md) | 金蝶绑卡 + ¥800/月付费 |
+| 3 | 团队招募 | [hr/fe_p5_final_jd.md](../hr/fe_p5_final_jd.md) | offer 签字 + 录用决定 |
+| 4 | 跑客户节奏 | [marketing/scripts/p0_8_clients.md](../marketing/scripts/p0_8_clients.md) | P0 8 家实际拨打 |
+
 ---
 
 ## 决策 1：营业执照（北京·科技类·本月提交）
