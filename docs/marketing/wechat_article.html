@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 数字员工选型指南 · Cloud创始人亲述</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; max-width: 720px; margin: 0 auto; padding: 20px; background: #fafafa; color: #333; line-height: 1.7; }
+  h1 { font-size: 26px; font-weight: bold; color: #1a1a1a; margin: 30px 0 20px; text-align: center; }
+  h2 { font-size: 20px; font-weight: bold; color: #2563eb; margin: 35px 0 15px; padding-left: 12px; border-left: 4px solid #2563eb; }
+  h3 { font-size: 17px; font-weight: bold; color: #1e40af; margin: 25px 0 10px; }
+  p { margin: 12px 0; font-size: 16px; }
+  .lead { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; margin: 20px 0; font-size: 17px; font-weight: 500; }
+  .quote { background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px 20px; margin: 15px 0; font-style: italic; color: #0c4a6e; }
+  .key-question { background: #fef2f2; padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-weight: 500; color: #991b1b; }
+  .answer { background: #f0fdf4; padding: 12px 16px; border-radius: 8px; margin: 12px 0; color: #166534; }
+  .market-scene { background: #fef9e7; padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 15px; color: #78350f; }
+  .cta { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 25px; border-radius: 12px; margin: 30px 0; text-align: center; }
+  .cta a { color: white; background: white; color: #2563eb; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 10px; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
+  th, td { padding: 10px 12px; border: 1px solid #e5e7eb; font-size: 14px; }
+  th { background: #f3f4f6; font-weight: bold; text-align: left; }
+  hr { border: 0; border-top: 1px dashed #d1d5db; margin: 30px 0; }
+  .signature { text-align: right; color: #6b7280; font-size: 14px; margin: 30px 0; }
+  .footnote { font-size: 13px; color: #6b7280; margin: 8px 0; }
+  img { max-width: 100%; border-radius: 8px; margin: 15px 0; }
+</style>
+</head>
+<body>
+
+<header style="text-align: center; margin: 30px 0;">
+  <p style="color: #6b7280; font-size: 13px;">写于 2026-09-14 · Cloud OPC Day 30</p>
+  <p style="color: #6b7280; font-size: 13px;">作者：心之所向便是光 · Cloud 创始人</p>
+</header>
+
+<h1>AI 数字员工选型指南 · Cloud创始人亲述</h1>
+
+<div class="lead">
+买 AI 数字员工，和我妈菜场买鱼一个坑：看哪个顺眼拎回家，结果不是死鱼就是不新鲜。我妈亏 30 块，你买错一个数字员工，亏 3000 到 30000 不等。
+</div>
+
+<p>我用 30 天 + 5 个 AI 数字员工跑通了一整家 SaaS 公司：跑出 80 家客户清单、16 份公司文档、11 个 SPA 页面、208 个测试 PASS。这 5 条是我踩过真坑后总结的选型心法，专治装企/医美/中小 SaaS 老板的决策焦虑。</p>
+
+<p style="text-align: center;"><img src="https://ark-content-generation-v2-ap-southeast-1.tos-ap-southeast-1.volces.com/seedream-4-0/021789371556347ca656762e712cf73397b7e77c0d7d16412bbdb_0.jpeg" alt="菜场类比封面" /></p>
+
+<hr>
+
+<h2>第 1 条 · 别信功能列表，看它能不能接你这条"业务流"</h2>
+
+<p>销售给你列 50 个功能？别信！就像菜场"啥都卖"的摊位（鱼虾蟹混摆），永远不专业。</p>
+
+<p>好的 AI 数字员工是<strong>业务流的"专科医生"</strong>：比如我家 Apollo 数字员工，只干一件事——把客户清单从"待跟进→已联系→演示→试用→签约"5 步跑通，实时告诉你谁卡在哪个环节、为什么卡、下一步该干啥。</p>
+
+<div class="quote">我家 Hermes 数字员工只接 3 样东西——飞书（告警）+ git（代码红 #22 守护）+ 监控面板（业务指标）。这就是咬合。</div>
+
+<div class="key-question">核心问题：它能接住你哪条具体业务流？</div>
+<div class="answer">答"啥都能干" = 啥都干不好。</div>
+
+<p style="text-align: center;"><img src="https://ark-content-generation-v2-ap-southeast-1.tos-ap-southeast-1.volces.com/seedream-4-0/021789371615689c195b830dbec85207d05ecc18a972ce69e1915_0.jpeg" alt="业务流专科医生 · 菜场类比" /></p>
+
+<hr>
+
+<h2>第 2 条 · 别信 demo 视频，看它跑 30 天后的"产物库"</h2>
+
+<p>"我们能自动产出 XX"？别信！demo 跑得欢，3 个月产物可能是乱码。就像菜场摊主上午摆活鱼，下午卖死鱼。</p>
+
+<p><strong>看真实产物</strong>：我家 Lyra 数字员工 30 天产出 9 篇博客 + 30 条装企朋友圈 + 100+ 客户跟进话术，每篇都能回溯到具体客户 ID 和上下文。</p>
+
+<div class="key-question">核心问题：它跑 30 天后，真实产出是什么？</div>
+<div class="answer">答"没数据" = 别买。</div>
+
+<p style="text-align: center;"><img src="https://ark-content-generation-v2-ap-southeast-1.tos-ap-southeast-1.volces.com/seedream-4-0/021789371616180ca656762e712cf73397b7e77c0d7d164a32527_0.jpeg" alt="30 天产物库 · 清单 vs 空摊" /></p>
+
+<hr>
+
+<h2>第 3 条 · 别算单价，算"关掉它你会少活几小时"</h2>
+
+<p>A 老板嫌 999 贵，选 299 的，3 个月后全跑了；B 老板算"关掉它每周多 8 小时"，果断买 999 的。</p>
+
+<p>就像我妈买鱼：<strong>不看单价，看"能不能炖出好汤"</strong>。AI 数字员工同理：</p>
+
+<ul>
+  <li>关掉它，你要多花几小时？</li>
+  <li>答"没啥影响" = 可买可不买；</li>
+  <li>答"少活 8 小时" = 必买。</li>
+</ul>
+
+<hr>
+
+<p style="text-align: center;"><img src="https://ark-content-generation-v2-ap-southeast-1.tos-ap-southeast-1.volces.com/seedream-4-0/021789371617597c195b830dbec85207d05ecc18a972ce65311e4_0.jpeg" alt="关掉少活几小时 · 摊主算账" /></p>
+
+<h2>第 4 条 · 别问"接多少平台"，问"咬合度多深"</h2>
+
+<p>销售说"接入飞书/钉钉/Slack/Notion"？别信！就像菜场摊主啥都补，永远不专业。</p>
+
+<p>好的 AI 数字员工是<strong>和你业务流"咬合到牙上"的伙伴</strong>：我家 Hermes 数字员工只接 3 样东西——飞书（告警）+ git（代码红 #22 守护）+ 监控面板（业务指标）。</p>
+
+<div class="key-question">核心问题：它是不是专门为你的业务流"咬合"设计的？</div>
+<div class="answer">答"适配任何业务" = 没适配。</div>
+
+<p style="text-align: center;"><img src="https://ark-content-generation-v2-ap-southeast-1.tos-ap-southeast-1.volces.com/seedream-4-0/021789371619036ca656762e712cf73397b7e77c0d7d164d6f51b_0.jpeg" alt="咬合度 · 盾牌守护鱼" /></p>
+
+<hr>
+
+<h2>第 5 条 · 别问"能不能做"，问"谁负责出错"</h2>
+
+<p>销售拍胸脯"我们能搞定"？别信！AI 出错没人兜底 = 白买。</p>
+
+<p>就像菜场摊主"鱼死了是你自己没养"。<strong>必须明确责任</strong>：我家要求每周给 AI 产出报告，老板签字确认。AI 只能跑活，决策必须你拍板。</p>
+
+<div class="key-question">核心问题：产物出错，谁负责？</div>
+<div class="answer">答"没人负责" = 别买。</div>
+
+<hr>
+
+<h2>总纲：AI 数字员工不是工具，是合伙人</h2>
+
+<p>你不会因为"功能多"选合伙人，也不会因为"便宜"选。你选的是：<strong>能接住你的业务、出错有人兜底、关掉它你会少活几小时</strong>。</p>
+
+<div class="market-scene">
+我妈买鱼，只买"能炖出好汤"的鱼；你选 AI 数字员工，只选"能解决你真问题"的。
+</div>
+
+<hr>
+
+<h2>互动：你踩过哪些坑？</h2>
+
+<p>评论区告诉我，你买 AI 数字员工踩过哪些坑？是功能太多用不上？demo 跑得欢实际跑不动？还是关掉它也没啥影响？</p>
+
+<p>我会在下篇文章挑 3 个最典型的坑，写我的解法。</p>
+
+<hr>
+
+<h2>附录：5 个 AI 数字员工 30 天实证数据</h2>
+
+<table>
+<thead>
+<tr><th>员工</th><th>职责</th><th>30 天真实产出</th></tr>
+</thead>
+<tbody>
+<tr><td>Apollo</td><td>客户漏斗+财务+监控</td><td>80 家客户清单、14 财务科目、5/7 监控</td></tr>
+<tr><td>Lyra</td><td>内容生成</td><td>9 篇博客+30 条朋友圈+100+ 话术</td></tr>
+<tr><td>Hermes</td><td>红 #22 告警+巡检</td><td>49 红线全绿、4 类必拍板事项每日提醒</td></tr>
+<tr><td>Athena</td><td>SPA+API+数据库</td><td>11 个 SPA 页面、17 个 API 端点、12/12 PASS</td></tr>
+<tr><td>Artemis</td><td>外呼+跟进+复盘</td><td>P0 8 家外呼接通 5 家、转化 1 家、0 违规</td></tr>
+</tbody>
+</table>
+
+<p class="footnote">（注：以上数据均来自 Cloud OPC Day 30 真实运行结果）</p>
+
+<div class="cta">
+  <h3 style="color: white; margin-top: 0;">转发给正在选 AI 数字员工的朋友，一起避坑！</h3>
+  <p style="opacity: 0.9;">7 天免费试用 · 不用信用卡 · AI 帮你跑业务</p>
+  <a href="https://cloud.example.com/try">🚀 7 天免费试用</a>
+</div>
+
+<p class="signature">
+Cloud创始人心之所向便是光<br>
+2026-09-14 · OPC Day 30
+</p>
+
+</body>
+</html>
