@@ -74,6 +74,20 @@ export function DashboardPage() {
   return (
     <div className="py-12 bg-gray-50 min-h-screen">
       <div className="max-w-page mx-auto px-6">
+        {/* Dashboard Preview Banner */}
+        <div className="mb-6 rounded-xl overflow-hidden shadow-md bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex items-center gap-6 text-white">
+          <img
+            src="/images/dashboard-preview.jpeg"
+            alt="Dashboard 预览"
+            className="w-24 h-24 object-cover rounded-lg shadow-lg hidden md:block"
+          />
+          <div className="flex-1">
+            <p className="text-xs uppercase tracking-wider opacity-90 mb-1">📊 你正在看的就是这个</p>
+            <h2 className="text-xl font-bold mb-1">实时仪表盘 · 监控 / 漏斗 / 财务 / 告警</h2>
+            <p className="text-sm opacity-90">MRR / ARR / CAC / LTV · 80 客户漏斗 P0-P3 · 13 告警规则 · 飞书实时推送</p>
+          </div>
+        </div>
+
         {/* 头部 */}
         <div className="flex items-center justify-between mb-8">
           <div>

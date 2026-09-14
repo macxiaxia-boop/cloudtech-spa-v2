@@ -53,23 +53,49 @@ const PHILOSOPHY = [
 export function OPCStoryPage() {
   return (
     <>
-      <section className="py-16 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <section className="py-16 bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden">
         <div className="max-w-page mx-auto px-6">
-          <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm mb-4">
-            👤 阿劲的今天 · 创始人后台
-          </span>
-          <div className="flex items-center gap-6 mb-8">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-3xl font-bold">
-              阿劲
-            </div>
+          <div className="grid md:grid-cols-2 gap-10 items-center mb-10">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                1 人 + 5 AI 员工
-                <span className="text-brand-500"> 的整家公司</span>
-              </h1>
-              <p className="text-lg text-gray-600">
+              <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm mb-4">
+                👤 阿劲的今天 · 创始人后台
+              </span>
+              <div className="flex items-center gap-6 mb-6">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-3xl font-bold">
+                  阿劲
+                </div>
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-bold mb-2 leading-[1.1]">
+                    1 人 + 5 AI 员工
+                    <br />
+                    <span className="text-brand-500">的整家公司</span>
+                  </h1>
+                </div>
+              </div>
+              <p className="text-lg text-gray-600 mb-4">
                 灵策智算创始人 · CloudTech OPC 模式实证 · Day 30 · 208/208 测试 PASS
               </p>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/try" className="px-5 py-2.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 inline-flex items-center gap-2 font-medium text-sm">
+                  7 天免费试用 <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link to="/employees" className="px-5 py-2.5 border border-gray-300 rounded-md hover:border-indigo-500 inline-flex items-center gap-2 text-sm">
+                  看 5 AI 员工 →
+                </Link>
+              </div>
+            </div>
+            <div className="relative">
+              <img
+                src="/images/opc-hero.jpeg"
+                alt="OPC 1 人 + AI 创业"
+                className="rounded-2xl shadow-2xl w-full"
+              />
+              <div className="absolute -bottom-4 -right-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                <div className="text-xs">
+                  <p className="font-bold text-indigo-600">Day 30</p>
+                  <p className="text-gray-500">5 AI · 11 SPA · 80 客户</p>
+                </div>
+              </div>
             </div>
           </div>
 

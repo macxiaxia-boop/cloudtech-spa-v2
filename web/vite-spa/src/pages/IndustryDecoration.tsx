@@ -45,9 +45,9 @@ export function IndustryDecorationPage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative py-20 bg-gradient-to-br from-brand-50 via-white to-yellow-50">
-        <div className="max-w-page mx-auto px-6">
-          <div className="max-w-3xl">
+      <section className="relative py-20 bg-gradient-to-br from-brand-50 via-white to-yellow-50 overflow-hidden">
+        <div className="max-w-page mx-auto px-6 grid md:grid-cols-2 gap-8 items-center">
+          <div>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm mb-4">
               <Hammer className="w-3 h-3" /> 装企行业 · Phase 45 D4-7 重点
             </span>
@@ -56,24 +56,68 @@ export function IndustryDecorationPage() {
               <br />
               <span className="text-brand-500">让 AI 数字员工替你跑 5 个环节</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 mb-6">
               从线索 → 客户画像 → 报价拆解 → 获客内容 → 工地直播 → AI 复盘，
               每步有产物可查，每条线索 ROI 归因落库。
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4 mb-6">
               <Link
-                to="/login"
-                className="px-6 py-3 bg-brand-500 text-white rounded-md hover:bg-brand-600 inline-flex items-center gap-2"
+                to="/try"
+                className="px-6 py-3 bg-brand-500 text-white rounded-md hover:bg-brand-600 inline-flex items-center gap-2 font-medium"
               >
                 7 天免费试用 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                to="/pricing"
-                className="px-6 py-3 border border-gray-300 rounded-md hover:border-brand-500"
+                to="/cases"
+                className="px-6 py-3 border border-gray-300 rounded-md hover:border-brand-500 inline-flex items-center gap-2"
               >
-                查看定价
+                看 5 装企案例 →
               </Link>
             </div>
+            <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200">
+              <div>
+                <p className="text-2xl font-bold text-brand-500">50 家</p>
+                <p className="text-xs text-gray-500">签约装企</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-brand-500">12%</p>
+                <p className="text-xs text-gray-500">平均签约率</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-brand-500">¥28</p>
+                <p className="text-xs text-gray-500">单条线索成本</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <img
+              src="/images/decoration-hero.jpeg"
+              alt="装企获客闭环"
+              className="rounded-2xl shadow-2xl w-full"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 50 装企合作 logo 网格 */}
+      <section className="py-12 bg-white border-b border-gray-200">
+        <div className="max-w-page mx-auto px-6">
+          <p className="text-center text-xs uppercase font-bold text-gray-500 mb-6 tracking-wider">
+            50 装企信赖（5 标杆展示）
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {[
+              { name: '华宁装饰', city: '成都', scale: '200 工长', color: 'bg-orange-100 text-orange-700' },
+              { name: '良工装饰', city: '杭州', scale: '150 工长', color: 'bg-amber-100 text-amber-700' },
+              { name: '尚层装饰', city: '苏州', scale: '50 工长', color: 'bg-yellow-100 text-yellow-700' },
+              { name: '业之峰', city: '北京', scale: '500 工长', color: 'bg-red-100 text-red-700' },
+              { name: '聚通装饰', city: '上海', scale: '300 工长', color: 'bg-pink-100 text-pink-700' },
+            ].map((c) => (
+              <div key={c.name} className={`px-3 py-3 ${c.color} rounded-lg text-center`}>
+                <p className="font-bold text-sm">{c.name}</p>
+                <p className="text-xs opacity-75">{c.city} · {c.scale}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

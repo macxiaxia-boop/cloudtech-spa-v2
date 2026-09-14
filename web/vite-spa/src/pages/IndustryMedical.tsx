@@ -30,9 +30,9 @@ export function IndustryMedicalPage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative py-20 bg-gradient-to-br from-pink-50 via-white to-rose-50">
-        <div className="max-w-page mx-auto px-6">
-          <div className="max-w-3xl">
+      <section className="relative py-20 bg-gradient-to-br from-pink-50 via-white to-rose-50 overflow-hidden">
+        <div className="max-w-page mx-auto px-6 grid md:grid-cols-2 gap-8 items-center">
+          <div>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm mb-4">
               <Stethoscope className="w-3 h-3" /> 医美行业 · Phase 45 D4-7 兜底
             </span>
@@ -41,24 +41,68 @@ export function IndustryMedicalPage() {
               <br />
               <span className="text-pink-500">让 AI 数字员工替你守住 6 条监管红线</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 mb-6">
               从线索 → 客户画像 → 种草内容 → 术前合规 QA → 案例展示 → AI 复盘，
               AI 自动拦截违规话术 + 案例脱敏。
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4 mb-6">
               <Link
-                to="/login"
-                className="px-6 py-3 bg-pink-500 text-white rounded-md hover:bg-pink-600 inline-flex items-center gap-2"
+                to="/try"
+                className="px-6 py-3 bg-pink-500 text-white rounded-md hover:bg-pink-600 inline-flex items-center gap-2 font-medium"
               >
                 7 天免费试用 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                to="/pricing"
-                className="px-6 py-3 border border-gray-300 rounded-md hover:border-pink-500"
+                to="/cases"
+                className="px-6 py-3 border border-gray-300 rounded-md hover:border-pink-500 inline-flex items-center gap-2"
               >
-                查看定价
+                看 5 医美案例 →
               </Link>
             </div>
+            <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200">
+              <div>
+                <p className="text-2xl font-bold text-pink-500">30 家</p>
+                <p className="text-xs text-gray-500">签约医美</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-pink-500">0</p>
+                <p className="text-xs text-gray-500">合规违规</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-pink-500">38%</p>
+                <p className="text-xs text-gray-500">二次到店率</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <img
+              src="/images/medical-hero.jpeg"
+              alt="医美合规获客"
+              className="rounded-2xl shadow-2xl w-full"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 30 医美合作 logo 网格 */}
+      <section className="py-12 bg-white border-b border-gray-200">
+        <div className="max-w-page mx-auto px-6">
+          <p className="text-center text-xs uppercase font-bold text-gray-500 mb-6 tracking-wider">
+            30 医美信赖（5 标杆展示）
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {[
+              { name: '美莱医美', city: '北京', scale: '8 院区', color: 'bg-pink-100 text-pink-700' },
+              { name: '伊美尔', city: '北京', scale: '5 院区', color: 'bg-rose-100 text-rose-700' },
+              { name: '画美医疗', city: '北京', scale: '3 院区', color: 'bg-fuchsia-100 text-fuchsia-700' },
+              { name: '上海美莱', city: '上海', scale: '6 院区', color: 'bg-purple-100 text-purple-700' },
+              { name: '华美紫馨', city: '成都', scale: '4 院区', color: 'bg-indigo-100 text-indigo-700' },
+            ].map((c) => (
+              <div key={c.name} className={`px-3 py-3 ${c.color} rounded-lg text-center`}>
+                <p className="font-bold text-sm">{c.name}</p>
+                <p className="text-xs opacity-75">{c.city} · {c.scale}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
