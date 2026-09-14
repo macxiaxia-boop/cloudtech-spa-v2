@@ -4,20 +4,28 @@ import { PricingPage } from './pages/Pricing';
 import { DashboardPage } from './pages/Dashboard';
 import { SettingsPage } from './pages/Settings';
 import { BillingPage } from './pages/Billing';
+import { IndustryDecorationPage } from './pages/IndustryDecoration';
+import { IndustryMedicalPage } from './pages/IndustryMedical';
+import { ContentSOPPage } from './pages/ContentSOP';
+import { ClientListPage } from './pages/ClientList';
 import { FEEmployeeMenu } from './components/FEEmployeeMenu';
 
-// Phase 46 D38-40: 客户后台已就绪
+// Phase 46 D41-52: 段 2 完整就绪（落地页 + SOP + 客户清单）
 // 路由:
-//  /              — 营销首页
-//  /pricing       — 定价（公开）
-//  /dashboard     — 客户后台（用量 + 行业复盘）
-//  /settings      — 账号设置
-//  /billing       — 套餐切换
-//  /employees     — FE 3 员工菜单 (content_writer/customer_service/market_researcher)
+//  /                                   — 营销首页
+//  /pricing                            — 定价（公开）
+//  /industries/decoration              — 装企行业落地页（SEO）
+//  /industries/medical                 — 医美行业落地页（SEO + 合规）
+//  /content-sop                        — 内容生产 SOP 工具（Phase 41-44 4 主题）
+//  /clients                            — 首批 80 家客户清单（D49-52）
+//  /dashboard                          — 客户后台（用量 + 行业复盘）
+//  /settings                           — 账号设置
+//  /billing                            — 套餐切换
+//  /employees                          — FE 3 员工菜单
 export default function App() {
   return (
     <div className="min-h-screen bg-white">
-      {/* 顶部导航 — Phase 45 D17-23 收敛 + Phase 46 D38-40 加后台入口 */}
+      {/* 顶部导航 — Phase 46 D41-52 加 SOP + 客户清单入口 */}
       <header className="border-b border-gray-200">
         <div className="max-w-page mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl font-bold text-brand-500">
@@ -25,6 +33,10 @@ export default function App() {
           </Link>
           <nav className="flex items-center gap-6 text-sm">
             <Link to="/" className="hover:text-brand-500">首页</Link>
+            <Link to="/industries/decoration" className="hover:text-brand-500">装企</Link>
+            <Link to="/industries/medical" className="hover:text-brand-500">医美</Link>
+            <Link to="/content-sop" className="hover:text-brand-500">SOP</Link>
+            <Link to="/clients" className="hover:text-brand-500">客户</Link>
             <Link to="/pricing" className="hover:text-brand-500">定价</Link>
             <Link to="/dashboard" className="hover:text-brand-500">后台</Link>
             <Link to="/billing" className="hover:text-brand-500">套餐</Link>
@@ -41,6 +53,10 @@ export default function App() {
         <Routes>
           <Route path="/" element={<MarketingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/industries/decoration" element={<IndustryDecorationPage />} />
+          <Route path="/industries/medical" element={<IndustryMedicalPage />} />
+          <Route path="/content-sop" element={<ContentSOPPage />} />
+          <Route path="/clients" element={<ClientListPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/billing" element={<BillingPage />} />
