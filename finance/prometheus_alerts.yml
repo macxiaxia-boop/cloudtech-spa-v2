@@ -1,0 +1,135 @@
+groups:
+  # ─── P0 紧急告警 (5 分钟内响应) ───
+  - name: p0_critical
+    interval: 30s
+    rules:
+      - alert: APIDown
+        expr: up{job="cloudtech-api"} == 0
+        for: 2m
+        labels:
+          severity: p0
+          channel: feishu_robot_critical
+        annotations:
+          summary: "API 完全不可用"
+          description: "cloudtech-api 服务 down 超过 2 分钟"
+          runbook: "立即重启 gateway + 检查 DB 连接池"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: db_pool_connections_active / db_pool_connections_max > 0.95
+        for: 1m
+        labels:
+          severity: p0
+          channel: feishu_robot_critical
+        annotations:
+          summary: "数据库连接池耗尽"
+          description: "活跃连接 {{ $value | humanizePercentage }} 接近上限"
+          runbook: "检查长事务 + 重启 gateway"
+
+      - alert: SecurityBreach
+        expr: increase(security_events_total{severity="critical"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: p0
+          channel: feishu_robot_critical_phone
+        annotations:
+          summary: "数据安全事件"
+          description: "检测到 {{ $value }} 个 critical 安全事件"
+          runbook: "立即隔离 + 通知用户（红线 #22）"
+
+  # ─── P1 重要告警 (1 小时内响应) ───
+  - name: p1_important
+    interval: 1m
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (route)
+          / sum(rate(http_requests_total[5m])) by (route)
+          > 0.05
+        for: 5m
+        labels:
+          severity: p1
+          channel: feishu_robot_important
+        annotations:
+          summary: "{{ $labels.route }} 错误率超 5%"
+          description: "当前 {{ $value | humanizePercentage }}"
+
+      - alert: PaymentLinkDown
+        expr: up{job="payment-gateway"} == 0
+        for: 5m
+        labels:
+          severity: p1
+          channel: feishu_robot_important
+        annotations:
+          summary: "支付链路异常"
+          description: "支付网关 down 超过 5 分钟"
+
+      - alert: ClientOnboardingBlocked
+        expr: increase(saa_signup_failures_total[1h]) > 5
+        for: 5m
+        labels:
+          severity: p1
+          channel: feishu_robot_important
+        annotations:
+          summary: "客户签约流程阻断"
+          description: "1h 内 {{ $value }} 次签约失败"
+
+  # ─── P2 警告 (4 小时内响应) ───
+  - name: p2_warning
+    interval: 5m
+    rules:
+      - alert: TenantQuotaExceeded
+        expr: tenant_quota_used / tenant_quota_limit > 0.9
+        for: 30m
+        labels:
+          severity: p2
+          channel: feishu_robot_warning
+        annotations:
+          summary: "租户 {{ $labels.tenant_id }} 配额接近上限"
+          description: "已用 {{ $value | humanizePercentage }}"
+
+      - alert: ContentGenerationFailureRate
+        expr: |
+          sum(rate(content_generation_failures_total[10m]))
+          / sum(rate(content_generation_total[10m]))
+          > 0.1
+        for: 10m
+        labels:
+          severity: p2
+          channel: feishu_robot_warning
+        annotations:
+          summary: "内容生成失败率 > 10%"
+
+      - alert: AlertSpamDetected
+        expr: increase(alerts_fired_total[1h]) > 20
+        for: 10m
+        labels:
+          severity: p2
+          channel: feishu_robot_warning
+        annotations:
+          summary: "告警风暴"
+          description: "1h 内 {{ $value }} 个告警·可能误报"
+
+  # ─── P3 提醒 (24 小时内响应) ───
+  - name: p3_reminder
+    interval: 1h
+    rules:
+      - alert: PerformanceDegradation
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1h])) by (le))
+          > 0.3
+        for: 1h
+        labels:
+          severity: p3
+          channel: feishu_robot_reminder
+        annotations:
+          summary: "API P95 延迟 > 300ms (1h 内平均)"
+
+      - alert: IndustryReviewAnomaly
+        expr: increase(industry_review_decision_total{decision="pause_and_review"}[24h]) > 3
+        for: 0m
+        labels:
+          severity: p3
+          channel: feishu_robot_reminder
+        annotations:
+          summary: "行业复盘出现暂停决策"
+          description: "24h 内 {{ $value }} 次 pause_and_review 决策"

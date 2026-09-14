@@ -9,9 +9,10 @@ import { IndustryMedicalPage } from './pages/IndustryMedical';
 import { ContentSOPPage } from './pages/ContentSOP';
 import { ClientListPage } from './pages/ClientList';
 import { DocumentsPage } from './pages/Documents';
+import { MonitoringPage } from './pages/Monitoring';
 import { FEEmployeeMenu } from './components/FEEmployeeMenu';
 
-// Phase 46 D53-60: 段 3 完整就绪（合同 + HR + 财务 + 营业执照）
+// Phase 46 D61-68: 段 4 完整就绪（监控 + 财务 + 客户漏斗）
 // 路由:
 //  /                                   — 营销首页
 //  /pricing                            — 定价（公开）
@@ -19,7 +20,8 @@ import { FEEmployeeMenu } from './components/FEEmployeeMenu';
 //  /industries/medical                 — 医美行业落地页（SEO + 合规）
 //  /content-sop                        — 内容生产 SOP 工具
 //  /clients                            — 80 家客户清单
-//  /documents                          — 公司文档中心（D53-60 合同/HR/财务/营业执照）
+//  /documents                          — 公司文档中心（D53-60）
+//  /monitoring                         — 监控与财务中心（D61-68）
 //  /dashboard                          — 客户后台
 //  /settings                           — 账号设置
 //  /billing                            — 套餐切换
@@ -27,7 +29,7 @@ import { FEEmployeeMenu } from './components/FEEmployeeMenu';
 export default function App() {
   return (
     <div className="min-h-screen bg-white">
-      {/* 顶部导航 — Phase 46 D53-60 加 Documents 入口 */}
+      {/* 顶部导航 — Phase 46 D61-68 加 Monitoring 入口 */}
       <header className="border-b border-gray-200">
         <div className="max-w-page mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl font-bold text-brand-500">
@@ -40,6 +42,7 @@ export default function App() {
             <Link to="/content-sop" className="hover:text-brand-500">SOP</Link>
             <Link to="/clients" className="hover:text-brand-500">客户</Link>
             <Link to="/documents" className="hover:text-brand-500">文档</Link>
+            <Link to="/monitoring" className="hover:text-brand-500">监控</Link>
             <Link to="/pricing" className="hover:text-brand-500">定价</Link>
             <Link to="/dashboard" className="hover:text-brand-500">后台</Link>
             <Link to="/billing" className="hover:text-brand-500">套餐</Link>
@@ -61,6 +64,7 @@ export default function App() {
           <Route path="/content-sop" element={<ContentSOPPage />} />
           <Route path="/clients" element={<ClientListPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/monitoring" element={<MonitoringPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/billing" element={<BillingPage />} />

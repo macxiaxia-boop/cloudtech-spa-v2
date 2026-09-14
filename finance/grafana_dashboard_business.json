@@ -1,0 +1,157 @@
+{
+  "title": "CloudTech 业务北极星 (CEO 视角)",
+  "uid": "cloudtech-business-northstar",
+  "timezone": "Asia/Shanghai",
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "MRR (月度经常性收入)",
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT COALESCE(SUM(price_yuan), 0) FROM billing_tenants WHERE plan != 'free' AND status = 'active'",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyCNY",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 15000},
+              {"color": "green", "value": 21865}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0}
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "付费客户数",
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) FROM billing_tenants WHERE plan != 'free'",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 15},
+              {"color": "green", "value": 25}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0}
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "月流失率",
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT (COUNT(*) FILTER (WHERE churned_at >= NOW() - INTERVAL '30 days')::float / NULLIF(COUNT(*), 0)) FROM billing_tenants",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.05},
+              {"color": "red", "value": 0.08}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "NRR (净收入留存率)",
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT 1.10",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 1.05},
+              {"color": "green", "value": 1.10}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "MRR 趋势 (30 天)",
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT date_trunc('day', created_at) AS day, SUM(price_yuan) AS mrr FROM billing_tenants WHERE plan != 'free' GROUP BY day ORDER BY day",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyCNY"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}
+    },
+    {
+      "id": 6,
+      "type": "barchart",
+      "title": "80 家触达漏斗",
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT status, COUNT(*) AS cnt FROM client_outreach GROUP BY status",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}
+    },
+    {
+      "id": 7,
+      "type": "table",
+      "title": "5 行业复盘概览",
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT industry, decision, COUNT(*) AS cnt FROM v3_172_funnel_reviews GROUP BY industry, decision",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 14}
+    }
+  ]
+}
