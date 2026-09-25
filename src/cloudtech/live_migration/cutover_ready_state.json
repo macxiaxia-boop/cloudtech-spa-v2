@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-25T20:50:00+00:00",
+  "title": "CloudTech rc2 — Wave 10 Cutover READY State",
+  "purpose": "Single source of truth for next session / user to execute the production cutover after L5 STOP_GATEs are resolved",
+  "cutover_state": "STAGED_AWAITING_USER",
+  "fake_provider_smoke_passed": true,
+  "fake_provider_smoke_evidence": "D:\\CloudTech-Live-Execution\\CloudTech_rc2_Live_Direct_Execution_20260925\\artifacts\\wave10_e2e_fake_smoke.json",
+  "live_repos_prepared": {
+    "D:\\CloudTech-Portable": {
+      "branch": "cloudtech-live-reconciliation-rc2",
+      "stash_ref": "WAVE10_PREP_AUTO_BACKUP_20260925",
+      "dirty_files_stashed": 1439,
+      "restore_command": "cd D:\\CloudTech-Portable && git stash pop"
+    },
+    "D:\\.openclaw": {
+      "branch": "openclaw-live-reconciliation-rc2",
+      "stash_ref": "WAVE10_PREP_AUTO_BACKUP_OPENCLAW_20260925",
+      "dirty_files_stashed": 558,
+      "restore_command": "cd D:\\.openclaw && git stash pop"
+    }
+  },
+  "staging_artifacts": {
+    "fake_provider": "src/cloudtech/live_migration/fake_provider.py",
+    "e2e_smoke_test": "src/cloudtech/live_migration/e2e_fake_smoke.py",
+    "cutover_manifest": "src/cloudtech/live_migration/production_cutover.yaml",
+    "cutover_playbook": "src/cloudtech/live_migration/cutover_playbook.md",
+    "rollback_runbook": "src/cloudtech/live_migration/rollback_runbook.md"
+  },
+  "stop_gates_status": {
+    "PRODUCTION_BACKENDS_REQUIRED": {
+      "status": "ACTIVE_BLOCKER",
+      "user_must_do": "curl -f http://localhost:5099/health + :18792/health + openclaw-port/health"
+    },
+    "REAL_PROVIDER_CREDENTIALS_REQUIRED": {
+      "status": "ACTIVE_BLOCKER",
+      "user_must_do": "echo DEEPSEEK_API_KEY=<key> >> D:\\CloudTech-Portable\\.env  (gitignored, never committed)"
+    },
+    "USER_AUTHORIZATION_FOR_CUTOVER": {
+      "status": "ACTIVE_BLOCKER",
+      "user_must_do": "Issue chat message: 'Wave 10 切生产授权'"
+    }
+  },
+  "cutover_phases_when_unblocked": [
+    {"phase": 1, "traffic_pct": 5,   "duration_min": 30,  "abort_threshold": "success_rate<90%_for_5min"},
+    {"phase": 2, "traffic_pct": 25,  "duration_min": 60,  "abort_threshold": "success_rate<92%_for_10min"},
+    {"phase": 3, "traffic_pct": 50,  "duration_min": 120, "abort_threshold": "success_rate<93%_for_15min"},
+    {"phase": 4, "traffic_pct": 100, "duration_min": null, "abort_threshold": "any_p0_incident"}
+  ],
+  "rollback_command_universal": "export CLOUDTECH_RC2_ENABLED=false && export CLOUDTECH_RC2_TRAFFIC_PCT=0 && winsw restart CloudTechGateway",
+  "next_action_for_user": "Review cutover_playbook.md §1 — resolve 3 STOP_GATEs in order"
+}

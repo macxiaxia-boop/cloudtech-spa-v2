@@ -1,0 +1,191 @@
+# CloudTech rc2 — Production Cutover Deployment Manifest
+# Status: STAGED · STOP_GATE: requires USER_AUTHORIZATION_FOR_CUTOVER + REAL_PROVIDER_CREDENTIALS
+# Generated: 2026-09-25 · Wave 10 staging artifact
+#
+# This manifest describes the phased production rollout for the
+# Live → Candidate rc2 router migration. It is NOT applied automatically.
+#
+# Apply only after:
+# 1. User approves Wave 10 cutover authorization (L5)
+# 2. REAL Provider API key(s) configured in .env (not committed)
+# 3. PRODUCTION_BACKENDS reachable from runtime
+#
+schema_version: "1.0"
+cutover_name: cloudtech-rc2-live-integration
+cutover_owner: ai-os
+cutover_state: STAGED    # STAGED | RUNNING | PAUSED | COMPLETE | ROLLED_BACK
+generated_at: "2026-09-25T20:30:00Z"
+
+# ============================================================
+# Phase Plan: 5% → 25% → 50% → 100% with automatic rollback
+# ============================================================
+phases:
+  - phase: 1
+    name: canary_5pct
+    traffic_pct: 5
+    duration_minutes: 30
+    promotion_criteria:
+      success_rate_min_pct: 95.0
+      p95_latency_max_ms: 3000
+      error_rate_max_pct: 5.0
+    rollback_triggers:
+      - success_rate_below_90pct_for_5min
+      - any_5xx_storm_above_20_per_min
+      - manual_halt_by_operator
+    notes: |
+      Watch 5% traffic for 30 minutes. If promotion criteria hold, advance.
+      This is the highest-risk phase — most likely place to detect real-world issues.
+
+  - phase: 2
+    name: gradual_25pct
+    traffic_pct: 25
+    duration_minutes: 60
+    promotion_criteria:
+      success_rate_min_pct: 95.0
+      p95_latency_max_ms: 2500
+      error_rate_max_pct: 5.0
+    rollback_triggers:
+      - success_rate_below_92pct_for_10min
+      - p95_latency_above_4000ms_for_10min
+      - cost_per_request_spike_above_3x_baseline
+      - manual_halt_by_operator
+    notes: |
+      One-quarter traffic. Compare metrics vs Live legacy router.
+
+  - phase: 3
+    name: majority_50pct
+    traffic_pct: 50
+    duration_minutes: 120
+    promotion_criteria:
+      success_rate_min_pct: 96.0
+      p95_latency_max_ms: 2000
+      error_rate_max_pct: 4.0
+    rollback_triggers:
+      - success_rate_below_93pct_for_15min
+      - p95_latency_above_3500ms_for_15min
+      - any_p0_incident
+      - manual_halt_by_operator
+    notes: |
+      Half-and-half traffic. Most realistic load test.
+
+  - phase: 4
+    name: full_100pct
+    traffic_pct: 100
+    duration_minutes: null   # indefinite
+    promotion_criteria: null # terminal phase
+    rollback_triggers:
+      - any_p0_incident
+      - manual_halt_by_operator
+    notes: |
+      Full cutover. Keep Live legacy router in standby for 7 days.
+
+# ============================================================
+# Feature Flags
+# ============================================================
+feature_flags:
+  cloudtech_rc2_enabled:
+    default: false
+    rollout_strategy: phased_per_phase
+    description: Master switch for Candidate rc2 router.
+  cloudtech_rc2_shadow_only:
+    default: true
+    rollout_strategy: static
+    description: Run Candidate rc2 in shadow mode (no real responses) alongside Live.
+  cloudtech_rc2_effect_ledger:
+    default: true
+    rollout_strategy: static
+    description: Persist every routed effect in SQLite ledger with idempotency.
+
+# ============================================================
+# Provider Configuration (PLACEHOLDER — real keys go to .env, never here)
+# ============================================================
+providers:
+  primary:
+    name: deepseek
+    model: deepseek-chat
+    rate_per_1k_tokens_usd: 0.002
+    credential_ref: env.DEEPSEEK_API_KEY    # NOT a real key — placeholder
+    enabled_for_phases: [1, 2, 3, 4]
+  failover:
+    name: openai
+    model: gpt-4o-mini
+    rate_per_1k_tokens_usd: 0.00015
+    credential_ref: env.OPENAI_API_KEY
+    enabled_for_phases: [3, 4]
+  test_only:
+    name: fake
+    model: fake-deepseek
+    rate_per_1k_tokens_usd: 0.0
+    credential_ref: null
+    enabled_for_phases: []   # NEVER enabled in production
+    notes: |
+      FakeProvider used ONLY for Wave 10 staging smoke tests in isolated copy.
+      Must NEVER appear in production enabled_for_phases.
+
+# ============================================================
+# Live System Touchpoints (READ-ONLY targets for cutover)
+# ============================================================
+live_systems:
+  cloudtech_portable:
+    path: D:/CloudTech-Portable
+    branch: cloudtech-live-reconciliation-rc2    # already created
+    role: SaaS frontend
+    entrypoint: uvicorn:5099
+    integration_point: unified_router.py
+    cutover_method: hot_swap_via_feature_flag
+  openclaw_workbench:
+    path: D:/.openclaw
+    branch: openclaw-live-reconciliation-rc2     # already created
+    role: Routing/orchestration
+    entrypoint: python openclaw_workbench/main.py
+    integration_point: openclaw_workbench/router.py
+    cutover_method: hot_swap_via_feature_flag
+  aios_ecosystem:
+    path: D:/AIOS
+    role: Daemons + cron
+    integration_point: WinSW supervisor
+    cutover_method: supervisor_restart_with_new_env
+
+# ============================================================
+# Observability
+# ============================================================
+observability:
+  metrics_endpoint: http://localhost:5099/metrics
+  log_path: D:/CloudTech-Live-Execution/runtime_logs/cutover_20260925.log
+  dashboard_url: null  # user to provide
+  alert_channels:
+    - local_console
+    - file_log
+
+# ============================================================
+# STOP_GATEs (Active Blockers)
+# ============================================================
+stop_gates:
+  PRODUCTION_BACKENDS_REQUIRED:
+    status: ACTIVE_BLOCKER
+    resolution: User configures target backend endpoints.
+  REAL_PROVIDER_CREDENTIALS_REQUIRED:
+    status: ACTIVE_BLOCKER
+    resolution: User provides API key(s) via .env (not committed).
+  USER_AUTHORIZATION_FOR_CUTOVER:
+    status: ACTIVE_BLOCKER
+    resolution: User explicitly approves "Wave 10 切生产".
+
+# ============================================================
+# Auto-rollback Configuration
+# ============================================================
+auto_rollback:
+  enabled: true
+  cooldown_minutes: 5
+  max_retries_per_phase: 2
+  target_state_after_rollback: STAGED
+  notification: local_console + log
+
+# ============================================================
+# Final State
+# ============================================================
+final_state:
+  on_success: COMPLETE
+  on_failure: ROLLED_BACK
+  expected_runtime_minutes: 240    # 30 + 60 + 120 + 30 watch
+  expected_cost_usd: 5.00          # conservative estimate for 4-hour validation
