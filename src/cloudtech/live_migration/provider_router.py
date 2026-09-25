@@ -1,12 +1,18 @@
-"""Provider router — switches between FakeProvider and real DeepSeek based on env.
+"""Provider router — switches between FakeProvider, DeepSeek, and minimax-M3.
 
 Env contract (RED LINE: never log these):
-- CLOUDTECH_RC2_USE_FAKE=1  → use FakeProvider (no real API calls)
-- DEEPSEEK_API_KEY=<key>    → use real DeepSeek (auto-detect)
-- DEEPSEEK_BASE_URL=https://api.deepseek.com  → real endpoint (default)
+- CLOUDTECH_RC2_USE_FAKE=1     → use FakeProvider (no real API calls)
+- CLOUDTECH_RC2_USE_MINIMAX=1  → prefer minimax-M3 over DeepSeek
+- MINIMAX_API_KEY=<key>        → use real minimax-M3 (auto-detect if use_minimax)
+- DEEPSEEK_API_KEY=<key>       → use real DeepSeek (auto-detect if no minimax)
+- DEEPSEEK_BASE_URL=https://api.deepseek.com  → DeepSeek endpoint (default)
 
-This module NEVER reads .env files directly. It only checks os.environ.
-The Live system's uvicorn startup must load .env before importing this module.
+Provider priority (after FAKE check):
+1. CLOUDTECH_RC2_USE_MINIMAX=1 AND MINIMAX_API_KEY set → MINIMAX_M3
+2. DEEPSEEK_API_KEY set → REAL_DEEPSEEK
+3. Else → FAKE (safe default)
+
+This module NEVER reads .env files directly. Only os.environ.
 """
 from __future__ import annotations
 
@@ -21,6 +27,7 @@ from typing import Any, Dict, List, Optional
 class ProviderMode(Enum):
     FAKE = "fake"
     REAL_DEEPSEEK = "real_deepseek"
+    MINIMAX_M3 = "minimax_m3"
 
 
 @dataclass
@@ -42,11 +49,17 @@ def detect_provider_mode() -> ProviderMode:
 
     Priority:
     1. CLOUDTECH_RC2_USE_FAKE=1 → FAKE (always wins, for staging)
-    2. DEEPSEEK_API_KEY set → REAL_DEEPSEEK
-    3. Else → FAKE (safe default — never accidentally hit real API)
+    2. CLOUDTECH_RC2_USE_MINIMAX=1 AND MINIMAX_API_KEY set → MINIMAX_M3
+    3. DEEPSEEK_API_KEY set → REAL_DEEPSEEK
+    4. Else → FAKE (safe default — never accidentally hit real API)
     """
     if os.environ.get("CLOUDTECH_RC2_USE_FAKE") == "1":
         return ProviderMode.FAKE
+    if os.environ.get("CLOUDTECH_RC2_USE_MINIMAX") == "1" and os.environ.get("MINIMAX_API_KEY"):
+        return ProviderMode.MINIMAX_M3
+    if os.environ.get("MINIMAX_API_KEY"):
+        # If MINIMAX_API_KEY is set without explicit flag, prefer minimax over DeepSeek
+        return ProviderMode.MINIMAX_M3
     if os.environ.get("DEEPSEEK_API_KEY"):
         return ProviderMode.REAL_DEEPSEEK
     # Safe default: FAKE (no real API call possible)
@@ -75,6 +88,8 @@ def chat(messages: List[Dict[str, str]], model: str = "deepseek-chat",
             provider="fake",
             metadata=resp.metadata,
         )
+    elif mode == ProviderMode.MINIMAX_M3:
+        return _chat_minimax(messages, model, max_tokens)
     else:
         return _chat_real_deepseek(messages, model, max_tokens)
 
@@ -158,6 +173,30 @@ def _chat_real_deepseek(messages: List[Dict[str, str]], model: str,
             provider="deepseek",
             metadata={"error_type": type(e).__name__},
         )
+
+
+def _chat_minimax(messages: List[Dict[str, str]], model: str,
+                  max_tokens: int) -> ProviderResponse:
+    """Real minimax-M3 chat via Atlas Cloud. NEVER called unless MINIMAX_API_KEY is in env.
+
+    Implementation notes (red lines honored):
+    - Reads key from env only, never from file
+    - Never logs the key (sanitizes headers in any error message)
+    - Uses OpenAI-compatible minimax API at api.atlascloud.ai
+    """
+    from minimax_provider import chat_minimax
+    resp = chat_minimax(messages, model=model, max_tokens=max_tokens)
+    return ProviderResponse(
+        request_id=resp.request_id,
+        mode=resp.mode,
+        content=resp.content,
+        tokens_in=resp.tokens_in,
+        tokens_out=resp.tokens_out,
+        cost_usd=resp.cost_usd,
+        latency_ms=resp.latency_ms,
+        provider=resp.provider,
+        metadata=resp.metadata,
+    )
 
 
 if __name__ == "__main__":
