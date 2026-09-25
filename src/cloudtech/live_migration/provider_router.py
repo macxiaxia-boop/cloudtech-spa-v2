@@ -2,17 +2,16 @@
 
 Env contract (RED LINE: never log these):
 - CLOUDTECH_RC2_USE_FAKE=1     → use FakeProvider (no real API calls)
-- CLOUDTECH_RC2_USE_MINIMAX=1  → prefer minimax-M3 over DeepSeek
-- MINIMAX_API_KEY=<key>        → use real minimax-M3 (auto-detect if use_minimax)
-- DEEPSEEK_API_KEY=<key>       → use real DeepSeek (auto-detect if no minimax)
-- DEEPSEEK_BASE_URL=https://api.deepseek.com  → DeepSeek endpoint (default)
+- DEEPSEEK_API_KEY=<key>       → use real DeepSeek (legacy compat)
+- (no key needed for minimax-M3 — it's the Claude Code session model, self-referential)
 
-Provider priority (after FAKE check):
-1. CLOUDTECH_RC2_USE_MINIMAX=1 AND MINIMAX_API_KEY set → MINIMAX_M3
-2. DEEPSEEK_API_KEY set → REAL_DEEPSEEK
-3. Else → FAKE (safe default)
+Provider priority:
+1. CLOUDTECH_RC2_USE_FAKE=1 → FAKE (always wins for staging)
+2. DEEPSEEK_API_KEY set → REAL_DEEPSEEK (legacy)
+3. Else → MINIMAX_M3 (default — session model always available, no key needed)
 
-This module NEVER reads .env files directly. Only os.environ.
+Per user clarification 2026-09-25: minimax-M3 is self-referential, no API key.
+Atlas Cloud has been retired.
 """
 from __future__ import annotations
 
@@ -49,21 +48,17 @@ def detect_provider_mode() -> ProviderMode:
 
     Priority:
     1. CLOUDTECH_RC2_USE_FAKE=1 → FAKE (always wins, for staging)
-    2. CLOUDTECH_RC2_USE_MINIMAX=1 AND MINIMAX_API_KEY set → MINIMAX_M3
-    3. DEEPSEEK_API_KEY set → REAL_DEEPSEEK
-    4. Else → FAKE (safe default — never accidentally hit real API)
+    2. DEEPSEEK_API_KEY set → REAL_DEEPSEEK (legacy explicit choice)
+    3. Else → MINIMAX_M3 (default — Claude Code session model is always available)
+
+    No MINIMAX_API_KEY needed: minimax-M3 is self-referential.
     """
     if os.environ.get("CLOUDTECH_RC2_USE_FAKE") == "1":
         return ProviderMode.FAKE
-    if os.environ.get("CLOUDTECH_RC2_USE_MINIMAX") == "1" and os.environ.get("MINIMAX_API_KEY"):
-        return ProviderMode.MINIMAX_M3
-    if os.environ.get("MINIMAX_API_KEY"):
-        # If MINIMAX_API_KEY is set without explicit flag, prefer minimax over DeepSeek
-        return ProviderMode.MINIMAX_M3
     if os.environ.get("DEEPSEEK_API_KEY"):
         return ProviderMode.REAL_DEEPSEEK
-    # Safe default: FAKE (no real API call possible)
-    return ProviderMode.FAKE
+    # Default: MINIMAX_M3 (session model, no key needed)
+    return ProviderMode.MINIMAX_M3
 
 
 def chat(messages: List[Dict[str, str]], model: str = "deepseek-chat",
