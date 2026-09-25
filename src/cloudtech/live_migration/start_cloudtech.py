@@ -100,6 +100,17 @@ def main():
 
     patched = apply_quality_aware_patch()
 
+    # Install observability dashboard (only if QualityAwareRouter is enabled)
+    if patched:
+        try:
+            from observability_dashboard import install_dashboard
+            log.info("[bootstrap] installing observability dashboard...")
+            install_dashboard()
+        except ImportError as ie:
+            log.warning(f"[bootstrap] observability_dashboard not found ({ie}); continuing without it")
+        except Exception as ex:
+            log.warning(f"[bootstrap] observability_dashboard install failed: {type(ex).__name__}: {ex}")
+
     # Now import and run Live's gateway (sealed core untouched)
     import uvicorn
     log.info(f"[bootstrap] Starting Live gateway_v22 on {args.host}:{args.port}")
