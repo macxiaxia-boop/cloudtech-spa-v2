@@ -10,13 +10,16 @@ import json
 import sqlite3
 import os
 import hashlib
+import time
 from datetime import datetime
 from pathlib import Path
 from contextlib import contextmanager
 
 # === Configuration ===
 DB_TYPE = os.environ.get("DB_TYPE", "sqlite")
-DB_PATH = Path(os.environ.get("DB_PATH", Path(r"C:\Users\xinzh\.openclaw\state") / "pipeline.db"))
+_DB_PATH_DEFAULT = Path(__file__).parent / "data" / "cloudtech.db"
+_env_db_path = os.environ.get("DB_PATH", "").strip()
+DB_PATH = Path(_env_db_path) if _env_db_path else _DB_PATH_DEFAULT
 PG_DSN = os.environ.get("DATABASE_URL", "")
 
 # Ensure directory
@@ -31,39 +34,68 @@ class Database:
         self.migrations_applied = []
 
     def connect(self):
-        if DB_TYPE == "postgresql" and PG_DSN:
-            import psycopg2
-            self.conn = psycopg2.connect(PG_DSN)
-        else:
-            self.conn = sqlite3.connect(str(DB_PATH), check_same_thread=False, timeout=10)
-            self.conn.row_factory = sqlite3.Row
-            self.conn.execute("PRAGMA journal_mode=WAL")
-            self.conn.execute("PRAGMA foreign_keys=ON")
-            # Performance indexes (R4.1: each DDL guarded — production DB
-            # schema may differ from MIGRATION V1, e.g. audit_log uses 'ts'
-            # not 'created_at', tenants table may not exist. connect() must
-            # never raise; silently skip on any schema mismatch.)
-            _INDEXES = (
-                ("tenants",   "tenants(status)",       "idx_tenants_status"),
-                ("tenants",   "tenants(plan)",         "idx_tenants_plan"),
-                ("audit_log", "audit_log(tenant_id)",  "idx_audit_tenant"),
-                ("audit_log", "audit_log(created_at)", "idx_audit_time"),
-                ("users",     "users(email)",          "idx_users_email"),
-            )
-            _existing = self._existing_tables()
-            for _table, _cols, _name in _INDEXES:
-                if _table not in _existing:
-                    continue
-                try:
-                    self.conn.execute(
-                        f"CREATE INDEX IF NOT EXISTS {_name} ON {_cols}"
+        """Open the SQLite database with retry-on-busy (R6.2).
+
+        Retries up to 3 times on sqlite3.OperationalError "database is locked"
+        with exponential backoff (0.5s, 1.0s, 2.0s). After connect succeeds,
+        applies PRAGMAs (WAL + busy_timeout + foreign_keys + cache + mmap)
+        and ensures performance indexes via _existing_tables() guard (R4.1).
+        Returns self for chaining.
+        """
+        last_err = None
+        for attempt in range(3):
+            try:
+                if DB_TYPE == "postgresql" and PG_DSN:
+                    import psycopg2
+                    self.conn = psycopg2.connect(PG_DSN)
+                else:
+                    self.conn = sqlite3.connect(str(DB_PATH), check_same_thread=False, timeout=10)
+                    self.conn.row_factory = sqlite3.Row
+                    # WAL + busy_timeout (R6.2): WAL is SQLite-level, no RAID;
+                    # busy_timeout=5000ms absorbs short-lived locks from
+                    # the TikTokDownloader daemon (PID 1876) child spawns.
+                    try:
+                        self.conn.execute("PRAGMA journal_mode=WAL")
+                        self.conn.execute("PRAGMA busy_timeout=5000")
+                    except Exception:
+                        pass
+                    self.conn.execute("PRAGMA foreign_keys=ON")
+                    # Performance indexes (R4.1: each DDL guarded — production DB
+                    # schema may differ from MIGRATION V1, e.g. audit_log uses 'ts'
+                    # not 'created_at', tenants table may not exist. connect() must
+                    # never raise; silently skip on any schema mismatch.)
+                    _INDEXES = (
+                        ("tenants",   "tenants(status)",       "idx_tenants_status"),
+                        ("tenants",   "tenants(plan)",         "idx_tenants_plan"),
+                        ("audit_log", "audit_log(tenant_id)",  "idx_audit_tenant"),
+                        ("audit_log", "audit_log(created_at)", "idx_audit_time"),
+                        ("users",     "users(email)",          "idx_users_email"),
                     )
-                except Exception:
-                    # Column or schema mismatch — skip silently (R4.1)
-                    pass
-            self.conn.execute("PRAGMA cache_size=-8000")  # 8MB cache
-            self.conn.execute("PRAGMA mmap_size=268435456")  # 256MB mmap
-        return self
+                    _existing = self._existing_tables()
+                    for _table, _cols, _name in _INDEXES:
+                        if _table not in _existing:
+                            continue
+                        try:
+                            self.conn.execute(
+                                f"CREATE INDEX IF NOT EXISTS {_name} ON {_cols}"
+                            )
+                        except Exception:
+                            # Column or schema mismatch — skip silently (R4.1)
+                            pass
+                    self.conn.execute("PRAGMA cache_size=-8000")  # 8MB cache
+                    self.conn.execute("PRAGMA mmap_size=268435456")  # 256MB mmap
+                return self
+            except sqlite3.OperationalError as e:
+                last_err = e
+                if "database is locked" not in str(e):
+                    # Non-recoverable: surface the error to caller
+                    self.conn = None
+                    raise
+                # R6.2 retry: exponential backoff 0.5s, 1.0s, 2.0s
+                self.conn = None
+                time.sleep(0.5 * (2 ** attempt))
+        # All 3 retries exhausted
+        raise last_err
 
     def _existing_tables(self):
         """Return set of existing table names from sqlite_master (R4.1 guard).
