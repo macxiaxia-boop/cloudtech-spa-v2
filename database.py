@@ -39,15 +39,46 @@ class Database:
             self.conn.row_factory = sqlite3.Row
             self.conn.execute("PRAGMA journal_mode=WAL")
             self.conn.execute("PRAGMA foreign_keys=ON")
-            # Performance indexes
-            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_tenants_status ON tenants(status)")
-            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_tenants_plan ON tenants(plan)")
-            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_audit_tenant ON audit_log(tenant_id)")
-            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_audit_time ON audit_log(created_at)")
-            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)")
+            # Performance indexes (R4.1: each DDL guarded — production DB
+            # schema may differ from MIGRATION V1, e.g. audit_log uses 'ts'
+            # not 'created_at', tenants table may not exist. connect() must
+            # never raise; silently skip on any schema mismatch.)
+            _INDEXES = (
+                ("tenants",   "tenants(status)",       "idx_tenants_status"),
+                ("tenants",   "tenants(plan)",         "idx_tenants_plan"),
+                ("audit_log", "audit_log(tenant_id)",  "idx_audit_tenant"),
+                ("audit_log", "audit_log(created_at)", "idx_audit_time"),
+                ("users",     "users(email)",          "idx_users_email"),
+            )
+            _existing = self._existing_tables()
+            for _table, _cols, _name in _INDEXES:
+                if _table not in _existing:
+                    continue
+                try:
+                    self.conn.execute(
+                        f"CREATE INDEX IF NOT EXISTS {_name} ON {_cols}"
+                    )
+                except Exception:
+                    # Column or schema mismatch — skip silently (R4.1)
+                    pass
             self.conn.execute("PRAGMA cache_size=-8000")  # 8MB cache
             self.conn.execute("PRAGMA mmap_size=268435456")  # 256MB mmap
         return self
+
+    def _existing_tables(self):
+        """Return set of existing table names from sqlite_master (R4.1 guard).
+
+        Used by connect() to skip CREATE INDEX on tables that don't exist
+        in the target database (legacy/production DBs may be missing some).
+        Returns empty set on any failure so connect() never raises from this helper.
+        """
+        try:
+            cur = self.conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+            return {row[0] for row in cur.fetchall()}
+        except Exception:
+            return set()
 
     @contextmanager
     def transaction(self):
