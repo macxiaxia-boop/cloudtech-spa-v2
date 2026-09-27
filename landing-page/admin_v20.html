@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>CloudTech v20 · 36 端点 · WebSocket</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f0f23; color: #e0e0e0; }
+header { background: linear-gradient(90deg, #6c5ce7, #a29bfe); padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { font-size: 22px; }
+.hdr-badges { display: flex; gap: 8px; }
+.badge { background: rgba(0,0,0,0.25); padding: 6px 14px; border-radius: 12px; font-size: 12px; }
+.badge.ok { color: #55efc4; }
+.badge.warn { color: #fdcb6e; }
+.badge.err { color: #ff7675; }
+nav { background: #1a1a3e; padding: 10px 32px; display: flex; gap: 6px; flex-wrap: wrap; }
+nav button { background: #2d2d5e; color: #e0e0e0; border: 0; padding: 9px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+nav button:hover { background: #3d3d7e; }
+nav button.active { background: #6c5ce7; color: white; }
+main { padding: 20px 32px; max-width: 1280px; margin: 0 auto; }
+.panel { display: none; }
+.panel.active { display: block; }
+.card { background: #1a1a3e; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+.card h2 { font-size: 15px; color: #a29bfe; margin-bottom: 10px; }
+.row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+.row label { flex: 0 0 90px; font-size: 12px; color: #b0b0d0; }
+.row input, .row select, .row textarea { flex: 1; min-width: 120px; background: #0f0f23; border: 1px solid #3d3d7e; color: #e0e0e0; padding: 6px 10px; border-radius: 4px; font-size: 12px; }
+button.primary { background: #6c5ce7; color: white; border: 0; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+button.danger { background: #d63031; color: white; border: 0; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+button.success { background: #00b894; color: white; border: 0; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+button.warn { background: #fdcb6e; color: #2d2d5e; border: 0; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+pre { background: #0f0f23; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 11px; max-height: 350px; overflow-y: auto; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.stat { background: #0f0f23; padding: 12px; border-radius: 6px; text-align: center; }
+.stat .val { font-size: 22px; color: #6c5ce7; font-weight: 600; }
+.stat .lbl { font-size: 11px; color: #888; margin-top: 3px; }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+.pill.consult, .pill.demo, .pill.pending { background: #fdcb6e; color: #2d2d5e; }
+.pill.trial { background: #55efc4; color: #2d2d5e; }
+.pill.quote { background: #a29bfe; color: white; }
+.pill.signed, .pill.active { background: #00b894; color: white; }
+#events-log { background: #0f0f23; border: 1px solid #2d2d5e; border-radius: 4px; padding: 8px; height: 380px; overflow-y: auto; font-family: monospace; font-size: 11px; }
+.evt-row { padding: 4px 8px; margin-bottom: 3px; border-radius: 3px; }
+.evt-row.employee_invoked { background: rgba(108,92,231,0.18); }
+.evt-row.quota_charged { background: rgba(253,203,110,0.18); }
+.evt-row.invoice_created { background: rgba(0,184,148,0.18); }
+.evt-row.lead_advanced { background: rgba(116,185,255,0.18); }
+.evt-row.subscription_activated { background: rgba(0,184,148,0.25); }
+.evt-row.bridge_incident { background: rgba(214,48,49,0.22); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid #2d2d5e; }
+th { color: #a29bfe; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>云数科技 · CloudTech v20 · 36 端点 + WebSocket</h1>
+  <div class="hdr-badges">
+    <span class="badge" id="ws-status">● WS</span>
+    <span class="badge" id="http-status">● HTTP</span>
+    <span class="badge" id="ev-count">● 0 events</span>
+  </div>
+</header>
+
+<nav>
+  <button class="active" data-panel="p-overview">概览</button>
+  <button data-panel="p-realtime">⚡ 实时</button>
+  <button data-panel="p-auth">认证</button>
+  <button data-panel="p-crm">CRM</button>
+  <button data-panel="p-employees">员工</button>
+  <button data-panel="p-ai">AI</button>
+  <button data-panel="p-billing">计费</button>
+  <button data-panel="p-bridge">A窗</button>
+</nav>
+
+<main>
+
+<div class="panel active" id="p-overview">
+  <div class="card">
+    <h2>5 端口健康</h2>
+    <div class="row"><button class="primary" onclick="checkHealth()">刷新</button></div>
+    <pre id="health-out">点击按钮后查看...</pre>
+  </div>
+  <div class="card">
+    <h2>36 端点清单</h2>
+    <div class="grid-2">
+      <div>
+        <h3>v1 (9) · <code>/api/real/v1</code></h3>
+        <pre>POST /auth/register | POST /auth/login
+POST /crm/leads | GET /crm/leads
+POST /employees/deploy | GET /employees/list
+POST /content/generate | GET /content/history
+GET /health</pre>
+      </div>
+      <div>
+        <h3>v2 (8) · <code>/api/real/v2</code></h3>
+        <pre>GET /crm/leads/{id}
+PATCH /crm/leads/{id}
+DELETE /crm/leads/{id}
+POST /employees/{id}/invoke
+POST /billing/charge | GET /billing/quota/{tenant}
+GET /stats/{tenant}
+POST /search/leads</pre>
+      </div>
+      <div>
+        <h3>v3 (7) · <code>/api/real/v3</code></h3>
+        <pre>POST /employees/bulk_invoke
+POST /quota/reset | POST /quota/reset_all
+GET /invoice/{id}/pdf
+GET /invoice/list/{tenant}
+POST /crm/leads/{id}/stage
+GET /employees/{id}/stats</pre>
+      </div>
+      <div>
+        <h3>v4 (7) + v5 (5) · A窗 + WS</h3>
+        <pre>v4 /api/aios/bridge/v1:
+auth/register | auth/login | auth/verify
+payment/skus | payment/checkout | payment/webhook
+payment/subscription/{tenant}
+v5 /api/ws/v1:
+WS /events | WS /tenant/{t}
+GET /stream/sse | /events/recent | POST /events/emit</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="p-realtime">
+  <div class="card">
+    <h2>⚡ WebSocket 实时事件</h2>
+    <div class="row">
+      <button class="primary" onclick="connectWS()">连接 WS</button>
+      <button class="danger" onclick="disconnectWS()">断开</button>
+      <button class="success" onclick="emitTest()">emit 测试</button>
+      <button class="warn" onclick="clearLog()">清空</button>
+    </div>
+    <div id="events-log"></div>
+  </div>
+  <div class="card">
+    <h2>📜 DB 持久化事件</h2>
+    <div class="row">
+      <label>limit</label><input id="r-limit" type="number" value="20" style="max-width:80px;">
+      <label>tenant</label><input id="r-tid" placeholder="(all)" style="max-width:160px;">
+      <button class="primary" onclick="loadRecent()">查询</button>
+    </div>
+    <div id="recent-out"></div>
+  </div>
+</div>
+
+<div class="panel" id="p-auth">
+  <div class="card">
+    <h2>v1 注册</h2>
+    <div class="row"><label>邮箱</label><input id="v1-email" value="v20@decoration.com"></div>
+    <div class="row"><label>密码</label><input id="v1-pwd" type="password" value="v20pass"></div>
+    <div class="row"><label>姓名</label><input id="v1-name" value="V20"></div>
+    <div class="row"><label>行业</label><select id="v1-ind"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select></div>
+    <div class="row"><button class="primary" onclick="v1Reg()">注册</button></div>
+    <pre id="v1-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>v4 A 窗 (JWT 24h)</h2>
+    <div class="row"><label>邮箱</label><input id="v4-email" value="ceo@decoration.com"></div>
+    <div class="row"><label>密码</label><input id="v4-pwd" type="password" value="ceo123"></div>
+    <div class="row"><label>角色</label><select id="v4-role"><option>owner</option><option>admin</option><option>manager</option><option>employee</option><option>viewer</option></select></div>
+    <div class="row"><label>行业</label><select id="v4-ind"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select></div>
+    <div class="row">
+      <button class="primary" onclick="v4Reg()">注册</button>
+      <button class="success" onclick="v4Login()">登录</button>
+      <button class="warn" onclick="v4Verify()">verify</button>
+    </div>
+    <pre id="v4-out">...</pre>
+  </div>
+</div>
+
+<div class="panel" id="p-crm">
+  <div class="card">
+    <h2>新建线索</h2>
+    <div class="row"><label>客户</label><input id="ld-name" value="V20 Boss"></div>
+    <div class="row"><label>电话</label><input id="ld-phone" value="13700137000"></div>
+    <div class="row"><label>行业</label><select id="ld-ind"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select></div>
+    <div class="row"><label>备注</label><textarea id="ld-notes">via v20 SPA</textarea></div>
+    <div class="row"><label>tenant</label><input id="ld-tenant" value="t_demo_001"></div>
+    <div class="row"><button class="primary" onclick="createLead()">创建</button>
+    <button class="warn" onclick="searchLeads()">搜索(industry=decoration)</button></div>
+    <pre id="ld-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>线索列表 (含 stage 推进 + 软删)</h2>
+    <div class="row">
+      <label>tenant</label><input id="ld-list-tenant" value="t_demo_001" style="max-width:140px;">
+      <button class="primary" onclick="listLeads()">查询</button>
+    </div>
+    <div id="ld-table"></div>
+  </div>
+</div>
+
+<div class="panel" id="p-employees">
+  <div class="card">
+    <h2>部署员工 + 批量 invoke</h2>
+    <div class="row"><label>preset</label><select id="emp-preset"><option>content_writer</option><option>customer_service</option><option>market_researcher</option><option>sales_assistant</option><option>seo_writer</option><option>copywriter</option></select></div>
+    <div class="row"><label>行业</label><select id="emp-ind"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select></div>
+    <div class="row"><label>tenant</label><input id="emp-tenant" value="t_demo_001"></div>
+    <div class="row"><button class="primary" onclick="deployEmp()">部署</button>
+    <button class="success" onclick="bulkInvoke()">批量 invoke</button></div>
+    <pre id="emp-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>员工列表</h2>
+    <div class="row">
+      <label>tenant</label><input id="emp-list-tenant" value="t_demo_001" style="max-width:160px;">
+      <button class="primary" onclick="listEmps()">查询</button>
+    </div>
+    <div id="emp-table"></div>
+  </div>
+</div>
+
+<div class="panel" id="p-ai">
+  <div class="card">
+    <h2>AI 内容生成</h2>
+    <div class="row"><label>行业</label><select id="ai-ind"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select></div>
+    <div class="row"><label>平台</label><select id="ai-pl"><option>xhs</option><option>wechat</option><option>douyin</option><option>zhihu</option></select></div>
+    <div class="row"><label>主题</label><input id="ai-topic" value="90 sqm renovation budget"></div>
+    <div class="row"><label>tenant</label><input id="ai-tenant" value="t_demo_001"></div>
+    <div class="row"><button class="primary" onclick="aiGen()">生成</button>
+    <button class="success" onclick="gen4()">4 行业一次生成</button>
+    <button class="warn" onclick="loadHistory()">历史</button></div>
+    <pre id="ai-out">...</pre>
+  </div>
+</div>
+
+<div class="panel" id="p-billing">
+  <div class="card">
+    <h2>Quota / 计费 / Invoice</h2>
+    <div class="row"><label>tenant</label><input id="b-tenant" value="t_demo_001" style="max-width:160px;"></div>
+    <div class="row"><label>calls</label><input id="b-calls" type="number" value="1" style="max-width:80px;">
+    <label>tokens</label><input id="b-tok" type="number" value="50" style="max-width:80px;"></div>
+    <div class="row">
+      <button class="primary" onclick="charge()">扣费</button>
+      <button class="warn" onclick="qQuota()">查 quota</button>
+      <button class="danger" onclick="rQuota()">reset</button>
+      <button class="danger" onclick="rAll()">reset_all</button>
+      <button class="success" onclick="lInv()">列 invoice</button>
+    </div>
+    <pre id="b-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>v4 SKU + Checkout</h2>
+    <div class="row">
+      <button class="primary" onclick="lSku()">12 SKU</button>
+      <button class="success" onclick="chkOut()">checkout pro-decoration</button>
+    </div>
+    <pre id="b-sku">...</pre>
+  </div>
+</div>
+
+<div class="panel" id="p-bridge">
+  <div class="card">
+    <h2>A 窗桥接 v4 健康</h2>
+    <div class="row">
+      <button class="primary" onclick="bHealth()">bridge 健康</button>
+      <button class="warn" onclick="lSub()">列订阅</button>
+      <button class="success" onclick="lStats()">v2 stats</button>
+    </div>
+    <pre id="br-out">...</pre>
+  </div>
+</div>
+
+</main>
+
+<script>
+const API = 'http://127.0.0.1:5000';
+let tenant = 't_demo_001';
+let ws = null;
+let evtCount = 0;
+
+async function req(method, path, body, headers = {}) {
+  const opts = { method, headers: { 'Content-Type': 'application/json', ...headers } };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(API + path, opts);
+    const ct = r.headers.get('content-type') || '';
+    const data = ct.includes('json') ? await r.json() : await r.text();
+    return { status: r.status, data };
+  } catch (e) { return { status: 0, data: { error: String(e) } }; }
+}
+function show(id, data) { document.getElementById(id).textContent = JSON.stringify(data, null, 2); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function setBadge(id, text, cls) { const el = document.getElementById(id); el.textContent = text; el.className = 'badge ' + (cls || ''); }
+
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById(b.dataset.panel).classList.add('active');
+}));
+
+// 概览
+async function checkHealth() {
+  const ports = [5000, 5099, 5002, 8080, 9099];
+  const out = { ports: {}, v1: null, v2: null, v3: null, v4: null, v5: null };
+  for (const p of ports) {
+    try { const r = await fetch(`http://127.0.0.1:${p}/health`); out.ports[p] = r.ok ? 'OK' : 'DOWN'; } catch (e) { out.ports[p] = 'ERR'; }
+  }
+  for (const [k, path] of [['v1','/api/real/v1/health'], ['v2','/api/real/v2/health'], ['v3','/api/real/v3/health'], ['v4','/api/aios/bridge/v1/bridge/health'], ['v5','/api/ws/v1/health']]) {
+    const r = await req('GET', path);
+    out[k] = r.data;
+  }
+  show('health-out', out);
+  setBadge('http-status', '● HTTP:5000 OK', 'ok');
+}
+
+// WS
+function connectWS() {
+  if (ws) ws.close();
+  ws = new WebSocket('ws://127.0.0.1:5000/api/ws/v1/events');
+  ws.onopen = () => setBadge('ws-status', '● WS 连接', 'ok');
+  ws.onmessage = e => {
+    evtCount++;
+    setBadge('ev-count', '● ' + evtCount + ' events', 'ok');
+    const evt = JSON.parse(e.data);
+    const div = document.getElementById('events-log');
+    const row = document.createElement('div');
+    row.className = 'evt-row ' + evt.event_type;
+    row.textContent = '[' + evt.ts.substring(11,19) + '] ' + evt.event_type + ' | tenant=' + (evt.tenant_id || '-') + ' | ' + JSON.stringify(evt.payload).substring(0,180);
+    div.insertBefore(row, div.firstChild);
+    if (div.children.length > 80) div.removeChild(div.lastChild);
+  };
+  ws.onclose = () => setBadge('ws-status', '● WS 断开', 'warn');
+  ws.onerror = () => setBadge('ws-status', '● WS 错误', 'err');
+}
+function disconnectWS() { if (ws) { ws.close(); ws = null; } }
+function clearLog() { document.getElementById('events-log').innerHTML = ''; evtCount = 0; setBadge('ev-count', '● 0 events', ''); }
+async function emitTest() {
+  await req('POST', '/api/ws/v1/events/emit', { event_type: 'employee_invoked', tenant_id: tenant, payload: { from: 'admin_v20', test: true } });
+}
+async function loadRecent() {
+  const limit = document.getElementById('r-limit').value || 20;
+  const tid = document.getElementById('r-tid').value || '';
+  const r = await req('GET', '/api/ws/v1/events/recent?limit=' + limit + (tid ? '&tenant_id=' + tid : ''));
+  if (r.status === 200 && r.data.events) {
+    const rows = r.data.events.map(e => `<tr>
+      <td>${esc(e.event_id)}</td>
+      <td><span class="pill">${esc(e.event_type)}</span></td>
+      <td>${esc(e.tenant_id || '-')}</td>
+      <td>${esc(typeof e.payload === 'string' ? e.payload : JSON.stringify(e.payload)).substring(0,100)}</td>
+      <td>${esc(e.ts).substring(0,19)}</td>
+    </tr>`).join('');
+    document.getElementById('recent-out').innerHTML = `<table>
+      <tr><th>ID</th><th>类型</th><th>tenant</th><th>payload</th><th>时间</th></tr>${rows}</table>`;
+  } else {
+    document.getElementById('recent-out').innerHTML = '<pre>' + JSON.stringify(r.data, null, 2) + '</pre>';
+  }
+}
+
+// Auth
+async function v1Reg() {
+  const body = { email: document.getElementById('v1-email').value, password: document.getElementById('v1-pwd').value, name: document.getElementById('v1-name').value, industry: document.getElementById('v1-ind').value };
+  show('v1-out', (await req('POST', '/api/real/v1/auth/register', body)).data);
+}
+async function v4Reg() {
+  const body = { email: document.getElementById('v4-email').value, password: document.getElementById('v4-pwd').value, name: 'V4', role: document.getElementById('v4-role').value, industry: document.getElementById('v4-ind').value };
+  const r = await req('POST', '/api/aios/bridge/v1/auth/register', body);
+  show('v4-out', r.data);
+  if (r.data.session_token) localStorage.setItem('v4_jwt', r.data.session_token);
+}
+async function v4Login() {
+  const body = { email: document.getElementById('v4-email').value, password: document.getElementById('v4-pwd').value };
+  const r = await req('POST', '/api/aios/bridge/v1/auth/login', body);
+  show('v4-out', r.data);
+  if (r.data.session_token) localStorage.setItem('v4_jwt', r.data.session_token);
+}
+async function v4Verify() {
+  const jwt = localStorage.getItem('v4_jwt');
+  if (!jwt) { show('v4-out', { error: 'no_jwt' }); return; }
+  show('v4-out', (await req('GET', '/api/aios/bridge/v1/auth/verify', null, { 'Authorization': 'Bearer ' + jwt })).data);
+}
+
+// CRM
+async function createLead() {
+  tenant = document.getElementById('ld-tenant').value;
+  const body = { customer_name: document.getElementById('ld-name').value, customer_phone: document.getElementById('ld-phone').value, industry: document.getElementById('ld-ind').value, source: 'admin_v20', stage: 'consult', notes: document.getElementById('ld-notes').value };
+  const r = await req('POST', '/api/real/v1/crm/leads', body, { 'x-tenant-id': tenant });
+  show('ld-out', r.data);
+  if (r.status === 200) {
+    await req('POST', '/api/ws/v1/events/emit', { event_type: 'lead_advanced', tenant_id: tenant, payload: { lead_id: r.data.lead_id, from: 'none', to: 'consult' } });
+  }
+  listLeads();
+}
+async function searchLeads() {
+  show('ld-out', (await req('POST', '/api/real/v2/search/leads?industry=decoration', {}, { 'x-tenant-id': tenant })).data);
+}
+async function listLeads() {
+  tenant = document.getElementById('ld-list-tenant').value;
+  const r = await req('GET', '/api/real/v1/crm/leads?tenant_id=' + tenant + '&limit=50');
+  if (r.status === 200 && r.data.leads) {
+    const rows = r.data.leads.map(l => `<tr>
+      <td>${esc(l.id)}</td>
+      <td>${esc(l.customer_name)}</td>
+      <td>${esc(l.customer_phone || '')}</td>
+      <td><span class="pill">${esc(l.stage)}</span></td>
+      <td>${esc(l.industry || '')}</td>
+      <td>${esc(l.notes || '').substring(0,30)}</td>
+      <td>
+        <button class="success" onclick="adv('${l.id}','demo')">demo</button>
+        <button class="success" onclick="adv('${l.id}','trial')">trial</button>
+        <button class="success" onclick="adv('${l.id}','quote')">quote</button>
+        <button class="success" onclick="adv('${l.id}','signed')">signed</button>
+        <button class="danger" onclick="delL('${l.id}')">删</button>
+      </td>
+    </tr>`).join('');
+    document.getElementById('ld-table').innerHTML = `<table>
+      <tr><th>ID</th><th>客户</th><th>电话</th><th>阶段</th><th>行业</th><th>备注</th><th>操作</th></tr>${rows}</table>`;
+  }
+}
+async function adv(id, stage) {
+  const r = await req('POST', '/api/real/v3/crm/leads/' + id + '/stage', { stage });
+  if (r.status === 200) await req('POST', '/api/ws/v1/events/emit', { event_type: 'lead_advanced', tenant_id: tenant, payload: { lead_id: id, to: stage } });
+  listLeads();
+}
+async function delL(id) {
+  if (!confirm('软删 lead ' + id + '?')) return;
+  show('ld-out', (await req('DELETE', '/api/real/v2/crm/leads/' + id)).data);
+  listLeads();
+}
+
+// Employees
+async function deployEmp() {
+  tenant = document.getElementById('emp-tenant').value;
+  const body = { preset: document.getElementById('emp-preset').value, industry: document.getElementById('emp-ind').value, config: { platforms: ['xhs','wechat'], tone: 'casual' } };
+  show('emp-out', (await req('POST', '/api/real/v1/employees/deploy', body, { 'x-tenant-id': tenant })).data);
+  listEmps();
+}
+async function bulkInvoke() {
+  const r = await req('GET', '/api/real/v1/employees/list?tenant_id=' + tenant);
+  if (!r.data.employees || !r.data.employees.length) { alert('先部署员工'); return; }
+  const items = r.data.employees.slice(0, 3).map((e, i) => ({ employee_id: e.id, topic: 'v20 bulk ' + (i+1), platform: 'xhs', tone: 'casual', length: 'short' }));
+  const r2 = await req('POST', '/api/real/v3/employees/bulk_invoke', { items }, { 'x-tenant-id': tenant });
+  show('emp-out', r2.data);
+  if (r2.data.ok > 0) await req('POST', '/api/ws/v1/events/emit', { event_type: 'employee_invoked', tenant_id: tenant, payload: { bulk: true, count: r2.data.ok } });
+}
+async function listEmps() {
+  tenant = document.getElementById('emp-list-tenant').value;
+  const r = await req('GET', '/api/real/v1/employees/list?tenant_id=' + tenant);
+  if (r.status === 200 && r.data.employees) {
+    const rows = r.data.employees.map(e => `<tr>
+      <td>${esc(e.id)}</td>
+      <td>${esc(e.preset)}</td>
+      <td>${esc(e.industry || '')}</td>
+      <td>${e.invoke_count || 0}</td>
+      <td>${esc(e.last_invoked_at || '从未').substring(0,19)}</td>
+      <td>
+        <button class="success" onclick="inv('${e.id}')">单 invoke</button>
+        <button class="warn" onclick="eStats('${e.id}')">stats</button>
+      </td>
+    </tr>`).join('');
+    document.getElementById('emp-table').innerHTML = `<table>
+      <tr><th>ID</th><th>preset</th><th>行业</th><th>调用数</th><th>最后调用</th><th>操作</th></tr>${rows}</table>`;
+  }
+}
+async function inv(eid) {
+  const topic = prompt('主题:');
+  if (!topic) return;
+  const r = await req('POST', '/api/real/v2/employees/' + eid + '/invoke', { topic, platform: 'xhs', tone: 'casual', length: 'short' });
+  if (r.status === 200) {
+    await req('POST', '/api/ws/v1/events/emit', { event_type: 'employee_invoked', tenant_id: tenant, payload: { employee_id: eid } });
+    alert('OK:\n' + r.data.text.substring(0, 300));
+  } else alert('fail: ' + JSON.stringify(r.data));
+  listEmps();
+}
+async function eStats(eid) { show('emp-out', (await req('GET', '/api/real/v3/employees/' + eid + '/stats?days=30')).data); }
+
+// AI
+async function aiGen() {
+  const body = { preset: 'content_writer', industry: document.getElementById('ai-ind').value, platform: document.getElementById('ai-pl').value, tone: 'casual', length: 'medium', topic: document.getElementById('ai-topic').value, tenant_id: document.getElementById('ai-tenant').value };
+  show('ai-out', { status: 'generating...' });
+  show('ai-out', (await req('POST', '/api/real/v1/content/generate', body)).data);
+}
+async function gen4() {
+  const topics = { decoration: '90 sqm renovation', education: 'English grammar', manufacturing: 'CNC quality', service: 'coffee retention' };
+  const plats = { decoration: 'xhs', education: 'wechat', manufacturing: 'zhihu', service: 'douyin' };
+  const out = { ts: new Date().toISOString(), results: [] };
+  for (const [ind, topic] of Object.entries(topics)) {
+    const r = await req('POST', '/api/real/v1/content/generate', { preset: 'content_writer', industry: ind, platform: plats[ind], tone: 'casual', length: 'short', topic, tenant_id: 't_' + ind + '_001' });
+    out.results.push({ industry: ind, status: r.status, text: (r.data.text || '').substring(0, 120), tokens: (r.data.tokens_in || 0) + '/' + (r.data.tokens_out || 0) });
+  }
+  show('ai-out', out);
+}
+async function loadHistory() {
+  const tid = document.getElementById('ai-tenant').value;
+  show('ai-out', (await req('GET', '/api/real/v1/content/history?tenant_id=' + tid + '&limit=20')).data);
+}
+
+// Billing
+async function charge() {
+  tenant = document.getElementById('b-tenant').value;
+  const body = { calls: parseInt(document.getElementById('b-calls').value), tokens_in: parseInt(document.getElementById('b-tok').value), tokens_out: 20, provider: 'minimax_m3', description: 'v20 SPA charge' };
+  const r = await req('POST', '/api/real/v2/billing/charge', body, { 'x-tenant-id': tenant });
+  show('b-out', r.data);
+  if (r.status === 200) await req('POST', '/api/ws/v1/events/emit', { event_type: 'quota_charged', tenant_id: tenant, payload: { invoice_id: r.data.invoice_id, amount: r.data.amount_usd } });
+}
+async function qQuota() { tenant = document.getElementById('b-tenant').value; show('b-out', (await req('GET', '/api/real/v2/billing/quota/' + tenant)).data); }
+async function rQuota() { tenant = document.getElementById('b-tenant').value; show('b-out', (await req('POST', '/api/real/v3/quota/reset?tenant_id=' + tenant)).data); }
+async function rAll() { if (!confirm('reset ALL?')) return; show('b-out', (await req('POST', '/api/real/v3/quota/reset_all')).data); }
+async function lInv() { tenant = document.getElementById('b-tenant').value; show('b-out', (await req('GET', '/api/real/v3/invoice/list/' + tenant + '?limit=20')).data); }
+async function lSku() { show('b-sku', (await req('GET', '/api/aios/bridge/v1/payment/skus')).data); }
+async function chkOut() {
+  const r = await req('POST', '/api/aios/bridge/v1/payment/checkout', { tenant_id: tenant, industry: 'decoration', plan: 'pro' });
+  show('b-sku', r.data);
+  if (r.data.session_id) {
+    const w = await req('POST', '/api/aios/bridge/v1/payment/webhook', { session_id: r.data.session_id, success: true, stripe_sig: 'mock' });
+    show('b-sku', w.data);
+    await req('POST', '/api/ws/v1/events/emit', { event_type: 'subscription_activated', tenant_id: tenant, payload: { plan: 'pro', amount: 1999 } });
+  }
+}
+
+// Bridge
+async function bHealth() { show('br-out', (await req('GET', '/api/aios/bridge/v1/bridge/health')).data); }
+async function lSub() { show('br-out', (await req('GET', '/api/aios/bridge/v1/payment/subscription/' + tenant)).data); }
+async function lStats() {
+  const r = await req('GET', '/api/real/v2/stats/' + tenant);
+  if (r.status === 200) {
+    const d = r.data;
+    show('br-out', d);
+  }
+}
+
+checkHealth();
+</script>
+
+</body>
+</html>

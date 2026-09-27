@@ -325,7 +325,11 @@ class Database:
 
                 -- Indexes
                 CREATE INDEX IF NOT EXISTS idx_tenants_status ON tenants(status);
-                CREATE INDEX IF NOT EXISTS idx_tenants_apikey ON tenants(api_key);
+                -- R6.4: REMOVED idx_tenants_apikey ON tenants(api_key)
+                -- Reason: V2 tenants(id/slug/owner_user_id/settings_json) has NO api_key column.
+                -- V2 migration created idx_tenants_slug/idx_tenants_owner/idx_tenants_status instead.
+                -- This index would fail with "no such column: api_key" against V2 tenants.
+                -- R6.4: aligned with V2 schema (no V1 column references on V2 tenants table)
                 CREATE INDEX IF NOT EXISTS idx_pipeline_runs_tenant ON pipeline_runs(tenant_id);
                 CREATE INDEX IF NOT EXISTS idx_pipeline_runs_status ON pipeline_runs(status);
                 CREATE INDEX IF NOT EXISTS idx_content_perf_tenant ON content_performance(tenant_id);

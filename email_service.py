@@ -78,6 +78,12 @@ def send_password_reset(to_email: str, name: str, reset_link: str) -> bool:
 
 def send_billing(to_email: str, name: str, plan: str, amount: float,
                  next_billing: str, invoice_url: str = "") -> bool:
+    # Pre-compute invoice link HTML outside f-string to avoid Python 3.12+
+    # f-string backslash restriction. (Bug fix 2026-09-25, was SyntaxError on line 90)
+    if invoice_url:
+        invoice_link_html = f'<p><a href="{invoice_url}" style="color:#6c5ce7">查看发票</a></p>'
+    else:
+        invoice_link_html = ""
     subject = f"云数科技 · 账单确认 ({plan})"
     body = f"""<div style="max-width:480px;margin:0 auto;font-family:Arial,sans-serif">
 <h2 style="color:#6c5ce7">账单确认</h2>
@@ -87,6 +93,6 @@ def send_billing(to_email: str, name: str, plan: str, amount: float,
 <tr><td style="padding:8px;border-bottom:1px solid #1e1e2a">金额</td><td style="padding:8px;border-bottom:1px solid #1e1e2a"><b>¥{amount:.2f}</b></td></tr>
 <tr><td style="padding:8px;border-bottom:1px solid #1e1e2a">下次扣款</td><td style="padding:8px;border-bottom:1px solid #1e1e2a">{next_billing}</td></tr>
 </table>
-{"<p><a href=\"" + invoice_url + "\" style=\"color:#6c5ce7\">查看发票</a></p>" if invoice_url else ""}
+{invoice_link_html}
 </div>"""
     return _send(to_email, subject, body)

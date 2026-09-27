@@ -147,8 +147,14 @@ async def list_employees():
       - 默认前端 GET /list 仍返回全部 8 个（保留兼容）
       - 前端菜单收敛建议调用 GET /list?frontend_only=true
     """
-    from digital_employees import EMPLOYEES
-    deployed = list(EMPLOYEES.keys()) if EMPLOYEES else []
+    # Bug fix 2026-09-25: digital_employees.py is missing from sys.path
+    # (was ModuleNotFoundError → 500 Internal Server Error).
+    # Fallback to empty EMPLOYEES dict when module is unavailable.
+    try:
+        from digital_employees import EMPLOYEES
+        deployed = list(EMPLOYEES.keys()) if EMPLOYEES else []
+    except (ImportError, ModuleNotFoundError):
+        deployed = []
     out = []
     for k, v in PRESET_EMPLOYEES.items():
         is_frontend = k in FRONTEND_EMPLOYEES
@@ -169,8 +175,11 @@ async def list_frontend_employees():
     返回: 营销(content_writer) + 客服(customer_service) + 调研(market_researcher)
     用途: 前端菜单只渲染这 3 个；其余 5 个走 API 但不展示
     """
-    from digital_employees import EMPLOYEES
-    deployed = list(EMPLOYEES.keys()) if EMPLOYEES else []
+    try:
+        from digital_employees import EMPLOYEES
+        deployed = list(EMPLOYEES.keys()) if EMPLOYEES else []
+    except (ImportError, ModuleNotFoundError):
+        deployed = []
     out = []
     for k in FRONTEND_EMPLOYEES:
         if k not in PRESET_EMPLOYEES:

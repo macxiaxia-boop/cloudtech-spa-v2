@@ -1,0 +1,482 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>云数科技 CloudTech · 管理后台 v16</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f0f23; color: #e0e0e0; }
+  header { background: linear-gradient(90deg, #6c5ce7, #a29bfe); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 22px; }
+  header .status { background: rgba(0,0,0,0.2); padding: 6px 14px; border-radius: 12px; font-size: 13px; }
+  .status.ok { color: #55efc4; }
+  .status.err { color: #ff7675; }
+  nav { background: #1a1a3e; padding: 12px 32px; display: flex; gap: 8px; flex-wrap: wrap; }
+  nav button { background: #2d2d5e; color: #e0e0e0; border: 0; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+  nav button:hover { background: #3d3d7e; }
+  nav button.active { background: #6c5ce7; color: white; }
+  main { padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
+  .card { background: #1a1a3e; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 16px; color: #a29bfe; margin-bottom: 12px; }
+  .form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .form-row label { flex: 0 0 100px; line-height: 32px; font-size: 13px; color: #b0b0d0; }
+  .form-row input, .form-row select, .form-row textarea { flex: 1; background: #0f0f23; border: 1px solid #3d3d7e; color: #e0e0e0; padding: 8px 12px; border-radius: 4px; font-family: inherit; font-size: 13px; }
+  .form-row textarea { min-height: 60px; }
+  button.primary { background: #6c5ce7; color: white; border: 0; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+  button.primary:hover { background: #7c6cf7; }
+  button.danger { background: #d63031; color: white; border: 0; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2d2d5e; }
+  th { color: #a29bfe; font-weight: 500; }
+  td { color: #d0d0e0; }
+  tr:hover { background: #2d2d5e; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .stat { background: #0f0f23; padding: 14px; border-radius: 6px; text-align: center; }
+  .stat .val { font-size: 24px; color: #6c5ce7; font-weight: 600; }
+  .stat .lbl { font-size: 12px; color: #888; margin-top: 4px; }
+  pre { background: #0f0f23; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 12px; max-height: 400px; overflow-y: auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+  .pill.consult { background: #fdcb6e; color: #2d2d5e; }
+  .pill.demo { background: #74b9ff; color: #2d2d5e; }
+  .pill.trial { background: #55efc4; color: #2d2d5e; }
+  .pill.quote { background: #a29bfe; color: white; }
+  .pill.signed { background: #00b894; color: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>云数科技 · CloudTech 管理后台 v16</h1>
+  <span class="status ok" id="status">● API:5000 OK</span>
+</header>
+
+<nav>
+  <button class="active" data-panel="p-overview">概览</button>
+  <button data-panel="p-register">注册/登录</button>
+  <button data-panel="p-leads">CRM 线索</button>
+  <button data-panel="p-employees">数字员工</button>
+  <button data-panel="p-generate">AI 生成</button>
+  <button data-panel="p-stats">统计</button>
+  <button data-panel="p-quota">Quota</button>
+</nav>
+
+<main>
+
+<!-- 概览 -->
+<div class="panel active" id="p-overview">
+  <div class="card">
+    <h2>📊 5 端口健康</h2>
+    <div class="form-row">
+      <button class="primary" onclick="checkHealth()">刷新健康状态</button>
+    </div>
+    <pre id="health-out">点击上方按钮查看...</pre>
+  </div>
+  <div class="card">
+    <h2>🌐 4 行业 AI 内容生成 (一键演示)</h2>
+    <div class="form-row">
+      <button class="primary" onclick="generateAll4Industries()">4 行业一次生成</button>
+    </div>
+    <pre id="gen-all-out">点击按钮后展示 4 行业真生成结果...</pre>
+  </div>
+</div>
+
+<!-- 注册/登录 -->
+<div class="panel" id="p-register">
+  <div class="card">
+    <h2>注册新用户</h2>
+    <div class="form-row"><label>邮箱</label><input id="reg-email" value="boss@decoration.com"></div>
+    <div class="form-row"><label>密码</label><input id="reg-pwd" type="password" value="boss123"></div>
+    <div class="form-row"><label>姓名</label><input id="reg-name" value="Boss Zhang"></div>
+    <div class="form-row"><label>行业</label>
+      <select id="reg-industry"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select>
+    </div>
+    <div class="form-row"><button class="primary" onclick="doRegister()">注册</button></div>
+    <pre id="reg-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>登录</h2>
+    <div class="form-row"><label>邮箱</label><input id="login-email" value="boss@decoration.com"></div>
+    <div class="form-row"><label>密码</label><input id="login-pwd" type="password" value="boss123"></div>
+    <div class="form-row"><button class="primary" onclick="doLogin()">登录</button></div>
+    <pre id="login-out">...</pre>
+  </div>
+</div>
+
+<!-- CRM -->
+<div class="panel" id="p-leads">
+  <div class="card">
+    <h2>新建线索</h2>
+    <div class="form-row"><label>客户名</label><input id="lead-name" value="李老板"></div>
+    <div class="form-row"><label>电话</label><input id="lead-phone" value="13900139000"></div>
+    <div class="form-row"><label>行业</label>
+      <select id="lead-industry"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select>
+    </div>
+    <div class="form-row"><label>来源</label><input id="lead-source" value="xhs"></div>
+    <div class="form-row"><label>阶段</label>
+      <select id="lead-stage"><option>consult</option><option>demo</option><option>trial</option><option>quote</option><option>signed</option></select>
+    </div>
+    <div class="form-row"><label>备注</label><textarea id="lead-notes">看了报价想聊</textarea></div>
+    <div class="form-row"><label>tenant_id</label><input id="lead-tenant" value="t_demo_001"></div>
+    <div class="form-row"><button class="primary" onclick="doCreateLead()">创建</button></div>
+    <pre id="lead-create-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>线索列表</h2>
+    <div class="form-row"><label>tenant_id</label><input id="lead-list-tenant" value="t_demo_001"></div>
+    <div class="form-row"><label>阶段筛选</label>
+      <select id="lead-list-stage"><option value="">(全部)</option><option>consult</option><option>demo</option><option>trial</option><option>quote</option><option>signed</option></select>
+    </div>
+    <div class="form-row"><button class="primary" onclick="doListLeads()">查询</button></div>
+    <div id="leads-table"></div>
+  </div>
+</div>
+
+<!-- 员工 -->
+<div class="panel" id="p-employees">
+  <div class="card">
+    <h2>部署数字员工</h2>
+    <div class="form-row"><label>preset</label>
+      <select id="emp-preset">
+        <option>content_writer</option><option>customer_service</option>
+        <option>market_researcher</option><option>sales_assistant</option>
+        <option>seo_writer</option><option>copywriter</option>
+      </select>
+    </div>
+    <div class="form-row"><label>行业</label>
+      <select id="emp-industry"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select>
+    </div>
+    <div class="form-row"><label>tenant_id</label><input id="emp-tenant" value="t_demo_001"></div>
+    <div class="form-row"><button class="primary" onclick="doDeployEmp()">部署</button></div>
+    <pre id="emp-deploy-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>员工列表 + Invoke (真调 LLM)</h2>
+    <div class="form-row"><label>tenant_id</label><input id="emp-list-tenant" value="t_demo_001"></div>
+    <div class="form-row"><button class="primary" onclick="doListEmps()">查询</button></div>
+    <div id="emp-table"></div>
+  </div>
+</div>
+
+<!-- AI 生成 -->
+<div class="panel" id="p-generate">
+  <div class="card">
+    <h2>AI 内容生成 (直调)</h2>
+    <div class="form-row"><label>行业</label>
+      <select id="gen-industry"><option>decoration</option><option>education</option><option>manufacturing</option><option>service</option></select>
+    </div>
+    <div class="form-row"><label>平台</label>
+      <select id="gen-platform"><option>xhs</option><option>wechat</option><option>zhihu</option><option>douyin</option></select>
+    </div>
+    <div class="form-row"><label>语气</label>
+      <select id="gen-tone"><option>professional</option><option>casual</option><option>humor</option><option>inspiring</option></select>
+    </div>
+    <div class="form-row"><label>长度</label>
+      <select id="gen-length"><option>short</option><option>medium</option><option>long</option></select>
+    </div>
+    <div class="form-row"><label>主题</label><input id="gen-topic" value="120平米三居室装修预算"></div>
+    <div class="form-row"><label>tenant_id</label><input id="gen-tenant" value="t_demo_001"></div>
+    <div class="form-row"><button class="primary" onclick="doGenerate()">生成</button></div>
+    <pre id="gen-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>历史记录</h2>
+    <div class="form-row"><label>tenant_id</label><input id="hist-tenant" value="t_demo_001"></div>
+    <div class="form-row"><button class="primary" onclick="doLoadHistory()">加载</button></div>
+    <div id="hist-table"></div>
+  </div>
+</div>
+
+<!-- 统计 -->
+<div class="panel" id="p-stats">
+  <div class="card">
+    <h2>租户统计</h2>
+    <div class="form-row"><label>tenant_id</label><input id="stats-tenant" value="t_demo_001"></div>
+    <div class="form-row"><button class="primary" onclick="doStats()">查询</button></div>
+    <div id="stats-grid"></div>
+  </div>
+</div>
+
+<!-- Quota -->
+<div class="panel" id="p-quota">
+  <div class="card">
+    <h2>租户 Quota</h2>
+    <div class="form-row"><label>tenant_id</label><input id="quota-tenant" value="t_demo_001"></div>
+    <div class="form-row"><button class="primary" onclick="doQuota()">查询</button></div>
+    <pre id="quota-out">...</pre>
+  </div>
+  <div class="card">
+    <h2>模拟计费 (POST /billing/charge)</h2>
+    <div class="form-row"><label>tenant_id</label><input id="charge-tenant" value="t_demo_001"></div>
+    <div class="form-row"><label>calls</label><input id="charge-calls" type="number" value="1"></div>
+    <div class="form-row"><label>tokens_in</label><input id="charge-tokens-in" type="number" value="50"></div>
+    <div class="form-row"><label>tokens_out</label><input id="charge-tokens-out" type="number" value="20"></div>
+    <div class="form-row"><button class="primary" onclick="doCharge()">扣费</button></div>
+    <pre id="charge-out">...</pre>
+  </div>
+</div>
+
+</main>
+
+<script>
+const API = 'http://127.0.0.1:5000';
+let currentTenantId = 't_demo_001';
+
+async function req(method, path, body, headers = {}) {
+  const opts = { method, headers: { 'Content-Type': 'application/json', ...headers } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  const ct = r.headers.get('content-type') || '';
+  const data = ct.includes('json') ? await r.json() : await r.text();
+  return { status: r.status, data };
+}
+
+function show(id, data) { document.getElementById(id).textContent = JSON.stringify(data, null, 2); }
+function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+// nav
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById(b.dataset.panel).classList.add('active');
+}));
+
+// health
+async function checkHealth() {
+  const ports = [5000, 5099, 5002, 8080, 9099];
+  const out = { ports: {}, real_business: null, v10_modules: null };
+  for (const p of ports) {
+    try {
+      const r = await fetch(`http://127.0.0.1:${p}/health`).catch(() => null);
+      out.ports[p] = r ? 'OK' : 'DOWN';
+    } catch (e) { out.ports[p] = 'ERR'; }
+  }
+  try {
+    const r = await req('GET', '/api/real/v1/health');
+    out.real_business = r.data;
+  } catch (e) { out.real_business = { err: String(e) }; }
+  try {
+    const r = await req('GET', '/health');
+    out.v10_modules = r.data;
+  } catch (e) { out.v10_modules = { err: String(e) }; }
+  show('health-out', out);
+}
+
+// register / login
+async function doRegister() {
+  const body = {
+    email: document.getElementById('reg-email').value,
+    password: document.getElementById('reg-pwd').value,
+    name: document.getElementById('reg-name').value,
+    industry: document.getElementById('reg-industry').value,
+  };
+  const r = await req('POST', '/api/real/v1/auth/register', body);
+  show('reg-out', r.data);
+  if (r.data && r.data.tenant_id) {
+    currentTenantId = r.data.tenant_id;
+    document.getElementById('lead-tenant').value = currentTenantId;
+    document.getElementById('gen-tenant').value = currentTenantId;
+  }
+}
+async function doLogin() {
+  const body = {
+    email: document.getElementById('login-email').value,
+    password: document.getElementById('login-pwd').value,
+  };
+  const r = await req('POST', '/api/real/v1/auth/login', body);
+  show('login-out', r.data);
+}
+
+// CRM
+async function doCreateLead() {
+  const tid = document.getElementById('lead-tenant').value;
+  const body = {
+    customer_name: document.getElementById('lead-name').value,
+    customer_phone: document.getElementById('lead-phone').value,
+    industry: document.getElementById('lead-industry').value,
+    source: document.getElementById('lead-source').value,
+    stage: document.getElementById('lead-stage').value,
+    notes: document.getElementById('lead-notes').value,
+  };
+  const r = await req('POST', '/api/real/v1/crm/leads', body, { 'x-tenant-id': tid });
+  show('lead-create-out', r.data);
+  doListLeads();
+}
+
+async function doListLeads() {
+  const tid = document.getElementById('lead-list-tenant').value;
+  const stage = document.getElementById('lead-list-stage').value;
+  const q = new URLSearchParams({ tenant_id: tid });
+  if (stage) q.append('stage', stage);
+  const r = await req('GET', '/api/real/v1/crm/leads?' + q.toString());
+  if (r.status === 200 && r.data.leads) {
+    const rows = r.data.leads.map(l => `<tr>
+      <td>${escapeHtml(l.id)}</td>
+      <td>${escapeHtml(l.customer_name)}</td>
+      <td>${escapeHtml(l.customer_phone || '')}</td>
+      <td><span class="pill ${l.stage}">${escapeHtml(l.stage)}</span></td>
+      <td>${escapeHtml(l.industry || '')}</td>
+      <td>${escapeHtml(l.source || '')}</td>
+      <td>${escapeHtml(l.notes || '')}</td>
+      <td>${escapeHtml(l.created_at || '').substring(0, 19)}</td>
+      <td>
+        <button class="danger" onclick="deleteLead('${l.id}')">删</button>
+      </td>
+    </tr>`).join('');
+    document.getElementById('leads-table').innerHTML = `<table>
+      <tr><th>ID</th><th>客户</th><th>电话</th><th>阶段</th><th>行业</th><th>来源</th><th>备注</th><th>创建</th><th>操作</th></tr>
+      ${rows}</table>`;
+  } else {
+    document.getElementById('leads-table').innerHTML = '<pre>' + JSON.stringify(r.data, null, 2) + '</pre>';
+  }
+}
+
+async function deleteLead(id) {
+  if (!confirm('软删 lead ' + id + '?')) return;
+  const r = await req('DELETE', `/api/real/v2/crm/leads/${id}`);
+  show('lead-create-out', r.data);
+  doListLeads();
+}
+
+// employees
+async function doDeployEmp() {
+  const tid = document.getElementById('emp-tenant').value;
+  const body = {
+    preset: document.getElementById('emp-preset').value,
+    industry: document.getElementById('emp-industry').value,
+    config: { platforms: ['xhs', 'wechat'], tone: 'casual' },
+  };
+  const r = await req('POST', '/api/real/v1/employees/deploy', body, { 'x-tenant-id': tid });
+  show('emp-deploy-out', r.data);
+  doListEmps();
+}
+
+async function doListEmps() {
+  const tid = document.getElementById('emp-list-tenant').value;
+  const r = await req('GET', `/api/real/v1/employees/list?tenant_id=${tid}`);
+  if (r.status === 200 && r.data.employees) {
+    const rows = r.data.employees.map(e => `<tr>
+      <td>${escapeHtml(e.id)}</td>
+      <td>${escapeHtml(e.preset)}</td>
+      <td>${escapeHtml(e.industry || '')}</td>
+      <td>${escapeHtml(e.config_json || '')}</td>
+      <td>${escapeHtml(e.status || '')}</td>
+      <td>${e.invoke_count || 0}</td>
+      <td>${escapeHtml(e.last_invoked_at || '从未').substring(0, 19)}</td>
+      <td>
+        <button class="primary" onclick="invokeEmp('${e.id}')">调 LLM</button>
+      </td>
+    </tr>`).join('');
+    document.getElementById('emp-table').innerHTML = `<table>
+      <tr><th>ID</th><th>preset</th><th>行业</th><th>config</th><th>状态</th><th>调用数</th><th>最后调用</th><th>操作</th></tr>
+      ${rows}</table>`;
+  }
+}
+
+async function invokeEmp(eid) {
+  const topic = prompt('输入主题:');
+  if (!topic) return;
+  const r = await req('POST', `/api/real/v2/employees/${eid}/invoke`, { topic, platform: 'xhs', tone: 'casual', length: 'short' });
+  if (r.status === 200) {
+    alert('调用成功!\n\ntext 预览:\n' + r.data.text.substring(0, 300) + '\n\nprovider=' + r.data.provider + ', tokens_in=' + r.data.tokens_in + ', tokens_out=' + r.data.tokens_out);
+  } else {
+    alert('失败: ' + JSON.stringify(r.data));
+  }
+  doListEmps();
+}
+
+// AI 生成
+async function doGenerate() {
+  const body = {
+    preset: 'content_writer',
+    industry: document.getElementById('gen-industry').value,
+    platform: document.getElementById('gen-platform').value,
+    tone: document.getElementById('gen-tone').value,
+    length: document.getElementById('gen-length').value,
+    topic: document.getElementById('gen-topic').value,
+    tenant_id: document.getElementById('gen-tenant').value,
+  };
+  show('gen-out', { status: 'generating...', topic: body.topic });
+  const r = await req('POST', '/api/real/v1/content/generate', body);
+  show('gen-out', r.data);
+}
+
+async function doLoadHistory() {
+  const tid = document.getElementById('hist-tenant').value;
+  const r = await req('GET', `/api/real/v1/content/history?tenant_id=${tid}&limit=20`);
+  if (r.status === 200 && r.data.history) {
+    const rows = r.data.history.map(h => `<tr>
+      <td>${escapeHtml(h.id)}</td>
+      <td>${escapeHtml(h.industry)}</td>
+      <td>${escapeHtml(h.platform)}</td>
+      <td>${escapeHtml(h.topic)}</td>
+      <td>${escapeHtml(h.provider)}</td>
+      <td>${h.tokens_in}/${h.tokens_out}</td>
+      <td>${escapeHtml(h.created_at).substring(0, 19)}</td>
+    </tr>`).join('');
+    document.getElementById('hist-table').innerHTML = `<table>
+      <tr><th>ID</th><th>行业</th><th>平台</th><th>主题</th><th>provider</th><th>tokens</th><th>创建</th></tr>
+      ${rows}</table>`;
+  }
+}
+
+// 4 行业一次生成
+async function generateAll4Industries() {
+  const topics = {
+    decoration: '120 sqm 3-bedroom renovation budget tips',
+    education: 'junior high English grammar focus',
+    manufacturing: 'CNC machining quality control',
+    service: 'coffee shop membership retention',
+  };
+  const out = { ts: new Date().toISOString(), results: [] };
+  for (const [ind, topic] of Object.entries(topics)) {
+    const r = await req('POST', '/api/real/v1/content/generate', {
+      preset: 'content_writer', industry: ind, platform: ind === 'manufacturing' ? 'zhihu' : (ind === 'service' ? 'douyin' : (ind === 'education' ? 'wechat' : 'xhs')),
+      tone: 'casual', length: 'short', topic, tenant_id: `t_${ind}_001`,
+    });
+    out.results.push({ industry: ind, topic, status: r.status, provider: r.data.provider, text_preview: (r.data.text || '').substring(0, 200), tokens_in: r.data.tokens_in });
+  }
+  show('gen-all-out', out);
+}
+
+// 统计
+async function doStats() {
+  const tid = document.getElementById('stats-tenant').value;
+  const r = await req('GET', `/api/real/v2/stats/${tid}`);
+  if (r.status === 200) {
+    const d = r.data;
+    document.getElementById('stats-grid').innerHTML = `
+      <div class="stat-grid">
+        ${Object.entries(d).filter(([k]) => k !== 'tenant_id' && k !== 'status').map(([k, v]) =>
+          `<div class="stat"><div class="val">${v}</div><div class="lbl">${escapeHtml(k)}</div></div>`
+        ).join('')}
+      </div>`;
+  }
+}
+
+// Quota
+async function doQuota() {
+  const tid = document.getElementById('quota-tenant').value;
+  const r = await req('GET', `/api/real/v2/billing/quota/${tid}`);
+  show('quota-out', r.data);
+}
+async function doCharge() {
+  const body = {
+    calls: parseInt(document.getElementById('charge-calls').value),
+    tokens_in: parseInt(document.getElementById('charge-tokens-in').value),
+    tokens_out: parseInt(document.getElementById('charge-tokens-out').value),
+    provider: 'minimax_m3',
+    description: 'manual charge from admin UI',
+  };
+  const r = await req('POST', '/api/real/v2/billing/charge', body, { 'x-tenant-id': document.getElementById('charge-tenant').value });
+  show('charge-out', r.data);
+}
+
+// 启动自动健康
+checkHealth();
+</script>
+
+</body>
+</html>

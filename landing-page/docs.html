@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 文档 · 灵策智算 / LynxceAI · 78 端点</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", Consolas, monospace;
+         background: #0a0e27; color: #e8eaf6; line-height: 1.6; padding: 40px 24px; }
+  h1 { font-size: 36px; text-align: center; margin-bottom: 16px;
+       background: linear-gradient(135deg, #ffd700, #ff6b9d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { color: #ffd700; margin: 32px 0 16px; font-size: 24px; border-bottom: 1px solid rgba(255,215,0,0.3); padding-bottom: 8px; }
+  h3 { color: #fff; margin: 16px 0 8px; font-size: 18px; }
+  code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; color: #ffd700; font-size: 13px; }
+  pre { background: rgba(0,0,0,0.5); padding: 16px; border-radius: 8px; overflow-x: auto;
+        border-left: 3px solid #ffd700; margin: 12px 0; font-size: 13px; }
+  .nav { text-align: center; margin-bottom: 24px; }
+  .nav a { color: #ffd700; text-decoration: none; margin: 0 16px; }
+  section { max-width: 1000px; margin: 0 auto; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  th, td { padding: 10px; border: 1px solid rgba(255,255,255,0.1); text-align: left; font-size: 14px; }
+  th { background: rgba(255,215,0,0.1); color: #ffd700; }
+  .endpoint { background: rgba(255,255,255,0.04); padding: 16px; border-radius: 8px; margin: 12px 0; }
+  .method { display: inline-block; padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 12px; margin-right: 8px; }
+  .get { background: #4caf50; }
+  .post { background: #ff9800; }
+  .delete { background: #f44336; }
+  .put { background: #2196f3; }
+  footer { text-align: center; margin-top: 48px; color: #607d8b; }
+</style>
+</head>
+<body>
+<div class="nav"><a href="index.html">← 首页</a> · <a href="pricing.html">价格</a></div>
+<h1>灵策智算 API 文档</h1>
+<p style="text-align:center;color:#b0bec5;margin-bottom:32px;">78 端点 · 4 行业 × 20 AI 数字员工 · OpenAPI 3.0 完整</p>
+
+<section>
+<h2>🔑 认证</h2>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/auth/v1/register</code>
+  <p style="margin-top:8px;color:#b0bec5;">注册新用户 — 输入 email + password + tenant_name + industry</p>
+</div>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/auth/v1/login</code>
+  <p style="margin-top:8px;color:#b0bec5;">登录 — 返回 JWT 24h token</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/auth/v1/verify</code>
+  <p style="margin-top:8px;color:#b0bec5;">验证 token (header: <code>Authorization: Bearer xxx</code>)</p>
+</div>
+
+<h2>💳 订阅 + 计费 (R291 v7)</h2>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/sub/v1/upgrade</code>
+  <p style="margin-top:8px;color:#b0bec5;">升级 plan — 立即生效 + prorated 计费</p>
+</div>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/sub/v1/downgrade</code>
+  <p style="margin-top:8px;color:#b0bec5;">降级 plan — 下个账单周期生效</p>
+</div>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/sub/v1/cancel</code>
+  <p style="margin-top:8px;color:#b0bec5;">取消订阅</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/quota/v1/check/{tenant}</code>
+  <p style="margin-top:8px;color:#b0bec5;">查 tenant 当前用量 vs 限额</p>
+</div>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/quota/v1/enforce</code>
+  <p style="margin-top:8px;color:#b0bec5;">操作前 enforce — 超额返回 <code>402 Payment Required</code></p>
+</div>
+
+<h2>🔐 安全 + 用户旅程 (R291 v7)</h2>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/recovery/v1/forgot</code>
+  <p style="margin-top:8px;color:#b0bec5;">提交邮箱 → 生成 5 分钟 token</p>
+</div>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/recovery/v1/reset</code>
+  <p style="margin-top:8px;color:#b0bec5;">用 token 重置密码</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/recovery/v1/verify/{token}</code>
+  <p style="margin-top:8px;color:#b0bec5;">验证 token 有效性</p>
+</div>
+
+<h2>🎁 推荐系统 (R291 v7)</h2>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/referral/v1/code</code>
+  <p style="margin-top:8px;color:#b0bec5;">为 tenant 生成唯一推荐码</p>
+</div>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/referral/v1/redeem</code>
+  <p style="margin-top:8px;color:#b0bec5;">用推荐码注册 → 双方各得积分 (referee +50, referrer +100)</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/referral/v1/stats/{tenant}</code>
+  <p style="margin-top:8px;color:#b0bec5;">查 tenant 推荐效果</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/referral/v1/leaderboard</code>
+  <p style="margin-top:8px;color:#b0bec5;">全局推荐排行榜 top 20</p>
+</div>
+
+<h2>📧 邮件 + 工单 (R291 v7)</h2>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/email/v1/enqueue</code>
+  <p style="margin-top:8px;color:#b0bec5;">邮件入队 — 6 模板 (welcome/password_reset/subscription_upgraded/quota_warning/referral_reward/support_reply)</p>
+</div>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/support/v1/ticket</code>
+  <p style="margin-top:8px;color:#b0bec5;">创建工单 — 5 状态机 + 4 优先级</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/support/v1/ticket/{id}</code>
+  <p style="margin-top:8px;color:#b0bec5;">查工单 (含消息)</p>
+</div>
+
+<h2>📊 数据分析 (R291 v7)</h2>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/analytics/v1/funnel</code>
+  <p style="margin-top:8px;color:#b0bec5;">注册 → 激活 → 订阅 → 付费 漏斗</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/analytics/v1/revenue</code>
+  <p style="margin-top:8px;color:#b0bec5;">MRR + ARR + by_industry + by_plan</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/analytics/v1/retention</code>
+  <p style="margin-top:8px;color:#b0bec5;">周留存 (cohort)</p>
+</div>
+
+<h2>⚡ 实时 + 审计 (R289-R290 v1-v6)</h2>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/ws/v1/ws/events</code>
+  <p style="margin-top:8px;color:#b0bec5;">WebSocket 实时事件 (asyncio.Queue broadcast)</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/ws/v1/sse</code>
+  <p style="margin-top:8px;color:#b0bec5;">Server-Sent Events 流</p>
+</div>
+<div class="endpoint">
+  <span class="method post">POST</span> <code>/api/audit/v1/log</code>
+  <p style="margin-top:8px;color:#b0bec5;">审计日志 (含 trace_id + span_id — 红线 #68 治本)</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/audit/v1/trace/{trace_id}</code>
+  <p style="margin-top:8px;color:#b0bec5;">按 trace_id 查完整链路</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/ratelimit/v1/check</code>
+  <p style="margin-top:8px;color:#b0bec5;">限流检查 (Token bucket)</p>
+</div>
+<div class="endpoint">
+  <span class="method get">GET</span> <code>/api/health/v1/snapshot</code>
+  <p style="margin-top:8px;color:#b0bec5;">健康快照 (7 modules + 50 tables 聚合)</p>
+</div>
+
+<h2>📈 API 端点分类 (78 端点)</h2>
+<table>
+  <tr><th>版本</th><th>模块数</th><th>端点数</th><th>说明</th></tr>
+  <tr><td>v1</td><td>9</td><td>9</td><td>核心业务 (register/checkout/CRM)</td></tr>
+  <tr><td>v2</td><td>8</td><td>8</td><td>真业务 (lead/employee/quota/invoice)</td></tr>
+  <tr><td>v3</td><td>7</td><td>7</td><td>质量感知 + 行业模板</td></tr>
+  <tr><td>v4</td><td>7</td><td>7</td><td>Stripe 模拟 + JWT + 多租户</td></tr>
+  <tr><td>v5</td><td>5</td><td>5</td><td>WebSocket + SSE 实时</td></tr>
+  <tr><td>v6</td><td>12</td><td>14</td><td>审计 + 限流 + 健康 (R290)</td></tr>
+  <tr style="background:rgba(255,215,0,0.08);"><td><b>v7 (R291)</b></td><td><b>8</b></td><td><b>28</b></td><td><b>SaaS 用户旅程 (recovery/sub/referral/quota/email/analytics/support)</b></td></tr>
+  <tr><td><b>合计</b></td><td><b>56</b></td><td><b>78</b></td><td>🚀</td></tr>
+</table>
+
+<h2>🧪 快速测试</h2>
+<pre><code># 1. 注册
+curl -X POST http://127.0.0.1:5000/api/auth/v1/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"test123","tenant_name":"测试公司","industry":"decoration"}'
+
+# 2. 登录取 token
+TOKEN=$(curl -s -X POST http://127.0.0.1:5000/api/auth/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"test123"}' | jq -r .token)
+
+# 3. 查健康快照
+curl http://127.0.0.1:5000/api/health/v1/snapshot
+
+# 4. 查 MRR
+curl http://127.0.0.1:5000/api/analytics/v1/revenue
+
+# 5. 创建工单
+curl -X POST http://127.0.0.1:5000/api/support/v1/ticket \
+  -H "Content-Type: application/json" \
+  -d '{"tenant_id":"test","user_id":"u1","subject":"测试","message":"怎么注册?"}'</code></pre>
+</section>
+
+<footer>
+  <p>灵策智算 / LynxceAI · <a href="index.html" style="color:#ffd700;">首页</a> · <a href="pricing.html" style="color:#ffd700;">价格</a></p>
+  <p style="margin-top:8px;font-size:12px;">Swagger UI: <a href="https://127.0.0.1:5000/docs" style="color:#ffd700;">127.0.0.1:5000/docs</a></p>
+</footer>
+</body>
+</html>

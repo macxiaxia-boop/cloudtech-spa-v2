@@ -36,3 +36,4 @@ logs/
 
 # Sensitive
 cookies_*.json
+*.db\n.env\n.jwt_secret\n*.log

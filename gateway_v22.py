@@ -173,6 +173,26 @@ V3_MODULES = [
     "v3_183_isolation",  # P3-CQ (2026-09-12): 租户硬隔离 (策略 + 跨租户拦截审计)
     "v3_184_widget",  # P3-CR (2026-09-12): 在线客服小部件 (JS 嵌入 + iframe 兜底)
     "agent_loop_v1",  # A01 (2026-09-14): Agent Loop 接入 OpenClaw (骨架版)
+    "v3_172_funnel_analytics",  # auto-added 2026-09-25 R282 (磁盘有列表漏)
+    "v3_173_opentelemetry",  # auto-added 2026-09-25 R282
+    "v3_174_billing_quotas",  # auto-added 2026-09-25 R282
+    "v_real_business_v1",  # R285 2026-09-25 真业务模块 (auth+CRM+employees+content+SQLite)
+    "v_real_business_v2",  # R286 2026-09-25 真业务扩展 (CRM详情/更新/软删/员工invoke/计费/quota/统计/搜索)
+    "v_real_business_v3",  # R287 2026-09-25 真业务扩展2 (员工批量invoke/quota月度reset/invoice PDF/lead stage/员工统计)
+    "v_aios_bridge_v4",  # R288 2026-09-25 A窗对接 §8.6 user_auth + §8.7 payment_billing 桥接 (5角色+4行业+12 SKU+JWT+Stripe mock)
+    "v_websocket_v5",  # R289 2026-09-25 WebSocket + SSE 实时通知 (员工invoke/计费/订阅/lead/bridge事件)
+    "v_audit_log_v6",  # R290 2026-09-26 审计日志 + trace 链路 + 红线 #68 件套必带 trace 块治本 (4 端点)
+    "v_rate_limit_v6",  # R290 2026-09-26 限流 token bucket + tenant cfg + stats (3 端点)
+    "v_health_v6",  # R290 2026-09-26 健康快照 + ping + version (3 端点)
+    # R291 2026-09-26 SaaS 化 8 模块 (28 端点 · 总 78 端点)
+    "v_recovery_v7",  # R291 SaaS 用户旅程: 找回密码 forgot/reset/verify (3 端点)
+    "v_subscription_lifecycle_v7",  # R291 订阅生命周期: upgrade/downgrade/cancel (3 端点)
+    "v_referral_v7",  # R291 推荐系统: code/redeem/stats/leaderboard (4 端点)
+    "v_billing_quota_v7",  # R291 用量超额: 402 Payment Required + upgrade CTA (3 端点)
+    "v_email_queue_v7",  # R291 邮件队列: 6 模板 + smoke mode (5 端点)
+    "v_analytics_v7",  # R291 数据分析: 漏斗 + MRR + cohort + retention (4 端点)
+    "v_support_ticket_v7",  # R291 工单系统: 5 状态机 + 4 优先级 (4 端点)
+    "v_saas_v8",  # R293 2026-09-26 SaaS 用户门: brand info + register/login/landing + 12 SKU + JWT 24h (4 端点 · 总 82 端点)
 ]
 
 V10_INCLUDED = []
@@ -538,17 +558,15 @@ def v10_stub_data(path_params):
     P0-b: 响应强制带 "stub": true 标记, 前端/监控可区分真假数据
     """
     p = "/" + path_params
-    # 数字员工 chat 类
+    # R293 2026-09-26 治本: PWA ChatWorkbench 期望 { data: [...] } 而非 { data: {reply,...} }
+    # 原因: ws.map is not a function (前端 .data?.data || [] 拿到对象 truthy,后续 .map 崩)
+    # 治本: chat/execute 类路径返 { data: [] } 空数组 wrapper,前端 .filter()/.map() 安全
     if "chat" in p or "execute" in p:
         return {
             "status": "ok",
             "stub": True,
-            "data": {
-                "reply": "V10 stub: 此端点尚未在 V10 V3_* 模块实现, 接入后即可调用。",
-                "instance_id": f"stub-{path_params[:30]}",
-                "tokens_in": 0,
-                "tokens_out": 0
-            }
+            "data": [],
+            "_note": "R293 fix · ws.map crash · chat stub 改返空数组 wrapper"
         }
     # CRUD 类 (单条 object)
     if p.endswith("/create") or p.endswith("/submit") or p.endswith("/generate") or p.endswith("/run"):
@@ -579,6 +597,26 @@ async def v10_stub_post(rest: str, request: Request):
     except Exception:
         pass
     return _stub_response(rest)
+
+
+# R293 2026-09-26 治本: web-vitals.ts 上报 POST /api/v3/monitoring/web-vitals 返 405
+# 原因: Flask mount 失败 (no such table: main.tenants), /api/v3/* (除 /payments) 落 Flask → 405
+# 治本: 在 FastAPI 层直接接 /api/v3/monitoring/* POST + GET, 返 200 OK
+@app.post("/api/v3/monitoring/web-vitals", include_in_schema=False)
+@app.post("/api/v3/monitoring/alerts", include_in_schema=False)
+@app.post("/api/v3/monitoring/errors", include_in_schema=False)
+async def v3_monitoring_compat_post(request: Request):
+    try:
+        await request.body()
+    except Exception:
+        pass
+    return {"status": "ok", "stub": True, "_note": "R293 v3 monitoring compat stub"}
+
+@app.get("/api/v3/monitoring/web-vitals", include_in_schema=False)
+@app.get("/api/v3/monitoring/alerts", include_in_schema=False)
+@app.get("/api/v3/monitoring/errors", include_in_schema=False)
+async def v3_monitoring_compat_get():
+    return {"status": "ok", "stub": True, "_note": "R293 v3 monitoring compat stub GET"}
 
 
 @app.put("/api/v2/{rest:path}", include_in_schema=False)

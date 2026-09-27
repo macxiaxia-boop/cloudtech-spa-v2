@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重置密码 · 灵策智算 / LynxceAI</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+         background: #0a0e27; color: #e8eaf6; display: flex; align-items: center;
+         justify-content: center; min-height: 100vh; padding: 24px; }
+  .card { background: rgba(255,255,255,0.04); padding: 40px; border-radius: 16px;
+          max-width: 400px; width: 100%; border: 1px solid rgba(255,255,255,0.1); }
+  h1 { font-size: 28px; margin-bottom: 16px;
+       background: linear-gradient(135deg, #ffd700, #ff6b9d); -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent; }
+  p { color: #b0bec5; margin-bottom: 24px; font-size: 14px; }
+  label { display: block; margin-bottom: 6px; font-size: 14px; color: #cfd8dc; }
+  input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+          background: rgba(0,0,0,0.3); color: #fff; font-size: 16px; margin-bottom: 16px; }
+  button { width: 100%; padding: 14px; border-radius: 8px; background: linear-gradient(135deg, #ffd700, #ff6b9d);
+           color: #1a1f4e; font-weight: 700; font-size: 16px; border: none; cursor: pointer; }
+  button:hover { opacity: 0.9; }
+  .msg { padding: 12px; border-radius: 6px; margin-bottom: 16px; display: none; }
+  .success { background: rgba(76,175,80,0.15); border: 1px solid #4caf50; color: #a5d6a7; }
+  .error { background: rgba(244,67,54,0.15); border: 1px solid #f44336; color: #ef9a9a; }
+  a { color: #ffd700; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🔒 重置密码</h1>
+  <p>设置您的新密码 (至少 6 位)。</p>
+  <div id="msg" class="msg"></div>
+  <label for="password">新密码</label>
+  <input type="password" id="password" placeholder="至少 6 位" autofocus>
+  <label for="confirm">确认密码</label>
+  <input type="password" id="confirm" placeholder="再输入一次">
+  <button onclick="reset()">重置密码</button>
+  <p style="text-align:center;margin-top:24px;"><a href="index.html">← 返回首页</a></p>
+</div>
+<script>
+const params = new URLSearchParams(window.location.search);
+const token = params.get('token');
+if (!token) {
+  document.getElementById('msg').className = 'msg error';
+  document.getElementById('msg').style.display = 'block';
+  document.getElementById('msg').textContent = '链接无效:缺少 token 参数';
+}
+function showMsg(text, ok) {
+  const m = document.getElementById('msg');
+  m.textContent = text;
+  m.className = 'msg ' + (ok ? 'success' : 'error');
+  m.style.display = 'block';
+}
+async function reset() {
+  const pw = document.getElementById('password').value;
+  const cf = document.getElementById('confirm').value;
+  if (pw.length < 6) return showMsg('密码至少 6 位', false);
+  if (pw !== cf) return showMsg('两次密码不一致', false);
+  try {
+    const r = await fetch('/api/recovery/v1/reset', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token: token, new_password: pw})
+    });
+    const data = await r.json();
+    if (r.ok) {
+      showMsg('✅ 密码已重置,3 秒后跳转首页...', true);
+      setTimeout(() => location.href = 'index.html', 3000);
+    } else {
+      showMsg('❌ ' + (data.detail?.error || data.error || '重置失败'), false);
+    }
+  } catch (e) {
+    showMsg('❌ 网络错误: ' + e.message, false);
+  }
+}
+</script>
+</body>
+</html>
