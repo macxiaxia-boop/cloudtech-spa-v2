@@ -1,11 +1,12 @@
 /**
  * CloudTech Agents · v3 视觉母版 06 模块
- * 智能体中心：4 Tab（全部/我的/团队/官方模板）+ 6 智能体卡片网格
+ * 智能体中心：4 Tab（全部/我的/团队/官方模板）+ 6 智能体卡片网格 + i18n
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, MoreHorizontal, Bot, TrendingUp, FileText, Heart, BarChart3, Headphones, FileSearch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
 
 type Tab = 'all' | 'mine' | 'team' | 'official';
 
@@ -27,17 +28,18 @@ const agents = [
 
 export function AgentsPage() {
   const [tab, setTab] = useState<Tab>('all');
+  const { t } = useTranslation();
   const filtered = tab === 'all' ? agents : agents.filter((a) => a.status === tab || (tab === 'official' && a.status === 'team'));
 
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold">智能体中心</h1>
+          <h1 className="text-2xl font-bold">{t('nav.agents')}</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">智能体市场 · 创建配置 · 技能扩展 · 版本管理</p>
         </div>
         <Link to="/employees/new">
-          <Button><Plus className="w-4 h-4" />创建智能体</Button>
+          <Button><Plus className="w-4 h-4" />{t('app.create_agent')}</Button>
         </Link>
       </div>
 

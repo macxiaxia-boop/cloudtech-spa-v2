@@ -1,7 +1,8 @@
-// Phase 45-47: SaaS 官网首页 · 5 AI 员工矩阵 + 客户证言 + 真插画
+// Phase 45-47: SaaS 官网首页 · 5 AI 员工矩阵 + 客户证言 + 真插画 + i18n
 import { Link } from 'react-router-dom';
 import { Sparkles, Bot, Briefcase, Heart, ArrowRight, Hammer, Stethoscope, CheckCircle2, Quote, Building2 } from 'lucide-react';
 import { CUSTOMER_LOGOS, TESTIMONIALS, TRUST_STATS } from '../data/customers';
+import { useTranslation } from '@/i18n';
 
 const FE_EMPLOYEES = [
   { id: 'content_writer', name: '内容创作', desc: 'AI 写公众号 / 小红书 / 抖音脚本', icon: '✍️' },
@@ -15,6 +16,7 @@ const INDUSTRIES = [
 ];
 
 export function MarketingPage() {
+  const { t } = useTranslation();
   return (
     <>
       {/* HERO */}

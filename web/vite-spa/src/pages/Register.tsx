@@ -1,6 +1,6 @@
 /**
  * CloudTech Register · v3 视觉母版 02 模块
- * 复用 Login 居中卡片样式 + 注册字段
+ * 复用 Login 居中卡片样式 + 注册字段 + i18n
  */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,9 +8,11 @@ import { Cloud, Eye, EyeOff, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslation, LocaleSwitcher } from '@/i18n';
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({

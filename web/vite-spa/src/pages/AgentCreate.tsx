@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslation } from '@/i18n';
 
 const steps = [
   { num: 1, label: '基础信息', icon: FileText },
@@ -26,6 +27,7 @@ const skillOptions = [
 
 export function AgentCreatePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [skills, setSkills] = useState<string[]>([]);
   const [dataSource, setDataSource] = useState({ mongodb: false, postgresql: false, python: false });

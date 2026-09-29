@@ -32,6 +32,7 @@ import { Save, Play, Settings, FileText, Bot, Database, GitBranch, Zap, ChevronR
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from '@/i18n';
 
 const nodeCategories = [
   {
@@ -137,6 +138,7 @@ function OutputNode({ data, selected }: NodeProps) {
 const nodeTypes = { start: StartNode, data: DataNode, ai: AINode, output: OutputNode };
 
 export function WorkflowEditorPage() {
+  const { t } = useTranslation();
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
   const [selectedNode, setSelectedNode] = useState<string | null>('3');
@@ -156,9 +158,9 @@ export function WorkflowEditorPage() {
         <Input defaultValue="市场分析工作流" className="w-64 h-8 text-sm" />
         <span className="text-xs text-[var(--text-tertiary)]">未保存</span>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="sm"><Play className="w-3.5 h-3.5" />运行</Button>
+          <Button variant="ghost" size="sm"><Play className="w-3.5 h-3.5" />{t('common.confirm')}</Button>
           <Button variant="outline" size="sm">调试</Button>
-          <Button size="sm"><Save className="w-3.5 h-3.5" />保存</Button>
+          <Button size="sm"><Save className="w-3.5 h-3.5" />{t('common.save')}</Button>
         </div>
       </div>
 

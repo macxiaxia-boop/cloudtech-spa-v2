@@ -4,6 +4,7 @@
  */
 import { Plus, Mail, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
 
 interface Member {
   id: string;
@@ -36,6 +37,7 @@ const statusColor = {
 };
 
 export function SettingsTeamPage() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -43,7 +45,7 @@ export function SettingsTeamPage() {
           <h1 className="text-2xl font-bold">团队与权限</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">成员管理 · 角色分配 · 权限控制</p>
         </div>
-        <Button><Plus className="w-4 h-4" />邀请成员</Button>
+        <Button><Plus className="w-4 h-4" />{t('app.invite_member')}</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

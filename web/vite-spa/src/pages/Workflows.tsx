@@ -1,10 +1,11 @@
 /**
  * CloudTech Workflows · v3 视觉母版 08 模块 · 列表页
- * 工作流列表 · 卡片网格 · 状态徽章
+ * 工作流列表 · 卡片网格 · 状态徽章 + i18n
  */
 import { Link } from 'react-router-dom';
 import { Plus, Workflow, MoreHorizontal, Play, Edit2, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
 
 interface Workflow {
   id: string;
@@ -33,15 +34,16 @@ const statusMap: Record<Workflow['status'], { label: string; cls: string }> = {
 };
 
 export function WorkflowsPage() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold">工作流</h1>
+          <h1 className="text-2xl font-bold">{t('nav.workflows')}</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">可视化拖拽 · 条件分支 · 多智能体协同 · 调试运行</p>
         </div>
         <Link to="/workflows/new">
-          <Button><Plus className="w-4 h-4" />新建工作流</Button>
+          <Button><Plus className="w-4 h-4" />{t('app.create_workflow')}</Button>
         </Link>
       </div>
 

@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { Plus, Settings as SettingsIcon, Users, Shield, BarChart3, FileText, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
 
 type Tab = 'models' | 'team' | 'permissions' | 'stats' | 'logs';
 
@@ -75,11 +76,12 @@ const levelMap: Record<LogEntry['level'], { label: string; cls: string }> = {
 
 export function SettingsSystemPage() {
   const [tab, setTab] = useState<Tab>('models');
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">系统设置</h1>
+        <h1 className="text-2xl font-bold">{t('nav.settings')}</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">模型 · 团队 · 权限 · 统计 · 日志</p>
       </div>
 
