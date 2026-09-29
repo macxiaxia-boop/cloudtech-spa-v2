@@ -45,6 +45,7 @@ import { SettingsSystemPage } from './pages/SettingsSystem';
 import { SettingsTeamPage } from './pages/SettingsTeam';
 import { ProfilePage } from './pages/Profile';
 import { NotificationsPage } from './pages/Notifications';
+import { AgentsPage } from './pages/Agents';
 
 /* ───── Layout: Marketing（marketing Header/Footer） ───── */
 function MarketingLayout() {
@@ -98,7 +99,7 @@ export default function App() {
       {/* 工作台路由（BasicLayout · children prop 模式）*/}
       <Route path="/dashboard" element={<BasicLayout><DashboardPage /></BasicLayout>} />
       <Route path="/chat" element={<BasicLayout showBreadcrumb={false}><ChatPage /></BasicLayout>} />
-      <Route path="/employees" element={<BasicLayout><AIEmployeesPage /></BasicLayout>} />
+      <Route path="/employees" element={<BasicLayout><AgentsPage /></BasicLayout>} />
       <Route path="/employees/new" element={<BasicLayout><AgentCreatePage /></BasicLayout>} />
       <Route path="/employees/:id/edit" element={<BasicLayout><AgentCreatePage /></BasicLayout>} />
       <Route path="/tasks" element={<BasicLayout><TasksPage /></BasicLayout>} />
