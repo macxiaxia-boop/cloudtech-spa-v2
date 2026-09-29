@@ -1,16 +1,215 @@
+/**
+ * CloudTech Design System · globals.css
+ * 来源：CLOUDTECH_DESIGN_SYSTEM.md（基于 v2 视觉母版 SHA256 5d6f1e40...）
+ *
+ * 变更（vs v1）：
+ * - Brand 主色从 #0066FF 升级到 #2563EB（Tailwind blue-600 · D11 决策）
+ * - 补全 brand/neutral/success/warning/destructive 完整色阶
+ * - 补全 surface/border/text/ring 系统
+ * - 补全 gradient 浅蓝紫（v2 视觉母版实测）
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-primary: #0066FF;
-  --color-bg: #FFFFFF;
-  --color-text: #1A1A1A;
+@layer base {
+  :root {
+    /* ── Brand Blue (Tailwind blue 系 · v2 视觉母版) ── */
+    --brand-50: #EFF6FF;
+    --brand-100: #DBEAFE;
+    --brand-200: #BFDBFE;
+    --brand-300: #93C5FD;
+    --brand-400: #60A5FA;
+    --brand-500: #3B82F6;
+    --brand-600: #2563EB;
+    --brand-700: #1D4ED8;
+    --brand-800: #1E40AF;
+    --brand-900: #1E3A8A;
+    --brand-950: #172554;
+
+    /* ── Neutral (slate 系 · 冷调) ── */
+    --neutral-0: #FFFFFF;
+    --neutral-50: #F8FAFC;
+    --neutral-100: #F1F5F9;
+    --neutral-200: #E2E8F0;
+    --neutral-300: #CBD5E1;
+    --neutral-400: #94A3B8;
+    --neutral-500: #64748B;
+    --neutral-600: #475569;
+    --neutral-700: #334155;
+    --neutral-800: #1E293B;
+    --neutral-900: #0F172A;
+    --neutral-950: #020617;
+
+    /* ── Semantic ── */
+    --success-50: #ECFDF5;
+    --success-100: #D1FAE5;
+    --success-500: #10B981;
+    --success-600: #059669;
+    --success-700: #047857;
+    --success-bg: rgba(16, 185, 129, 0.08);
+
+    --warning-50: #FFFBEB;
+    --warning-100: #FEF3C7;
+    --warning-500: #F59E0B;
+    --warning-600: #D97706;
+    --warning-700: #B45309;
+    --warning-bg: rgba(245, 158, 11, 0.08);
+
+    --destructive-50: #FEF2F2;
+    --destructive-100: #FEE2E2;
+    --destructive-500: #EF4444;
+    --destructive-600: #DC2626;
+    --destructive-700: #B91C1C;
+    --destructive-bg: rgba(239, 68, 68, 0.08);
+
+    --accent-purple-50: #F5F3FF;
+    --accent-purple-500: #8B5CF6;
+    --accent-purple-600: #7C3AED;
+
+    --accent-orange-50: #FFF7ED;
+    --accent-orange-500: #F97316;
+    --accent-orange-600: #EA580C;
+
+    /* ── Surfaces ── */
+    --surface-base: var(--neutral-0);
+    --surface-subtle: var(--neutral-50);
+    --surface-muted: var(--neutral-100);
+    --surface-overlay: rgba(15, 23, 42, 0.5);
+
+    /* ── Borders ── */
+    --border-default: var(--neutral-200);
+    --border-hover: var(--neutral-300);
+    --border-focus: var(--brand-600);
+
+    /* ── Text ── */
+    --text-primary: var(--neutral-900);
+    --text-secondary: var(--neutral-500);
+    --text-tertiary: var(--neutral-400);
+    --text-disabled: var(--neutral-400);
+    --text-inverse: var(--neutral-0);
+    --text-link: var(--brand-600);
+    --text-link-hover: var(--brand-700);
+
+    /* ── Focus Ring ── */
+    --ring-color: rgba(37, 99, 235, 0.4);
+    --ring-offset: 2px;
+
+    /* ── Gradients (v2 视觉母版实测) ── */
+    --gradient-hero: linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 50%, #FFFFFF 100%);
+    --gradient-brand: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    --gradient-brand-soft: linear-gradient(135deg, #DBEAFE 0%, #EDE9FE 100%);
+    --gradient-card: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+
+    /* ── Layout ── */
+    --sidebar-width: 240px;
+    --sidebar-width-collapsed: 64px;
+    --header-height: 56px;
+    --max-width: 1280px;
+
+    /* ── Radius ── */
+    --radius-sm: 0.375rem;
+    --radius: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.25rem;
+
+    /* ── Shadows ── */
+    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow: 0 2px 4px rgba(15, 23, 42, 0.06), 0 4px 8px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 8px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 8px 16px rgba(15, 23, 42, 0.10), 0 4px 8px rgba(15, 23, 42, 0.06);
+    --shadow-xl: 0 16px 32px rgba(15, 23, 42, 0.12), 0 8px 16px rgba(15, 23, 42, 0.08);
+
+    /* ── Motion ── */
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+
+    /* ── Typography ── */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Inter',
+                 'PingFang SC', 'Hiragino Sans GB',
+                 'Microsoft YaHei', 'Segoe UI', sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+    /* ── Backward Compat (v1 旧色 · 仅保留 primary 别名) ── */
+    --color-primary: var(--brand-600);  /* #0066FF → #2563EB（D11 升级） */
+    --color-bg: var(--neutral-0);
+    --color-text: var(--neutral-900);
+  }
+
+  /* ── Base Reset ── */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background: var(--surface-subtle);
+    margin: 0;
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  /* Focus Ring */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--ring-offset) var(--surface-base), 0 0 0 calc(var(--ring-offset) + 3px) var(--ring-color);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  color: var(--color-text);
-  background: var(--color-bg);
-  margin: 0;
+@layer components {
+  /* ── Surfaces ── */
+  .ct-surface-base { background: var(--surface-base); }
+  .ct-surface-subtle { background: var(--surface-subtle); }
+  .ct-surface-muted { background: var(--surface-muted); }
+
+  /* ── Cards ── */
+  .ct-card {
+    background: var(--surface-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs);
+    padding: var(--space-6, 1.5rem);
+    transition: box-shadow var(--duration-normal) var(--ease-spring), border-color var(--duration-fast) ease;
+  }
+  .ct-card:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--border-hover);
+  }
+
+  /* ── Scrollbar (v2 视觉母版风格 · 极淡) ── */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--neutral-300);
+    border-radius: var(--radius);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--neutral-400);
+  }
 }

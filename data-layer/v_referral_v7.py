@@ -133,6 +133,29 @@ async def redeem(req: RedeemReq):
         # 更新 codes 计数
         c.execute("UPDATE referral_codes SET redeemed_count=redeemed_count + 1, total_points=total_points + ? WHERE code=?",
                   (REWARD_REFERRER, req.code))
+        # R321 修: 兑换成功, 双方各发邮件 (referral_reward 模板)
+        try:
+            referrer_row = c.execute("SELECT email FROM saas_users WHERE tenant_id=? LIMIT 1", (row["tenant_id"],)).fetchone()
+            referee_row = c.execute("SELECT email FROM saas_users WHERE tenant_id=? LIMIT 1", (req.referee_tenant_id,)).fetchone()
+            referrer_email = referrer_row["email"] if referrer_row else f"noreply+{row['tenant_id'][:8]}@lynxce.ai"
+            referee_email = referee_row["email"] if referee_row else (req.referee_email or f"noreply+{req.referee_tenant_id[:8]}@lynxce.ai")
+            for recipient, role, points in [(referrer_email, "referrer", REWARD_REFERRER),
+                                             (referee_email, "referee", REWARD_REFEREE)]:
+                body_html = (
+                    f'<h1>🎉 推荐奖励到账</h1>'
+                    f'<p>角色: <b>{role}</b> · 获得 <b>+{points}</b> 积分</p>'
+                    f'<p>推荐码: <b>{req.code}</b></p>'
+                    f'<p><a href="http://localhost:5099/account/referral">查看积分 →</a></p>'
+                )
+                c.execute(
+                    "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
+                    " VALUES (?,?,?,?,?,?,?,?,?)",
+                    (recipient, 'referral_reward', f'推荐奖励到账 +{points} 积分 / LynxceAI', body_html,
+                     json.dumps({'role': role, 'points': points, 'code': req.code}),
+                     'sent', 1, _now(), _now()),
+                )
+        except Exception:
+            pass
         c.commit()
         return {
             "status": "ok",

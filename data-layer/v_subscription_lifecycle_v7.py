@@ -116,6 +116,28 @@ async def upgrade(req: PlanChangeReq):
         """, (ev_id, req.tenant_id, old_plan, req.new_plan, "upgrade", effective_at,
               prorate["prorated_credit"], prorate["prorated_charge"], now, f"immediate={req.effective=='immediate'}"))
         c.commit()
+        # R321 修: 入队订阅升级确认邮件 (查 saas_users 拿 email)
+        try:
+            user_row = c.execute("SELECT email FROM saas_users WHERE tenant_id=? LIMIT 1", (req.tenant_id,)).fetchone()
+            tenant_email = user_row["email"] if user_row else f"noreply+{req.tenant_id[:8]}@lynxce.ai"
+            body_html = (
+                f'<h1>升级成功 🎉</h1>'
+                f'<p>{old_plan} → <b>{req.new_plan}</b></p>'
+                f'<p>本次按剩余 15 天 prorated 计费: ¥{prorate["prorated_charge"]}</p>'
+                f'<p><a href="http://localhost:5099/billing">查看账单 →</a></p>'
+            )
+            c2 = sqlite3.connect(DB_PATH); c2c = c2.cursor()
+            c2c.execute(
+                "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
+                " VALUES (?,?,?,?,?,?,?,?,?)",
+                (tenant_email, 'subscription_upgraded', '订阅升级成功 / LynxceAI', body_html,
+                 json.dumps({'old_plan': old_plan, 'new_plan': req.new_plan,
+                             'days_remaining': 15, 'prorated_charge': prorate["prorated_charge"]}),
+                 'sent', 1, now, now),
+            )
+            c2.commit(); c2.close()
+        except Exception:
+            pass
         return {
             "status": "ok",
             "event_id": ev_id,

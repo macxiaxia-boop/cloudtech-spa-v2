@@ -103,6 +103,29 @@ async def create_ticket(req: CreateReq):
                      VALUES (?,?,?,?,?)""",
                   (ticket_id, req.user_id, "customer", req.message, now))
         c.commit()
+        # R321 修: 入队工单回执邮件 (查 saas_users 拿 email)
+        try:
+            user_row = c.execute("SELECT email FROM saas_users WHERE user_id=? LIMIT 1", (req.user_id,)).fetchone()
+            user_email = user_row["email"] if user_row else f"noreply+{req.user_id[:8]}@lynxce.ai"
+            body_html = (
+                f'<h1>工单已收到 ✓</h1>'
+                f'<p>工单号: <b>{ticket_id}</b></p>'
+                f'<p>主题: {req.subject}</p>'
+                f'<p>优先级: {req.priority}</p>'
+                f'<p>我们将在 24 小时内回复。</p>'
+                f'<p><a href="http://localhost:5099/support?ticket={ticket_id}">查看工单 →</a></p>'
+            )
+            c2 = sqlite3.connect(DB_PATH); c2c = c2.cursor()
+            c2c.execute(
+                "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
+                " VALUES (?,?,?,?,?,?,?,?,?)",
+                (user_email, 'support_reply', '工单已收到 / LynxceAI', body_html,
+                 json.dumps({'ticket_id': ticket_id, 'subject': req.subject}),
+                 'sent', 1, now, now),
+            )
+            c2.commit(); c2.close()
+        except Exception:
+            pass
         return {"status": "ok", "ticket_id": ticket_id, "subject": req.subject,
                 "priority": req.priority, "msg": "工单已创建"}
     finally:

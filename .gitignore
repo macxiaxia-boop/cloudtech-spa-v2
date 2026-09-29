@@ -37,3 +37,14 @@ logs/
 # Sensitive
 cookies_*.json
 *.db\n.env\n.jwt_secret\n*.log
+
+# ── UI Rebuild v2 (2026-09-29) ──
+# 浅克隆参考仓库不入库（3 仓库约 200MB）
+design/research/references/_cloned/
+# P0 备份目录（恢复用）
+web/vite-spa.bak-*/
+
+# Node / Build artifacts
+web/vite-spa/node_modules/
+web/vite-spa/dist-v45/
+web/vite-spa/.vite/

@@ -1,0 +1,56 @@
+cloudtech_page,route,current_state,user_module,new_components_needed,shadcn_components,antd_pro_ref,xyflow_components,priority,complexity,notes
+Login,/login,MISSING,1_login_register,LoginForm + AuthContext,button + input + label + form + checkbox + alert,"src/pages/user/login/index.tsx",-,P0,M,新增路由 + 表单 + JWT 存储
+Register,/register,MISSING,1_login_register,RegisterForm + terms,button + input + label + form + checkbox + select,src/pages/user/register/index.tsx,-,P1,M,新增路由 + 表单 + 验证码
+ForgotPassword,/forgot-password,MISSING,1_login_register,ForgotForm,input + form + button,src/pages/user/login/index.tsx,-,P2,S,新增路由
+AccountSettings,/account,MISSING,1_login_register,ProfileForm + PasswordForm,form + input + label + button + tabs + separator,src/pages/account/settings/index.tsx,-,P1,M,新增路由（与 /settings 区分）
+Marketing,/,EXISTING marketing,2_workspace,Hero优化 + FeatureGrid + CTASection,button + card + badge + separator,-,-,P0,H,保留但视觉母版化重做
+Dashboard,/dashboard,EXISTING basic,2_workspace,KPICards + ChartGrid + ActivityFeed,card + chart + skeleton + tabs + progress + table + badge,src/pages/dashboard/analysis/index.tsx,-,P0,H,保留数据接入，UI 完全重做
+AppShell (新),all routes,EXISTING Header/Footer,2_workspace,Sidebar + Header + Breadcrumb + Cmd+K,sidebar + navigation-menu + breadcrumb + command + sheet + dropdown-menu + avatar + badge + tooltip + kbd,src/layouts/BasicLayout.tsx + RightContent/AvatarDropdown.tsx,-,P0,H,新组件目录 src/components/AppShell/
+Chat,/chat,MISSING,3_ai_chat,ChatStream + MessageList + ModelSelector + SessionList,bubble + textarea + button + select + scroll-area + tabs + dropdown-menu + skeleton + avatar + badge + tooltip,Ant Design X AI Assistant 设计借鉴,-,P0,H,新增路由 + Stream 处理（SSE/WebSocket）
+ModelSelector,Chat 内部,MISSING,3_ai_chat,模型下拉 + 温度滑块 + 系统提示,select + slider + textarea + label + form,-,-,P0,M,挂在 Chat 右侧
+AIEmployees,/employees,EXISTING marketing,4_agent_center,AgentList + AgentCard + AgentDetail + AgentCreate,card + table + tabs + dialog + form + input + select + textarea + badge + progress + skeleton + sheet,src/pages/list/card-list/index.tsx,-,P0,H,改造为智能体工作台（不仅是营销介绍）
+AgentCreate,Modal in /employees,MISSING,4_agent_center,创建对话框,dialog + form + input + textarea + select + button + alert,-,-,P0,M,在 /employees 触发
+AgentConfig,Sheet in /employees,MISSING,4_agent_center,配置侧边面板,sheet + form + input + textarea + select + slider + switch + tabs + button,-,-,P0,M,在 /employees 触发
+Workflows,/workflows,MISSING,5_workflow_editor,WorkflowList + WorkflowCard + StatusBadge,card + table + badge + button + dropdown-menu,src/pages/list/card-list/index.tsx,-,P0,H,新增路由 + xyflow 引入
+WorkflowEditor,/workflows/[id],MISSING,5_workflow_editor,EditorCanvas + NodePanel + ConfigPanel + Toolbar,button + input + tabs + select + switch + slider + form + separator + sheet + tooltip + dropdown-menu,-,ReactFlow + Controls + Background + MiniMap + useNodesState + useEdgesState,P0,XH,新增路由 + xyflow 主集成
+CustomNode (7 types),EditorCanvas 内,MISSING,5_workflow_editor,StartNode + LLMNode + KnowledgeNode + ToolNode + ConditionNode + LoopNode + EndNode,card + badge + handle 自定义,-,CustomNode 模式,P0,H,每种节点独立 tsx 文件
+Tasks,/tasks,MISSING,6_task_center,TaskList + TaskRow + TaskDetail + FilterBar,table + tabs + badge + button + dropdown-menu + progress + sheet + dialog + skeleton + empty + filter,src/pages/list/table-list/index.tsx,-,P0,H,新增路由 + 实时进度
+TaskDetail,Sheet in /tasks,MISSING,6_task_center,详情侧边面板,sheet + tabs + form + badge + progress + scroll-area,-,-,P0,M,显示日志/输入/输出/耗时
+TaskMonitor,/tasks?filter=running,MISSING,6_task_center,实时监控视图,card + table + progress + badge + avatar + skeleton,-,-,P1,M,可选
+Knowledge,/knowledge,MISSING,7_knowledge_base,DocumentList + FolderTree + SearchBar + UploadButton,table + input + button + breadcrumb + sheet + dialog + checkbox + skeleton + dropdown-menu + command,-,-,P0,H,新增路由（保留旧 /documents 作为介绍）
+DocumentUpload,Modal in /knowledge,MISSING,7_knowledge_base,上传对话框（支持拖拽）,dialog + form + input + button + progress + alert,-,-,P0,M,拖拽上传
+DocumentViewer,/knowledge/[id],MISSING,7_knowledge_base,文档预览 + 段落检索,tabs + scroll-area + button + separator + badge + input + skeleton,-,-,P0,H,PDF / Markdown / 图片预览
+Settings,/settings,EXISTING basic,8_system_settings,已有公司信息，强化其他分组,form + input + label + button + tabs + switch + select + separator + alert + badge + dialog,src/pages/account/settings/index.tsx,-,P1,M,强化为完整设置中心
+Settings/Profile,/settings/profile,EXISTING basic,8_system_settings,公司信息 + 联系人,form + input + label + button,-,-,P1,S,
+Settings/Billing,/settings/billing,MISSING,8_system_settings,当前套餐 + 升级 + 发票,card + table + button + badge + dialog + tabs,-,-,P1,M,
+Settings/Models,/settings/models,MISSING,8_system_settings,模型配置 + API Key,form + input + select + switch + button + alert + dialog,-,-,P1,M,新增
+Settings/Permissions,/settings/permissions,MISSING,8_system_settings,成员权限矩阵,table + checkbox + select + button + dialog + alert,-,-,P2,M,新增（多租户场景）
+Settings/Status,/settings/status,MISSING,8_system_settings,系统运行状态 + API 健康,badge + card + progress + table + alert,-,-,P2,M,新增
+Monitoring,/monitoring,EXISTING basic,8_system_settings,已有，强化实时告警,card + chart + table + badge + alert + tabs + progress,src/pages/dashboard/monitor/index.tsx,-,P1,H,UI 完全重做
+Pricing,/pricing,EXISTING basic,-,价格表 + 对比 + CTA,card + table + badge + button + tabs + separator,-,-,P2,M,视觉母版化重做
+TryNow,/try,EXISTING basic,-,7 天试用申请,form + input + select + button + alert + progress,-,-,P2,M,
+Funnel,/funnel,EXISTING basic,-,漏斗转化分析,chart + card + table + tabs + badge,-,-,P3,M,可选视觉母版化
+CaseLibrary,/cases,EXISTING basic,-,10 客户案例卡片网格,card + badge + button + tabs,-,-,P3,L,
+ClientList,/clients,EXISTING basic,-,80 家客户清单,table + input + filter + button + pagination + badge + dropdown-menu,-,-,P3,M,
+IndustryDecoration,/industries/decoration,EXISTING basic,-,装企行业 SEO 落地页,card + button + badge + separator + tabs,-,-,P3,M,
+IndustryMedical,/industries/medical,EXISTING basic,-,医美行业 SEO 落地页,card + button + badge + alert + separator,-,-,P3,M,合规强提示
+ContentSOP,/content-sop,EXISTING basic,-,内容生产 SOP 工具,tabs + table + button + input + badge + progress,-,-,P3,M,
+Blog,/blog,EXISTING basic,-,博客列表 + 详情,card + input + button + badge + pagination,-,-,P4,L,
+FAQ,/faq,EXISTING basic,-,帮助中心,accordion + input + tabs + button,-,-,P4,L,
+OPCStory,/opc-story,EXISTING basic,-,创始人故事,timeline + card + badge,-,-,P4,L,
+Documents,/documents,EXISTING basic,-,公司文档（保留为营销页）,card + table + button,-,-,P4,L,改造为旧路由 fallback
+Funnel,/funnel,EXISTING basic,-,转化漏斗,chart + card + tabs + table,-,-,P3,M,
+NotFound,*,MISSING,-,404 页面,button + card,-,-,P2,S,App.tsx 已声明 fallback，需实装
+AgentCreateWizard,/employees/new,MISSING,4_agent_center,6 步向导 (基础/角色/技能/知识库/发布),dialog + form + input + textarea + select + button + radio + progress + tabs + avatar + separator + sheet,Antd Pro Step Form 借鉴,-,P0,H,Modal/全屏 Sheet 双形态
+AgentEdit,/employees/[id]/edit,MISSING,4_agent_center,同上向导 + 加载已有数据,同上,+ skeleton + alert,-,P0,H,与 AgentCreate 共用组件
+WorkflowNodePanel,WorkflowEditor 内,MISSING,5_workflow_editor,5 类节点库（触发/AI/数据/逻辑/操作）,scroll-area + button + badge + separator + tooltip + collapsible,-,xyflow NodeTypes,P0,H,拖拽支持（HTML5 DnD）
+Files,/files,MISSING,7_knowledge_base,网格视图 + 文件类型筛选,card + button + input + tabs + badge + dropdown-menu + view-switcher,-,-,P0,H,08 知识库列表 + 09 文件管理网格
+Models,/settings/models,MISSING,8_system_settings,6 模型 + 4 Tab + 开关,table + tabs + badge + switch + button + dialog + tooltip + avatar,Antd Pro 表格借鉴,-,P1,M,大模型/嵌入模型/简单模型/语音模型
+Team,/settings/team,MISSING,8_system_settings,成员管理 + 角色权限 + 组织架构,table + tabs + avatar + badge + select + button + dialog + alert + dropdown-menu,-,-,P2,M,角色 3 级 + 邀请流程
+SystemSettings,/settings/system,MISSING,8_system_settings,基础/计算/安全/日志 4 Tab,tabs + form + input + select + switch + textarea + button + table + alert + badge,-,-,P2,M,企业级深度配置
+Analytics,/analytics,MISSING,8_system_settings,4 KPI + 折线 + 饼图 + 条形,card + chart + tabs + select + button + skeleton + badge,-,recharts/shadcn chart,P1,H,业务数据分析
+Notifications,/notifications,MISSING,8_system_settings,4 Tab + 已读未读 + 全部已读,tabs + button + badge + avatar + scroll-area + dropdown-menu + separator + empty,-,-,P2,M,系统/任务/协作/全部
+Profile,/profile,MISSING,8_system_settings,头像 + 6 Tab + 账号安全 + API 管理,tabs + form + input + button + switch + select + avatar + badge + alert + dialog + table,-,-,P2,M,个人资料/账号/API/统计/通知/隐私
+MobileDashboard,/dashboard (mobile),MISSING,2_workspace,极简首页 + Hamburger + TabBar,sheet + button + input + tabs + card + avatar + badge,-,-,P1,H,< 768px 适配基线
+MobileChat,/chat (mobile),MISSING,3_ai_chat,全宽气泡 + 底部输入,scroll-area + bubble + textarea + button + tabs,-,-,P1,M,< 768px 适配
+MobileEmployees,/employees (mobile),MISSING,4_agent_center,2 列卡片网格,card + tabs + sheet + button,-,-,P1,M,< 768px 适配

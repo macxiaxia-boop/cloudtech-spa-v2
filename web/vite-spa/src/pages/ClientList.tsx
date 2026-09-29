@@ -199,29 +199,6 @@ export function ClientListPage() {
           </div>
         </div>
       </section>
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
-              <p className="text-xs text-gray-500">装企</p>
-              <p className="text-3xl font-bold text-yellow-600">{decoClients.length}</p>
-              <p className="text-xs text-gray-400 mt-1">覆盖 16 城</p>
-            </div>
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
-              <p className="text-xs text-gray-500">医美</p>
-              <p className="text-3xl font-bold text-pink-600">{mediClients.length}</p>
-              <p className="text-xs text-gray-400 mt-1">覆盖 14 城</p>
-            </div>
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
-              <p className="text-xs text-gray-500">总客户</p>
-              <p className="text-3xl font-bold text-emerald-600">{CLIENTS.length}</p>
-              <p className="text-xs text-gray-400 mt-1">覆盖 20 城</p>
-            </div>
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
-              <p className="text-xs text-gray-500">城市 TOP 1</p>
-              <p className="text-3xl font-bold text-emerald-600">{topCities[0][0]}</p>
-              <p className="text-xs text-gray-400 mt-1">{topCities[0][1]} 家</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 红 #22 守门 */}
       <section className="py-6 bg-yellow-50 border-y border-yellow-200">
