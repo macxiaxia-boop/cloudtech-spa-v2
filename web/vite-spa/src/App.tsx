@@ -60,6 +60,7 @@ import { SettingsTeamPage } from './pages/SettingsTeam';
 import { ProfilePage } from './pages/Profile';
 import { NotificationsPage } from './pages/Notifications';
 import { AgentsPage } from './pages/Agents';
+import { RequireAuth } from './components/Auth/RequireAuth';
 
 /* ───── Layout: Marketing（marketing Header/Footer） ───── */
 function MarketingLayout() {
@@ -111,26 +112,26 @@ export default function App() {
       <Route path="/workspace/select" element={<WorkspaceSelectorPage />} />
 
       {/* 工作台路由（BasicLayout · children prop 模式）*/}
-      <Route path="/dashboard" element={<BasicLayout><DashboardPage /></BasicLayout>} />
-      <Route path="/chat" element={<BasicLayout showBreadcrumb={false}><ChatPage /></BasicLayout>} />
-      <Route path="/employees" element={<BasicLayout><AgentsPage /></BasicLayout>} />
-      <Route path="/employees/new" element={<BasicLayout><AgentCreatePage /></BasicLayout>} />
-      <Route path="/employees/:id/edit" element={<BasicLayout><AgentCreatePage /></BasicLayout>} />
-      <Route path="/tasks" element={<BasicLayout><TasksPage /></BasicLayout>} />
-      <Route path="/knowledge" element={<BasicLayout><KnowledgePage /></BasicLayout>} />
-      <Route path="/files" element={<BasicLayout><FilesPage /></BasicLayout>} />
-      <Route path="/workflows" element={<BasicLayout><Suspense fallback={<PageLoading />}><WorkflowsPage /></Suspense></BasicLayout>} />
-      <Route path="/workflows/new" element={<BasicLayout showBreadcrumb={false}><Suspense fallback={<PageLoading />}><WorkflowEditorPage /></Suspense></BasicLayout>} />
-      <Route path="/workflows/:id" element={<BasicLayout showBreadcrumb={false}><Suspense fallback={<PageLoading />}><WorkflowEditorPage /></Suspense></BasicLayout>} />
-      <Route path="/settings" element={<BasicLayout><SettingsPage /></BasicLayout>} />
-      <Route path="/settings/models" element={<BasicLayout><SettingsPage /></BasicLayout>} />
-      <Route path="/settings/team" element={<BasicLayout><SettingsTeamPage /></BasicLayout>} />
-      <Route path="/settings/system" element={<BasicLayout><SettingsSystemPage /></BasicLayout>} />
-      <Route path="/settings/billing" element={<BasicLayout><BillingPage /></BasicLayout>} />
-      <Route path="/analytics" element={<BasicLayout><AnalyticsPage /></BasicLayout>} />
-      <Route path="/profile" element={<BasicLayout><ProfilePage /></BasicLayout>} />
-      <Route path="/notifications" element={<BasicLayout><NotificationsPage /></BasicLayout>} />
-      <Route path="/monitoring" element={<BasicLayout><MonitoringPage /></BasicLayout>} />
+      <Route path="/dashboard" element={<RequireAuth><BasicLayout><DashboardPage /></BasicLayout></RequireAuth>} />
+      <Route path="/chat" element={<RequireAuth><BasicLayout showBreadcrumb={false}><ChatPage /></BasicLayout></RequireAuth>} />
+      <Route path="/employees" element={<RequireAuth><BasicLayout><AgentsPage /></BasicLayout></RequireAuth>} />
+      <Route path="/employees/new" element={<RequireAuth><BasicLayout><AgentCreatePage /></BasicLayout></RequireAuth>} />
+      <Route path="/employees/:id/edit" element={<RequireAuth><BasicLayout><AgentCreatePage /></BasicLayout></RequireAuth>} />
+      <Route path="/tasks" element={<RequireAuth><BasicLayout><TasksPage /></BasicLayout></RequireAuth>} />
+      <Route path="/knowledge" element={<RequireAuth><BasicLayout><KnowledgePage /></BasicLayout></RequireAuth>} />
+      <Route path="/files" element={<RequireAuth><BasicLayout><FilesPage /></BasicLayout></RequireAuth>} />
+      <Route path="/workflows" element={<RequireAuth><BasicLayout><Suspense fallback={<PageLoading />}><WorkflowsPage /></Suspense></BasicLayout></RequireAuth>} />
+      <Route path="/workflows/new" element={<RequireAuth><BasicLayout showBreadcrumb={false}><Suspense fallback={<PageLoading />}><WorkflowEditorPage /></Suspense></BasicLayout></RequireAuth>} />
+      <Route path="/workflows/:id" element={<RequireAuth><BasicLayout showBreadcrumb={false}><Suspense fallback={<PageLoading />}><WorkflowEditorPage /></Suspense></BasicLayout></RequireAuth>} />
+      <Route path="/settings" element={<RequireAuth><BasicLayout><SettingsPage /></BasicLayout></RequireAuth>} />
+      <Route path="/settings/models" element={<RequireAuth><BasicLayout><SettingsPage /></BasicLayout></RequireAuth>} />
+      <Route path="/settings/team" element={<RequireAuth><BasicLayout><SettingsTeamPage /></BasicLayout></RequireAuth>} />
+      <Route path="/settings/system" element={<RequireAuth><BasicLayout><SettingsSystemPage /></BasicLayout></RequireAuth>} />
+      <Route path="/settings/billing" element={<RequireAuth><BasicLayout><BillingPage /></BasicLayout></RequireAuth>} />
+      <Route path="/analytics" element={<RequireAuth><BasicLayout><AnalyticsPage /></BasicLayout></RequireAuth>} />
+      <Route path="/profile" element={<RequireAuth><BasicLayout><ProfilePage /></BasicLayout></RequireAuth>} />
+      <Route path="/notifications" element={<RequireAuth><BasicLayout><NotificationsPage /></BasicLayout></RequireAuth>} />
+      <Route path="/monitoring" element={<RequireAuth><BasicLayout><MonitoringPage /></BasicLayout></RequireAuth>} />
 
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
