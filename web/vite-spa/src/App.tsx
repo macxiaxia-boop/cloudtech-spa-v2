@@ -38,6 +38,8 @@ import { TasksPage } from './pages/Tasks';
 import { AgentCreatePage } from './pages/AgentCreate';
 import { KnowledgePage } from './pages/Knowledge';
 import { FilesPage } from './pages/Files';
+import { WorkflowsPage } from './pages/Workflows';
+import { WorkflowEditorPage } from './pages/WorkflowEditor';
 
 /* ───── Layout: Marketing（marketing Header/Footer） ───── */
 function MarketingLayout() {
@@ -97,6 +99,9 @@ export default function App() {
       <Route path="/tasks" element={<BasicLayout><TasksPage /></BasicLayout>} />
       <Route path="/knowledge" element={<BasicLayout><KnowledgePage /></BasicLayout>} />
       <Route path="/files" element={<BasicLayout><FilesPage /></BasicLayout>} />
+      <Route path="/workflows" element={<BasicLayout><WorkflowsPage /></BasicLayout>} />
+      <Route path="/workflows/new" element={<BasicLayout showBreadcrumb={false}><WorkflowEditorPage /></BasicLayout>} />
+      <Route path="/workflows/:id" element={<BasicLayout showBreadcrumb={false}><WorkflowEditorPage /></BasicLayout>} />
       <Route path="/settings" element={<BasicLayout><SettingsPage /></BasicLayout>} />
       <Route path="/settings/models" element={<BasicLayout><SettingsPage /></BasicLayout>} />
       <Route path="/settings/team" element={<BasicLayout><SettingsPage /></BasicLayout>} />
