@@ -35,5 +35,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 EXPOSE 80
 
-# 前台运行 nginx
-CMD ["nginx", "-g", "daemon=off;"]
+# 前台运行 nginx（覆盖默认 entrypoint · 强制 daemon off）
+CMD ["nginx", "-g", "daemon off;"]
