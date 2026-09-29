@@ -7,12 +7,15 @@
  * - "AI 今日简报" 浮动卡（右下角）
  * - "最近项目" + "最近动态" 双栏
  * - "团队任务分布" 饼图
+ *
+ * i18n: zh-CN + en-US via useTranslation
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, Users, TrendingUp, AlertTriangle, ArrowRight, Bot, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { timeAgo } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 interface UsageData {
   calls: number;
@@ -55,16 +58,15 @@ const taskDistribution = [
 
 export function DashboardPage() {
   const [showBriefing, setShowBriefing] = useState(true);
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-6">
       {/* 欢迎区 */}
       <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-6 flex items-start justify-between gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold mb-1.5">你好，张三 👋</h1>
-          <p className="text-sm text-[var(--text-secondary)]">
-            这是你团队 AI 工作空间，今天有 5 个任务在进行中。
-          </p>
+          <h1 className="text-2xl font-bold mb-1.5">{t('dashboard.greeting')}</h1>
+          <p className="text-sm text-[var(--text-secondary)]">{t('dashboard.greeting_subtitle')}</p>
         </div>
         <div className="hidden md:flex items-center gap-1 text-sm text-[var(--text-secondary)]">
           <button className="p-1 hover:bg-[var(--surface-muted)] rounded"><ChevronLeft className="w-4 h-4" /></button>
@@ -77,21 +79,21 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: '今日运行', value: '12', sub: '进行中的任务', icon: TrendingUp, color: 'text-brand-600 bg-brand-50' },
-            { label: '智能体在线', value: '3', sub: '待命智能体', icon: Bot, color: 'text-accent-purple-600 bg-accent-purple-50' },
-            { label: '今日完成', value: '8', sub: '已完成任务', icon: BarChart3, color: 'text-success-600 bg-success-50' },
-            { label: '待处理', value: '2', sub: '待处理任务', icon: AlertTriangle, color: 'text-warning-600 bg-warning-50' },
+            { labelKey: 'dashboard.today_running', sub: '进行中的任务', icon: TrendingUp, color: 'text-brand-600 bg-brand-50' },
+            { labelKey: 'dashboard.agents_online', sub: '待命智能体',  icon: Bot,        color: 'text-accent-purple-600 bg-accent-purple-50' },
+            { labelKey: 'dashboard.today_done',    sub: '已完成任务',  icon: BarChart3,   color: 'text-success-600 bg-success-50' },
+            { labelKey: 'dashboard.pending',      sub: '待处理任务',  icon: AlertTriangle, color: 'text-warning-600 bg-warning-50' },
           ].map((kpi) => {
             const Icon = kpi.icon;
             return (
-              <div key={kpi.label} className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5 hover:shadow-sm transition-shadow">
+              <div key={kpi.labelKey} className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5 hover:shadow-sm transition-shadow">
                 <div className="flex items-center justify-between mb-3">
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${kpi.color}`}>
                     <Icon className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="text-3xl font-bold text-[var(--text-primary)]">{kpi.value}</div>
-                <div className="text-xs text-[var(--text-secondary)] mt-1">{kpi.label}</div>
+                <div className="text-xs text-[var(--text-secondary)] mt-1">{t(kpi.labelKey)}</div>
                 <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5">{kpi.sub}</div>
               </div>
             );
@@ -102,10 +104,10 @@ export function DashboardPage() {
         <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="text-sm font-semibold">运行概览</div>
-              <div className="text-xs text-[var(--text-tertiary)]">查看详情</div>
+              <div className="text-sm font-semibold">{t('dashboard.running_overview')}</div>
+              <div className="text-xs text-[var(--text-tertiary)]">{t('app.view_detail')}</div>
             </div>
-            <Link to="/monitoring" className="text-xs text-brand-600 hover:underline">查看详情 →</Link>
+            <Link to="/monitoring" className="text-xs text-brand-600 hover:underline">{t('app.view_detail')} →</Link>
           </div>
           <div className="flex items-end justify-between gap-1 h-32">
             {[40, 65, 50, 80, 70, 90, 85, 60, 75, 95, 70, 88].map((h, i) => (
@@ -122,8 +124,8 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold">最近项目</h2>
-            <Link to="/tasks" className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">查看全部 →</Link>
+            <h2 className="font-semibold">{t('dashboard.recent_projects')}</h2>
+            <Link to="/tasks" className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">{t('app.view_all')} →</Link>
           </div>
           <div className="space-y-2">
             {projects.map((p) => (
@@ -145,8 +147,8 @@ export function DashboardPage() {
 
         <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold">最近动态</h2>
-            <Link to="/notifications" className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">查看全部 →</Link>
+            <h2 className="font-semibold">{t('dashboard.recent_activity')}</h2>
+            <Link to="/notifications" className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">{t('app.view_all')} →</Link>
           </div>
           <div className="space-y-3">
             {activities.map((a) => (
@@ -168,7 +170,7 @@ export function DashboardPage() {
 
       {/* 团队任务分布 饼图 */}
       <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
-        <h2 className="font-semibold mb-4">团队任务分布</h2>
+        <h2 className="font-semibold mb-4">{t('dashboard.task_distribution')}</h2>
         <div className="flex items-center gap-8">
           <PieChart data={taskDistribution} />
           <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -189,12 +191,10 @@ export function DashboardPage() {
           <button onClick={() => setShowBriefing(false)} className="absolute top-2 right-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] text-lg leading-none">×</button>
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-accent-purple-500" />
-            <span className="text-sm font-semibold">AI 今日简报</span>
+            <span className="text-sm font-semibold">{t('dashboard.ai_briefing')}</span>
           </div>
-          <p className="text-sm text-[var(--text-secondary)] mb-3">
-            你正在看的就是这个。AI 数据日报已生成，点开 AI 今日简报，内容一目了然，查看月月...
-          </p>
-          <Button size="sm" className="w-full">查看详情<ArrowRight className="w-3.5 h-3.5" /></Button>
+          <p className="text-sm text-[var(--text-secondary)] mb-3">{t('dashboard.ai_briefing_text')}</p>
+          <Button size="sm" className="w-full">{t('dashboard.ai_briefing_action')}<ArrowRight className="w-3.5 h-3.5" /></Button>
         </div>
       )}
     </div>
