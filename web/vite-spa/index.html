@@ -2,12 +2,47 @@
 <html lang="zh-CN" class="light">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CloudTech · AI 数字员工 SaaS</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#2563EB" />
+
+    <!-- SEO 基础 -->
+    <title>CloudTech · 企业级 AI 工作空间</title>
+    <meta name="description" content="CloudTech 是企业级 AI 数字员工 SaaS 平台，集成对话、智能体、工作流、任务执行、知识管理的一体化 AI 工作空间。让 AI 成为团队的 5 位数字员工，像一支完整团队跑。" />
+    <meta name="keywords" content="CloudTech,AI 工作空间,智能体,工作流,任务管理,知识库,AI 对话,数字员工,SaaS" />
+    <meta name="author" content="CloudTech Team" />
+    <link rel="canonical" href="https://cloudtech.example.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cloudtech.example.com/" />
+    <meta property="og:title" content="CloudTech · 企业级 AI 工作空间" />
+    <meta property="og:description" content="集成对话、智能体、工作流、任务执行、知识管理的一体化 AI 工作空间。" />
+    <meta property="og:image" content="https://cloudtech.example.com/og-image.png" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="CloudTech" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CloudTech · 企业级 AI 工作空间" />
+    <meta name="twitter:description" content="AI 时代的 5 位数字员工。" />
+    <meta name="twitter:image" content="https://cloudtech.example.com/og-image.png" />
+
+    <!-- PWA 占位（未来完整 PWA 时启用）-->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- 字体预连接（生产可换为 Inter / 思源黑体）-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+
+    <!-- 图标（iOS / Android）-->
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CloudTech" />
   </head>
   <body>
     <div id="root"></div>
+    <noscript>请启用 JavaScript 以使用 CloudTech 企业级 AI 工作空间。</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

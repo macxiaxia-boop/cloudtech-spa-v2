@@ -1,10 +1,11 @@
 /**
  * CloudTech Analytics · v3 视觉母版 12 模块
- * 数据分析中心：KPI 卡 + 折线 + 饼图 + 条形
+ * 数据分析中心：KPI 卡 + 折线 + 饼图 + 条形 + i18n
  */
 import { useState } from 'react';
 import { Users, TrendingUp, Activity, Layers, Download, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
 
 type TimeRange = '7d' | '30d' | '90d' | '1y';
 
@@ -35,13 +36,14 @@ const userGrowthData = [40, 65, 50, 80, 70, 90, 85, 60, 75, 95, 70, 88, 100];
 
 export function AnalyticsPage() {
   const [range, setRange] = useState<TimeRange>('30d');
+  const { t } = useTranslation();
   const total = taskDistribution.reduce((sum, d) => sum + d.value, 0);
 
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold">数据分析中心</h1>
+          <h1 className="text-2xl font-bold">{t('nav.analytics')}</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">用户增长 · 任务分布 · 行业转化 · 每日活跃</p>
         </div>
         <div className="flex items-center gap-2">

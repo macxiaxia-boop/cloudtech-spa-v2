@@ -1,12 +1,13 @@
 /**
  * CloudTech Profile · v3 视觉母版 15 模块
- * 个人中心：6 Tab（个人资料/账号安全/API 管理/使用统计/通知与消息/隐私设置）
+ * 个人中心：6 Tab（个人资料/账号安全/API 管理/使用统计/通知与消息/隐私设置）+ i18n
  */
 import { useState } from 'react';
 import { Camera, User, Shield, Key, BarChart3, Bell, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from '@/i18n';
 
 type Tab = 'profile' | 'security' | 'api' | 'stats' | 'notifications' | 'privacy';
 
@@ -21,6 +22,7 @@ const tabs: { key: Tab; label: string; icon: any }[] = [
 
 export function ProfilePage() {
   const [tab, setTab] = useState<Tab>('profile');
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-4">
@@ -33,7 +35,7 @@ export function ProfilePage() {
           </button>
         </div>
         <div className="flex-1">
-          <h1 className="text-xl font-bold">张三</h1>
+          <h1 className="text-xl font-bold">{t('nav.profile')}</h1>
           <div className="text-sm text-[var(--text-secondary)]">zhangsan@company.com</div>
           <div className="flex items-center gap-3 mt-2 text-xs text-[var(--text-tertiary)]">
             <span>ID: 188****6666</span>

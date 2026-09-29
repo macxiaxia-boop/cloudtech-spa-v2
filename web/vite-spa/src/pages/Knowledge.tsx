@@ -1,11 +1,12 @@
 /**
  * CloudTech Knowledge · v3 视觉母版 10 模块
- * 文档检索 · 向量检索 · 多模态解析 · 权限控制
+ * 文档检索 · 向量检索 · 多模态解析 · 权限控制 + i18n
  */
 import { useState } from 'react';
 import { Search, Plus, FileText, MoreHorizontal, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/i18n';
 
 type Tab = 'all' | 'docs' | 'db' | 'web' | 'team';
 
@@ -40,11 +41,12 @@ const tabs: { key: Tab; label: string }[] = [
 export function KnowledgePage() {
   const [tab, setTab] = useState<Tab>('all');
   const [query, setQuery] = useState('');
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">知识库</h1>
+        <h1 className="text-2xl font-bold">{t('nav.knowledge')}</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">文档检索 · 向量检索 · 多模态解析 · 权限控制</p>
       </div>
 
@@ -62,7 +64,7 @@ export function KnowledgePage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] pointer-events-none" />
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索文件…" className="pl-10 h-9" />
           </div>
-          <Button size="sm"><Plus className="w-4 h-4" />上传文档</Button>
+          <Button size="sm"><Plus className="w-4 h-4" />{t('app.upload_doc')}</Button>
         </div>
 
         <table className="w-full">

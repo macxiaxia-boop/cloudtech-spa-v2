@@ -1,10 +1,11 @@
 /**
  * CloudTech Tasks · v3 视觉母版 09 模块
- * Tab + Table + 进度条 + 状态徽章
+ * Tab + Table + 进度条 + 状态徽章 + i18n
  */
 import { useState } from 'react';
 import { MoreHorizontal, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
 
 type TaskStatus = 'running' | 'completed' | 'failed' | 'pending';
 type FilterTab = 'all' | 'running' | 'completed' | 'failed';
@@ -44,16 +45,17 @@ const tabs: { key: FilterTab; label: string }[] = [
 
 export function TasksPage() {
   const [tab, setTab] = useState<FilterTab>('all');
+  const { t } = useTranslation();
   const filtered = tab === 'all' ? tasks : tasks.filter((t) => t.status === tab);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">任务中心</h1>
+          <h1 className="text-2xl font-bold">{t('nav.tasks')}</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">任务管理 · 执行进度 · 日志追踪 · 异常处理</p>
         </div>
-        <Button><Plus className="w-4 h-4" />新建任务</Button>
+        <Button><Plus className="w-4 h-4" />{t('app.create_task')}</Button>
       </div>
 
       <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)]">

@@ -7,15 +7,17 @@
  * 3. 居中路由（centered）: 不套任何 layout（/login /register /workspace/select）
  *
  * 性能优化：WorkflowEditor + Workflows 懒加载（react.lazy + Suspense）
+ * 错误边界：ErrorBoundary 包裹整个 App 防止单组件崩溃
  */
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Link, Outlet } from 'react-router-dom';
+import { Routes, Route, Outlet } from 'react-router-dom';
 import { MarketingPage } from './pages/Marketing';
 import { PricingPage } from './pages/Pricing';
 import { DashboardPage } from './pages/Dashboard';
 import { SettingsPage } from './pages/Settings';
 import { BillingPage } from './pages/Billing';
 import { IndustryDecorationPage } from './pages/IndustryDecoration';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 /* Lazy-load WorkflowEditor + Workflows (xyflow 67KB) */
 const WorkflowsPage = lazy(() => import('./pages/Workflows').then((m) => ({ default: m.WorkflowsPage })));
@@ -61,6 +63,7 @@ import { ProfilePage } from './pages/Profile';
 import { NotificationsPage } from './pages/Notifications';
 import { AgentsPage } from './pages/Agents';
 import { RequireAuth } from './components/Auth/RequireAuth';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 /* ───── Layout: Marketing（marketing Header/Footer） ───── */
 function MarketingLayout() {
@@ -77,17 +80,13 @@ function MarketingLayout() {
 }
 
 function NotFound() {
-  return (
-    <div className="max-w-page mx-auto px-6 py-20 text-center">
-      <h1 className="text-3xl font-bold mb-4">404 · 没找到这页</h1>
-      <Link to="/" className="text-brand-500 hover:underline">返回首页</Link>
-    </div>
-  );
+  return <NotFoundPage />;
 }
 
 export default function App() {
   return (
-    <Routes>
+    <ErrorBoundary>
+      <Routes>
       {/* 营销路由（marketing Header/Footer）*/}
       <Route element={<MarketingLayout />}>
         <Route path="/" element={<MarketingPage />} />
@@ -136,5 +135,6 @@ export default function App() {
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </ErrorBoundary>
   );
 }

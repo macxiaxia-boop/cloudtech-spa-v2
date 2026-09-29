@@ -1,11 +1,12 @@
 /**
  * CloudTech Files · v3 视觉母版 11 模块
- * 网格视图 + 文件类型筛选 + 缩略图
+ * 网格视图 + 文件类型筛选 + 缩略图 + i18n
  */
 import { useState } from 'react';
 import { Plus, Search, Grid3x3, List, MoreHorizontal, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/i18n';
 
 type View = 'grid' | 'list';
 type Tab = 'all' | 'image' | 'doc' | 'video' | 'other';
@@ -43,6 +44,7 @@ export function FilesPage() {
   const [view, setView] = useState<View>('grid');
   const [tab, setTab] = useState<Tab>('all');
   const [query, setQuery] = useState('');
+  const { t } = useTranslation();
 
   const filtered = tab === 'all' ? items : items.filter((i) => i.type === tab);
 
@@ -50,7 +52,7 @@ export function FilesPage() {
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold">文件管理</h1>
+          <h1 className="text-2xl font-bold">{t('nav.files')}</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">网格视图 · 类型筛选 · 多格式支持</p>
         </div>
         <div className="flex items-center gap-2">
@@ -58,7 +60,7 @@ export function FilesPage() {
             <button onClick={() => setView('grid')} className={`p-2 ${view === 'grid' ? 'bg-brand-50 text-brand-600' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'}`} aria-label="网格视图"><Grid3x3 className="w-4 h-4" /></button>
             <button onClick={() => setView('list')} className={`p-2 border-l border-[var(--border-default)] ${view === 'list' ? 'bg-brand-50 text-brand-600' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'}`} aria-label="列表视图"><List className="w-4 h-4" /></button>
           </div>
-          <Button size="sm"><Plus className="w-4 h-4" />上传文件</Button>
+          <Button size="sm"><Plus className="w-4 h-4" />{t('app.upload_file')}</Button>
         </div>
       </div>
 

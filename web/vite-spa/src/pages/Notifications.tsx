@@ -1,10 +1,11 @@
 /**
  * CloudTech Notifications · v3 视觉母版 14 模块
- * 通知中心：4 Tab（全部/系统通知/任务通知/协作通知）+ 已读未读
+ * 通知中心：4 Tab（全部/系统通知/任务通知/协作通知）+ 已读未读 + i18n
  */
 import { useState } from 'react';
 import { Bell, Check, Trash2, Settings as SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
 
 type Tab = 'all' | 'system' | 'task' | 'collab';
 
@@ -43,6 +44,7 @@ const typeBadge: Record<Notification['type'], { color: string; label: string }> 
 
 export function NotificationsPage() {
   const [tab, setTab] = useState<Tab>('all');
+  const { t } = useTranslation();
   const filtered = tab === 'all' ? notifications : notifications.filter((n) => n.type === tab);
   const unreadCount = notifications.filter((n) => n.unread).length;
 
@@ -52,7 +54,7 @@ export function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Bell className="w-6 h-6 text-brand-600" />
-            通知中心
+            {t('nav.notifications')}
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">系统通知 · 任务通知 · 协作通知</p>
         </div>
