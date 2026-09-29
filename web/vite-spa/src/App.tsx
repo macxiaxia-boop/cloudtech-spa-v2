@@ -40,6 +40,9 @@ import { KnowledgePage } from './pages/Knowledge';
 import { FilesPage } from './pages/Files';
 import { WorkflowsPage } from './pages/Workflows';
 import { WorkflowEditorPage } from './pages/WorkflowEditor';
+import { AnalyticsPage } from './pages/Analytics';
+import { SettingsSystemPage } from './pages/SettingsSystem';
+import { SettingsTeamPage } from './pages/SettingsTeam';
 
 /* ───── Layout: Marketing（marketing Header/Footer） ───── */
 function MarketingLayout() {
@@ -104,9 +107,10 @@ export default function App() {
       <Route path="/workflows/:id" element={<BasicLayout showBreadcrumb={false}><WorkflowEditorPage /></BasicLayout>} />
       <Route path="/settings" element={<BasicLayout><SettingsPage /></BasicLayout>} />
       <Route path="/settings/models" element={<BasicLayout><SettingsPage /></BasicLayout>} />
-      <Route path="/settings/team" element={<BasicLayout><SettingsPage /></BasicLayout>} />
-      <Route path="/settings/system" element={<BasicLayout><SettingsPage /></BasicLayout>} />
+      <Route path="/settings/team" element={<BasicLayout><SettingsTeamPage /></BasicLayout>} />
+      <Route path="/settings/system" element={<BasicLayout><SettingsSystemPage /></BasicLayout>} />
       <Route path="/settings/billing" element={<BasicLayout><BillingPage /></BasicLayout>} />
+      <Route path="/analytics" element={<BasicLayout><AnalyticsPage /></BasicLayout>} />
       <Route path="/monitoring" element={<BasicLayout><MonitoringPage /></BasicLayout>} />
 
       {/* 404 */}
