@@ -5,7 +5,10 @@
  * 1. 营销路由（marketing）: 用 Header/Footer 包装，marketing-first 布局
  * 2. 工作台路由（AppShell）: 用 BasicLayout 包装，左 sidebar + 顶 header
  * 3. 居中路由（centered）: 不套任何 layout（/login /register /workspace/select）
+ *
+ * 性能优化：WorkflowEditor + Workflows 懒加载（react.lazy + Suspense）
  */
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Link, Outlet } from 'react-router-dom';
 import { MarketingPage } from './pages/Marketing';
 import { PricingPage } from './pages/Pricing';
@@ -13,6 +16,19 @@ import { DashboardPage } from './pages/Dashboard';
 import { SettingsPage } from './pages/Settings';
 import { BillingPage } from './pages/Billing';
 import { IndustryDecorationPage } from './pages/IndustryDecoration';
+
+/* Lazy-load WorkflowEditor + Workflows (xyflow 67KB) */
+const WorkflowsPage = lazy(() => import('./pages/Workflows').then((m) => ({ default: m.WorkflowsPage })));
+const WorkflowEditorPage = lazy(() => import('./pages/WorkflowEditor').then((m) => ({ default: m.WorkflowEditorPage })));
+
+/* Lazy-load 入口加载占位 */
+function PageLoading() {
+  return (
+    <div className="flex items-center justify-center h-[calc(100vh-56px)]">
+      <div className="text-sm text-[var(--text-secondary)]">加载中…</div>
+    </div>
+  );
+}
 import { IndustryMedicalPage } from './pages/IndustryMedical';
 import { ContentSOPPage } from './pages/ContentSOP';
 import { ClientListPage } from './pages/ClientList';
@@ -38,8 +54,6 @@ import { TasksPage } from './pages/Tasks';
 import { AgentCreatePage } from './pages/AgentCreate';
 import { KnowledgePage } from './pages/Knowledge';
 import { FilesPage } from './pages/Files';
-import { WorkflowsPage } from './pages/Workflows';
-import { WorkflowEditorPage } from './pages/WorkflowEditor';
 import { AnalyticsPage } from './pages/Analytics';
 import { SettingsSystemPage } from './pages/SettingsSystem';
 import { SettingsTeamPage } from './pages/SettingsTeam';
@@ -105,9 +119,9 @@ export default function App() {
       <Route path="/tasks" element={<BasicLayout><TasksPage /></BasicLayout>} />
       <Route path="/knowledge" element={<BasicLayout><KnowledgePage /></BasicLayout>} />
       <Route path="/files" element={<BasicLayout><FilesPage /></BasicLayout>} />
-      <Route path="/workflows" element={<BasicLayout><WorkflowsPage /></BasicLayout>} />
-      <Route path="/workflows/new" element={<BasicLayout showBreadcrumb={false}><WorkflowEditorPage /></BasicLayout>} />
-      <Route path="/workflows/:id" element={<BasicLayout showBreadcrumb={false}><WorkflowEditorPage /></BasicLayout>} />
+      <Route path="/workflows" element={<BasicLayout><Suspense fallback={<PageLoading />}><WorkflowsPage /></Suspense></BasicLayout>} />
+      <Route path="/workflows/new" element={<BasicLayout showBreadcrumb={false}><Suspense fallback={<PageLoading />}><WorkflowEditorPage /></Suspense></BasicLayout>} />
+      <Route path="/workflows/:id" element={<BasicLayout showBreadcrumb={false}><Suspense fallback={<PageLoading />}><WorkflowEditorPage /></Suspense></BasicLayout>} />
       <Route path="/settings" element={<BasicLayout><SettingsPage /></BasicLayout>} />
       <Route path="/settings/models" element={<BasicLayout><SettingsPage /></BasicLayout>} />
       <Route path="/settings/team" element={<BasicLayout><SettingsTeamPage /></BasicLayout>} />
