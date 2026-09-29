@@ -1,0 +1,78 @@
+repo,source_path,file_type,key_concept,cloudtech_application,license,commit_sha,priority,adaptation_notes
+shadcn-ui,apps/v4/components.json,config,cssVariables=true + lucide iconLibrary,src/theme/globals.css + tailwind.config.js,MIT,db2db460,P0,baseColor=neutral → 替换为 brand blue palette
+shadcn-ui,apps/v4/registry/new-york-v4/ui/button.tsx,component,class-variance-authority 6-variant + 8-size,src/components/ui/button.tsx,MIT,db2db460,P0,加 SPDX 头 + 替换 default variant bg 为 brand-500
+shadcn-ui,apps/v4/registry/new-york-v4/ui/card.tsx,component,data-slot pattern + @container/card-header,src/components/ui/card.tsx,MIT,db2db460,P0,圆角从 rounded-xl 改为 rounded-lg 更企业感
+shadcn-ui,apps/v4/registry/new-york-v4/ui/input.tsx,component,input with ring focus state,src/components/ui/input.tsx,MIT,db2db460,P0,登录/注册/搜索栏必备
+shadcn-ui,apps/v4/registry/new-york-v4/ui/form.tsx,component,react-hook-form + zod schema,src/components/ui/form.tsx,MIT,db2db460,P0,所有表单页用此基底
+shadcn-ui,apps/v4/registry/new-york-v4/ui/label.tsx,component,radix Label primitive,src/components/ui/label.tsx,MIT,db2db460,P0,与 Form 配套
+shadcn-ui,apps/v4/registry/new-york-v4/ui/dialog.tsx,component,radix Dialog + overlay animation,src/components/ui/dialog.tsx,MIT,db2db460,P0,智能体创建/删除确认等
+shadcn-ui,apps/v4/registry/new-york-v4/ui/alert.tsx,component,destructive/default variant,src/components/ui/alert.tsx,MIT,db2db460,P1,系统告警/操作反馈
+shadcn-ui,apps/v4/registry/new-york-v4/ui/alert-dialog.tsx,component,确认对话框 (删除/不可逆操作),src/components/ui/alert-dialog.tsx,MIT,db2db460,P0,智能体删除/工作流发布前确认
+shadcn-ui,apps/v4/registry/new-york-v4/ui/select.tsx,component,radix Select primitive,src/components/ui/select.tsx,MIT,db2db460,P0,模型选择/角色选择/状态选择
+shadcn-ui,apps/v4/registry/new-york-v4/ui/checkbox.tsx,component,radix Checkbox,src/components/ui/checkbox.tsx,MIT,db2db460,P1,知识库多选/权限勾选
+shadcn-ui,apps/v4/registry/new-york-v4/ui/radio-group.tsx,component,radix RadioGroup,src/components/ui/radio-group.tsx,MIT,db2db460,P2,模型类型选择
+shadcn-ui,apps/v4/registry/new-york-v4/ui/switch.tsx,component,radix Switch,src/components/ui/switch.tsx,MIT,db2db460,P1,设置页开关
+shadcn-ui,apps/v4/registry/new-york-v4/ui/slider.tsx,component,radix Slider,src/components/ui/slider.tsx,MIT,db2db460,P2,温度/Token 参数调节
+shadcn-ui,apps/v4/registry/new-york-v4/ui/textarea.tsx,component,AI prompt input,src/components/ui/textarea.tsx,MIT,db2db460,P0,/chat /agents prompt 编辑
+shadcn-ui,apps/v4/registry/new-york-v4/ui/tabs.tsx,component,radix Tabs,src/components/ui/tabs.tsx,MIT,db2db460,P0,智能体详情/任务中心/设置分组
+shadcn-ui,apps/v4/registry/new-york-v4/ui/accordion.tsx,component,radix Accordion,src/components/ui/accordion.tsx,MIT,db2db460,P2,FAQ / 知识库目录
+shadcn-ui,apps/v4/registry/new-york-v4/ui/collapsible.tsx,component,radix Collapsible,src/components/ui/collapsible.tsx,MIT,db2db460,P2,sidebar 二级菜单折叠
+shadcn-ui,apps/v4/registry/new-york-v4/ui/tooltip.tsx,component,radix Tooltip,src/components/ui/tooltip.tsx,MIT,db2db460,P1,icon 按钮说明
+shadcn-ui,apps/v4/registry/new-york-v4/ui/popover.tsx,component,radix Popover,src/components/ui/popover.tsx,MIT,db2db460,P1,模型下拉/用户菜单
+shadcn-ui,apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx,component,radix DropdownMenu,src/components/ui/dropdown-menu.tsx,MIT,db2db460,P0,任务操作菜单/表格行操作
+shadcn-ui,apps/v4/registry/new-york-v4/ui/command.tsx,component,cmdk 命令面板,src/components/ui/command.tsx,MIT,db2db460,P1,Cmd+K 全局搜索/命令面板
+shadcn-ui,apps/v4/registry/new-york-v4/ui/dialog.tsx (sheet),component,Sheet 侧边抽屉,src/components/ui/sheet.tsx,MIT,db2db460,P0,移动端 nav / 工作流配置面板
+shadcn-ui,apps/v4/registry/new-york-v4/ui/sidebar.tsx,component,AppSidebar + SidebarProvider,src/components/ui/sidebar.tsx,MIT,db2db460,P0,工作台左侧导航
+shadcn-ui,apps/v4/registry/new-york-v4/ui/navigation-menu.tsx,component,radix NavigationMenu,src/components/ui/navigation-menu.tsx,MIT,db2db460,P2,顶部主导航
+shadcn-ui,apps/v4/registry/new-york-v4/ui/breadcrumb.tsx,component,radix Breadcrumb,src/components/ui/breadcrumb.tsx,MIT,db2db460,P1,层级面包屑
+shadcn-ui,apps/v4/registry/new-york-v4/ui/pagination.tsx,component,列表分页,src/components/ui/pagination.tsx,MIT,db2db460,P2,客户清单/案例库
+shadcn-ui,apps/v4/registry/new-york-v4/ui/table.tsx,component,通用表格 primitive,src/components/ui/table.tsx,MIT,db2db460,P0,任务中心/智能体列表/知识库
+shadcn-ui,apps/v4/registry/new-york-v4/ui/data-table.tsx,component,tanstack-table 集成（如有）,src/components/ui/data-table.tsx,MIT,db2db460,P2,复杂数据表
+shadcn-ui,apps/v4/registry/new-york-v4/ui/badge.tsx,component,状态徽标,src/components/ui/badge.tsx,MIT,db2db460,P0,任务状态/智能体状态
+shadcn-ui,apps/v4/registry/new-york-v4/ui/avatar.tsx,component,radix Avatar,src/components/ui/avatar.tsx,MIT,db2db460,P1,用户头像/AI 员工头像
+shadcn-ui,apps/v4/registry/new-york-v4/ui/progress.tsx,component,radix Progress,src/components/ui/progress.tsx,MIT,db2db460,P0,任务进度条
+shadcn-ui,apps/v4/registry/new-york-v4/ui/skeleton.tsx,component,加载占位,src/components/ui/skeleton.tsx,MIT,db2db460,P0,所有数据加载态
+shadcn-ui,apps/v4/registry/new-york-v4/ui/separator.tsx,component,radix Separator,src/components/ui/separator.tsx,MIT,db2db460,P2,视觉分隔
+shadcn-ui,apps/v4/registry/new-york-v4/ui/scroll-area.tsx,component,radix ScrollArea,src/components/ui/scroll-area.tsx,MIT,db2db460,P1,对话区滚动/侧栏滚动
+shadcn-ui,apps/v4/registry/new-york-v4/ui/sonner.tsx,component,Toast 通知,src/components/ui/sonner.tsx,MIT,db2db460,P1,操作反馈/系统通知
+shadcn-ui,apps/v4/registry/new-york-v4/ui/spinner.tsx,component,加载中,src/components/ui/spinner.tsx,MIT,db2db460,P1,提交按钮 loading
+shadcn-ui,apps/v4/registry/new-york-v4/ui/empty.tsx,component,空状态,src/components/ui/empty.tsx,MIT,db2db460,P1,列表空数据
+shadcn-ui,apps/v4/registry/new-york-v4/ui/bubble.tsx,component,AI 消息气泡,src/components/ui/bubble.tsx,MIT,db2db460,P0,/chat 消息列表
+shadcn-ui,apps/v4/registry/new-york-v4/ui/resizable.tsx,component,radix Resizable,src/components/ui/resizable.tsx,MIT,db2db460,P2,工作流编辑器/聊天详情
+shadcn-ui,apps/v4/registry/new-york-v4/ui/calendar.tsx,component,react-day-picker 集成,src/components/ui/calendar.tsx,MIT,db2db460,P3,日期选择
+shadcn-ui,apps/v4/registry/new-york-v4/ui/chart.tsx,component,recharts 集成,src/components/ui/chart.tsx,MIT,db2db460,P1,Dashboard 数据可视化
+shadcn-ui,apps/v4/registry/new-york-v4/ui/kbd.tsx,component,键盘快捷键提示,src/components/ui/kbd.tsx,MIT,db2db460,P3,快捷键说明
+shadcn-ui,apps/v4/registry/new-york-v4/blocks/login-01,example,登录页布局,src/pages/Login.tsx 参考,MIT,db2db460,P1,左侧品牌 + 右侧表单
+shadcn-ui,apps/v4/registry/new-york-v4/blocks/dashboard-01,example,Dashboard 布局,src/pages/Dashboard.tsx 参考,MIT,db2db460,P1,顶部 KPI + 图表网格
+shadcn-ui,apps/v4/registry/new-york-v4/blocks/settings-01,example,设置页布局,src/pages/Settings.tsx 参考,MIT,db2db460,P2,左侧菜单 + 右侧表单
+shadcn-ui,apps/v4/registry/new-york-v4/blocks/ai-chat-01,example,AI 对话页,src/pages/Chat.tsx 参考,MIT,db2db460,P0,左侧会话 + 中间消息 + 右侧模型配置
+shadcn-ui,apps/v4/registry/new-york-v4/blocks/calendar-01,example,日历视图,src/pages/Monitoring.tsx 参考,MIT,db2db460,P3,任务时间线
+ant-design-pro,config/defaultSettings.ts,config,navTheme='light' + layout='mix' + fixSiderbar=true + colorPrimary='#1677ff',src/theme/settings.ts (CloudTech 自实现),MIT,24de7e34,P1,**不复制代码，仅借鉴设计**；main 色借鉴 #1677ff 与 #0066FF 同系
+ant-design-pro,config/routes.ts,config,/user/* layout:false 单独处理 + wrappers 权限校验 + i18n menu,src/routes/index.tsx (React Router 6),MIT,24de7e34,P1,**不复制代码**；CloudTech 路由设计借鉴此结构
+ant-design-pro,src/layouts/BasicLayout.tsx,component,ProLayout mix (顶部 nav + 左侧 sidebar),src/components/AppShell/BasicLayout.tsx,MIT,24de7e34,P1,**仅借鉴结构**，用 Tailwind + shadcn Sidebar 自实现
+ant-design-pro,src/pages/user/login/index.tsx,page,登录页布局,src/pages/Login.tsx,MIT,24de7e34,P1,**仅截图参考**，不复制代码
+ant-design-pro,src/pages/dashboard/analysis/index.tsx,page,Dashboard Analysis,KPI 卡片 + 图表,src/pages/Dashboard.tsx 参考,MIT,24de7e34,P2,**仅借鉴区块组织**
+ant-design-pro,src/pages/dashboard/monitor/index.tsx,page,Monitor 页（异常告警）,src/pages/Monitoring.tsx 参考,MIT,24de7e34,P1,**仅借鉴区块组织**
+ant-design-pro,src/pages/list/table-list/index.tsx,page,TableList（搜索+表格+操作）,src/pages/ClientList.tsx 参考,MIT,24de7e34,P1,**仅借鉴区块组织**
+ant-design-pro,src/pages/list/card-list/index.tsx,page,CardList（卡片网格）,src/pages/CaseLibrary.tsx 参考,MIT,24de7e34,P2,**仅借鉴区块组织**
+ant-design-pro,src/pages/account/settings/index.tsx,page,AccountSettings（多分组设置）,src/pages/Settings.tsx 参考,MIT,24de7e34,P1,**仅借鉴区块组织**
+ant-design-pro,src/components/RightContent/AvatarDropdown.tsx,component,用户菜单 + 退出,src/components/AppShell/UserMenu.tsx,MIT,24de7e34,P1,**仅截图参考**
+ant-design-pro,docs/dumi-theme,doc,Pro 文档站点设计,可作 CloudTech /docs 视觉参考,MIT,24de7e34,P3,**可选借鉴**
+ant-design-pro,src/services/ant-design-pro/api.ts,service,API 抽象层（含 mock + http）,,MIT,24de7e34,P1,**仅借鉴分层思想**，CloudTech 已用 fetch
+ant-design-pro,config/oneapi.json,config,OpenAPI schema 导入,—,MIT,24de7e34,P3,CloudTech 已用 /api/v2/* 直接 fetch
+xyflow,packages/react/src/styles/style.css,css,xy-flow 基础样式（handle/edge/controls）,src/styles/xyflow.css,MIT,3d35b573,P0,直接引入 @xyflow/react/dist/style.css
+xyflow,packages/react/src/styles/base.css,css,xy-flow CSS 变量主题,src/styles/xyflow-theme.css,MIT,3d35b573,P0,覆盖 --xy-* 变量为 CloudTech brand
+xyflow,packages/react/src/components/FlowRenderer,component,主渲染器（含背景/网格/minimap）,,MIT,3d35b573,P0,直接使用 `<ReactFlow>` 组件
+xyflow,packages/react/src/components/Controls,component,缩放/适配/锁定控件,src/components/workflow/Controls.tsx,MIT,3d35b573,P0,直接使用 `<Controls>`
+xyflow,packages/react/src/components/MiniMap,component,缩略图,src/components/workflow/MiniMap.tsx,MIT,3d35b573,P1,直接使用 `<MiniMap>` + 自定义节点颜色
+xyflow,packages/react/src/components/Background,component,网格背景,src/components/workflow/Background.tsx,MIT,3d35b573,P0,直接使用 `<Background variant="dots">`
+xyflow,packages/react/src/hooks/useReactFlow,hook,流程控制 hook（fitView/zoomIn）,src/hooks/useWorkflow.ts,MIT,3d35b573,P0,直接使用
+xyflow,packages/react/src/hooks/useNodesState,hook,节点状态管理,src/hooks/useWorkflowNodes.ts,MIT,3d35b573,P0,直接使用
+xyflow,packages/react/src/hooks/useEdgesState,hook,边状态管理,src/hooks/useWorkflowEdges.ts,MIT,3d35b573,P0,直接使用
+xyflow,packages/react/src/hooks/useConnection,hook,连接处理,—,MIT,3d35b573,P0,直接使用
+xyflow,packages/react/src/types/nodes.ts,types,CustomNode 类型,src/types/workflow.ts,MIT,3d35b573,P0,定义 7 种节点类型
+xyflow,packages/react/src/types/edges.ts,types,CustomEdge 类型,src/types/workflow.ts,MIT,3d35b573,P0,定义 4 种边类型
+xyflow,examples/react/src/examples/Basic,example,基础节点编辑器示例,src/pages/Workflows/Editor.tsx 参考,MIT,3d35b573,P1,**完整示例参考**
+xyflow,examples/react/src/examples/CustomNode,example,自定义节点示例,src/components/workflow/nodes/,MIT,3d35b573,P1,**完整示例参考**
+xyflow,examples/react/src/examples/Validation,example,边验证示例,src/components/workflow/validators.ts,MIT,3d35b573,P1,**完整示例参考**
+xyflow,examples/react/src/examples/Subflow,example,子流程嵌套,—,MIT,3d35b573,P3,**暂不实现**，Phase 2

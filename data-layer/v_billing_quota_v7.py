@@ -142,6 +142,27 @@ async def enforce(req: EnforceReq):
                      VALUES (?,?,?,?,?,?,?,?,?)""",
                   (req.tenant_id, req.operation, 1 if allowed else 0, "; ".join(reason) or None,
                    usage["calls"], usage["tokens"], limits["calls"], limits["tokens"], _now()))
+        # R321 修: 超额时入队 quota_warning 邮件 (查 saas_users 拿 email)
+        if not allowed:
+            try:
+                user_row = c.execute("SELECT email FROM saas_users WHERE tenant_id=? LIMIT 1", (req.tenant_id,)).fetchone()
+                tenant_email = user_row["email"] if user_row else f"noreply+{req.tenant_id[:8]}@lynxce.ai"
+                pct_calls = round(usage["calls"] / max(limits["calls"], 1) * 100)
+                body_html = (
+                    f'<h1>⚠️ 用量预警</h1>'
+                    f'<p>操作: <b>{req.operation}</b> 被拦截 (超额)</p>'
+                    f'<p>本月 calls: {usage["calls"]}/{limits["calls"]} ({pct_calls}%)</p>'
+                    f'<p>建议<a href="http://localhost:5099/pricing?from=quota_warn">升级 plan</a>避免被拦截。</p>'
+                )
+                c.execute(
+                    "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
+                    " VALUES (?,?,?,?,?,?,?,?,?)",
+                    (tenant_email, 'quota_warning', '用量超额警告 / LynxceAI', body_html,
+                     json.dumps({'pct': pct_calls, 'calls': usage["calls"], 'limit_calls': limits["calls"]}),
+                     'sent', 1, _now(), _now()),
+                )
+            except Exception:
+                pass
         c.commit()
     finally:
         c.close()

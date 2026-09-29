@@ -22,6 +22,7 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { OnboardingTrigger } from './components/OnboardingTrigger';
 import { BasicLayout } from './components/AppShell/BasicLayout';
+import { WorkspaceSelectorPage } from './pages/WorkspaceSelect';
 
 // Phase 47: 全部做（Stage 1+2+3）— 17 页面 + 完整导航 + Onboarding + 新监控
 // Phase 48.D84-87: Funnel + Revenue 接入 SPA（4 大补漏）
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/monitoring" element={<MonitoringPage />} />
           <Route path="/dashboard" element={<BasicLayout><DashboardPage /></BasicLayout>} />
+          <Route path="/workspace/select" element={<WorkspaceSelectorPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="*" element={<NotFound />} />

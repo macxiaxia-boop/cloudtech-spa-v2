@@ -70,10 +70,10 @@ async def forgot(req: ForgotReq):
     """用户提交邮箱 → 生成 5 分钟 token (即使邮箱不存在也返回 ok 防枚举)。"""
     c = _conn()
     try:
-        row = c.execute("SELECT user_id FROM saas_users WHERE email=? LIMIT 1", (req.email,)).fetchone()
+        row = c.execute("SELECT id FROM users WHERE email=?", (req.email,)).fetchone()
         if not row:
             return {"status": "ok", "msg": "如果邮箱存在,重置链接已发送", "email": req.email}
-        user_id = str(row["user_id"])
+        user_id = str(row["id"])
         token = secrets.token_urlsafe(32)
         token_hash = _hash_token(token)
         now = _now()
@@ -83,26 +83,7 @@ async def forgot(req: ForgotReq):
             VALUES (?, ?, ?, ?, ?, ?)
         """, (token_hash, user_id, req.email, now, expires, req.ip))
         c.commit()
-        # R321 修: 入队密码重置邮件 (smoke mode, 真 SMTP 由 L4 接入)
-        try:
-            reset_url = f"http://localhost:5099/reset-password?token={token}"
-            body_html = (
-                f'<h1>密码重置</h1>'
-                f'<p>请点击下方链接在 5 分钟内重置密码:</p>'
-                f'<p><a href="{reset_url}">重置密码 →</a></p>'
-                f'<p>如非本人操作, 请忽略此邮件。</p>'
-            )
-            c2 = sqlite3.connect(DB_PATH); c2c = c2.cursor()
-            c2c.execute(
-                "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
-                " VALUES (?,?,?,?,?,?,?,?,?)",
-                (req.email, 'password_reset', '重置密码 / LynxceAI', body_html,
-                 json.dumps({'reset_url': reset_url}), 'sent', 1,
-                 _now(), _now()),
-            )
-            c2.commit(); c2.close()
-        except Exception:
-            pass
+        # TODO: 真实场景下邮件发送 (L5 边界 — 需 SMTP 配置)
         return {
             "status": "ok",
             "msg": "重置链接已生成 (5 分钟有效)",

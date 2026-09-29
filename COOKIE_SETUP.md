@@ -1,67 +1,56 @@
-# Cookie 导入指南 — 解锁小红书/抖音真实数据采集
+# Cookie 配置指南 · R321
 
-## 三步完成
+> **用户原话**: "cookie 后面配"
+> **目标**: 把 5 平台 cookie 文件从占位换成真值, 工作流自动从 `mock_fallback` 切到 `real`
 
-### Step 1: 安装 Chrome 扩展
+## 5 平台 cookie 文件
 
-1. 打开 Chrome → 扩展商店搜索 **"EditThisCookie"**
-2. 安装后右上角会出现 🍪 图标
+| 平台 | 文件 | 状态 | 备注 |
+|------|------|------|------|
+| 抖音 | `D:\CloudTech-Portable\cookies_douyin.json` | 🔴 过期 (2025-07) | 需重新扫码 |
+| 小红书 | `D:\CloudTech-Portable\cookies_xiaohongshu.json` | 🔴 过期 (2025-07) | 需重新扫码 |
+| 视频号 | `D:\CloudTech-Portable\cookies_shipinhao.json` | 🟡 占位 | 模板已生成 |
+| 公众号 | `D:\CloudTech-Portable\cookies_wechat_mp.json` | 🟡 占位 | 模板已生成 |
+| B站 | `D:\CloudTech-Portable\cookies_bilibili.json` | 🟡 占位 | 模板已生成 |
 
-### Step 2: 导出 Cookie
+## 重新登录方法
 
-1. **打开小红书网页版** → https://www.xiaohongshu.com
-2. 扫码登录你的小红书账号
-3. 登录后点击右上角 🍪 → 点 **Export** (导出按钮)
-4. 复制弹出的 JSON 文本
-5. 粘贴到 `cookies_xiaohongshu.json` 文件
+### 方法 1: Playwright 脚本 (推荐)
 
-**抖音同理：**
-1. 打开 https://www.douyin.com 并登录
-2. 🍪 → Export → 复制 JSON
-3. 粘贴到 `cookies_douyin.json` 文件
-
-### Step 3: 放文件
-
-将两个 JSON 文件放到这个目录：
-```
-D:\浏览器\CloudTech-v2.0.0\CloudTech-Portable\
-├── cookies_xiaohongshu.json
-└── cookies_douyin.json
+```python
+# 双击运行 `D:\CloudTech-Portable\login_<平台>.py` (已存在 douyin / xhs)
+# 浏览器打开 → 手动扫码 → 检测登录成功 → 自动保存 cookie 到对应文件
 ```
 
-完成后运行测试采集：
+### 方法 2: 手动提取
+
+1. Chrome 打开目标平台 + 扫码登录
+2. F12 → Application → Cookies → 复制所有 cookies
+3. 按 `[{name, value, domain, path, expires, httpOnly, secure, sameSite}, ...]` 格式粘贴到 `cookies_<平台>.json`
+
+## 登录验证
+
 ```bash
-node scraper_browser.js --batch
+curl http://127.0.0.1:5099/api/v3/v3_193_multi_workflow/douyin/workflow/run \
+  -H "Content-Type: application/json" -d '{"industry":"decoration"}'
 ```
 
----
+返回 `"publish": {"mode": "real", ...}` 即生效。
 
-## Cookie 文件格式示例
+## 安全提醒
 
-```json
-[
-  {
-    "domain": ".xiaohongshu.com",
-    "name": "web_session",
-    "value": "xxxxxxxxxxxxx",
-    "path": "/",
-    "httpOnly": true,
-    "secure": true
-  },
-  {
-    "domain": ".xiaohongshu.com", 
-    "name": "webId",
-    "value": "xxxxxxxxxxxxx",
-    "path": "/"
-  }
-]
-```
+- cookie = 账号凭证, **不可提交到 git**
+- 当前 `.gitignore` 应已包含 `cookies_*.json` (若未, 加一行)
+- cookie 过期时间: 抖音/小红书 ~30 天, 视频号/公众号 ~2 小时 (微信风控), B站 ~7 天
 
----
+## L2 自治完成的 prep work
 
-## 注意事项
+- 5 个 cookie 文件**模板已就位**
+- `v3_193_multi_workflow` 自动检测 cookie 内容 (REPLACE 视为占位 → mock)
+- 一旦 cookie 真实, **无需改代码**, 重启 V22 gateway 即生效
 
-- Cookie 有效期通常 7-30 天，过期需重新导入
-- 不要分享 Cookie 文件给任何人
-- Cookie 文件已在 `.gitignore` 中排除
-- 建议每两周刷新一次登录态
+## L4 待办 (用户授权)
+
+- 真实登录 5 平台
+- 按方法 1/2 替换 cookie 值
+- 验证 publish 模式从 mock 切到 real

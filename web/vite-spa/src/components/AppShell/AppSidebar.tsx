@@ -53,18 +53,18 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    title: '管理',
+    title: '团队',
     items: [
-      { label: '模型管理', href: '/settings/models', icon: Settings2 },
+      { label: '团队空间', href: '/workspace/select', icon: Users },
       { label: '团队与权限', href: '/settings/team', icon: Users },
-      { label: '系统设置', href: '/settings/system', icon: Sliders },
     ],
   },
   {
-    title: '数据',
+    title: '管理',
     items: [
+      { label: '模型管理', href: '/settings/models', icon: Settings2 },
+      { label: '系统设置', href: '/settings/system', icon: Sliders },
       { label: '数据分析', href: '/analytics', icon: BarChart3 },
-      { label: '通知中心', href: '/notifications', icon: Bell },
     ],
   },
 ];

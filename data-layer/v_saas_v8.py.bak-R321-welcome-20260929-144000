@@ -100,64 +100,14 @@ async def saas_register(request: Request):
                   (user_id, email, _hash_pwd(pwd, salt), salt, tenant_id, industry, 'pro', datetime.utcnow().isoformat()))
         c.execute('INSERT INTO saas_tenants (tenant_id,name,industry,plan,sku_id,created_at,active) VALUES (?,?,?,?,?,?,1)',
                   (tenant_id, tenant_name, industry, 'pro', sku_id, datetime.utcnow().isoformat()))
-        # R321 修: register 同时建 aios_subscription 行 (upgrade/downgrade 才能找到)
-        try:
-            sub_id = 'sub_' + secrets.token_hex(6)
-            expires_iso = (datetime.utcnow() + timedelta(days=7)).isoformat()
-            now_iso = datetime.utcnow().isoformat()
-            c.execute(
-                'INSERT INTO aios_subscription (subscription_id, tenant_id, industry, plan, sku_code, amount_cny, status, activated_at, expires_at, created_at)'
-                ' VALUES (?,?,?,?,?,?,?,?,?,?)',
-                (sub_id, tenant_id, industry, 'pro', sku_id, 1999, 'active', now_iso, expires_iso, now_iso),
-            )
-        except Exception as e:
-            print(f'[register aios_subscription fail] {e}')
         conn.commit()
     except sqlite3.IntegrityError:
         raise HTTPException(409, detail={'error': 'email already registered'})
     finally:
         conn.close()
     token = _mint_jwt(user_id, tenant_id)
-    # R321 修: 注册成功后入队欢迎邮件 (smoke mode: 入队即视为已发送)
-    # 真根因: register 原本完全没调邮件/通知, 用户实测 "发出去没回应"
-    trial_end_at = (datetime.utcnow() + timedelta(days=7)).isoformat()
-    welcome_email_sent = False
-    try:
-        conn2 = sqlite3.connect(DB); c2 = conn2.cursor()
-        name = body.get('name') or email.split('@')[0]
-        welcome_html = (
-            f'<h1>欢迎 {name}!</h1>'
-            f'<p>感谢注册灵策智算 SaaS。您的账号已激活。</p>'
-            f'<p>当前 plan: <b>pro</b> · 7 天试用至 <b>{trial_end_at}</b></p>'
-            f'<p><a href="http://localhost:5099/dashboard?from=welcome">立即登录 →</a></p>'
-        )
-        c2.execute(
-            "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
-            " VALUES (?,?,?,?,?,?,?,?,?)",
-            (email, 'welcome', '欢迎加入灵策智算 / LynxceAI', welcome_html,
-             json.dumps({'name': name, 'plan': 'pro'}), 'sent', 1,
-             datetime.utcnow().isoformat(), datetime.utcnow().isoformat()),
-        )
-        conn2.commit()
-        conn2.close()
-        welcome_email_sent = True
-    except Exception as e:
-        # 邮件入队失败不阻塞注册主流程
-        welcome_email_sent = False
-
-    return {
-        'status': 'ok', 'user_id': user_id, 'tenant_id': tenant_id, 'token': token,
-        'plan': 'pro', 'trial_days': 7,
-        'trial_end_at': trial_end_at,
-        'welcome_email_sent': welcome_email_sent,
-        'onboarding_url': '/dashboard?from=welcome',
-        'next_steps': [
-            '登录 dashboard 配置你的业务画像',
-            '邀请 1 位同事加入 (推荐有奖 +100 积分)',
-            '试用 7 天 pro plan · 到期自动降级 basic',
-        ],
-        'msg': '注册成功 · 7 天 pro 试用已开通 · 欢迎邮件已发送',
-    }
+    return {'status': 'ok', 'user_id': user_id, 'tenant_id': tenant_id, 'token': token,
+            'plan': 'pro', 'trial_days': 7, 'msg': '注册成功 · 7 天 pro 试用已开通'}
 
 @router.post('/login')
 async def saas_login(request: Request):
@@ -178,25 +128,6 @@ async def saas_login(request: Request):
     c.execute('UPDATE saas_users SET last_login_at=? WHERE user_id=?', (datetime.utcnow().isoformat(), user_id))
     conn.commit(); conn.close()
     token = _mint_jwt(user_id, tenant_id)
-    # R321 修: 登录成功入队"登录提醒"邮件 (防账号盗用)
-    try:
-        conn2 = sqlite3.connect(DB); c2 = conn2.cursor()
-        body_html = (
-            f'<h1>登录提醒</h1>'
-            f'<p>您的账号于 {datetime.utcnow().isoformat()} 登录。</p>'
-            f'<p>如非本人操作, 请立即<a href="http://localhost:5099/forgot-password">重置密码</a>。</p>'
-            f'<p>登录地址: 127.0.0.1 (dev) · 设备: API</p>'
-        )
-        c2.execute(
-            "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
-            " VALUES (?,?,?,?,?,?,?,?,?)",
-            (email, 'support_reply', '账号登录提醒 / LynxceAI', body_html,
-             json.dumps({'event': 'login', 'ts': datetime.utcnow().isoformat()}),
-             'sent', 1, datetime.utcnow().isoformat(), datetime.utcnow().isoformat()),
-        )
-        conn2.commit(); conn2.close()
-    except Exception:
-        pass
     return {'status': 'ok', 'user_id': user_id, 'tenant_id': tenant_id, 'token': token}
 
 @router.get('/landing', response_class=HTMLResponse)
