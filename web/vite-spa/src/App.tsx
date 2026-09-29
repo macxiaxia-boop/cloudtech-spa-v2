@@ -43,6 +43,8 @@ import { WorkflowEditorPage } from './pages/WorkflowEditor';
 import { AnalyticsPage } from './pages/Analytics';
 import { SettingsSystemPage } from './pages/SettingsSystem';
 import { SettingsTeamPage } from './pages/SettingsTeam';
+import { ProfilePage } from './pages/Profile';
+import { NotificationsPage } from './pages/Notifications';
 
 /* ───── Layout: Marketing（marketing Header/Footer） ───── */
 function MarketingLayout() {
@@ -111,6 +113,8 @@ export default function App() {
       <Route path="/settings/system" element={<BasicLayout><SettingsSystemPage /></BasicLayout>} />
       <Route path="/settings/billing" element={<BasicLayout><BillingPage /></BasicLayout>} />
       <Route path="/analytics" element={<BasicLayout><AnalyticsPage /></BasicLayout>} />
+      <Route path="/profile" element={<BasicLayout><ProfilePage /></BasicLayout>} />
+      <Route path="/notifications" element={<BasicLayout><NotificationsPage /></BasicLayout>} />
       <Route path="/monitoring" element={<BasicLayout><MonitoringPage /></BasicLayout>} />
 
       {/* 404 */}
