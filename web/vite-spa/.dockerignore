@@ -1,0 +1,49 @@
+# CloudTech SPA · Docker ignore
+# 减少构建上下文，加速 docker build
+
+# 依赖（容器内重新 npm ci）
+node_modules/
+
+# 构建产物（容器内重新 build）
+dist-v45/
+dist/
+build/
+
+# 测试与开发文件
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+coverage/
+
+# Vite 缓存
+.vite/
+.eslintcache
+.stylelintcache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 环境（生产用部署平台 env）
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# CI / 测试结果
+.nyc_output/
+playwright-report/
+test-results/
+
+# 大文件
+*.log
+.DS_Store
