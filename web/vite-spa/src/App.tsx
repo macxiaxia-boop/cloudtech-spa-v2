@@ -1,4 +1,12 @@
-import { Routes, Route, Link } from 'react-router-dom';
+/**
+ * CloudTech App · 路由分流（v3 重构）
+ *
+ * 三套路由分流：
+ * 1. 营销路由（marketing）: 用 Header/Footer 包装，marketing-first 布局
+ * 2. 工作台路由（AppShell）: 用 BasicLayout 包装，左 sidebar + 顶 header
+ * 3. 居中路由（centered）: 不套任何 layout（/login /register /workspace/select）
+ */
+import { Routes, Route, Link, Outlet } from 'react-router-dom';
 import { MarketingPage } from './pages/Marketing';
 import { PricingPage } from './pages/Pricing';
 import { DashboardPage } from './pages/Dashboard';
@@ -17,7 +25,7 @@ import { TryNowPage } from './pages/TryNow';
 import { AIEmployeesPage } from './pages/AIEmployees';
 import { OPCStoryPage } from './pages/OPCStory';
 import { FunnelPage } from './pages/Funnel';
-import { FEEmployeeMenu } from './components/FEEmployeeMenu';
+
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { OnboardingTrigger } from './components/OnboardingTrigger';
@@ -28,64 +36,17 @@ import { RegisterPage } from './pages/Register';
 import { ChatPage } from './pages/Chat';
 import { TasksPage } from './pages/Tasks';
 import { AgentCreatePage } from './pages/AgentCreate';
+import { KnowledgePage } from './pages/Knowledge';
+import { FilesPage } from './pages/Files';
 
-// Phase 47: 全部做（Stage 1+2+3）— 17 页面 + 完整导航 + Onboarding + 新监控
-// Phase 48.D84-87: Funnel + Revenue 接入 SPA（4 大补漏）
-// 4 大区导航：产品 / 行业 / 资源 / 我的
-// 路由:
-//  /                              — 营销首页（4 关键数字嵌入）
-//  /pricing                       — 定价（含 Revenue 预测表）
-//  /try                           — 7 天试用（Stage 3 卖）
-//  /employees                     — 5 AI 数字员工完整工时表
-//  /funnel                        — 漏斗转化（5 状态机 + 4 洞察）
-//  /industries/decoration         — 装企行业落地页（SEO）
-//  /industries/medical            — 医美行业落地页（SEO + 合规）
-//  /content-sop                   — 内容生产 SOP 工具
-//  /cases                         — 10 客户案例库（5 装企 + 5 医美）
-//  /blog                          — 博客（OPC 故事 + 行业洞察）
-//  /faq                           — 帮助中心
-//  /opc-story                     — 心之所向便是光的今天 · 创始人后台
-//  /clients                       — 80 家客户清单
-//  /documents                     — 公司文档中心
-//  /monitoring                    — 监控与财务中心
-//  /dashboard                     — 客户后台
-//  /settings                      — 账号设置
-//  /billing                       — 套餐切换
-export default function App() {
+/* ───── Layout: Marketing（marketing Header/Footer） ───── */
+function MarketingLayout() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
-
       <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<MarketingPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/try" element={<TryNowPage />} />
-          <Route path="/employees" element={<AIEmployeesPage />} />
-          <Route path="/funnel" element={<FunnelPage />} />
-          <Route path="/industries/decoration" element={<IndustryDecorationPage />} />
-          <Route path="/industries/medical" element={<IndustryMedicalPage />} />
-          <Route path="/content-sop" element={<ContentSOPPage />} />
-          <Route path="/cases" element={<CaseLibraryPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route path="/opc-story" element={<OPCStoryPage />} />
-          <Route path="/clients" element={<ClientListPage />} />
-          <Route path="/documents" element={<DocumentsPage />} />
-          <Route path="/monitoring" element={<MonitoringPage />} />
-          <Route path="/dashboard" element={<BasicLayout><DashboardPage /></BasicLayout>} />
-          <Route path="/workspace/select" element={<WorkspaceSelectorPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/chat" element={<BasicLayout showBreadcrumb={false}><ChatPage /></BasicLayout>} />
-          <Route path="/tasks" element={<BasicLayout><TasksPage /></BasicLayout>} />
-          <Route path="/employees/new" element={<BasicLayout><AgentCreatePage /></BasicLayout>} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/billing" element={<BillingPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Outlet />
       </main>
-
       <Footer />
       <OnboardingTrigger />
     </div>
@@ -98,5 +59,53 @@ function NotFound() {
       <h1 className="text-3xl font-bold mb-4">404 · 没找到这页</h1>
       <Link to="/" className="text-brand-500 hover:underline">返回首页</Link>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      {/* 营销路由（marketing Header/Footer）*/}
+      <Route element={<MarketingLayout />}>
+        <Route path="/" element={<MarketingPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/try" element={<TryNowPage />} />
+        <Route path="/funnel" element={<FunnelPage />} />
+        <Route path="/industries/decoration" element={<IndustryDecorationPage />} />
+        <Route path="/industries/medical" element={<IndustryMedicalPage />} />
+        <Route path="/content-sop" element={<ContentSOPPage />} />
+        <Route path="/cases" element={<CaseLibraryPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/faq" element={<FAQPage />} />
+        <Route path="/opc-story" element={<OPCStoryPage />} />
+        <Route path="/clients" element={<ClientListPage />} />
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/billing" element={<BillingPage />} />
+      </Route>
+
+      {/* 居中路由（全屏居中卡片，不套 layout）*/}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/workspace/select" element={<WorkspaceSelectorPage />} />
+
+      {/* 工作台路由（BasicLayout · children prop 模式）*/}
+      <Route path="/dashboard" element={<BasicLayout><DashboardPage /></BasicLayout>} />
+      <Route path="/chat" element={<BasicLayout showBreadcrumb={false}><ChatPage /></BasicLayout>} />
+      <Route path="/employees" element={<BasicLayout><AIEmployeesPage /></BasicLayout>} />
+      <Route path="/employees/new" element={<BasicLayout><AgentCreatePage /></BasicLayout>} />
+      <Route path="/employees/:id/edit" element={<BasicLayout><AgentCreatePage /></BasicLayout>} />
+      <Route path="/tasks" element={<BasicLayout><TasksPage /></BasicLayout>} />
+      <Route path="/knowledge" element={<BasicLayout><KnowledgePage /></BasicLayout>} />
+      <Route path="/files" element={<BasicLayout><FilesPage /></BasicLayout>} />
+      <Route path="/settings" element={<BasicLayout><SettingsPage /></BasicLayout>} />
+      <Route path="/settings/models" element={<BasicLayout><SettingsPage /></BasicLayout>} />
+      <Route path="/settings/team" element={<BasicLayout><SettingsPage /></BasicLayout>} />
+      <Route path="/settings/system" element={<BasicLayout><SettingsPage /></BasicLayout>} />
+      <Route path="/settings/billing" element={<BasicLayout><BillingPage /></BasicLayout>} />
+      <Route path="/monitoring" element={<BasicLayout><MonitoringPage /></BasicLayout>} />
+
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
