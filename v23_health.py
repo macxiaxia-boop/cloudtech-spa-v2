@@ -7176,6 +7176,88 @@ def get_auth_api_keys_rotate_secret_v9(key_id: str):
     }
 
 
+def get_skills_apply_stats(skill_id: str):
+    """Skill apply-stats · 应用统计 (R435)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "apply_count": 32,
+            "applied_at": datetime.utcnow().isoformat() + "Z",
+            "applied_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_unset_default_for_all(method_id: str):
+    """Billing payment-methods/{id}/unset-default-for-all · 取消默认 all (R435)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "is_default": False,
+            "unset_all": True,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_language_list_v2(campaign_id: str):
+    """Campaigns audience-language-list-v2 · 语言列表 v2 (R435)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"language": "zh-CN", "name": "简体中文",  "users": 16840, "pct": 91.4},
+            {"language": "en-US", "name": "English",   "users":   920, "pct":  5.0},
+            {"language": "ja-JP", "name": "日本語",     "users":   280, "pct":  1.5},
+            {"language": "es-ES", "name": "Español",   "users":   180, "pct":  1.0},
+            {"language": "other", "name": "其他",       "users":   200, "pct":  1.1},
+        ],
+        "total": 18420,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_year_list_v2(file_id: str):
+    """Files download-by-year-list-v2 · 按年列表 v2 (R435)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"year": "2024", "downloads":  680},
+            {"year": "2025", "downloads": 4180},
+            {"year": "2026", "downloads": 3280},
+        ],
+        "total": 8140,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v10(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v10 · 轮换 secret v10 (R435)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 19,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v10",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -7719,6 +7801,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-grade-stats-v2": lambda q, id="c001": get_campaigns_audience_grade_stats_v2(id),
     "/api/v2/files/{id}/download-by-month-list-v2": lambda q, id="f_001": get_files_download_by_month_list_v2(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v9": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v9(id),
+    "/api/v2/skills/{id}/apply-stats":          lambda q, id="s_001": get_skills_apply_stats(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-for-all": lambda q, id="c_001": get_billing_payment_methods_unset_default_for_all(id),
+    "/api/v2/campaigns/{id}/audience-language-list-v2": lambda q, id="c001": get_campaigns_audience_language_list_v2(id),
+    "/api/v2/files/{id}/download-by-year-list-v2": lambda q, id="f_001": get_files_download_by_year_list_v2(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v10": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v10(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
