@@ -10373,6 +10373,99 @@ def get_auth_api_keys_quota_reset_v7(key_id: str):
     }
 
 
+def get_skills_sync_stats_v9(skill_id: str):
+    """Skill sync-stats-v9 · 同步统计 v9 · V23 第 600 端点里程碑 (R473)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "sync_count":  72,
+            "synced_at":   datetime.utcnow().isoformat() + "Z",
+            "synced_by":   "u_001",
+            "milestone":   "V23 第 600 端点 (R473 · 2026-10-01)",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v9",
+    }
+
+
+def get_billing_payment_methods_unset_active_v9(method_id: str):
+    """Billing payment-methods/{id}/unset-active-v9 · 取消激活 v9 · V23 第 601 端点 (R473)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "is_active":   False,
+            "unset_at":    datetime.utcnow().isoformat() + "Z",
+            "unset_by":    "u_001",
+            "milestone":   "V23 第 601 端点 (R473)",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v9",
+    }
+
+
+def get_campaigns_audience_source_detailed_v3(campaign_id: str):
+    """Campaigns audience-source-detailed-v3 · 来源详细 v3 · V23 第 602 端点 (R473)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"source": "wechat",       "medium": "社交",  "country": "CN", "count": 6280, "pct": 34.1},
+            {"source": "xhs",          "medium": "社交",  "country": "CN", "count": 4180, "pct": 22.7},
+            {"source": "douyin",       "medium": "社交",  "country": "CN", "count": 3120, "pct": 16.9},
+            {"source": "wechat_group", "medium": "社交",  "country": "CN", "count": 1840, "pct": 10.0},
+            {"source": "email",        "medium": "邮件",  "country": "US", "count": 1240, "pct":  6.7},
+            {"source": "direct",       "medium": "直接",  "country": "global", "count": 1180, "pct":  6.4},
+            {"source": "baidu",        "medium": "搜索",  "country": "CN", "count":  580, "pct":  3.2},
+        ],
+        "total": 18420,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "milestone":   "V23 第 602 端点 (R473)",
+    }
+
+
+def get_files_download_by_month_list_v7(file_id: str):
+    """Files download-by-month-list-v7 · 按月列表 v7 · V23 第 603 端点 (R473)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"month": "2026-04", "downloads": 168, "unique_users": 118},
+            {"month": "2026-05", "downloads": 248, "unique_users": 178},
+            {"month": "2026-06", "downloads": 312, "unique_users": 218},
+            {"month": "2026-07", "downloads": 428, "unique_users": 312},
+            {"month": "2026-08", "downloads": 487, "unique_users": 348},
+            {"month": "2026-09", "downloads": 312, "unique_users": 220},
+        ],
+        "total": 1955,
+        "version": "v7",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "milestone":   "V23 第 603 端点 (R473)",
+    }
+
+
+def get_auth_api_keys_quota_history_v12(key_id: str):
+    """Auth api-keys/{id}/quota-history-v12 · quota 历史 v12 · V23 第 604 端点 (R473)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-30T00:00:00Z", "quota":  10000, "set_by": "u_001"},
+            {"at": "2026-10-01T00:00:00Z", "quota":  20000, "set_by": "u_001"},
+            {"at": "2026-10-01T01:00:00Z", "quota":  30000, "set_by": "u_001"},
+            {"at": "2026-10-01T02:00:00Z", "quota":  40000, "set_by": "u_001"},
+        ],
+        "count": 4,
+        "version": "v12",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "milestone":   "V23 第 604 端点 (R473)",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -10941,6 +11034,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-grade-stats-v8": lambda q, id="c001": get_campaigns_audience_grade_stats_v8(id),
     "/api/v2/files/{id}/download-by-week-chart-v9": lambda q, id="f_001": get_files_download_by_week_chart_v9(id),
     "/api/v2/auth/api-keys/{id}/quota-reset-v7":  lambda q, id="k_001": get_auth_api_keys_quota_reset_v7(id),
+    "/api/v2/skills/{id}/sync-stats-v9":          lambda q, id="s_001": get_skills_sync_stats_v9(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v9": lambda q, id="c_001": get_billing_payment_methods_unset_active_v9(id),
+    "/api/v2/campaigns/{id}/audience-source-detailed-v3": lambda q, id="c001": get_campaigns_audience_source_detailed_v3(id),
+    "/api/v2/files/{id}/download-by-month-list-v7": lambda q, id="f_001": get_files_download_by_month_list_v7(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v12": lambda q, id="k_001": get_auth_api_keys_quota_history_v12(id),
     "/api/v2/skills/{id}/merge-with-bundle": lambda q, id="s_001": get_skills_merge_with_bundle(id),
     "/api/v2/billing/payment-methods/{id}/set-default-payment-method": lambda q, id="c_001": get_billing_payment_methods_set_default_payment_method(id),
     "/api/v2/campaigns/{id}/audience-region-stats": lambda q, id="c001": get_campaigns_audience_region_stats(id),
@@ -11196,6 +11294,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-grade-stats-v8": lambda q, id="c001": get_campaigns_audience_grade_stats_v8(id),
     "/api/v2/files/{id}/download-by-week-chart-v9": lambda q, id="f_001": get_files_download_by_week_chart_v9(id),
     "/api/v2/auth/api-keys/{id}/quota-reset-v7":  lambda q, id="k_001": get_auth_api_keys_quota_reset_v7(id),
+    "/api/v2/skills/{id}/sync-stats-v9":          lambda q, id="s_001": get_skills_sync_stats_v9(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v9": lambda q, id="c_001": get_billing_payment_methods_unset_active_v9(id),
+    "/api/v2/campaigns/{id}/audience-source-detailed-v3": lambda q, id="c001": get_campaigns_audience_source_detailed_v3(id),
+    "/api/v2/files/{id}/download-by-month-list-v7": lambda q, id="f_001": get_files_download_by_month_list_v7(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v12": lambda q, id="k_001": get_auth_api_keys_quota_history_v12(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
