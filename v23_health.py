@@ -3892,6 +3892,89 @@ def get_auth_sso_config(sso_id: str):
     }
 
 
+def get_skills_merge_multiple(skill_ids: str):
+    """Skill merge-multiple · 合并多个 skill (R396)"""
+    ids = skill_ids.split(',') if ',' in skill_ids else [skill_ids]
+    return {
+        "status": "ok",
+        "data": {
+            "merged_count":  len(ids),
+            "merged_ids":    ids,
+            "new_skill_id":  f"merged_v23_R396_{len(ids)}",
+            "merged_at":     datetime.utcnow().isoformat() + "Z",
+            "merged_by":     "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_subscription_upgrade(tenant_id: str):
+    """Billing subscription-upgrade · 升级订阅 (R396)"""
+    return {
+        "status": "ok",
+        "data": {
+            "tenant_id":       tenant_id,
+            "subscription_id": "sub_v23_R396_up",
+            "previous_plan":   "basic",
+            "upgraded_to":     "pro",
+            "upgraded_at":     datetime.utcnow().isoformat() + "Z",
+            "prorated_yuan":   500,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_age_stats(campaign_id: str):
+    """Campaigns audience-age-stats · 受众年龄分布 (R396)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"age_range": "13-17", "count":  980,  "pct":  5.3},
+            {"age_range": "18-24", "count": 3680,  "pct": 20.0},
+            {"age_range": "25-34", "count": 6280,  "pct": 34.1},
+            {"age_range": "35-44", "count": 4120,  "pct": 22.3},
+            {"age_range": "45-54", "count": 2180,  "pct": 11.8},
+            {"age_range": "55-64", "count":  980,  "pct":  5.3},
+            {"age_range": "65+",   "count":  200,  "pct":  1.1},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_comments_count(file_id: str):
+    """Files comments-count · 评论计数 (R396)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":        file_id,
+            "total_comments": 3,
+            "unresolved":     1,
+            "resolved":       2,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_all():
+    """Auth api-keys/rotate-all · 全部轮换 (R396)"""
+    return {
+        "status": "ok",
+        "data": {
+            "rotated_count":   3,
+            "rotated_at":      datetime.utcnow().isoformat() + "Z",
+            "rotated_by":       "u_001",
+            "old_keys_invalidated": True,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -4240,6 +4323,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/impressions-history": lambda q, id="c001": get_campaigns_impressions_history(id),
     "/api/v2/files/{id}/share-revoke":     lambda q, id="f_001": get_files_share_revoke(id),
     "/api/v2/auth/sso/{id}/config":         lambda q, id="wechat_work": get_auth_sso_config(id),
+    "/api/v2/skills/merge-multiple/{ids}":  lambda q, ids="s_001,s_002": get_skills_merge_multiple(ids),
+    "/api/v2/billing/{tenant_id}/subscription-upgrade": lambda q, tenant_id="t_3a59592b7619": get_billing_subscription_upgrade(tenant_id),
+    "/api/v2/campaigns/{id}/audience-age-stats": lambda q, id="c001": get_campaigns_audience_age_stats(id),
+    "/api/v2/files/{id}/comments-count":   lambda q, id="f_001": get_files_comments_count(id),
+    "/api/v2/auth/api-keys/rotate-all":    lambda q: get_auth_api_keys_rotate_all(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
