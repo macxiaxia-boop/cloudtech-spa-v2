@@ -3803,6 +3803,95 @@ def get_auth_devices_forget(device_id: str):
     }
 
 
+def get_skills_clone(skill_id: str):
+    """Skill clone · 克隆 skill (R395)"""
+    return {
+        "status": "ok",
+        "data": {
+            "source_skill_id": skill_id,
+            "new_skill_id":    f"{skill_id}_clone_v23",
+            "new_name":        f"{skill_id} 克隆",
+            "cloned_by":       "u_001",
+            "cloned_at":       datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_tax_rates():
+    """Billing tax rates · 税率列表 (R395)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"region": "CN",   "rate": 0.06, "type": "vat_general",   "applies_to": "all"},
+            {"region": "CN",   "rate": 0.03, "type": "vat_small",     "applies_to": "small_business"},
+            {"region": "CN",   "rate": 0.13, "type": "vat_old",       "applies_to": "deprecated"},
+            {"region": "US",   "rate": 0.0,  "type": "sales_tax",     "applies_to": "varies_by_state"},
+            {"region": "EU",   "rate": 0.20, "type": "vat",          "applies_to": "all"},
+            {"region": "JP",   "rate": 0.10, "type": "consumption",   "applies_to": "all"},
+        ],
+        "default_region": "CN",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_impressions_history(campaign_id: str):
+    """Campaigns impressions-history · 曝光历史 (R395)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"date": "2026-09-24", "impressions": 2620},
+            {"date": "2026-09-25", "impressions": 2840},
+            {"date": "2026-09-26", "impressions": 2610},
+            {"date": "2026-09-27", "impressions": 2920},
+            {"date": "2026-09-28", "impressions": 3010},
+            {"date": "2026-09-29", "impressions": 3120},
+            {"date": "2026-09-30", "impressions": 3010},
+        ],
+        "total":        20130,
+        "average":      2875,
+        "trend_pct":    "+2.3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_share_revoke(file_id: str):
+    """Files share-revoke · 撤销分享 (R395)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":        file_id,
+            "share_revoked":  True,
+            "active_links":   0,
+            "revoked_at":     datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_sso_config(sso_id: str):
+    """Auth sso/{id}/config · SSO 配置 (R395)"""
+    configs = {
+        "wechat_work": {"name": "企业微信",     "client_id": "wc_v23", "scopes": ["contact:user.id"]},
+        "feishu":      {"name": "飞书",         "client_id": "fs_v23", "scopes": ["contact:user.id"]},
+        "dingtalk":    {"name": "钉钉",         "client_id": "dd_v23", "scopes": ["contact:user.id"]},
+        "google":      {"name": "Google",       "client_id": "g_v23",  "scopes": ["openid", "email", "profile"]},
+    }
+    found = configs.get(sso_id)
+    if not found:
+        return {"status": "ok", "data": {}, "source": "not_found", "ts": datetime.utcnow().isoformat() + "Z"}
+    return {
+        "status": "ok",
+        "data": {"sso_id": sso_id, **found},
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -4146,6 +4235,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/ctr-history":   lambda q, id="c001": get_campaigns_ctr_history(id),
     "/api/v2/files/comments/{id}/delete":   lambda q, id="c_001": get_files_comments_delete(id),
     "/api/v2/auth/devices/{id}/forget":     lambda q, id="d_001": get_auth_devices_forget(id),
+    "/api/v2/skills/{id}/clone":           lambda q, id="s_001": get_skills_clone(id),
+    "/api/v2/billing/tax-rates":           lambda q: get_billing_tax_rates(),
+    "/api/v2/campaigns/{id}/impressions-history": lambda q, id="c001": get_campaigns_impressions_history(id),
+    "/api/v2/files/{id}/share-revoke":     lambda q, id="f_001": get_files_share_revoke(id),
+    "/api/v2/auth/sso/{id}/config":         lambda q, id="wechat_work": get_auth_sso_config(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
