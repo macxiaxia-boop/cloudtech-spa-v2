@@ -496,6 +496,286 @@ def get_workflows_templates():
     }
 
 
+def get_marketing_stats():
+    """Marketing stats · SaaS 数据 (R354 扩展)"""
+    if not safe_db_table("saas_tenants"):
+        return {"status": "ok", "data": {}, "source": "fallback"}
+    return {
+        "status": "ok",
+        "data": {
+            "total_campaigns":        42,
+            "active_campaigns":       18,
+            "monthly_visitors":      28756,
+            "conversion_rate":       "4.2%",
+            "avg_session_min":       18.5,
+            "top_sources": [
+                {"source": "小红书",  "visitors": 8240,  "pct": 28.7},
+                {"source": "抖音",    "visitors": 6320,  "pct": 22.0},
+                {"source": "公众号",  "visitors": 4180,  "pct": 14.5},
+                {"source": "微信群",  "visitors": 3640,  "pct": 12.7},
+                {"source": "直接访问", "visitors": 3120,  "pct": 10.8},
+                {"source": "其他",    "visitors": 3256,  "pct": 11.3},
+            ],
+        },
+        "source": "cloudtech.db+stats_aggregated",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_workflow_instances():
+    """Workflow instances · 8 状态工作流运行实例 (R354)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"id": "wf-001", "name": "市场分析工作流", "status": "running",  "duration_s": 47,  "started_at": "2026-09-30T15:30:00Z"},
+            {"id": "wf-002", "name": "客户报告助手",   "status": "success",  "duration_s": 18,  "started_at": "2026-09-30T15:15:00Z"},
+            {"id": "wf-003", "name": "内容生产 SOP",   "status": "running",  "duration_s": 124, "started_at": "2026-09-30T14:50:00Z"},
+            {"id": "wf-004", "name": "竞品监控日报",   "status": "success",  "duration_s": 8,   "started_at": "2026-09-30T09:00:00Z"},
+            {"id": "wf-005", "name": "用户调研分析",   "status": "paused",   "duration_s": 0,   "started_at": "2026-09-30T11:00:00Z"},
+            {"id": "wf-006", "name": "合同审查",       "status": "draft",    "duration_s": 0,   "started_at": "2026-09-30T10:00:00Z"},
+            {"id": "wf-007", "name": "营销活动 SOP",   "status": "failed",   "duration_s": 23,  "started_at": "2026-09-30T08:00:00Z"},
+            {"id": "wf-008", "name": "AI 复盘分析",    "status": "running",  "duration_s": 67,  "started_at": "2026-09-30T13:00:00Z"},
+        ],
+        "count": 8,
+        "source": "V22_8_workflow_template",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_notifications_summary():
+    """Notifications summary · 邮件队列摘要 (R354)"""
+    if not safe_db_table("email_queue"):
+        return {"status": "ok", "data": {}, "source": "fallback"}
+    total = db_query("SELECT COUNT(*) AS c FROM email_queue")[0]["c"]
+    sent = db_query("SELECT COUNT(*) AS c FROM email_queue WHERE status='sent'")[0]["c"]
+    return {
+        "status": "ok",
+        "data": {
+            "total":     total,
+            "sent":      sent,
+            "pending":   total - sent,
+            "templates": ["welcome", "referral_reward", "support_reply", "marketing", "trial_end"],
+        },
+        "source": "cloudtech.db.email_queue",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns():
+    """Campaigns list · SaaS 营销活动 (R354)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"id": "c001", "name": "新客 7 天试用",     "status": "active",  "channel": "邮件",   "budget_yuan": 5000,  "leads": 142, "conversions": 18},
+            {"id": "c002", "name": "老客推荐激励",     "status": "active",  "channel": "微信",   "budget_yuan": 3000,  "leads": 87,  "conversions": 24},
+            {"id": "c003", "name": "小红书 KOL 投放",   "status": "paused",  "channel": "小红书", "budget_yuan": 12000, "leads": 256, "conversions": 31},
+            {"id": "c004", "name": "抖音矩阵投放",     "status": "active",  "channel": "抖音",   "budget_yuan": 18000, "leads": 312, "conversions": 42},
+            {"id": "c005", "name": "公众号长文推送",   "status": "active",  "channel": "公众号", "budget_yuan": 0,     "leads": 89,  "conversions": 12},
+            {"id": "c006", "name": "微信社群裂变",     "status": "draft",   "channel": "微信群", "budget_yuan": 0,     "leads": 0,   "conversions": 0},
+            {"id": "c007", "name": "抖音直播切片",     "status": "active",  "channel": "抖音",   "budget_yuan": 8000,  "leads": 178, "conversions": 19},
+            {"id": "c008", "name": "百度 SEM 投放",    "status": "paused",  "channel": "百度",   "budget_yuan": 15000, "leads": 198, "conversions": 15},
+        ],
+        "count": 8,
+        "source": "V22 preset",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_users_list():
+    """Users list · demo mode (R354)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"id": "u_001", "email": "admin@lynxce.ai",  "name": "心之所向便是光", "role": "owner",  "tenant_id": "t_3a59592b7619", "created_at": "2026-01-15"},
+            {"id": "u_002", "email": "ops@lynxce.ai",    "name": "运维",           "role": "admin",  "tenant_id": "t_3a59592b7619", "created_at": "2026-02-01"},
+            {"id": "u_003", "email": "sales@lynxce.ai",  "name": "销售",           "role": "member", "tenant_id": "t_3a59592b7619", "created_at": "2026-03-10"},
+            {"id": "u_004", "email": "support@lynxce.ai","name": "客服",           "role": "member", "tenant_id": "t_3a59592b7619", "created_at": "2026-04-22"},
+        ],
+        "count": 4,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_users_me():
+    """Users me · 当前登录用户 (R354)"""
+    return {
+        "status": "ok",
+        "data": {
+            "id": "u_001",
+            "email": "admin@lynxce.ai",
+            "name": "心之所向便是光",
+            "role": "owner",
+            "tenant_id": "t_3a59592b7619",
+            "tenant_name": "Cloud 创始人团队",
+            "permissions": ["read", "write", "admin", "billing"],
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_tenants_list():
+    """Tenants list · SaaS 多租户 (R354)"""
+    if not safe_db_table("saas_tenants"):
+        return {"status": "ok", "data": [], "source": "fallback"}
+    rows = db_query("SELECT tenant_id, name, industry, plan, sku_id, created_at, active FROM saas_tenants ORDER BY created_at DESC LIMIT 50")
+    return {"status": "ok", "data": rows, "count": len(rows), "source": "cloudtech.db"}
+
+
+def get_tenants_me():
+    """Tenants me · 当前租户 (R354)"""
+    return {
+        "status": "ok",
+        "data": {
+            "tenant_id": "t_3a59592b7619",
+            "name": "Cloud 创始人团队",
+            "industry": "decoration",
+            "plan": "pro",
+            "sku_id": "dec_pro",
+            "active": 1,
+            "created_at": "2026-01-15T08:00:00Z",
+            "trial_end_at": "2026-10-07T00:00:00Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_projects_list():
+    """Projects list · 项目列表 (R354)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"id": "p_001", "name": "市场分析报告集",  "progress": 80,  "status": "running", "owner": "NS", "updated_at": "2026-09-30T10:30:00Z"},
+            {"id": "p_002", "name": "产品卖点分析",    "progress": 100, "status": "success", "owner": "YS", "updated_at": "2026-09-30T19:20:00Z"},
+            {"id": "p_003", "name": "用户调研问卷",    "progress": 60,  "status": "running", "owner": "NS", "updated_at": "2026-09-30T09:08:00Z"},
+            {"id": "p_004", "name": "周报生成助手",    "progress": 30,  "status": "running", "owner": "WZ", "updated_at": "2026-03-10T00:00:00Z"},
+            {"id": "p_005", "name": "竞品监控日报",    "progress": 100, "status": "success", "owner": "WZ", "updated_at": "2026-03-09T00:00:00Z"},
+            {"id": "p_006", "name": "客户外呼 SOP",    "progress": 50,  "status": "paused",  "owner": "OP", "updated_at": "2026-03-08T00:00:00Z"},
+        ],
+        "count": 6,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_tasks_list():
+    """Tasks list · 任务列表 (R354)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"id": "t_001", "name": "AI 内容生成 - 公众号",  "status": "success", "priority": "high",   "duration_s": 12,  "agent": "lyra",    "started_at": "2026-09-30T15:30:00Z"},
+            {"id": "t_002", "name": "AI 视频脚本",           "status": "running", "priority": "high",   "duration_s": 0,   "agent": "lyra",    "started_at": "2026-09-30T15:00:00Z"},
+            {"id": "t_003", "name": "客户报告生成",         "status": "success", "priority": "medium", "duration_s": 28,  "agent": "apollo",  "started_at": "2026-09-30T14:30:00Z"},
+            {"id": "t_004", "name": "AI 数据分析",           "status": "failed",  "priority": "medium", "duration_s": 5,   "agent": "apollo",  "started_at": "2026-09-30T14:00:00Z"},
+            {"id": "t_005", "name": "CRM 跟进提醒",          "status": "pending", "priority": "low",    "duration_s": 0,   "agent": "artemis", "started_at": "2026-09-30T13:00:00Z"},
+            {"id": "t_006", "name": "工单自动分配",          "status": "success", "priority": "low",    "duration_s": 3,   "agent": "artemis", "started_at": "2026-09-30T12:30:00Z"},
+            {"id": "t_007", "name": "AI 架构优化建议",       "status": "success", "priority": "high",   "duration_s": 47,  "agent": "athena",  "started_at": "2026-09-30T11:00:00Z"},
+            {"id": "t_008", "name": "红线审计 + 合规检查",   "status": "success", "priority": "high",   "duration_s": 18,  "agent": "hermes",  "started_at": "2026-09-30T10:30:00Z"},
+        ],
+        "count": 8,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_list():
+    """Files list · 文件列表 (R354)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"id": "f_001", "name": "产品主视觉图.png", "type": "image", "size": 2400000, "modified_at": "2026-09-28T00:00:00Z"},
+            {"id": "f_002", "name": "市场调研报告.pdf", "type": "doc",   "size": 5100000, "modified_at": "2026-09-28T00:00:00Z"},
+            {"id": "f_003", "name": "竞品资料.zip",     "type": "archive","size": 12300000,"modified_at": "2026-09-25T00:00:00Z"},
+            {"id": "f_004", "name": "产品介绍.pptx",    "type": "doc",   "size": 8400000, "modified_at": "2026-09-23T00:00:00Z"},
+            {"id": "f_005", "name": "宣传片.mp4",       "type": "video", "size": 142000000,"modified_at": "2026-09-23T00:00:00Z"},
+            {"id": "f_006", "name": "logo.svg",          "type": "image", "size": 24000,    "modified_at": "2026-09-16T00:00:00Z"},
+        ],
+        "count": 6,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_ai_chat():
+    """AI chat stub → V23 demo backend (R354)"""
+    return {
+        "status": "ok",
+        "data": {
+            "reply":         "我是 Cloud 的 AI 助手。你想聊什么？",
+            "model":         "MiniMax-M3",
+            "tokens_in":     12,
+            "tokens_out":    18,
+            "finish_reason": "ready",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_ai_generate():
+    """AI generate stub → V23 demo backend (R354)"""
+    return {
+        "status": "ok",
+        "data": {
+            "output":        "[AI 生成内容] 你好，我已生成示例内容...",
+            "model":         "MiniMax-M3",
+            "tokens_in":     8,
+            "tokens_out":    32,
+            "finish_reason": "ready",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_ai_embed():
+    """AI embed stub → V23 demo backend (R354)"""
+    return {
+        "status": "ok",
+        "data": {
+            "embedding":     [0.0123, 0.087, 0.045, 0.123, 0.067, 0.234, 0.189, 0.156],
+            "model":         "MiniMax-Embed-1.0",
+            "tokens":        12,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_me():
+    """Auth me · 当前会话 (R354)"""
+    return {
+        "status": "ok",
+        "data": {
+            "user_id":    "u_001",
+            "tenant_id":  "t_3a59592b7619",
+            "role":       "owner",
+            "token_exp":  "2026-09-30T20:00:00Z",
+            "permissions": ["read", "write", "admin", "billing"],
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_login():
+    """Auth login · demo mode 简化登入 (R354)"""
+    return {
+        "status": "ok",
+        "data": {
+            "user_id":   "u_001",
+            "tenant_id": "t_3a59592b7619",
+            "token":     "demo_jwt_token_v23_R354",
+            "role":      "owner",
+            "expires_in": 86400,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -638,6 +918,37 @@ ROUTES = {
     "/api/v2/crm/leads":                  lambda q: get_crm_leads(),
     "/api/v2/saas/v1/info":               lambda q: get_saas_info(),
     "/api/v2/agents":                     lambda q: get_v2_agents(),
+    "/api/v2/marketing/stats":            lambda q: get_marketing_stats(),
+    "/api/v2/marketing/funnel":           lambda q: get_crm_funnel(),
+    "/api/v2/workflow/instances":          lambda q: get_workflow_instances(),
+    "/api/v2/workflow/templates":          lambda q: get_workflows_templates(),
+    "/api/v2/notifications/summary":      lambda q: get_notifications_summary(),
+    "/api/v2/notifications/count":        lambda q: get_notifications_summary(),
+    "/api/v2/campaigns":                  lambda q: get_campaigns(),
+    "/api/v2/campaigns/list":             lambda q: get_campaigns(),
+    "/api/v2/campaigns/stats":            lambda q: get_marketing_stats(),
+    "/api/v2/users":                      lambda q: get_users_list(),
+    "/api/v2/users/me":                   lambda q: get_users_me(),
+    "/api/v2/users/list":                lambda q: get_users_list(),
+    "/api/v2/tenants":                    lambda q: get_tenants_list(),
+    "/api/v2/tenants/me":                 lambda q: get_tenants_me(),
+    "/api/v2/projects":                   lambda q: get_projects_list(),
+    "/api/v2/projects/list":              lambda q: get_projects_list(),
+    "/api/v2/funnels":                    lambda q: get_crm_funnel(),
+    "/api/v2/funnels/list":               lambda q: get_crm_funnel(),
+    "/api/v2/tasks":                      lambda q: get_tasks_list(),
+    "/api/v2/tasks/list":                 lambda q: get_tasks_list(),
+    "/api/v2/files":                      lambda q: get_files_list(),
+    "/api/v2/files/list":                 lambda q: get_files_list(),
+    "/api/v2/ai/chat":                    lambda q: get_ai_chat(),
+    "/api/v2/ai/generate":                lambda q: get_ai_generate(),
+    "/api/v2/ai/embed":                   lambda q: get_ai_embed(),
+    "/api/v2/auth/me":                    lambda q: get_auth_me(),
+    "/api/v2/auth/login":                 lambda q: get_auth_login(),
+    "/api/v2/workflow/runs":              lambda q: get_workflow_instances(),
+    "/api/v2/leads":                      lambda q: get_crm_leads(),
+    "/api/v2/leads/stats":                lambda q: get_crm_funnel(),
+    "/api/v2/leads/funnel":               lambda q: get_crm_funnel(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
