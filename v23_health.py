@@ -4157,6 +4157,88 @@ def get_auth_api_keys_disable(key_id: str):
     }
 
 
+def get_skills_merge_template(skill_id: str):
+    """Skill merge-template · 合并模板 (R399)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":        skill_id,
+            "merged_template_id": f"tmpl_v23_R399_{skill_id}",
+            "merged_at":       datetime.utcnow().isoformat() + "Z",
+            "merged_nodes":    8,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_downgrade_options(tenant_id: str):
+    """Billing downgrade-options · 降级选项 (R399)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"target_plan": "basic",     "monthly_yuan":  199, "annual_yuan": 1999, "feature_lost": ["enterprise_support", "99.95% SLA"]},
+            {"target_plan": "pro",        "monthly_yuan": 1999, "annual_yuan":19999, "feature_lost": ["custom_development"]},
+        ],
+        "current_plan":   "enterprise",
+        "downgrade_discount_pct": 30,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_device_stats(campaign_id: str):
+    """Campaigns audience-device-stats · 受众设备 (R399)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"device": "iOS",     "count": 6840, "pct": 37.1},
+            {"device": "Android", "count": 7240, "pct": 39.3},
+            {"device": "Windows", "count": 2480, "pct": 13.5},
+            {"device": "macOS",   "count": 1420, "pct":  7.7},
+            {"device": "Other",   "count":  440, "pct":  2.4},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_rate(file_id: str):
+    """Files download-rate · 下载速率 (R399)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":         file_id,
+            "size_bytes":      2400000,
+            "avg_bandwidth_bps": 5242880,
+            "avg_download_s":  4.0,
+            "fastest_s":       1.5,
+            "slowest_s":       8.0,
+            "by_region": {
+                "CN": "1.2s avg", "US": "2.8s avg", "EU": "3.5s avg", "JP": "1.5s avg",
+            },
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_enable(key_id: str):
+    """Auth api-keys/{id}/enable · 启用 API key (R399)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":      key_id,
+            "enabled":    True,
+            "enabled_at": datetime.utcnow().isoformat() + "Z",
+            "enabled_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -4520,6 +4602,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-region-stats": lambda q, id="c001": get_campaigns_audience_region_stats(id),
     "/api/v2/files/{id}/popular-times":  lambda q, id="f_001": get_files_popular_times(id),
     "/api/v2/auth/api-keys/{id}/disable": lambda q, id="k_001": get_auth_api_keys_disable(id),
+    "/api/v2/skills/{id}/merge-template": lambda q, id="s_001": get_skills_merge_template(id),
+    "/api/v2/billing/{tenant_id}/downgrade-options": lambda q, tenant_id="t_3a59592b7619": get_billing_downgrade_options(tenant_id),
+    "/api/v2/campaigns/{id}/audience-device-stats": lambda q, id="c001": get_campaigns_audience_device_stats(id),
+    "/api/v2/files/{id}/download-rate":   lambda q, id="f_001": get_files_download_rate(id),
+    "/api/v2/auth/api-keys/{id}/enable":  lambda q, id="k_001": get_auth_api_keys_enable(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
