@@ -8775,6 +8775,90 @@ def get_auth_api_keys_quota_history_v3(key_id: str):
     }
 
 
+def get_skills_export_template_v2(skill_id: str):
+    """Skill export-template-v2 · 导出模板 v2 (R454)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "export_url":  f"https://marketplace.v23.com/v2/templates/{skill_id}.yaml",
+            "exported_at": datetime.utcnow().isoformat() + "Z",
+            "version":     "v2",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_unset_active(method_id: str):
+    """Billing payment-methods/{id}/unset-active · 取消激活 (R454)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "is_active":   False,
+            "unset_at":    datetime.utcnow().isoformat() + "Z",
+            "unset_by":    "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_tech_list_v8(campaign_id: str):
+    """Campaigns audience-tech-list-v8 · 技术列表 v8 (R454)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"tech": "iOS",          "count": 7820, "pct": 42.4},
+            {"tech": "Android",      "count": 5240, "pct": 28.4},
+            {"tech": "Windows",      "count": 2180, "pct": 11.8},
+            {"tech": "macOS",        "count": 1420, "pct":  7.7},
+            {"tech": "Linux",        "count":  580, "pct":  3.1},
+            {"tech": "Other",        "count": 1180, "pct":  6.4},
+        ],
+        "count": 6,
+        "version": "v8",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_day_stats(file_id: str):
+    """Files download-by-day-stats · 按日统计 (R454)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"date": "2026-09-24", "downloads": 28, "unique_users": 18, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+            {"date": "2026-09-25", "downloads": 42, "unique_users": 28, "avg_size_mb": 2.5, "p99_size_mb": 2.9},
+            {"date": "2026-09-26", "downloads": 38, "unique_users": 22, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+            {"date": "2026-09-27", "downloads": 56, "unique_users": 38, "avg_size_mb": 2.6, "p99_size_mb": 3.0},
+            {"date": "2026-09-28", "downloads": 68, "unique_users": 45, "avg_size_mb": 2.5, "p99_size_mb": 2.9},
+            {"date": "2026-09-29", "downloads": 42, "unique_users": 28, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+            {"date": "2026-09-30", "downloads": 38, "unique_users": 24, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+        ],
+        "total": 312,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_burst_quota_history(key_id: str):
+    """Auth api-keys/{id}/burst-quota-history · 突发配额历史 (R454)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-25T00:00:00Z", "burst_quota":  100, "set_by": "u_001"},
+            {"at": "2026-09-28T00:00:00Z", "burst_quota":  300, "set_by": "u_001"},
+            {"at": "2026-09-30T00:00:00Z", "burst_quota":  500, "set_by": "u_001"},
+            {"at": "2026-10-01T00:00:00Z", "burst_quota": 1000, "set_by": "u_001"},
+        ],
+        "count": 4,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -9413,6 +9497,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-cohort-list-v3": lambda q, id="c001": get_campaigns_audience_cohort_list_v3(id),
     "/api/v2/files/{id}/download-by-quarter-stats-v4": lambda q, id="f_001": get_files_download_by_quarter_stats_v4(id),
     "/api/v2/auth/api-keys/{id}/quota-history-v3": lambda q, id="k_001": get_auth_api_keys_quota_history_v3(id),
+    "/api/v2/skills/{id}/export-template-v2":     lambda q, id="s_001": get_skills_export_template_v2(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active": lambda q, id="c_001": get_billing_payment_methods_unset_active(id),
+    "/api/v2/campaigns/{id}/audience-tech-list-v8": lambda q, id="c001": get_campaigns_audience_tech_list_v8(id),
+    "/api/v2/files/{id}/download-by-day-stats":   lambda q, id="f_001": get_files_download_by_day_stats(id),
+    "/api/v2/auth/api-keys/{id}/burst-quota-history": lambda q, id="k_001": get_auth_api_keys_burst_quota_history(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
