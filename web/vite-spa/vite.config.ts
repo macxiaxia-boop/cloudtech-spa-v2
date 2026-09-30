@@ -22,6 +22,21 @@ export default defineConfig({
     outDir: 'dist-v45',
     sourcemap: true,
     target: 'es2020',
+    // R362 Lighthouse perf 优化 · 把大 vendor 拆出 main chunk (治本 perf 64)
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':       ['react', 'react-dom', 'react-router-dom'],
+          'vendor-radix':       ['radix-ui', '@radix-ui/react-dialog', 'class-variance-authority', 'clsx', 'tailwind-merge'],
+          'vendor-icons':       ['lucide-react'],
+          'vendor-motion':      ['framer-motion'],
+          'vendor-flow':        ['@xyflow/react'],
+          'vendor-forms':       ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'vendor-other':       ['cmdk', 'sonner'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 800,  // 治本 main chunk > 500KB warning
   },
   test: {
     environment: 'jsdom',

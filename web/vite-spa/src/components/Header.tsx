@@ -60,7 +60,7 @@ export function Header() {
   const location = useLocation();
 
   return (
-    <header className="border-b border-gray-200 bg-white sticky top-0 z-40 shadow-sm">
+    <header className="border-b border-border bg-card sticky top-0 z-40 shadow-sm">
       <div className="max-w-page mx-auto px-6 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 text-xl font-bold text-brand-500">
@@ -86,13 +86,13 @@ export function Header() {
                 <ChevronDown className="w-3 h-3 text-gray-400" />
               </button>
               {openSection === section.title && (
-                <div className="absolute top-full left-0 mt-0 w-56 bg-white border border-gray-200 rounded-md shadow-lg py-2">
+                <div className="absolute top-full left-0 mt-0 w-56 bg-card border border-border rounded-md shadow-lg py-2">
                   {section.items.map((item) => (
                     <Link
                       key={item.to}
                       to={item.to}
                       className={`flex items-center justify-between px-4 py-2 text-sm hover:bg-gray-50 ${
-                        location.pathname === item.to ? 'bg-brand-50 text-brand-600 font-medium' : 'text-gray-700'
+                        location.pathname === item.to ? 'bg-brand-50 text-brand-600 font-medium' : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <span>{item.label}</span>
@@ -121,7 +121,7 @@ export function Header() {
         <div className="flex items-center gap-3">
           <Link
             to="/login"
-            className="hidden md:block text-sm text-gray-700 hover:text-brand-500"
+            className="hidden md:block text-sm text-muted-foreground hover:text-brand-500"
           >
             登录
           </Link>

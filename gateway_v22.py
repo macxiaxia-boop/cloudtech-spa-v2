@@ -592,18 +592,63 @@ def _stub_response(rest: str, status: int = 200):
     return JSONResponse(content=v10_stub_data(rest))
 
 
+# R362 · V22 catch-all 转发到 V23 (7791) · 治本 R497 端点 stub=true 根因
+# V22 老 stub 路由无法识别 V23 动态端点 → 转发到 V23 子服务即可
+# V23 找不到再返 V22 stub (向后兼容)
+V23_FORWARD_URL = os.environ.get("V23_FORWARD_URL", "http://127.0.0.1:7791")
+V23_FORWARD_TIMEOUT = float(os.environ.get("V23_FORWARD_TIMEOUT", "3.0"))
+
+
+def _try_forward_v23(rest: str, method: str = "GET", body: bytes = None):
+    """转发到 V23 (7791) · 成功返 JSONResponse, 失败返 None
+    用 stdlib urllib (避免 requests 依赖) · R362 治本 R497 stub=true 根因
+    """
+    import urllib.request
+    import urllib.error
+    try:
+        url = f"{V23_FORWARD_URL}/api/v2/{rest}"
+        headers_dict = {"Accept": "application/json"}
+        data = body if method == "POST" else None
+        if method == "POST":
+            headers_dict["Content-Type"] = "application/json"
+        req = urllib.request.Request(url, data=data, headers=headers_dict, method=method)
+        with urllib.request.urlopen(req, timeout=V23_FORWARD_TIMEOUT) as resp:
+            raw = resp.read()
+            import json as _json
+            try:
+                parsed = _json.loads(raw)
+                return JSONResponse(content=parsed, status_code=resp.status)
+            except Exception:
+                # V23 返非 JSON → 直接返 raw
+                return JSONResponse(content={"raw": raw.decode("utf-8", errors="ignore")}, status_code=resp.status)
+    except urllib.error.HTTPError as e:
+        # V23 返 4xx/5xx → 走 V22 stub 兜底 (V22 stub 通常 200 + stub:true)
+        return None
+    except Exception:
+        # V23 不可达 (timeout/refused/etc) → 走 V22 stub 兜底
+        return None
+    return None
+
+
 @app.get("/api/v2/{rest:path}", include_in_schema=False)
 def v10_stub_get(rest: str):
+    # R362 · 先尝试 V23 转发 (治本 R497+ stub=true 根因)
+    fwd = _try_forward_v23(rest, method="GET")
+    if fwd is not None:
+        return fwd
     return _stub_response(rest)
 
 
 @app.post("/api/v2/{rest:path}", include_in_schema=False)
 async def v10_stub_post(rest: str, request: Request):
-    # 读 body 但不用, 避免客户端断流报错
+    # R362 · 先尝试 V23 转发
     try:
-        await request.body()
+        body = await request.body()
     except Exception:
-        pass
+        body = b""
+    fwd = _try_forward_v23(rest, method="POST", body=body)
+    if fwd is not None:
+        return fwd
     return _stub_response(rest)
 
 
