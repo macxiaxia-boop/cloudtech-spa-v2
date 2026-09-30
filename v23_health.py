@@ -8185,6 +8185,90 @@ def get_auth_api_keys_quota_reset_v2(key_id: str):
     }
 
 
+def get_skills_pull_template_v2(skill_id: str):
+    """Skill pull-template-v2 · 拉取模板 v2 (R447)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "pulled_id":   f"tpl_v23_R447_v2_{skill_id}",
+            "pulled_at": datetime.utcnow().isoformat() + "Z",
+            "size_bytes":  12288,
+            "version":     "v2",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_unset_default_for_billing_v3(method_id: str):
+    """Billing payment-methods/{id}/unset-default-for-billing-v3 · 取消默认 billing v3 (R447)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "for_billing": False,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v3",
+    }
+
+
+def get_campaigns_audience_source_detailed_v2(campaign_id: str):
+    """Campaigns audience-source-detailed-v2 · 来源详细 v2 (R447)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"source": "wechat",       "medium": "社交",  "country": "CN", "count": 6280, "pct": 34.1},
+            {"source": "xhs",          "medium": "社交",  "country": "CN", "count": 4180, "pct": 22.7},
+            {"source": "douyin",       "medium": "社交",  "country": "CN", "count": 3120, "pct": 16.9},
+            {"source": "wechat_group", "medium": "社交",  "country": "CN", "count": 1840, "pct": 10.0},
+            {"source": "email",        "medium": "邮件",  "country": "US", "count": 1240, "pct":  6.7},
+            {"source": "direct",       "medium": "直接",  "country": "global", "count": 1180, "pct":  6.4},
+            {"source": "baidu",        "medium": "搜索",  "country": "CN", "count":  580, "pct":  3.2},
+        ],
+        "total": 18420,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_week_stats_v4(file_id: str):
+    """Files download-by-week-stats-v4 · 按周统计 v4 (R447)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"week": "2026-09-W1", "downloads": 312, "unique_users": 218, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+            {"week": "2026-09-W2", "downloads": 428, "unique_users": 312, "avg_size_mb": 2.5, "p99_size_mb": 2.9},
+            {"week": "2026-09-W3", "downloads": 487, "unique_users": 348, "avg_size_mb": 2.5, "p99_size_mb": 2.9},
+            {"week": "2026-09-W4", "downloads": 312, "unique_users": 220, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+        ],
+        "total": 1539,
+        "version": "v4",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_quota_set(key_id: str):
+    """Auth api-keys/{id}/quota-set · 设置 quota (R447)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "quota":          25000,
+            "set_at":         datetime.utcnow().isoformat() + "Z",
+            "set_by":         "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -8788,6 +8872,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-language-detailed": lambda q, id="c001": get_campaigns_audience_language_detailed(id),
     "/api/v2/files/{id}/download-by-day-of-week-stats": lambda q, id="f_001": get_files_download_by_day_of_week_stats(id),
     "/api/v2/auth/api-keys/{id}/quota-reset-v2":     lambda q, id="k_001": get_auth_api_keys_quota_reset_v2(id),
+    "/api/v2/skills/{id}/pull-template-v2":       lambda q, id="s_001": get_skills_pull_template_v2(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-for-billing-v3": lambda q, id="c_001": get_billing_payment_methods_unset_default_for_billing_v3(id),
+    "/api/v2/campaigns/{id}/audience-source-detailed-v2": lambda q, id="c001": get_campaigns_audience_source_detailed_v2(id),
+    "/api/v2/files/{id}/download-by-week-stats-v4": lambda q, id="f_001": get_files_download_by_week_stats_v4(id),
+    "/api/v2/auth/api-keys/{id}/quota-set":         lambda q, id="k_001": get_auth_api_keys_quota_set(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
