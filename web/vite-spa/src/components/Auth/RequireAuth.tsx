@@ -21,8 +21,8 @@ export function RequireAuth({ children, skipWorkspace = false }: RequireAuthProp
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[var(--surface-subtle)]">
-        <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+      <div className="flex items-center justify-center h-screen bg-muted">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
           加载中…
         </div>

@@ -1,11 +1,16 @@
 /**
- * CloudTech Knowledge · v3 视觉母版 10 模块
- * 文档检索 · 向量检索 · 多模态解析 · 权限控制 + i18n
+ * CloudTech Knowledge · V23 视觉重做 (2026-09-30)
+ * 文档检索 · 向量检索 · 多模态解析 · 权限控制 + shadcn Card + Table + i18n
+ *
+ * V23: bg-[var(--xxx)] 硬编码 → 标准 token · table → shadcn Table
  */
 import { useState } from 'react';
 import { Search, Plus, FileText, MoreHorizontal, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/i18n';
 
 type Tab = 'all' | 'docs' | 'db' | 'web' | 'team';
@@ -47,68 +52,70 @@ export function KnowledgePage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">{t('nav.knowledge')}</h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">文档检索 · 向量检索 · 多模态解析 · 权限控制</p>
+        <p className="text-sm text-muted-foreground mt-1">文档检索 · 向量检索 · 多模态解析 · 权限控制</p>
       </div>
 
-      <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)]">
-        <div className="p-4 border-b border-[var(--border-default)] flex items-center gap-3 flex-wrap">
+      <Card className="p-0">
+        <div className="p-4 border-b border-border flex items-center gap-3 flex-wrap">
           <nav className="flex gap-1 mr-auto">
             {tabs.map((t) => (
               <button key={t.key} onClick={() => setTab(t.key)}
                 className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
-                  tab === t.key ? 'bg-brand-50 text-brand-700 font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'
+                  tab === t.key ? 'bg-brand-50 text-brand-700 font-medium' : 'text-muted-foreground hover:bg-muted'
                 }`}>{t.label}</button>
             ))}
           </nav>
           <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索文件…" className="pl-10 h-9" />
           </div>
           <Button size="sm"><Plus className="w-4 h-4" />{t('app.upload_doc')}</Button>
         </div>
 
-        <table className="w-full">
-          <thead>
-            <tr className="bg-[var(--surface-subtle)] border-b border-[var(--border-default)]">
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-10"><input type="checkbox" className="rounded" /></th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5">名称</th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">类型</th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">大小</th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">修改时间</th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">创建人</th>
-              <th className="text-right text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-12">操作</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-10"><input type="checkbox" className="rounded" /></TableHead>
+              <TableHead>名称</TableHead>
+              <TableHead className="w-24">类型</TableHead>
+              <TableHead className="w-24">大小</TableHead>
+              <TableHead className="w-24">修改时间</TableHead>
+              <TableHead className="w-24">创建人</TableHead>
+              <TableHead className="w-12 text-right">操作</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {files.map((f) => (
-              <tr key={f.id} className="border-b border-[var(--border-default)] hover:bg-[var(--surface-subtle)]">
-                <td className="px-4 py-2.5"><input type="checkbox" className="rounded" /></td>
-                <td className="px-4 py-2.5">
+              <TableRow key={f.id}>
+                <TableCell><input type="checkbox" className="rounded" /></TableCell>
+                <TableCell>
                   <div className="flex items-center gap-2">
-                    <div className={`w-7 h-7 rounded flex items-center justify-center text-[10px] font-semibold ${f.typeColor}`}>{f.type}</div>
-                    <span className="text-sm font-medium text-[var(--text-primary)]">{f.name}</span>
+                    <Badge className={`w-12 justify-center ${f.typeColor}`}>{f.type}</Badge>
+                    <span className="text-sm font-medium text-foreground">{f.name}</span>
                   </div>
-                </td>
-                <td className="px-4 py-2.5 text-xs text-[var(--text-secondary)]">{f.type}</td>
-                <td className="px-4 py-2.5 text-xs text-[var(--text-secondary)]">{f.size}</td>
-                <td className="px-4 py-2.5 text-xs text-[var(--text-tertiary)]">{f.modifiedAt}</td>
-                <td className="px-4 py-2.5 text-xs text-[var(--text-secondary)]">{f.owner}</td>
-                <td className="px-4 py-2.5 text-right">
-                  <button className="p-1 hover:bg-[var(--surface-muted)] rounded"><MoreHorizontal className="w-4 h-4 text-[var(--text-tertiary)]" /></button>
-                </td>
-              </tr>
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">{f.type}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{f.size}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{f.modifiedAt}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{f.owner}</TableCell>
+                <TableCell className="text-right">
+                  <button className="p-1 hover:bg-muted rounded"><MoreHorizontal className="w-4 h-4 text-muted-foreground" /></button>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
 
-      <div className="bg-info-bg rounded-lg border border-brand-200 p-4 flex items-start gap-3">
-        <Upload className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
-        <div className="text-sm">
-          <div className="font-medium text-brand-700">支持多模态解析</div>
-          <div className="text-brand-700 mt-1">上传 PDF/Word/PPT/Excel/Markdown 后，自动解析文本 + 图片 OCR + 表格结构，构建向量索引供智能体检索。</div>
-        </div>
-      </div>
+      <Card className="bg-brand-50 border-brand-200 p-0">
+        <CardContent className="p-4 flex items-start gap-3">
+          <Upload className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <div className="font-medium text-brand-700">支持多模态解析</div>
+            <div className="text-brand-700 mt-1">上传 PDF/Word/PPT/Excel/Markdown 后，自动解析文本 + 图片 OCR + 表格结构，构建向量索引供智能体检索。</div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

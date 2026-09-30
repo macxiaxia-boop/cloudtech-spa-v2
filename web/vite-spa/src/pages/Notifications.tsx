@@ -1,4 +1,15 @@
 /**
+ * CloudTech Notifications · V23 视觉重做 (2026-09-30)
+ * 通知中心：3 Tab (系统/任务/协作) + shadcn Card + Badge + i18n
+ *
+ * V23: bg-[var(--xxx)] 硬编码 → 标准 token (bg-card / text-muted-foreground / border-border)
+ */
+import { useState } from 'react';
+import { Bell, Trash2, Check, X, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useTranslation } from '@/i18n';
  * CloudTech Notifications · v3 视觉母版 14 模块
  * 通知中心：4 Tab（全部/系统通知/任务通知/协作通知）+ 已读未读 + i18n
  */
@@ -56,7 +67,7 @@ export function NotificationsPage() {
             <Bell className="w-6 h-6 text-brand-600" />
             {t('nav.notifications')}
           </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">系统通知 · 任务通知 · 协作通知</p>
+          <p className="text-sm text-muted-foreground mt-1">系统通知 · 任务通知 · 协作通知</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm"><Check className="w-3.5 h-3.5" />全部已读</Button>
@@ -65,46 +76,46 @@ export function NotificationsPage() {
       </div>
 
       {unreadCount > 0 && (
-        <div className="bg-info-bg border border-brand-200 rounded-lg px-4 py-2.5 text-sm text-brand-700 flex items-center gap-2">
+        <div className="bg-brand-50 border border-brand-200 rounded-lg px-4 py-2.5 text-sm text-brand-700 flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
           您有 <strong>{unreadCount}</strong> 条未读通知
         </div>
       )}
 
-      <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)]">
-        <nav className="flex border-b border-[var(--border-default)] px-2 overflow-x-auto">
+      <Card className="p-0">
+        <nav className="flex border-b border-border px-2 overflow-x-auto">
           {tabs.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
-                tab === t.key ? 'border-brand-600 text-brand-600' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                tab === t.key ? 'border-brand-600 text-brand-600' : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}>
               {t.label}
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-brand-100 text-brand-700' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'}`}>{t.count}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-brand-100 text-brand-700' : 'bg-muted text-muted-foreground'}`}>{t.count}</span>
             </button>
           ))}
         </nav>
 
-        <div className="divide-y divide-[var(--border-default)]">
+        <div className="divide-y divide-border">
           {filtered.map((n) => {
             const tb = typeBadge[n.type];
             return (
-              <div key={n.id} className={`flex items-start gap-3 p-4 hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer ${n.unread ? 'bg-brand-50/30' : ''}`}>
+              <div key={n.id} className={`flex items-start gap-3 p-4 hover:bg-accent transition-colors cursor-pointer ${n.unread ? 'bg-brand-50/30' : ''}`}>
                 <div className="text-2xl shrink-0">{n.icon}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     {n.unread && <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0" />}
-                    <span className="font-medium text-sm">{n.title}</span>
+                    <span className="font-medium text-sm text-foreground">{n.title}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${tb.color}`}>{tb.label}</span>
                   </div>
-                  <div className="text-xs text-[var(--text-secondary)]">{n.desc}</div>
+                  <div className="text-xs text-muted-foreground">{n.desc}</div>
                 </div>
-                <div className="text-xs text-[var(--text-tertiary)] shrink-0">{n.time}</div>
-                <button className="p-1 hover:bg-[var(--surface-muted)] rounded shrink-0" aria-label="删除"><Trash2 className="w-3.5 h-3.5 text-[var(--text-tertiary)]" /></button>
+                <div className="text-xs text-muted-foreground shrink-0">{n.time}</div>
+                <button className="p-1 hover:bg-accent rounded shrink-0" aria-label="删除"><Trash2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
               </div>
             );
           })}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

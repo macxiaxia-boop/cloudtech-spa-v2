@@ -36,22 +36,22 @@ export function AgentsPage() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">{t('nav.agents')}</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">智能体市场 · 创建配置 · 技能扩展 · 版本管理</p>
+          <p className="text-sm text-muted-foreground mt-1">智能体市场 · 创建配置 · 技能扩展 · 版本管理</p>
         </div>
         <Link to="/employees/new">
           <Button><Plus className="w-4 h-4" />{t('app.create_agent')}</Button>
         </Link>
       </div>
 
-      <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)]">
-        <nav className="flex border-b border-[var(--border-default)] px-2 overflow-x-auto">
+      <div className="bg-card rounded-lg border border-border">
+        <nav className="flex border-b border-border px-2 overflow-x-auto">
           {tabs.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
-                tab === t.key ? 'border-brand-600 text-brand-600' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                tab === t.key ? 'border-brand-600 text-brand-600' : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}>
               {t.label}
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-brand-100 text-brand-700' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'}`}>{t.count}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-brand-100 text-brand-700' : 'bg-muted text-muted-foreground'}`}>{t.count}</span>
             </button>
           ))}
         </nav>
@@ -60,28 +60,28 @@ export function AgentsPage() {
           {filtered.map((a) => {
             const Icon = a.icon;
             return (
-              <div key={a.id} className="group bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5 hover:shadow-md hover:border-brand-300 transition-all">
+              <div key={a.id} className="group bg-card rounded-xl border border-border p-5 hover:shadow-md hover:border-brand-300 transition-all">
                 <div className="flex items-start justify-between mb-3">
                   <div className={`w-12 h-12 rounded-xl ${a.bg} flex items-center justify-center shadow-sm`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <button className="p-1 opacity-0 group-hover:opacity-100 hover:bg-[var(--surface-muted)] rounded transition-opacity">
-                    <MoreHorizontal className="w-4 h-4 text-[var(--text-tertiary)]" />
+                  <button className="p-1 opacity-0 group-hover:opacity-100 hover:bg-muted rounded transition-opacity">
+                    <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
                 <h3 className="font-semibold mb-1 group-hover:text-brand-600 transition-colors">{a.name}</h3>
-                <p className="text-xs text-[var(--text-secondary)] mb-3 line-clamp-2 min-h-[2.5em]">{a.description}</p>
+                <p className="text-xs text-muted-foreground mb-3 line-clamp-2 min-h-[2.5em]">{a.description}</p>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {a.tags.map((t) => (
-                    <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)]">{t}</span>
+                    <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{t}</span>
                   ))}
                 </div>
-                <div className="flex items-center justify-between pt-3 border-t border-[var(--border-default)]">
-                  <div className="text-xs text-[var(--text-tertiary)]">
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div className="text-xs text-muted-foreground">
                     <Bot className="w-3 h-3 inline mr-0.5" />
                     {a.owner}
                   </div>
-                  <span className="text-xs text-[var(--text-secondary)]">{a.uses}</span>
+                  <span className="text-xs text-muted-foreground">{a.uses}</span>
                 </div>
               </div>
             );

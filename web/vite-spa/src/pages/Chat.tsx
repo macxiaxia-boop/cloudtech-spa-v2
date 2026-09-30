@@ -59,8 +59,8 @@ export function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-56px)] -m-4">
       {/* 左侧：会话列表 */}
-      <aside className="w-60 border-r border-[var(--border-default)] bg-[var(--surface-base)] flex flex-col">
-        <div className="p-3 border-b border-[var(--border-default)]">
+      <aside className="w-60 border-r border-border bg-card flex flex-col">
+        <div className="p-3 border-b border-border">
           <Button className="w-full" size="sm">
             <Plus className="w-4 h-4" />
             新建对话
@@ -70,19 +70,19 @@ export function ChatPage() {
           {sessions.map((s) => (
             <button
               key={s.id}
-              className="w-full text-left px-3 py-2 rounded-md text-sm hover:bg-[var(--surface-muted)] transition-colors"
+              className="w-full text-left px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
             >
-              <div className="font-medium truncate text-[var(--text-primary)]">{s.title}</div>
-              <div className="text-xs text-[var(--text-tertiary)] mt-0.5">{s.updatedAt}</div>
+              <div className="font-medium truncate text-foreground">{s.title}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{s.updatedAt}</div>
             </button>
           ))}
         </div>
       </aside>
 
       {/* 中间：消息流 */}
-      <div className="flex-1 flex flex-col bg-[var(--surface-base)] min-w-0">
+      <div className="flex-1 flex flex-col bg-card min-w-0">
         {/* 顶栏：模型选择 */}
-        <div className="h-12 border-b border-[var(--border-default)] flex items-center justify-between px-4">
+        <div className="h-12 border-b border-border flex items-center justify-between px-4">
           <select
             value={model}
             onChange={(e) => setModel(e.target.value)}
@@ -94,9 +94,9 @@ export function ChatPage() {
             <option>DeepSeek</option>
             <option>智谱 GLM-4</option>
           </select>
-          <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)]">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>会话时间线</span>
-            <button className="p-1 hover:bg-[var(--surface-muted)] rounded"><Settings2 className="w-4 h-4" /></button>
+            <button className="p-1 hover:bg-muted rounded"><Settings2 className="w-4 h-4" /></button>
           </div>
         </div>
 
@@ -114,31 +114,31 @@ export function ChatPage() {
                   className={`rounded-xl px-4 py-3 text-sm ${
                     msg.role === 'user'
                       ? 'bg-brand-600 text-white'
-                      : 'bg-[var(--surface-muted)] text-[var(--text-primary)]'
+                      : 'bg-muted text-foreground'
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                   {msg.chart && (
-                    <div className="mt-3 p-3 bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)]">
+                    <div className="mt-3 p-3 bg-card rounded-lg border border-border">
                       <div className="flex items-center gap-2 mb-2">
                         <BarChart3 className="w-4 h-4 text-brand-600" />
                         <span className="font-medium text-sm">{msg.chart.label}</span>
                       </div>
                       <div className="flex items-end justify-between">
                         <div>
-                          <div className="text-2xl font-bold text-[var(--text-primary)]">{msg.chart.value}</div>
-                          <div className="text-xs text-[var(--text-tertiary)]">活跃用户</div>
+                          <div className="text-2xl font-bold text-foreground">{msg.chart.value}</div>
+                          <div className="text-xs text-muted-foreground">活跃用户</div>
                         </div>
                         <div className="text-success-600 text-sm font-medium">{msg.chart.change}</div>
                       </div>
                     </div>
                   )}
                 </div>
-                <div className="text-xs text-[var(--text-tertiary)] mt-1 px-1">{msg.time}</div>
+                <div className="text-xs text-muted-foreground mt-1 px-1">{msg.time}</div>
               </div>
               {msg.role === 'user' && (
                 <div className="w-8 h-8 rounded-full bg-[var(--neutral-200)] flex items-center justify-center shrink-0">
-                  <User className="w-4 h-4 text-[var(--text-secondary)]" />
+                  <User className="w-4 h-4 text-muted-foreground" />
                 </div>
               )}
             </div>
@@ -146,7 +146,7 @@ export function ChatPage() {
         </div>
 
         {/* 输入区 */}
-        <div className="border-t border-[var(--border-default)] p-4">
+        <div className="border-t border-border p-4">
           <div className="flex items-end gap-2 max-w-4xl mx-auto">
             <Button variant="ghost" size="icon" className="shrink-0">
               <Paperclip className="w-4 h-4" />
@@ -171,8 +171,8 @@ export function ChatPage() {
       </div>
 
       {/* 右侧：模型/工具面板（折叠态） */}
-      <aside className="hidden xl:flex w-80 border-l border-[var(--border-default)] bg-[var(--surface-base)] flex-col">
-        <div className="p-4 border-b border-[var(--border-default)]">
+      <aside className="hidden xl:flex w-80 border-l border-border bg-card flex-col">
+        <div className="p-4 border-b border-border">
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <Settings2 className="w-4 h-4" />
             模型配置
@@ -180,31 +180,31 @@ export function ChatPage() {
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm">
           <div>
-            <div className="text-xs text-[var(--text-tertiary)] mb-1.5">当前模型</div>
-            <select className="w-full h-9 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] px-3 text-sm focus:outline-none focus:border-brand-600">
+            <div className="text-xs text-muted-foreground mb-1.5">当前模型</div>
+            <select className="w-full h-9 rounded-md border border-border bg-card px-3 text-sm focus:outline-none focus:border-brand-600">
               <option>{model}</option>
               <option>Claude 3.5</option>
               <option>GPT-4o</option>
             </select>
           </div>
           <div>
-            <div className="text-xs text-[var(--text-tertiary)] mb-1.5">温度</div>
+            <div className="text-xs text-muted-foreground mb-1.5">温度</div>
             <input type="range" min="0" max="2" step="0.1" defaultValue="0.7" className="w-full" />
-            <div className="flex justify-between text-xs text-[var(--text-tertiary)] mt-1">
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>精确</span>
               <span>0.7</span>
               <span>创造</span>
             </div>
           </div>
           <div>
-            <div className="text-xs text-[var(--text-tertiary)] mb-1.5">系统提示</div>
+            <div className="text-xs text-muted-foreground mb-1.5">系统提示</div>
             <Textarea placeholder="你是一个专业的 AI 助手…" className="min-h-[100px] text-sm" />
           </div>
           <div>
-            <div className="text-xs text-[var(--text-tertiary)] mb-1.5">可用工具</div>
+            <div className="text-xs text-muted-foreground mb-1.5">可用工具</div>
             <div className="flex flex-wrap gap-1.5">
               {['联网搜索', '数据分析', '文档检索', '代码执行', '图像理解'].map((t) => (
-                <span key={t} className="text-xs px-2 py-1 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)]">{t}</span>
+                <span key={t} className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">{t}</span>
               ))}
             </div>
           </div>

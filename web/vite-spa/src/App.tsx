@@ -113,7 +113,7 @@ export default function App() {
       {/* 工作台路由（BasicLayout · children prop 模式）*/}
       <Route path="/dashboard" element={<RequireAuth><BasicLayout><DashboardPage /></BasicLayout></RequireAuth>} />
       <Route path="/chat" element={<RequireAuth><BasicLayout showBreadcrumb={false}><ChatPage /></BasicLayout></RequireAuth>} />
-      <Route path="/employees" element={<RequireAuth><BasicLayout><AgentsPage /></BasicLayout></RequireAuth>} />
+      <Route path="/employees" element={<RequireAuth><BasicLayout><AIEmployeesPage /></BasicLayout></RequireAuth>} />
       <Route path="/employees/new" element={<RequireAuth><BasicLayout><AgentCreatePage /></BasicLayout></RequireAuth>} />
       <Route path="/employees/:id/edit" element={<RequireAuth><BasicLayout><AgentCreatePage /></BasicLayout></RequireAuth>} />
       <Route path="/tasks" element={<RequireAuth><BasicLayout><TasksPage /></BasicLayout></RequireAuth>} />

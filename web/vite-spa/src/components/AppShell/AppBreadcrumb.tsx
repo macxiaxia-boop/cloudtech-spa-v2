@@ -42,10 +42,10 @@ export function AppBreadcrumb() {
   if (pathnames.length === 0) return null;
 
   return (
-    <nav className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)] mb-4" aria-label="面包屑">
+    <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4" aria-label="面包屑">
       <Link
         to="/dashboard"
-        className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors"
+        className="flex items-center gap-1 hover:text-foreground transition-colors"
       >
         <Home className="w-4 h-4" />
       </Link>
@@ -55,11 +55,11 @@ export function AppBreadcrumb() {
         const label = routeLabels[segment] || decodeURIComponent(segment);
         return (
           <span key={href} className="flex items-center gap-1.5">
-            <ChevronRight className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
+            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
             {isLast ? (
-              <span className="font-medium text-[var(--text-primary)]">{label}</span>
+              <span className="font-medium text-foreground">{label}</span>
             ) : (
-              <Link to={href} className="hover:text-[var(--text-primary)] transition-colors">
+              <Link to={href} className="hover:text-foreground transition-colors">
                 {label}
               </Link>
             )}

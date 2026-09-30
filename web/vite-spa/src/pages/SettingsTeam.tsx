@@ -27,7 +27,7 @@ const members: Member[] = [
 const roleColors = {
   管理员: 'bg-brand-50 text-brand-700 border-brand-200',
   成员:   'bg-info-bg text-brand-700 border-brand-100',
-  访客:   'bg-[var(--surface-muted)] text-[var(--text-secondary)] border-[var(--border-default)]',
+  访客:   'bg-muted text-muted-foreground border-border',
 };
 
 const statusColor = {
@@ -43,14 +43,14 @@ export function SettingsTeamPage() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">团队与权限</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">成员管理 · 角色分配 · 权限控制</p>
+          <p className="text-sm text-muted-foreground mt-1">成员管理 · 角色分配 · 权限控制</p>
         </div>
         <Button><Plus className="w-4 h-4" />{t('app.invite_member')}</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {members.map((m) => (
-          <div key={m.id} className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5 hover:shadow-sm transition-shadow">
+          <div key={m.id} className="bg-card rounded-xl border border-border p-5 hover:shadow-sm transition-shadow">
             <div className="flex items-start gap-3 mb-4">
               <div className="relative shrink-0">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-accent-purple-500 flex items-center justify-center text-white text-lg font-semibold">{m.name.slice(0, 1)}</div>
@@ -60,20 +60,20 @@ export function SettingsTeamPage() {
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="font-semibold truncate">{m.name}</span>
                 </div>
-                <div className="text-xs text-[var(--text-tertiary)] truncate flex items-center gap-1">
+                <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
                   <Mail className="w-3 h-3 shrink-0" />
                   {m.email}
                 </div>
               </div>
-              <button className="p-1 hover:bg-[var(--surface-muted)] rounded shrink-0">
-                <MoreHorizontal className="w-4 h-4 text-[var(--text-tertiary)]" />
+              <button className="p-1 hover:bg-muted rounded shrink-0">
+                <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className={`px-2 py-0.5 rounded-full border font-medium ${roleColors[m.role]}`}>{m.role}</span>
-              <span className="text-[var(--text-tertiary)]">{m.lastActive}</span>
+              <span className="text-muted-foreground">{m.lastActive}</span>
             </div>
-            <div className="mt-3 pt-3 border-t border-[var(--border-default)] text-xs text-[var(--text-tertiary)]">
+            <div className="mt-3 pt-3 border-t border-border text-xs text-muted-foreground">
               加入于 {m.joinedAt}
             </div>
           </div>
@@ -81,21 +81,21 @@ export function SettingsTeamPage() {
       </div>
 
       {/* 角色权限概览 */}
-      <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
+      <div className="bg-card rounded-xl border border-border p-5">
         <h2 className="font-semibold mb-1">角色权限概览</h2>
-        <p className="text-xs text-[var(--text-tertiary)] mb-4">三种预置角色 · 可在权限设置中自定义</p>
+        <p className="text-xs text-muted-foreground mb-4">三种预置角色 · 可在权限设置中自定义</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             { role: '管理员', desc: '全部功能 + 团队管理 + 系统设置', count: members.filter((m) => m.role === '管理员').length, color: 'border-brand-300 bg-brand-50/30' },
             { role: '成员',   desc: '日常工作台全部功能（无管理）',     count: members.filter((m) => m.role === '成员').length,   color: 'border-brand-200 bg-info-bg/30' },
-            { role: '访客',   desc: '只读访问 Dashboard 与公开内容',   count: members.filter((m) => m.role === '访客').length,   color: 'border-[var(--border-default)] bg-[var(--surface-subtle)]' },
+            { role: '访客',   desc: '只读访问 Dashboard 与公开内容',   count: members.filter((m) => m.role === '访客').length,   color: 'border-border bg-muted' },
           ].map((r) => (
             <div key={r.role} className={`p-4 rounded-lg border-2 ${r.color}`}>
               <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold">{r.role}</span>
-                <span className="text-xs text-[var(--text-secondary)]">{r.count} 人</span>
+                <span className="text-xs text-muted-foreground">{r.count} 人</span>
               </div>
-              <p className="text-xs text-[var(--text-secondary)]">{r.desc}</p>
+              <p className="text-xs text-muted-foreground">{r.desc}</p>
             </div>
           ))}
         </div>

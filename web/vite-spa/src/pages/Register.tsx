@@ -45,16 +45,16 @@ export function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--gradient-ice)' }}>
-      <div className="w-full max-w-md bg-[var(--surface-base)] rounded-xl shadow-xl border border-[var(--border-default)] p-8">
+      <div className="w-full max-w-md bg-card rounded-xl shadow-xl border border-border p-8">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
             <Cloud className="w-5 h-5 text-white" />
           </div>
-          <span className="font-semibold text-[var(--text-primary)] text-base">CloudTech</span>
+          <span className="font-semibold text-foreground text-base">CloudTech</span>
         </div>
 
         <h1 className="text-2xl font-bold mb-1.5">创建账户</h1>
-        <p className="text-sm text-[var(--text-secondary)] mb-6">开始你的 AI 工作空间之旅</p>
+        <p className="text-sm text-muted-foreground mb-6">开始你的 AI 工作空间之旅</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-5">
           <div className="space-y-1.5">
@@ -76,7 +76,7 @@ export function RegisterPage() {
             <Label htmlFor="password">密码</Label>
             <div className="relative">
               <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="至少 8 位，含大小写数字符号" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required className="pr-10" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
@@ -99,8 +99,8 @@ export function RegisterPage() {
             )}
           </div>
           <label className="flex items-start gap-2 cursor-pointer text-sm">
-            <input type="checkbox" checked={form.agreed} onChange={(e) => setForm({ ...form, agreed: e.target.checked })} className="mt-0.5 rounded border-[var(--border-default)] text-brand-600 focus:ring-brand-500/20" />
-            <span className="text-[var(--text-secondary)]">
+            <input type="checkbox" checked={form.agreed} onChange={(e) => setForm({ ...form, agreed: e.target.checked })} className="mt-0.5 rounded border-border text-brand-600 focus:ring-brand-500/20" />
+            <span className="text-muted-foreground">
               我已阅读并同意 <a href="#" className="text-brand-600 hover:underline">服务条款</a> 和 <a href="#" className="text-brand-600 hover:underline">隐私政策</a>
             </span>
           </label>
@@ -109,7 +109,7 @@ export function RegisterPage() {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-[var(--text-secondary)]">
+        <p className="text-center text-sm text-muted-foreground">
           已有账户？
           <Link to="/login" className="text-brand-600 hover:text-brand-700 font-medium ml-1">立即登录</Link>
         </p>

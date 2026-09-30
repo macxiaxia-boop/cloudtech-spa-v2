@@ -57,11 +57,11 @@ export function AgentCreatePage() {
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 transition-colors ${
                   isActive ? 'bg-brand-600 text-white'
                   : isDone ? 'bg-success-500 text-white'
-                  : 'bg-[var(--surface-muted)] text-[var(--text-tertiary)]'
+                  : 'bg-muted text-muted-foreground'
                 }`}>
                   {isDone ? <Check className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                 </div>
-                <div className={`text-sm ${isActive ? 'font-medium text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>{s.label}</div>
+                <div className={`text-sm ${isActive ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>{s.label}</div>
                 {s.num < 5 && <div className={`flex-1 h-0.5 mx-2 ${isDone ? 'bg-success-500' : 'bg-[var(--neutral-200)]'}`} />}
               </div>
             );
@@ -70,10 +70,10 @@ export function AgentCreatePage() {
       </div>
 
       {/* 步骤内容 */}
-      <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="grid grid-cols-[1fr_400px]">
           {/* 左：表单 */}
-          <div className="p-8 border-r border-[var(--border-default)]">
+          <div className="p-8 border-r border-border">
             {step === 1 && (
               <div className="space-y-5">
                 <h2 className="text-lg font-semibold">基础信息</h2>
@@ -100,7 +100,7 @@ export function AgentCreatePage() {
             {step === 2 && (
               <div className="space-y-5">
                 <h2 className="text-lg font-semibold">技能配置</h2>
-                <p className="text-sm text-[var(--text-secondary)]">选择该智能体擅长的技能领域，可多选</p>
+                <p className="text-sm text-muted-foreground">选择该智能体擅长的技能领域，可多选</p>
                 <div className="grid grid-cols-2 gap-2">
                   {skillOptions.map((s) => (
                     <button
@@ -110,7 +110,7 @@ export function AgentCreatePage() {
                       className={`flex items-center justify-between px-3 py-2.5 rounded-md border text-sm transition-colors ${
                         skills.includes(s)
                           ? 'border-brand-500 bg-brand-50 text-brand-700'
-                          : 'border-[var(--border-default)] hover:bg-[var(--surface-muted)]'
+                          : 'border-border hover:bg-muted'
                       }`}
                     >
                       <span>{s}</span>
@@ -118,14 +118,14 @@ export function AgentCreatePage() {
                     </button>
                   ))}
                 </div>
-                <div className="pt-3 border-t border-[var(--border-default)] space-y-3">
+                <div className="pt-3 border-t border-border space-y-3">
                   <Label>数据源</Label>
                   {[
                     { key: 'mongodb' as const, label: 'MongoDB' },
                     { key: 'postgresql' as const, label: 'PostgreSQL' },
                     { key: 'python' as const, label: 'Python 脚本' },
                   ].map((ds) => (
-                    <label key={ds.key} className="flex items-center justify-between p-2 rounded-md hover:bg-[var(--surface-muted)] cursor-pointer">
+                    <label key={ds.key} className="flex items-center justify-between p-2 rounded-md hover:bg-muted cursor-pointer">
                       <span className="text-sm">{ds.label}</span>
                       <button
                         type="button"
@@ -143,12 +143,12 @@ export function AgentCreatePage() {
             {step === 3 && (
               <div className="space-y-5">
                 <h2 className="text-lg font-semibold">知识库</h2>
-                <p className="text-sm text-[var(--text-secondary)]">选择该智能体可以访问的知识库</p>
+                <p className="text-sm text-muted-foreground">选择该智能体可以访问的知识库</p>
                 <div className="space-y-2">
                   {['市场分析报告集', '产品需求文档库', '用户调研数据', '行业洞察报告'].map((kb) => (
-                    <label key={kb} className="flex items-center gap-3 p-3 rounded-md border border-[var(--border-default)] hover:bg-[var(--surface-muted)] cursor-pointer">
+                    <label key={kb} className="flex items-center gap-3 p-3 rounded-md border border-border hover:bg-muted cursor-pointer">
                       <input type="checkbox" className="rounded text-brand-600" />
-                      <BookOpen className="w-4 h-4 text-[var(--text-tertiary)]" />
+                      <BookOpen className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm flex-1">{kb}</span>
                     </label>
                   ))}
@@ -159,11 +159,11 @@ export function AgentCreatePage() {
             {step === 4 && (
               <div className="space-y-5">
                 <h2 className="text-lg font-semibold">测试对话</h2>
-                <p className="text-sm text-[var(--text-secondary)]">用一段测试对话验证智能体表现</p>
-                <div className="border border-[var(--border-default)] rounded-lg p-4 min-h-[200px] bg-[var(--surface-subtle)]">
+                <p className="text-sm text-muted-foreground">用一段测试对话验证智能体表现</p>
+                <div className="border border-border rounded-lg p-4 min-h-[200px] bg-muted">
                   <div className="flex gap-2 mb-3">
                     <div className="w-7 h-7 rounded-full bg-[var(--neutral-200)] flex items-center justify-center text-xs">U</div>
-                    <div className="bg-[var(--surface-base)] rounded-lg px-3 py-2 text-sm border border-[var(--border-default)]">分析最近 3 个月的市场趋势</div>
+                    <div className="bg-card rounded-lg px-3 py-2 text-sm border border-border">分析最近 3 个月的市场趋势</div>
                   </div>
                   <div className="flex gap-2">
                     <div className="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-xs text-brand-600">AI</div>
@@ -194,7 +194,7 @@ export function AgentCreatePage() {
                         className={`flex-1 px-3 py-2 rounded-md border text-sm transition-colors ${
                           visible === v.key
                             ? 'border-brand-500 bg-brand-50 text-brand-700'
-                            : 'border-[var(--border-default)] hover:bg-[var(--surface-muted)]'
+                            : 'border-border hover:bg-muted'
                         }`}
                       >{v.label}</button>
                     ))}
@@ -216,16 +216,16 @@ export function AgentCreatePage() {
           </div>
 
           {/* 右：实时预览 */}
-          <div className="p-6 bg-[var(--surface-subtle)]">
-            <div className="text-xs text-[var(--text-tertiary)] mb-3 font-medium">实时预览</div>
-            <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)] p-5">
+          <div className="p-6 bg-muted">
+            <div className="text-xs text-muted-foreground mb-3 font-medium">实时预览</div>
+            <div className="bg-card rounded-lg border border-border p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-500 to-accent-purple-500 flex items-center justify-center shrink-0">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <div className="font-semibold">市场分析师</div>
-                  <div className="text-xs text-[var(--text-tertiary)]">一句话描述它的核心能力</div>
+                  <div className="text-xs text-muted-foreground">一句话描述它的核心能力</div>
                 </div>
               </div>
               {skills.length > 0 && (
@@ -235,17 +235,17 @@ export function AgentCreatePage() {
                   ))}
                 </div>
               )}
-              <div className="text-xs text-[var(--text-tertiary)]">已使用 0 次</div>
+              <div className="text-xs text-muted-foreground">已使用 0 次</div>
             </div>
           </div>
         </div>
 
         {/* 底部按钮 */}
-        <div className="border-t border-[var(--border-default)] px-8 py-4 flex items-center justify-between bg-[var(--surface-subtle)]">
+        <div className="border-t border-border px-8 py-4 flex items-center justify-between bg-muted">
           <Button variant="ghost" onClick={prev} disabled={step === 1}>
             <ArrowLeft className="w-4 h-4" />上一步
           </Button>
-          <div className="text-xs text-[var(--text-tertiary)]">第 {step} / 5 步</div>
+          <div className="text-xs text-muted-foreground">第 {step} / 5 步</div>
           <Button onClick={next}>
             {step === 5 ? '发布' : '下一步'}<ArrowRight className="w-4 h-4" />
           </Button>

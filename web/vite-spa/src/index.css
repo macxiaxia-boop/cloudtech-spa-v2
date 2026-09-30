@@ -78,6 +78,18 @@
     --surface-muted: var(--neutral-100);
     --surface-overlay: rgba(15, 23, 42, 0.5);
 
+    /* V23: RGB 数字格式 var (用于 Tailwind rgb(var()) wrapper + /<alpha-value>) */
+    --neutral-0-rgb: 255 255 255;
+    --neutral-50-rgb: 248 250 252;
+    --neutral-100-rgb: 241 245 249;
+    --neutral-500-rgb: 100 116 139;
+    --neutral-900-rgb: 15 23 42;
+    --brand-600-rgb: 37 99 235;
+    --surface-base-rgb: var(--neutral-0-rgb);
+    --text-primary-rgb: var(--neutral-900-rgb);
+    --border-rgb: 226 232 240; /* = neutral-200 */
+    --ring-rgb: 37 99 235;    /* = brand-600 */
+
     /* ── Borders ── */
     --border-default: var(--neutral-200);
     --border-hover: var(--neutral-300);

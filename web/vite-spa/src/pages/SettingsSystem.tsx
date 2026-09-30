@@ -82,18 +82,18 @@ export function SettingsSystemPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">{t('nav.settings')}</h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">模型 · 团队 · 权限 · 统计 · 日志</p>
+        <p className="text-sm text-muted-foreground mt-1">模型 · 团队 · 权限 · 统计 · 日志</p>
       </div>
 
       {/* 5 Tab 横向 */}
-      <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)]">
-        <nav className="flex border-b border-[var(--border-default)] px-2 overflow-x-auto">
+      <div className="bg-card rounded-lg border border-border">
+        <nav className="flex border-b border-border px-2 overflow-x-auto">
           {tabs.map((t) => {
             const Icon = t.icon;
             return (
               <button key={t.key} onClick={() => setTab(t.key)}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  tab === t.key ? 'border-brand-600 text-brand-600' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  tab === t.key ? 'border-brand-600 text-brand-600' : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}>
                 <Icon className="w-4 h-4" />
                 {t.label}
@@ -108,31 +108,31 @@ export function SettingsSystemPage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="font-semibold">已配置模型</h2>
-                <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{models.filter((m) => m.enabled).length} / {models.length} 已启用</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{models.filter((m) => m.enabled).length} / {models.length} 已启用</p>
               </div>
               <Button size="sm"><Plus className="w-4 h-4" />添加模型</Button>
             </div>
             <table className="w-full">
               <thead>
-                <tr className="bg-[var(--surface-subtle)] border-b border-[var(--border-default)]">
-                  <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5">模型</th>
-                  <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-32">类型</th>
-                  <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-40">服务商</th>
-                  <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">状态</th>
-                  <th className="text-right text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">操作</th>
+                <tr className="bg-muted border-b border-border">
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5">模型</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-32">类型</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-40">服务商</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-24">状态</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-4 py-2.5 w-24">操作</th>
                 </tr>
               </thead>
               <tbody>
                 {models.map((m) => (
-                  <tr key={m.id} className="border-b border-[var(--border-default)] hover:bg-[var(--surface-subtle)]">
+                  <tr key={m.id} className="border-b border-border hover:bg-muted">
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded bg-gradient-to-br from-brand-500 to-accent-purple-500 flex items-center justify-center text-white text-xs font-semibold">{m.name.slice(0, 1)}</div>
                         <span className="text-sm font-medium">{m.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 text-xs text-[var(--text-secondary)]">{m.type}</td>
-                    <td className="px-4 py-2.5 text-xs text-[var(--text-secondary)]">{m.provider}</td>
+                    <td className="px-4 py-2.5 text-xs text-muted-foreground">{m.type}</td>
+                    <td className="px-4 py-2.5 text-xs text-muted-foreground">{m.provider}</td>
                     <td className="px-4 py-2.5">
                       <button className={`relative w-9 h-5 rounded-full transition-colors ${m.enabled ? 'bg-brand-600' : 'bg-[var(--neutral-300)]'}`}>
                         <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${m.enabled ? 'translate-x-4' : ''}`} />
@@ -140,7 +140,7 @@ export function SettingsSystemPage() {
                     </td>
                     <td className="px-4 py-2.5 text-right">
                       <button className="text-xs text-brand-600 hover:underline mr-2">设置</button>
-                      <button className="p-1 hover:bg-[var(--surface-muted)] rounded"><MoreHorizontal className="w-4 h-4 text-[var(--text-tertiary)]" /></button>
+                      <button className="p-1 hover:bg-muted rounded"><MoreHorizontal className="w-4 h-4 text-muted-foreground" /></button>
                     </td>
                   </tr>
                 ))}
@@ -155,24 +155,24 @@ export function SettingsSystemPage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="font-semibold">成员管理</h2>
-                <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{members.length} 名成员 · {members.filter((m) => m.role === '管理员').length} 名管理员</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{members.length} 名成员 · {members.filter((m) => m.role === '管理员').length} 名管理员</p>
               </div>
               <Button size="sm"><Plus className="w-4 h-4" />邀请成员</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {members.map((m) => (
-                <div key={m.id} className="flex items-center gap-3 p-4 rounded-lg border border-[var(--border-default)] hover:shadow-sm transition-shadow">
+                <div key={m.id} className="flex items-center gap-3 p-4 rounded-lg border border-border hover:shadow-sm transition-shadow">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-accent-purple-500 flex items-center justify-center text-white font-semibold shrink-0">{m.name.slice(0, 1)}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">{m.name}</span>
                       <span className={`w-2 h-2 rounded-full shrink-0 ${m.status === 'online' ? 'bg-success-500' : m.status === '1h' ? 'bg-warning-500' : 'bg-neutral-300'}`} />
                     </div>
-                    <div className="text-xs text-[var(--text-tertiary)] truncate">{m.email}</div>
+                    <div className="text-xs text-muted-foreground truncate">{m.email}</div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-xs px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 font-medium">{m.role}</span>
-                    <button className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">编辑</button>
+                    <button className="text-xs text-muted-foreground hover:text-foreground">编辑</button>
                   </div>
                 </div>
               ))}
@@ -184,14 +184,14 @@ export function SettingsSystemPage() {
         {tab === 'permissions' && (
           <div className="p-5">
             <h2 className="font-semibold mb-1">角色权限矩阵</h2>
-            <p className="text-xs text-[var(--text-tertiary)] mb-4">配置每个角色可访问的功能模块</p>
+            <p className="text-xs text-muted-foreground mb-4">配置每个角色可访问的功能模块</p>
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[var(--surface-subtle)] border-b border-[var(--border-default)]">
-                  <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5">模块</th>
-                  <th className="text-center text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">管理员</th>
-                  <th className="text-center text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">成员</th>
-                  <th className="text-center text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">访客</th>
+                <tr className="bg-muted border-b border-border">
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5">模块</th>
+                  <th className="text-center text-xs font-medium text-muted-foreground px-4 py-2.5 w-24">管理员</th>
+                  <th className="text-center text-xs font-medium text-muted-foreground px-4 py-2.5 w-24">成员</th>
+                  <th className="text-center text-xs font-medium text-muted-foreground px-4 py-2.5 w-24">访客</th>
                 </tr>
               </thead>
               <tbody>
@@ -206,14 +206,14 @@ export function SettingsSystemPage() {
                   { module: '团队管理',   perms: [true, false, false] },
                   { module: '系统设置',   perms: [true, false, false] },
                 ].map((row) => (
-                  <tr key={row.module} className="border-b border-[var(--border-default)]">
+                  <tr key={row.module} className="border-b border-border">
                     <td className="px-4 py-2.5 font-medium">{row.module}</td>
                     {row.perms.map((p, i) => (
                       <td key={i} className="px-4 py-2.5 text-center">
                         {p ? (
                           <span className="inline-flex w-5 h-5 rounded-full bg-success-100 text-success-700 items-center justify-center text-xs">✓</span>
                         ) : (
-                          <span className="inline-flex w-5 h-5 rounded-full bg-[var(--surface-muted)] text-[var(--text-tertiary)] items-center justify-center text-xs">—</span>
+                          <span className="inline-flex w-5 h-5 rounded-full bg-muted text-muted-foreground items-center justify-center text-xs">—</span>
                         )}
                       </td>
                     ))}
@@ -234,8 +234,8 @@ export function SettingsSystemPage() {
                 { label: '总 Token 消耗', value: '892K', trend: '+8%' },
                 { label: '本月费用', value: '¥328', trend: '+15%' },
               ].map((s) => (
-                <div key={s.label} className="p-4 bg-[var(--surface-subtle)] rounded-lg">
-                  <div className="text-xs text-[var(--text-tertiary)]">{s.label}</div>
+                <div key={s.label} className="p-4 bg-muted rounded-lg">
+                  <div className="text-xs text-muted-foreground">{s.label}</div>
                   <div className="text-2xl font-bold mt-1">{s.value}</div>
                   <div className="text-xs text-success-600 mt-1">{s.trend}</div>
                 </div>
@@ -252,7 +252,7 @@ export function SettingsSystemPage() {
           <div className="p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold">系统日志</h2>
-              <select className="h-8 rounded border border-[var(--border-default)] bg-[var(--surface-base)] px-2 text-xs">
+              <select className="h-8 rounded border border-border bg-card px-2 text-xs">
                 <option>全部级别</option>
                 <option>INFO</option>
                 <option>WARN</option>
@@ -263,13 +263,13 @@ export function SettingsSystemPage() {
               {logs.map((log) => {
                 const lm = levelMap[log.level];
                 return (
-                  <div key={log.id} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-[var(--surface-subtle)] text-sm">
+                  <div key={log.id} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted text-sm">
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold shrink-0 ${lm.cls}`}>{lm.label}</span>
-                    <span className="text-[var(--text-secondary)] shrink-0 w-16">{log.actor}</span>
-                    <span className="text-[var(--text-primary)] flex-1 truncate">
-                      <span className="text-[var(--text-secondary)]">{log.action}</span> · <span className="font-medium">{log.target}</span>
+                    <span className="text-muted-foreground shrink-0 w-16">{log.actor}</span>
+                    <span className="text-foreground flex-1 truncate">
+                      <span className="text-muted-foreground">{log.action}</span> · <span className="font-medium">{log.target}</span>
                     </span>
-                    <span className="text-xs text-[var(--text-tertiary)] shrink-0">{log.time}</span>
+                    <span className="text-xs text-muted-foreground shrink-0">{log.time}</span>
                   </div>
                 );
               })}

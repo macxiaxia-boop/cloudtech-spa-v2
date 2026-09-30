@@ -39,48 +39,48 @@ export function WorkspaceSelectorPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--gradient-ice)' }}>
-      <div className="w-full max-w-[var(--workspace-selector-w)] bg-[var(--surface-base)] rounded-xl shadow-xl border border-[var(--border-default)] p-8">
+      <div className="w-full max-w-[var(--workspace-selector-w)] bg-card rounded-xl shadow-xl border border-border p-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
               <Cloud className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="font-semibold text-[var(--text-primary)] text-base">CloudTech</span>
-              {user && <div className="text-xs text-[var(--text-tertiary)]">{user.email}</div>}
+              <span className="font-semibold text-foreground text-base">CloudTech</span>
+              {user && <div className="text-xs text-muted-foreground">{user.email}</div>}
             </div>
           </div>
-          <button onClick={handleLogout} className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">切换账号</button>
+          <button onClick={handleLogout} className="text-xs text-muted-foreground hover:text-foreground">切换账号</button>
         </div>
 
         <h1 className="text-2xl font-bold mb-2">选择工作空间</h1>
-        <p className="text-sm text-[var(--text-secondary)] mb-6">一个更高效的 AI 工作方式</p>
+        <p className="text-sm text-muted-foreground mb-6">一个更高效的 AI 工作方式</p>
 
         <div className="flex flex-col gap-3 mb-6">
           {workspaces.map((ws) => (
-            <button key={ws.id} onClick={() => handleSelect(ws)} className="flex items-center gap-4 p-4 rounded-lg border border-[var(--border-default)] hover:border-brand-500 hover:shadow-sm transition-all text-left group">
+            <button key={ws.id} onClick={() => handleSelect(ws)} className="flex items-center gap-4 p-4 rounded-lg border border-border hover:border-brand-500 hover:shadow-sm transition-all text-left group">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${ws.iconColor}`}>
                 <ws.icon className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-[var(--text-primary)]">{ws.name}</span>
-                  <span className="text-xs text-[var(--text-tertiary)]">{ws.memberCount} 人</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)]">{ws.role}</span>
+                  <span className="font-semibold text-foreground">{ws.name}</span>
+                  <span className="text-xs text-muted-foreground">{ws.memberCount} 人</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{ws.role}</span>
                 </div>
-                <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{ws.description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{ws.description}</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-[var(--text-tertiary)] group-hover:text-brand-600 group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-brand-600 group-hover:translate-x-1 transition-all" />
             </button>
           ))}
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-[var(--border-default)]">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
           <button className="flex items-center gap-2 text-sm text-brand-600 hover:text-brand-700 transition-colors">
             <Plus className="w-4 h-4" />
             创建新组织
           </button>
-          <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+          <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <RefreshCw className="w-4 h-4" />
             切换账号
           </button>

@@ -73,7 +73,7 @@ interface AppSidebarProps {
 export function AppSidebar({ collapsed = false, onNavigate }: AppSidebarProps) {
   return (
     <aside className={cn(
-      'bg-[var(--surface-emphasis)] border-r border-[var(--border-default)] flex flex-col h-screen sticky top-0 transition-all duration-300',
+      'bg-card border-r border-border flex flex-col h-screen sticky top-0 transition-all duration-300',
       collapsed ? 'w-16' : 'w-[var(--sidebar-width)]',
       // 移动端隐藏（lg 以上显示）
       'hidden lg:flex',
@@ -84,7 +84,7 @@ export function AppSidebar({ collapsed = false, onNavigate }: AppSidebarProps) {
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0">
           <Cloud className="w-5 h-5 text-white" />
         </div>
-        {!collapsed && <span className="font-semibold text-[var(--text-primary)] text-base">CloudTech</span>}
+        {!collapsed && <span className="font-semibold text-foreground text-base">CloudTech</span>}
       </div>
 
       {/* Nav Sections */}
@@ -92,7 +92,7 @@ export function AppSidebar({ collapsed = false, onNavigate }: AppSidebarProps) {
         {navSections.map((section, idx) => (
           <div key={idx} className="flex flex-col gap-1">
             {section.title && !collapsed && (
-              <div className="px-3 py-1 text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wide">
+              <div className="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 {section.title}
               </div>
             )}
@@ -108,7 +108,7 @@ export function AppSidebar({ collapsed = false, onNavigate }: AppSidebarProps) {
                     collapsed && 'justify-center px-0',
                     isActive
                       ? 'bg-brand-50 text-brand-700 font-medium'
-                      : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)]'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   )
                 }
               >
@@ -124,12 +124,12 @@ export function AppSidebar({ collapsed = false, onNavigate }: AppSidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="pt-3 border-t border-[var(--border-default)]">
+      <div className="pt-3 border-t border-border">
         <NavLink to="/profile" onClick={onNavigate} title={collapsed ? '个人中心' : undefined}
           className={({ isActive }) =>
             cn('flex items-center gap-3 h-9 px-3 rounded-md text-sm transition-colors mt-1',
               collapsed && 'justify-center px-0',
-              isActive ? 'bg-brand-50 text-brand-700 font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)]'
+              isActive ? 'bg-brand-50 text-brand-700 font-medium' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )
           }>
           <UserCircle className="w-5 h-5 shrink-0" />
@@ -139,7 +139,7 @@ export function AppSidebar({ collapsed = false, onNavigate }: AppSidebarProps) {
           className={({ isActive }) =>
             cn('flex items-center gap-3 h-9 px-3 rounded-md text-sm transition-colors mt-1',
               collapsed && 'justify-center px-0',
-              isActive ? 'bg-brand-50 text-brand-700 font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)]'
+              isActive ? 'bg-brand-50 text-brand-700 font-medium' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )
           }>
           <Settings2 className="w-5 h-5 shrink-0" />
@@ -165,7 +165,7 @@ export function MobileSidebarDrawer({ open, onClose }: { open: boolean; onClose:
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <div className="absolute inset-0 bg-[var(--surface-overlay)] animate-fade-in" onClick={onClose} />
-      <div className="absolute left-0 top-0 bottom-0 w-[var(--sidebar-width)] bg-[var(--surface-emphasis)] shadow-xl animate-slide-up flex flex-col">
+      <div className="absolute left-0 top-0 bottom-0 w-[var(--sidebar-width)] bg-card shadow-xl animate-slide-up flex flex-col">
         <AppSidebar onNavigate={onClose} />
       </div>
     </div>

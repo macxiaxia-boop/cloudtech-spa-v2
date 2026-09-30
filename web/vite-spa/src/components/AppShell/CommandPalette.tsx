@@ -51,26 +51,26 @@ export function CommandPalette() {
       onClick={() => setOpen(false)}
     >
       <div
-        className="w-full max-w-xl bg-[var(--surface-base)] rounded-lg shadow-xl border border-[var(--border-default)] overflow-hidden"
+        className="w-full max-w-xl bg-card rounded-lg shadow-xl border border-border overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <Command label="命令面板" className="flex flex-col">
-          <div className="flex items-center gap-2 px-4 border-b border-[var(--border-default)]">
-            <Search className="w-4 h-4 text-[var(--text-tertiary)]" />
+          <div className="flex items-center gap-2 px-4 border-b border-border">
+            <Search className="w-4 h-4 text-muted-foreground" />
             <Command.Input
               placeholder="输入命令或搜索…"
-              className="flex-1 h-12 bg-transparent border-0 outline-none text-sm placeholder:text-[var(--text-tertiary)]"
+              className="flex-1 h-12 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
             />
-            <kbd className="text-[10px] font-mono text-[var(--text-tertiary)] bg-[var(--surface-muted)] px-1.5 py-0.5 rounded border border-[var(--border-default)]">
+            <kbd className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">
               ESC
             </kbd>
           </div>
           <Command.List className="max-h-80 overflow-y-auto p-2">
-            <Command.Empty className="py-6 text-center text-sm text-[var(--text-tertiary)]">
+            <Command.Empty className="py-6 text-center text-sm text-muted-foreground">
               未找到结果
             </Command.Empty>
             {['导航'].map((group) => (
-              <Command.Group key={group} heading={group} className="text-xs text-[var(--text-tertiary)] px-2 py-1.5 font-medium">
+              <Command.Group key={group} heading={group} className="text-xs text-muted-foreground px-2 py-1.5 font-medium">
                 {commands
                   .filter((c) => c.group === group)
                   .map((item) => (

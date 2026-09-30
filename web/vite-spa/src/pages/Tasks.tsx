@@ -53,13 +53,13 @@ export function TasksPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t('nav.tasks')}</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">任务管理 · 执行进度 · 日志追踪 · 异常处理</p>
+          <p className="text-sm text-muted-foreground mt-1">任务管理 · 执行进度 · 日志追踪 · 异常处理</p>
         </div>
         <Button><Plus className="w-4 h-4" />{t('app.create_task')}</Button>
       </div>
 
-      <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)]">
-        <div className="border-b border-[var(--border-default)] px-4">
+      <div className="bg-card rounded-lg border border-border">
+        <div className="border-b border-border px-4">
           <nav className="flex gap-6">
             {tabs.map((t) => (
               <button
@@ -68,7 +68,7 @@ export function TasksPage() {
                 className={`py-3 text-sm font-medium border-b-2 transition-colors ${
                   tab === t.key
                     ? 'border-brand-600 text-brand-600'
-                    : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {t.label}
@@ -79,25 +79,25 @@ export function TasksPage() {
 
         <table className="w-full">
           <thead>
-            <tr className="bg-[var(--surface-subtle)] border-b border-[var(--border-default)]">
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-10">
+            <tr className="bg-muted border-b border-border">
+              <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-10">
                 <input type="checkbox" className="rounded" />
               </th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5">任务名称</th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-32">进度</th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-32">负责人</th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-28">状态</th>
-              <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-32">起止时间</th>
-              <th className="text-right text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-12">操作</th>
+              <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5">任务名称</th>
+              <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-32">进度</th>
+              <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-32">负责人</th>
+              <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-28">状态</th>
+              <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-32">起止时间</th>
+              <th className="text-right text-xs font-medium text-muted-foreground px-4 py-2.5 w-12">操作</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((task) => {
               const sm = statusMap[task.status];
               return (
-                <tr key={task.id} className="border-b border-[var(--border-default)] hover:bg-[var(--surface-subtle)]">
+                <tr key={task.id} className="border-b border-border hover:bg-muted">
                   <td className="px-4 py-2.5"><input type="checkbox" className="rounded" /></td>
-                  <td className="px-4 py-2.5 text-sm font-medium text-[var(--text-primary)]">{task.name}</td>
+                  <td className="px-4 py-2.5 text-sm font-medium text-foreground">{task.name}</td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-1.5 bg-[var(--neutral-200)] rounded-full overflow-hidden">
@@ -108,17 +108,17 @@ export function TasksPage() {
                           style={{ width: `${task.progress}%` }}
                         />
                       </div>
-                      <span className="text-xs text-[var(--text-secondary)] w-9 text-right">{task.progress}%</span>
+                      <span className="text-xs text-muted-foreground w-9 text-right">{task.progress}%</span>
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-sm text-[var(--text-secondary)]">{task.owner}</td>
+                  <td className="px-4 py-2.5 text-sm text-muted-foreground">{task.owner}</td>
                   <td className="px-4 py-2.5">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${sm.cls}`}>{sm.label}</span>
                   </td>
-                  <td className="px-4 py-2.5 text-sm text-[var(--text-tertiary)]">{task.startAt}</td>
+                  <td className="px-4 py-2.5 text-sm text-muted-foreground">{task.startAt}</td>
                   <td className="px-4 py-2.5 text-right">
-                    <button className="p-1 hover:bg-[var(--surface-muted)] rounded">
-                      <MoreHorizontal className="w-4 h-4 text-[var(--text-tertiary)]" />
+                    <button className="p-1 hover:bg-muted rounded">
+                      <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                     </button>
                   </td>
                 </tr>

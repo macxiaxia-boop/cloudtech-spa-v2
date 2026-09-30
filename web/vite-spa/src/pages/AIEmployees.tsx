@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, Brain, Code, Database, Megaphone, Sparkles, ArrowRight, CheckCircle2, Search } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Skill {
   name: string;
@@ -545,37 +547,38 @@ export function AIEmployeesPage() {
 
 function StatCard({ label, value, sub, highlight }: { label: string; value: string | number; sub?: string; highlight?: boolean }) {
   return (
-    <div className={`p-5 rounded-lg border-2 ${
-      highlight ? 'bg-gradient-to-br from-purple-50 to-white border-purple-200' : 'bg-white border-gray-200'
-    }`}>
-      <p className="text-3xl font-bold text-brand-500">{value}</p>
-      <p className="text-sm text-gray-700 mt-1">{label}</p>
-      {sub && <p className="text-xs text-gray-500 mt-0.5">{sub}</p>}
-    </div>
+    <Card className={`p-0 ${highlight ? 'bg-gradient-to-br from-accent-purple-50 to-card border-accent-purple-200' : ''}`}>
+      <CardContent className="p-5">
+        <p className="text-3xl font-bold text-brand-600">{value}</p>
+        <p className="text-sm text-muted-foreground mt-1">{label}</p>
+        {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+      </CardContent>
+    </Card>
   );
 }
 
 function EmployeeCard({ e }: { e: Employee }) {
   const Icon = e.icon;
   return (
-    <div className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-brand-500 transition">
+    <Card className="p-0 overflow-hidden hover:border-brand-500 transition border-2">
+      {/* Hero header 带背景色 */}
       <div className={`p-6 ${e.bg}`}>
         <div className="flex items-center gap-4">
-          <div className={`w-16 h-16 rounded-xl bg-white flex items-center justify-center ${e.color}`}>
+          <div className={`w-16 h-16 rounded-xl bg-card flex items-center justify-center ${e.color}`}>
             <Icon className="w-8 h-8" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-2xl font-bold">{e.name}</h3>
-              <span className={`px-2 py-0.5 text-xs font-bold ${e.color} bg-white rounded-full`}>
+              <h3 className="text-2xl font-bold text-card-foreground">{e.name}</h3>
+              <Badge className={`${e.color} bg-card`}>
                 {e.role}
-              </span>
+              </Badge>
             </div>
-            <p className="text-sm italic text-gray-700">"{e.motto}"</p>
+            <p className="text-sm italic text-muted-foreground">"{e.motto}"</p>
           </div>
           <div className="text-right">
             <p className={`text-3xl font-bold ${e.color}`}>{e.skills.length}</p>
-            <p className="text-xs text-gray-600">skill 模板</p>
+            <p className="text-xs text-muted-foreground">skill 模板</p>
           </div>
         </div>
       </div>
@@ -583,43 +586,45 @@ function EmployeeCard({ e }: { e: Employee }) {
       <div className="p-6 grid md:grid-cols-3 gap-6">
         {/* 工时统计 */}
         <div>
-          <p className="text-xs uppercase font-bold text-gray-500 mb-3">📊 工时统计</p>
+          <p className="text-xs uppercase font-bold text-muted-foreground mb-3">📊 工时统计</p>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>今日</span>
-              <span className="font-bold">{e.todayHours} h</span>
+              <span className="text-muted-foreground">今日</span>
+              <span className="font-bold text-foreground">{e.todayHours} h</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span>本周</span>
-              <span className="font-bold">{e.weekHours} h</span>
+              <span className="text-muted-foreground">本周</span>
+              <span className="font-bold text-foreground">{e.weekHours} h</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span>累计任务</span>
-              <span className="font-bold">{e.tasksCompleted}</span>
+              <span className="text-muted-foreground">累计任务</span>
+              <span className="font-bold text-foreground">{e.tasksCompleted}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span>成功率</span>
-              <span className="font-bold text-green-600">{e.successRate}%</span>
+              <span className="text-muted-foreground">成功率</span>
+              <span className="font-bold text-success-600">{e.successRate}%</span>
             </div>
           </div>
         </div>
 
         {/* 核心职责 */}
         <div>
-          <p className="text-xs uppercase font-bold text-gray-500 mb-3">📋 核心职责</p>
+          <p className="text-xs uppercase font-bold text-muted-foreground mb-3">📋 核心职责</p>
           <ul className="space-y-1.5">
             {e.responsibilities.map((r, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+              <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                 <CheckCircle2 className={`w-4 h-4 ${e.color} flex-shrink-0 mt-0.5`} />
                 <span>{r}</span>
               </li>
             ))}
           </ul>
           <div className="mt-4">
-            <p className="text-xs uppercase font-bold text-gray-500 mb-2">🗂️ 6 大类</p>
+            <p className="text-xs uppercase font-bold text-muted-foreground mb-2">🗂️ 6 大类</p>
             <div className="flex flex-wrap gap-1">
               {e.categories.map((c) => (
-                <span key={c} className={`px-2 py-0.5 ${e.bg} ${e.color} text-xs rounded`}>{c}</span>
+                <Badge key={c} className={`${e.bg} ${e.color} text-xs`}>
+                  {c}
+                </Badge>
               ))}
             </div>
           </div>
@@ -627,20 +632,20 @@ function EmployeeCard({ e }: { e: Employee }) {
 
         {/* Top skill 预览 */}
         <div>
-          <p className="text-xs uppercase font-bold text-gray-500 mb-3">⭐ Top skills（前 8）</p>
+          <p className="text-xs uppercase font-bold text-muted-foreground mb-3">⭐ Top skills（前 8）</p>
           <div className="space-y-1.5">
             {e.skills.slice(0, 8).map((s, i) => (
               <div key={i} className="flex items-center justify-between text-sm">
-                <span className="truncate flex-1">{s.name}</span>
-                <span className="text-xs text-gray-500 ml-2">{s.useCases}</span>
+                <span className="truncate flex-1 text-foreground">{s.name}</span>
+                <span className="text-xs text-muted-foreground ml-2">{s.useCases}</span>
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-3">
+          <p className="text-xs text-muted-foreground mt-3">
             + {e.skills.length - 8} more（见下方 skill 库）
           </p>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

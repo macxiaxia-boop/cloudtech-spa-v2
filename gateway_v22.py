@@ -531,7 +531,7 @@ log.info(f"  + Phase 45 D8-12: 4 meta endpoints registered (health/deep, routes/
 # 路径: D:\MiniMax\cloudtech-redesign\web\dist
 # 这是 Vite build 出来的 production 包, 已经包含 React SPA 所有页面
 # (Agent 中心 / 客户成功 / NPS / 模型沙盒 / 客户管理 / Admin / 装企 CRM 等)
-DIST_DIR = Path(r"D:\MiniMax\cloudtech-redesign\web\dist")
+DIST_DIR = Path(r"D:\CloudTech-Portable\web\vite-spa\dist-v45")
 DIST_ASSETS = DIST_DIR / "assets"
 if DIST_DIR.exists():
     # /assets/* 静态资源直出 (specific mount, 不被 catch-all 影响)

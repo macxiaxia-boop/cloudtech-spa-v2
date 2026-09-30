@@ -44,14 +44,14 @@ export function AnalyticsPage() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">{t('nav.analytics')}</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">用户增长 · 任务分布 · 行业转化 · 每日活跃</p>
+          <p className="text-sm text-muted-foreground mt-1">用户增长 · 任务分布 · 行业转化 · 每日活跃</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex border border-[var(--border-default)] rounded-md overflow-hidden">
+          <div className="flex border border-border rounded-md overflow-hidden">
             {ranges.map((r) => (
               <button key={r.key} onClick={() => setRange(r.key)}
                 className={`px-3 py-1.5 text-xs transition-colors ${
-                  range === r.key ? 'bg-brand-50 text-brand-700 font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'
+                  range === r.key ? 'bg-brand-50 text-brand-700 font-medium' : 'text-muted-foreground hover:bg-muted'
                 }`}>{r.label}</button>
             ))}
           </div>
@@ -70,15 +70,15 @@ export function AnalyticsPage() {
         ].map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
+            <div key={kpi.label} className="bg-card rounded-xl border border-border p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${kpi.color}`}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <span className={`text-xs font-medium ${kpi.positive ? 'text-success-600' : 'text-destructive-600'}`}>{kpi.change}</span>
               </div>
-              <div className="text-2xl font-bold text-[var(--text-primary)]">{kpi.value}</div>
-              <div className="text-xs text-[var(--text-secondary)] mt-1">{kpi.label}</div>
+              <div className="text-2xl font-bold text-foreground">{kpi.value}</div>
+              <div className="text-xs text-muted-foreground mt-1">{kpi.label}</div>
             </div>
           );
         })}
@@ -86,26 +86,26 @@ export function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 用户增长 折线图 */}
-        <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
+        <div className="bg-card rounded-xl border border-border p-5">
           <h2 className="font-semibold mb-1">用户增长趋势</h2>
-          <p className="text-xs text-[var(--text-tertiary)] mb-4">最近 30 天新增用户数</p>
+          <p className="text-xs text-muted-foreground mb-4">最近 30 天新增用户数</p>
           <LineChart data={userGrowthData} />
-          <div className="flex justify-between text-[10px] text-[var(--text-tertiary)] mt-3">
+          <div className="flex justify-between text-[10px] text-muted-foreground mt-3">
             <span>3/1</span><span>3/8</span><span>3/15</span><span>3/22</span><span>3/30</span>
           </div>
         </div>
 
         {/* 任务类型分布 饼图 */}
-        <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
+        <div className="bg-card rounded-xl border border-border p-5">
           <h2 className="font-semibold mb-1">任务类型分布</h2>
-          <p className="text-xs text-[var(--text-tertiary)] mb-4">按当前活跃任务分类</p>
+          <p className="text-xs text-muted-foreground mb-4">按当前活跃任务分类</p>
           <div className="flex items-center gap-6">
             <PieChart data={taskDistribution} total={total} />
             <div className="flex-1 grid grid-cols-1 gap-2">
               {taskDistribution.map((d) => (
                 <div key={d.label} className="flex items-center gap-2 text-sm">
                   <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: d.color }} />
-                  <span className="text-[var(--text-secondary)]">{d.label}</span>
+                  <span className="text-muted-foreground">{d.label}</span>
                   <span className="ml-auto font-medium">{d.value}%</span>
                 </div>
               ))}
@@ -115,9 +115,9 @@ export function AnalyticsPage() {
       </div>
 
       {/* 行业转化 条形图 */}
-      <div className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5">
+      <div className="bg-card rounded-xl border border-border p-5">
         <h2 className="font-semibold mb-1">行业转化分布</h2>
-        <p className="text-xs text-[var(--text-tertiary)] mb-4">各行业的线索与签约数对比</p>
+        <p className="text-xs text-muted-foreground mb-4">各行业的线索与签约数对比</p>
         <div className="space-y-3">
           {industryData.map((ind) => {
             const max = Math.max(...industryData.map((d) => d.leads));
@@ -125,7 +125,7 @@ export function AnalyticsPage() {
               <div key={ind.name}>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span className="font-medium">{ind.name}</span>
-                  <span className="text-xs text-[var(--text-tertiary)]">{ind.signed}/{ind.leads}</span>
+                  <span className="text-xs text-muted-foreground">{ind.signed}/{ind.leads}</span>
                 </div>
                 <div className="flex gap-1 h-6">
                   <div className="bg-brand-500 rounded" style={{ width: `${(ind.leads / max) * 100}%` }} />
@@ -135,7 +135,7 @@ export function AnalyticsPage() {
             );
           })}
         </div>
-        <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[var(--border-default)] text-xs text-[var(--text-tertiary)]">
+        <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5"><span className="w-3 h-3 bg-brand-500 rounded" />线索数</div>
           <div className="flex items-center gap-1.5"><span className="w-3 h-3 bg-success-500 rounded" />签约数</div>
         </div>

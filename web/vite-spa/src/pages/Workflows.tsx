@@ -29,7 +29,7 @@ const workflows: Workflow[] = [
 
 const statusMap: Record<Workflow['status'], { label: string; cls: string }> = {
   published: { label: '已发布', cls: 'bg-success-bg text-success-700' },
-  draft:     { label: '草稿',   cls: 'bg-[var(--surface-muted)] text-[var(--text-secondary)]' },
+  draft:     { label: '草稿',   cls: 'bg-muted text-muted-foreground' },
   paused:    { label: '已暂停', cls: 'bg-warning-bg text-warning-700' },
 };
 
@@ -40,7 +40,7 @@ export function WorkflowsPage() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">{t('nav.workflows')}</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">可视化拖拽 · 条件分支 · 多智能体协同 · 调试运行</p>
+          <p className="text-sm text-muted-foreground mt-1">可视化拖拽 · 条件分支 · 多智能体协同 · 调试运行</p>
         </div>
         <Link to="/workflows/new">
           <Button><Plus className="w-4 h-4" />{t('app.create_workflow')}</Button>
@@ -51,7 +51,7 @@ export function WorkflowsPage() {
         {workflows.map((w) => {
           const sm = statusMap[w.status];
           return (
-            <div key={w.id} className="bg-[var(--surface-base)] rounded-xl border border-[var(--border-default)] p-5 hover:shadow-md hover:border-brand-300 transition-all group">
+            <div key={w.id} className="bg-card rounded-xl border border-border p-5 hover:shadow-md hover:border-brand-300 transition-all group">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500 to-accent-purple-500 flex items-center justify-center shrink-0">
                   <Workflow className="w-5 h-5 text-white" />
@@ -60,22 +60,22 @@ export function WorkflowsPage() {
               </div>
               <Link to={`/workflows/${w.id}`} className="block">
                 <h3 className="font-semibold text-base mb-1 group-hover:text-brand-600 transition-colors">{w.name}</h3>
-                <p className="text-xs text-[var(--text-secondary)] mb-3 line-clamp-2 min-h-[2.5em]">{w.description}</p>
+                <p className="text-xs text-muted-foreground mb-3 line-clamp-2 min-h-[2.5em]">{w.description}</p>
               </Link>
-              <div className="flex items-center gap-4 text-xs text-[var(--text-tertiary)] mb-3 pb-3 border-b border-[var(--border-default)]">
+              <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3 pb-3 border-b border-border">
                 <span>{w.nodeCount} 节点</span>
                 <span>·</span>
                 <span>{w.runs} 次运行</span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 text-xs text-[var(--text-tertiary)]">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="w-3 h-3" />
                   {w.lastRun || '尚未运行'}
                 </div>
                 <div className="flex items-center gap-1">
-                  <Link to={`/workflows/${w.id}`} className="p-1.5 hover:bg-[var(--surface-muted)] rounded" aria-label="编辑"><Edit2 className="w-3.5 h-3.5 text-[var(--text-tertiary)]" /></Link>
-                  <button className="p-1.5 hover:bg-[var(--surface-muted)] rounded" aria-label="运行"><Play className="w-3.5 h-3.5 text-[var(--text-tertiary)]" /></button>
-                  <button className="p-1.5 hover:bg-destructive-bg rounded" aria-label="删除"><Trash2 className="w-3.5 h-3.5 text-[var(--text-tertiary)] hover:text-destructive-600" /></button>
+                  <Link to={`/workflows/${w.id}`} className="p-1.5 hover:bg-muted rounded" aria-label="编辑"><Edit2 className="w-3.5 h-3.5 text-muted-foreground" /></Link>
+                  <button className="p-1.5 hover:bg-muted rounded" aria-label="运行"><Play className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                  <button className="p-1.5 hover:bg-destructive-bg rounded" aria-label="删除"><Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive-600" /></button>
                 </div>
               </div>
             </div>

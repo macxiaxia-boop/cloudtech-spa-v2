@@ -30,14 +30,14 @@ export function ProfilePage() {
       <div className="bg-gradient-to-br from-brand-50 to-accent-purple-50 rounded-xl border border-brand-200 p-6 flex items-center gap-5">
         <div className="relative">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-500 to-accent-purple-500 flex items-center justify-center text-white text-2xl font-bold">ZS</div>
-          <button className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[var(--surface-base)] border border-[var(--border-default)] flex items-center justify-center hover:bg-brand-50 transition-colors shadow-sm">
-            <Camera className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+          <button className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-card border border-border flex items-center justify-center hover:bg-brand-50 transition-colors shadow-sm">
+            <Camera className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
         <div className="flex-1">
           <h1 className="text-xl font-bold">{t('nav.profile')}</h1>
-          <div className="text-sm text-[var(--text-secondary)]">zhangsan@company.com</div>
-          <div className="flex items-center gap-3 mt-2 text-xs text-[var(--text-tertiary)]">
+          <div className="text-sm text-muted-foreground">zhangsan@company.com</div>
+          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
             <span>ID: 188****6666</span>
             <span>·</span>
             <span>产品研发部</span>
@@ -49,14 +49,14 @@ export function ProfilePage() {
       </div>
 
       {/* 6 Tab */}
-      <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)] flex">
-        <nav className="w-56 border-r border-[var(--border-default)] p-3 space-y-1">
+      <div className="bg-card rounded-lg border border-border flex">
+        <nav className="w-56 border-r border-border p-3 space-y-1">
           {tabs.map((t) => {
             const Icon = t.icon;
             return (
               <button key={t.key} onClick={() => setTab(t.key)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
-                  tab === t.key ? 'bg-brand-50 text-brand-700 font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'
+                  tab === t.key ? 'bg-brand-50 text-brand-700 font-medium' : 'text-muted-foreground hover:bg-muted'
                 }`}>
                 <Icon className="w-4 h-4" />
                 {t.label}
@@ -101,13 +101,13 @@ export function ProfilePage() {
                   { name: 'Dev Key',         prefix: 'sk-dev-****xyz789',  created: '2026-02-20', lastUsed: '10 分钟前' },
                   { name: 'Test Key',        prefix: 'sk-test-****qwe456', created: '2026-03-10', lastUsed: '3 天前' },
                 ].map((k) => (
-                  <div key={k.name} className="flex items-center gap-3 p-3 rounded-md border border-[var(--border-default)]">
-                    <Key className="w-4 h-4 text-[var(--text-tertiary)]" />
+                  <div key={k.name} className="flex items-center gap-3 p-3 rounded-md border border-border">
+                    <Key className="w-4 h-4 text-muted-foreground" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium">{k.name}</div>
-                      <div className="text-xs text-[var(--text-tertiary)] font-mono">{k.prefix}</div>
+                      <div className="text-xs text-muted-foreground font-mono">{k.prefix}</div>
                     </div>
-                    <div className="text-xs text-[var(--text-tertiary)]">最后使用 {k.lastUsed}</div>
+                    <div className="text-xs text-muted-foreground">最后使用 {k.lastUsed}</div>
                     <button className="text-xs text-destructive-600 hover:underline">撤销</button>
                   </div>
                 ))}
@@ -124,8 +124,8 @@ export function ProfilePage() {
                   { label: 'Token 消耗',   value: '1.2M',  trend: '+22%' },
                   { label: '本月费用',     value: '¥85.20', trend: '+15%' },
                 ].map((s) => (
-                  <div key={s.label} className="p-4 bg-[var(--surface-subtle)] rounded-lg">
-                    <div className="text-xs text-[var(--text-tertiary)]">{s.label}</div>
+                  <div key={s.label} className="p-4 bg-muted rounded-lg">
+                    <div className="text-xs text-muted-foreground">{s.label}</div>
                     <div className="text-2xl font-bold mt-1">{s.value}</div>
                     <div className="text-xs text-success-600 mt-1">{s.trend}</div>
                   </div>
@@ -167,16 +167,16 @@ export function ProfilePage() {
 function SettingRow({ label, desc, action, status, statusCls, danger }: { label: string; desc: string; action: string; status?: string; statusCls?: 'success' | 'muted'; danger?: boolean }) {
   const statusClasses = {
     success: 'bg-success-bg text-success-700',
-    muted:   'bg-[var(--surface-muted)] text-[var(--text-secondary)]',
+    muted:   'bg-muted text-muted-foreground',
   };
   return (
-    <div className="flex items-center gap-4 p-4 rounded-lg border border-[var(--border-default)]">
+    <div className="flex items-center gap-4 p-4 rounded-lg border border-border">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="font-medium">{label}</span>
           {status && <span className={`text-xs px-2 py-0.5 rounded-full ${statusClasses[statusCls || 'success']}`}>{status}</span>}
         </div>
-        <div className="text-xs text-[var(--text-tertiary)] mt-0.5">{desc}</div>
+        <div className="text-xs text-muted-foreground mt-0.5">{desc}</div>
       </div>
       <Button variant="outline" size="sm" className={danger ? 'text-destructive-600 border-destructive-200 hover:bg-destructive-bg' : ''}>{action}</Button>
     </div>

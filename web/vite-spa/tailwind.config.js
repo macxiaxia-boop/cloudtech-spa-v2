@@ -83,35 +83,35 @@ export default {
           500: '#F97316',
           600: '#EA580C',
         },
-        /* Surfaces & semantic helpers */
-        border: 'var(--border-default)',
-        input: 'var(--border-default)',
-        ring: 'var(--ring-color)',
-        background: 'var(--surface-base)',
-        foreground: 'var(--text-primary)',
+        /* Surfaces & semantic helpers (V23: rgb(var()) wrapper 支持 opacity /50 等) */
+        border: 'rgb(var(--border-rgb, 226 232 240) / <alpha-value>)',
+        input: 'rgb(var(--border-rgb, 226 232 240) / <alpha-value>)',
+        ring: 'rgb(var(--ring-rgb, 37 99 235) / <alpha-value>)',
+        background: 'rgb(var(--surface-base-rgb, 255 255 255) / <alpha-value>)',
+        foreground: 'rgb(var(--text-primary-rgb, 15 23 42) / <alpha-value>)',
         primary: {
-          DEFAULT: 'var(--brand-600)',
-          foreground: 'var(--neutral-0)',
+          DEFAULT: 'rgb(var(--brand-600-rgb, 37 99 235) / <alpha-value>)',
+          foreground: 'rgb(var(--neutral-0-rgb, 255 255 255) / <alpha-value>)',
         },
         secondary: {
-          DEFAULT: 'var(--neutral-100)',
-          foreground: 'var(--neutral-900)',
+          DEFAULT: 'rgb(var(--neutral-100-rgb, 241 245 249) / <alpha-value>)',
+          foreground: 'rgb(var(--neutral-900-rgb, 15 23 42) / <alpha-value>)',
         },
         muted: {
-          DEFAULT: 'var(--neutral-100)',
-          foreground: 'var(--neutral-500)',
+          DEFAULT: 'rgb(var(--neutral-100-rgb, 241 245 249) / <alpha-value>)',
+          foreground: 'rgb(var(--neutral-500-rgb, 100 116 139) / <alpha-value>)',
         },
         accent: {
-          DEFAULT: 'var(--neutral-100)',
-          foreground: 'var(--neutral-900)',
+          DEFAULT: 'rgb(var(--neutral-100-rgb, 241 245 249) / <alpha-value>)',
+          foreground: 'rgb(var(--neutral-900-rgb, 15 23 42) / <alpha-value>)',
         },
         popover: {
-          DEFAULT: 'var(--surface-base)',
-          foreground: 'var(--text-primary)',
+          DEFAULT: 'rgb(var(--surface-base-rgb, 255 255 255) / <alpha-value>)',
+          foreground: 'rgb(var(--text-primary-rgb, 15 23 42) / <alpha-value>)',
         },
         card: {
-          DEFAULT: 'var(--surface-base)',
-          foreground: 'var(--text-primary)',
+          DEFAULT: 'rgb(var(--surface-base-rgb, 255 255 255) / <alpha-value>)',
+          foreground: 'rgb(var(--text-primary-rgb, 15 23 42) / <alpha-value>)',
         },
       },
       borderRadius: {

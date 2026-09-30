@@ -1,6 +1,9 @@
 // Phase 45-47: 定价页 · 3 套餐 + 客户 logo + 退款保证 + 比较表 + Revenue 预测（Phase 48.D85）
 import { Link } from 'react-router-dom';
 import { Check, ArrowRight, Shield, Building2, Clock, TrendingUp, DollarSign, Target, Calculator } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { CUSTOMER_LOGOS, TESTIMONIALS } from '../data/customers';
 import { PRICING_TIERS, REVENUE_PROJECTIONS, REVENUE_KEY_METRICS } from '../data/revenue';
 
@@ -101,47 +104,46 @@ export function PricingPage() {
           </div>
         </div>
 
-        {/* 3 套餐卡片 */}
+        {/* 3 套餐卡片 · V23 shadcn Card */}
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
           {PLANS.map((plan) => (
-            <div
+            <Card
               key={plan.name}
-              className={`relative p-6 rounded-xl border-2 ${
+              className={`relative p-0 ${
                 plan.highlight
-                  ? 'border-brand-500 bg-gradient-to-br from-brand-50 to-white shadow-xl'
-                  : 'border-gray-200 bg-white'
+                  ? 'border-2 border-brand-500 bg-gradient-to-br from-brand-50 to-card shadow-xl'
+                  : 'border-2'
               }`}
             >
               {plan.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-brand-500 text-white text-xs rounded-full font-bold">
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-brand-500 text-white text-xs rounded-full font-bold z-10">
                   ⭐ 推荐
-                </span>
+                </Badge>
               )}
-              <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-              <p className="text-sm text-gray-500 mb-4">{plan.desc}</p>
-              <div className="flex items-baseline mb-4">
-                <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-gray-500 ml-1">{plan.period}</span>
-              </div>
-              <ul className="space-y-2 mb-6">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                to={plan.href}
-                className={`block text-center px-4 py-2 rounded-md font-medium ${
-                  plan.highlight
-                    ? 'bg-brand-500 text-white hover:bg-brand-600'
-                    : 'border border-gray-300 hover:border-brand-500'
-                }`}
-              >
-                {plan.cta}
-              </Link>
-            </div>
+              <CardHeader className="p-6 pb-2">
+                <CardTitle className="text-xl text-foreground">{plan.name}</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">{plan.desc}</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="flex items-baseline mb-4">
+                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
+                  <span className="text-muted-foreground ml-1">{plan.period}</span>
+                </div>
+                <ul className="space-y-2 mb-6">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <Check className="w-4 h-4 text-success-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-foreground">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to={plan.href}>
+                  <Button className={`w-full ${plan.highlight ? '' : 'variant-outline'}`}>
+                    {plan.cta}
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           ))}
         </div>
 

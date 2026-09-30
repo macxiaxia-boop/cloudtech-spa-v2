@@ -47,13 +47,13 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--surface-subtle)]">
+        <div className="min-h-screen flex items-center justify-center p-6 bg-muted">
           <div className="max-w-md text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive-bg flex items-center justify-center">
               <AlertTriangle className="w-8 h-8 text-destructive-600" />
             </div>
             <h1 className="text-2xl font-bold mb-2">{this.props.fallbackTitle || '出错了'}</h1>
-            <p className="text-sm text-[var(--text-secondary)] mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               {this.props.fallbackMessage || '页面遇到了一个意外错误。请重试或返回首页。'}
             </p>
             {import.meta.env.DEV && this.state.error && (

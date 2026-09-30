@@ -8,8 +8,10 @@ import { Cloud, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LocaleSwitcher } from '@/i18n';
+import { BRAND } from '@/lib/brand';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -37,23 +39,23 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--gradient-ice)' }}>
-      <div className="w-full max-w-md bg-[var(--surface-base)] rounded-xl shadow-xl border border-[var(--border-default)] p-8">
+      <div className="w-full max-w-md bg-card rounded-xl shadow-xl border border-border p-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
               <Cloud className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-[var(--text-primary)] text-base">CloudTech</span>
+            <span className="font-semibold text-foreground text-base">CloudTech</span>
           </div>
           <LocaleSwitcher />
         </div>
 
         <h1 className="text-2xl font-bold mb-1.5">{t('login.welcome')}</h1>
-        <p className="text-sm text-[var(--text-secondary)] mb-6">{t('login.subtitle')}</p>
+        <p className="text-sm text-muted-foreground mb-6">{t('login.subtitle')}</p>
 
-        <div className="flex border-b border-[var(--border-default)] mb-6">
+        <div className="flex border-b border-border mb-6">
           <button type="button" className="flex-1 pb-3 text-sm font-medium text-brand-600 border-b-2 border-brand-600">{t('login.email_tab')}</button>
-          <button type="button" className="flex-1 pb-3 text-sm font-medium text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">{t('login.sso_tab')}</button>
+          <button type="button" className="flex-1 pb-3 text-sm font-medium text-muted-foreground hover:text-muted-foreground transition-colors">{t('login.sso_tab')}</button>
         </div>
 
         {error && (
@@ -72,7 +74,7 @@ export function LoginPage() {
             <Label htmlFor="password">{t('login.password_placeholder')}</Label>
             <div className="relative">
               <Input id="password" type={showPassword ? 'text' : 'password'} placeholder={t('login.password_placeholder')} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]" aria-label={showPassword ? 'hide' : 'show'}>
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground" aria-label={showPassword ? 'hide' : 'show'}>
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
@@ -80,8 +82,8 @@ export function LoginPage() {
 
           <div className="flex items-center justify-between text-sm">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="rounded border-[var(--border-default)] text-brand-600 focus:ring-brand-500/20" />
-              <span className="text-[var(--text-secondary)]">{t('login.remember')}</span>
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="rounded border-border text-brand-600 focus:ring-brand-500/20" />
+              <span className="text-muted-foreground">{t('login.remember')}</span>
             </label>
             <Link to="/forgot-password" className="text-brand-600 hover:text-brand-700">{t('login.forgot')}</Link>
           </div>
@@ -92,17 +94,17 @@ export function LoginPage() {
         </form>
 
         <div className="relative my-5">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--border-default)]" /></div>
-          <div className="relative flex justify-center text-xs"><span className="bg-[var(--surface-base)] px-3 text-[var(--text-tertiary)]">{t('login.sso_divider')}</span></div>
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+          <div className="relative flex justify-center text-xs"><span className="bg-card px-3 text-muted-foreground">{t('login.sso_divider')}</span></div>
         </div>
 
         <div className="grid grid-cols-4 gap-2 mb-6">
           {[t('login.sso_google'), t('login.sso_github'), t('login.sso_microsoft'), t('login.sso_wechat')].map((p) => (
-            <button key={p} type="button" className="h-10 rounded-md border border-[var(--border-default)] hover:bg-[var(--surface-muted)] transition-colors text-xs font-medium text-[var(--text-secondary)]">{p}</button>
+            <button key={p} type="button" className="h-10 rounded-md border border-border hover:bg-muted transition-colors text-xs font-medium text-muted-foreground">{p}</button>
           ))}
         </div>
 
-        <p className="text-center text-sm text-[var(--text-secondary)]">
+        <p className="text-center text-sm text-muted-foreground">
           {t('login.no_account')}
           <Link to="/register" className="text-brand-600 hover:text-brand-700 font-medium ml-1">{t('login.register_link')}</Link>
         </p>

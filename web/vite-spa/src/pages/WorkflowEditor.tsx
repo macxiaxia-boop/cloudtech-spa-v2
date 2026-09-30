@@ -52,7 +52,7 @@ const nodeCategories = [
     nodes: [{ id: 'condition', label: '条件判断' }, { id: 'loop', label: '循环' }, { id: 'parallel', label: '并行' }],
   },
   {
-    title: '操作', icon: Settings, color: 'text-[var(--text-secondary)] bg-[var(--surface-muted)]',
+    title: '操作', icon: Settings, color: 'text-muted-foreground bg-muted',
     nodes: [{ id: 'code', label: '代码执行' }, { id: 'file', label: '文件操作' }, { id: 'email', label: '邮件' }],
   },
 ];
@@ -84,15 +84,15 @@ function StartNode({ data }: NodeProps) {
 
 function DataNode({ data, selected }: NodeProps) {
   return (
-    <div className={`px-4 py-2 bg-[var(--surface-base)] rounded-lg shadow-md border-2 ${selected ? 'border-accent-purple-500' : 'border-[var(--border-default)]'} min-w-[140px]`}>
+    <div className={`px-4 py-2 bg-card rounded-lg shadow-md border-2 ${selected ? 'border-accent-purple-500' : 'border-border'} min-w-[140px]`}>
       <Handle type="target" position={Position.Left} className="!bg-[var(--border-default)] !w-2 !h-2 !border-2 !border-white" />
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded bg-accent-purple-50 flex items-center justify-center">
           <Database className="w-3 h-3 text-accent-purple-600" />
         </div>
         <div>
-          <div className="text-xs font-semibold text-[var(--text-primary)]">{(data as any).label}</div>
-          {(data as any).sub && <div className="text-[10px] text-[var(--text-tertiary)]">{(data as any).sub}</div>}
+          <div className="text-xs font-semibold text-foreground">{(data as any).label}</div>
+          {(data as any).sub && <div className="text-[10px] text-muted-foreground">{(data as any).sub}</div>}
         </div>
       </div>
       <Handle type="source" position={Position.Right} className="!bg-[var(--border-default)] !w-2 !h-2 !border-2 !border-white" />
@@ -102,15 +102,15 @@ function DataNode({ data, selected }: NodeProps) {
 
 function AINode({ data, selected }: NodeProps) {
   return (
-    <div className={`px-4 py-2 bg-[var(--surface-base)] rounded-lg shadow-md border-2 ${selected ? 'border-brand-500' : 'border-[var(--border-default)]'} min-w-[140px]`}>
+    <div className={`px-4 py-2 bg-card rounded-lg shadow-md border-2 ${selected ? 'border-brand-500' : 'border-border'} min-w-[140px]`}>
       <Handle type="target" position={Position.Left} className="!bg-[var(--border-default)] !w-2 !h-2 !border-2 !border-white" />
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded bg-brand-50 flex items-center justify-center">
           <Bot className="w-3 h-3 text-brand-600" />
         </div>
         <div>
-          <div className="text-xs font-semibold text-[var(--text-primary)]">{(data as any).label}</div>
-          {(data as any).sub && <div className="text-[10px] text-[var(--text-tertiary)]">{(data as any).sub}</div>}
+          <div className="text-xs font-semibold text-foreground">{(data as any).label}</div>
+          {(data as any).sub && <div className="text-[10px] text-muted-foreground">{(data as any).sub}</div>}
         </div>
       </div>
       <Handle type="source" position={Position.Right} className="!bg-[var(--border-default)] !w-2 !h-2 !border-2 !border-white" />
@@ -120,15 +120,15 @@ function AINode({ data, selected }: NodeProps) {
 
 function OutputNode({ data, selected }: NodeProps) {
   return (
-    <div className={`px-4 py-2 bg-[var(--surface-base)] rounded-lg shadow-md border-2 ${selected ? 'border-warning-500' : 'border-[var(--border-default)]'} min-w-[140px]`}>
+    <div className={`px-4 py-2 bg-card rounded-lg shadow-md border-2 ${selected ? 'border-warning-500' : 'border-border'} min-w-[140px]`}>
       <Handle type="target" position={Position.Left} className="!bg-[var(--border-default)] !w-2 !h-2 !border-2 !border-white" />
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded bg-warning-50 flex items-center justify-center">
           <FileText className="w-3 h-3 text-warning-600" />
         </div>
         <div>
-          <div className="text-xs font-semibold text-[var(--text-primary)]">{(data as any).label}</div>
-          {(data as any).sub && <div className="text-[10px] text-[var(--text-tertiary)]">{(data as any).sub}</div>}
+          <div className="text-xs font-semibold text-foreground">{(data as any).label}</div>
+          {(data as any).sub && <div className="text-[10px] text-muted-foreground">{(data as any).sub}</div>}
         </div>
       </div>
     </div>
@@ -154,9 +154,9 @@ export function WorkflowEditorPage() {
   return (
     <div className="-m-4 h-[calc(100vh-56px)] flex flex-col">
       {/* Toolbar */}
-      <div className="h-12 border-b border-[var(--border-default)] bg-[var(--surface-base)] flex items-center px-4 gap-3">
+      <div className="h-12 border-b border-border bg-card flex items-center px-4 gap-3">
         <Input defaultValue="市场分析工作流" className="w-64 h-8 text-sm" />
-        <span className="text-xs text-[var(--text-tertiary)]">未保存</span>
+        <span className="text-xs text-muted-foreground">未保存</span>
         <div className="ml-auto flex items-center gap-2">
           <Button variant="ghost" size="sm"><Play className="w-3.5 h-3.5" />{t('common.confirm')}</Button>
           <Button variant="outline" size="sm">调试</Button>
@@ -166,12 +166,12 @@ export function WorkflowEditorPage() {
 
       <div className="flex-1 flex min-h-0">
         {/* 左侧节点库 */}
-        <aside className="w-52 border-r border-[var(--border-default)] bg-[var(--surface-base)] overflow-y-auto p-3 space-y-4">
+        <aside className="w-52 border-r border-border bg-card overflow-y-auto p-3 space-y-4">
           {nodeCategories.map((cat) => {
             const Icon = cat.icon;
             return (
               <div key={cat.title}>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] mb-2">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-2">
                   <Icon className="w-3.5 h-3.5" />
                   {cat.title}
                 </div>
@@ -215,29 +215,29 @@ export function WorkflowEditorPage() {
         </div>
 
         {/* 右侧节点配置 */}
-        <aside className="w-80 border-l border-[var(--border-default)] bg-[var(--surface-base)] overflow-y-auto">
-          <div className="p-4 border-b border-[var(--border-default)] flex items-center justify-between">
+        <aside className="w-80 border-l border-border bg-card overflow-y-auto">
+          <div className="p-4 border-b border-border flex items-center justify-between">
             <h3 className="text-sm font-semibold flex items-center gap-2">
               <Settings className="w-4 h-4" />
               节点配置
             </h3>
             {selectedNode && (
-              <button onClick={() => setSelectedNode(null)} className="p-1 hover:bg-[var(--surface-muted)] rounded">
-                <X className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
+              <button onClick={() => setSelectedNode(null)} className="p-1 hover:bg-muted rounded">
+                <X className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             )}
           </div>
           {!selected ? (
-            <div className="p-8 text-center text-sm text-[var(--text-tertiary)]">
+            <div className="p-8 text-center text-sm text-muted-foreground">
               <p>选中节点查看配置</p>
             </div>
           ) : (
             <div className="p-4 space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-[var(--border-default)]">
+              <div className="flex items-center gap-2 pb-3 border-b border-border">
                 <span className="text-xs px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 font-medium">
                   {(selected.data as any).label}
                 </span>
-                <span className="text-xs text-[var(--text-tertiary)]">节点 ID: {selected.id}</span>
+                <span className="text-xs text-muted-foreground">节点 ID: {selected.id}</span>
               </div>
               <div className="space-y-1.5">
                 <Label>节点名称</Label>
@@ -245,7 +245,7 @@ export function WorkflowEditorPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>模型</Label>
-                <select className="w-full h-9 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] px-3 text-sm focus:outline-none focus:border-brand-600">
+                <select className="w-full h-9 rounded-md border border-border bg-card px-3 text-sm focus:outline-none focus:border-brand-600">
                   <option>GPT-4o</option>
                   <option>Claude 3.5</option>
                   <option>Gemini 1.5</option>
@@ -257,26 +257,26 @@ export function WorkflowEditorPage() {
                 <textarea
                   defaultValue="你是一个专业的数据分析师，能够从数据中提取有价值的洞察，并生成清晰的报告。"
                   rows={4}
-                  className="w-full rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] px-3 py-2 text-sm placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-500/20"
+                  className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-500/20"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label>输入变量</Label>
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-xs font-mono p-2 bg-[var(--surface-muted)] rounded">
-                    <ChevronRight className="w-3 h-3 text-[var(--text-tertiary)]" />
+                  <div className="flex items-center gap-2 text-xs font-mono p-2 bg-muted rounded">
+                    <ChevronRight className="w-3 h-3 text-muted-foreground" />
                     market_data
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-mono p-2 bg-[var(--surface-muted)] rounded">
-                    <ChevronRight className="w-3 h-3 text-[var(--text-tertiary)]" />
+                  <div className="flex items-center gap-2 text-xs font-mono p-2 bg-muted rounded">
+                    <ChevronRight className="w-3 h-3 text-muted-foreground" />
                     analysis_type
                   </div>
                 </div>
               </div>
               <div className="space-y-1.5">
                 <Label>输出变量</Label>
-                <div className="flex items-center gap-2 text-xs font-mono p-2 bg-[var(--surface-muted)] rounded">
-                  <ChevronRight className="w-3 h-3 text-[var(--text-tertiary)]" />
+                <div className="flex items-center gap-2 text-xs font-mono p-2 bg-muted rounded">
+                  <ChevronRight className="w-3 h-3 text-muted-foreground" />
                   analysis_result
                 </div>
               </div>

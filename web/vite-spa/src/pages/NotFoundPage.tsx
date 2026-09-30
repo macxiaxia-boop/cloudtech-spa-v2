@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 export function NotFoundPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--surface-subtle)]">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-muted">
       <div className="max-w-lg text-center">
         {/* 大字 404 */}
         <div className="text-9xl font-bold bg-gradient-to-br from-brand-500 via-accent-purple-500 to-accent-orange-500 bg-clip-text text-transparent mb-4 leading-none select-none">
@@ -15,7 +15,7 @@ export function NotFoundPage() {
         </div>
 
         <h1 className="text-2xl md:text-3xl font-bold mb-3">页面找不到</h1>
-        <p className="text-sm text-[var(--text-secondary)] mb-8 leading-relaxed">
+        <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
           抱歉，您访问的页面不存在或已被移除。<br />
           请检查 URL 是否正确，或从下方选择一个方向继续。
         </p>
@@ -49,16 +49,16 @@ export function NotFoundPage() {
             <Link
               key={s.href}
               to={s.href}
-              className="flex flex-col items-center gap-1 p-3 rounded-lg border border-[var(--border-default)] hover:border-brand-500 hover:shadow-sm transition-all bg-[var(--surface-base)]"
+              className="flex flex-col items-center gap-1 p-3 rounded-lg border border-border hover:border-brand-500 hover:shadow-sm transition-all bg-card"
             >
               <span className="text-2xl">{s.icon}</span>
-              <span className="text-xs text-[var(--text-secondary)]">{s.label}</span>
+              <span className="text-xs text-muted-foreground">{s.label}</span>
             </Link>
           ))}
         </div>
 
         {/* 帮助链接 */}
-        <div className="mt-8 text-xs text-[var(--text-tertiary)]">
+        <div className="mt-8 text-xs text-muted-foreground">
           需要帮助？
           <Link to="/faq" className="text-brand-600 hover:underline mx-1">访问帮助中心</Link>
           或

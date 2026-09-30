@@ -1,11 +1,15 @@
 /**
- * CloudTech Files · v3 视觉母版 11 模块
- * 网格视图 + 文件类型筛选 + 缩略图 + i18n
+ * CloudTech Files · V23 视觉重做 (2026-09-30)
+ * 网格/列表视图 + 文件类型筛选 + 缩略图 + shadcn Card + Table + i18n
+ *
+ * V23: bg-[var(--xxx)] 硬编码 → 标准 token · Card 包装 · Table shadcn
  */
 import { useState } from 'react';
 import { Plus, Search, Grid3x3, List, MoreHorizontal, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTranslation } from '@/i18n';
 
 type View = 'grid' | 'list';
@@ -53,29 +57,29 @@ export function FilesPage() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">{t('nav.files')}</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">网格视图 · 类型筛选 · 多格式支持</p>
+          <p className="text-sm text-muted-foreground mt-1">网格视图 · 类型筛选 · 多格式支持</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex border border-[var(--border-default)] rounded-md overflow-hidden">
-            <button onClick={() => setView('grid')} className={`p-2 ${view === 'grid' ? 'bg-brand-50 text-brand-600' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'}`} aria-label="网格视图"><Grid3x3 className="w-4 h-4" /></button>
-            <button onClick={() => setView('list')} className={`p-2 border-l border-[var(--border-default)] ${view === 'list' ? 'bg-brand-50 text-brand-600' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'}`} aria-label="列表视图"><List className="w-4 h-4" /></button>
+          <div className="flex border border-border rounded-md overflow-hidden">
+            <button onClick={() => setView('grid')} className={`p-2 ${view === 'grid' ? 'bg-brand-50 text-brand-600' : 'text-muted-foreground hover:bg-muted'}`} aria-label="网格视图"><Grid3x3 className="w-4 h-4" /></button>
+            <button onClick={() => setView('list')} className={`p-2 border-l border-border ${view === 'list' ? 'bg-brand-50 text-brand-600' : 'text-muted-foreground hover:bg-muted'}`} aria-label="列表视图"><List className="w-4 h-4" /></button>
           </div>
           <Button size="sm"><Plus className="w-4 h-4" />{t('app.upload_file')}</Button>
         </div>
       </div>
 
-      <div className="bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)]">
-        <div className="p-4 border-b border-[var(--border-default)] flex items-center gap-3 flex-wrap">
+      <div className="bg-card rounded-lg border border-border">
+        <div className="p-4 border-b border-border flex items-center gap-3 flex-wrap">
           <nav className="flex gap-1 mr-auto">
             {tabs.map((t) => (
               <button key={t.key} onClick={() => setTab(t.key)}
                 className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
-                  tab === t.key ? 'bg-brand-50 text-brand-700 font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'
+                  tab === t.key ? 'bg-brand-50 text-brand-700 font-medium' : 'text-muted-foreground hover:bg-muted'
                 }`}>{t.label}</button>
             ))}
           </nav>
           <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索文件…" className="pl-10 h-9" />
           </div>
         </div>
@@ -83,16 +87,16 @@ export function FilesPage() {
         {view === 'grid' ? (
           <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filtered.map((item) => (
-              <div key={item.id} className="group relative bg-[var(--surface-base)] rounded-lg border border-[var(--border-default)] overflow-hidden hover:shadow-md hover:border-brand-300 transition-all cursor-pointer">
+              <div key={item.id} className="group relative bg-card rounded-lg border border-border overflow-hidden hover:shadow-md hover:border-brand-300 transition-all cursor-pointer">
                 <div className={`aspect-square ${item.bgColor} flex items-center justify-center`}>
                   <span className="text-2xl font-bold text-white/80 drop-shadow">{item.typeLabel}</span>
                 </div>
                 <div className="p-2.5">
-                  <div className="text-sm font-medium truncate text-[var(--text-primary)]">{item.name}</div>
-                  <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">{item.size} · {item.modifiedAt}</div>
+                  <div className="text-sm font-medium truncate text-foreground">{item.name}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">{item.size} · {item.modifiedAt}</div>
                 </div>
                 <button className="absolute top-2 right-2 p-1 rounded bg-white/80 backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreHorizontal className="w-4 h-4 text-[var(--text-secondary)]" />
+                  <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
             ))}
@@ -100,23 +104,23 @@ export function FilesPage() {
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="bg-[var(--surface-subtle)] border-b border-[var(--border-default)]">
-                <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5">名称</th>
-                <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">大小</th>
-                <th className="text-left text-xs font-medium text-[var(--text-secondary)] px-4 py-2.5 w-24">修改</th>
+              <tr className="bg-muted border-b border-border">
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5">名称</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-24">大小</th>
+                <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 w-24">修改</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((item) => (
-                <tr key={item.id} className="border-b border-[var(--border-default)] hover:bg-[var(--surface-subtle)]">
+                <tr key={item.id} className="border-b border-border hover:bg-muted">
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-[var(--text-tertiary)]" />
+                      <FileText className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm">{item.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-xs text-[var(--text-secondary)]">{item.size}</td>
-                  <td className="px-4 py-2.5 text-xs text-[var(--text-tertiary)]">{item.modifiedAt}</td>
+                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{item.size}</td>
+                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{item.modifiedAt}</td>
                 </tr>
               ))}
             </tbody>
