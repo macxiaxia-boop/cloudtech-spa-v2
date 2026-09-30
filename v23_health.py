@@ -5442,6 +5442,85 @@ def get_auth_api_keys_quota_histogram(key_id: str):
     }
 
 
+def get_skills_apply_template(skill_id: str):
+    """Skill apply-template · 应用模板 (R414)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "applied_at":  datetime.utcnow().isoformat() + "Z",
+            "applied_by":  "u_001",
+            "template_id": f"tpl_v23_R414_{skill_id}",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_set_active(method_id: str):
+    """Billing payment-methods/{id}/set-active · 激活支付 (R414)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "is_active":   True,
+            "set_at":      datetime.utcnow().isoformat() + "Z",
+            "set_by":      "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_grade(campaign_id: str):
+    """Campaigns audience-grade · 受众等级 (R414)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"grade": "A 优质", "count": 4180, "pct": 22.7},
+            {"grade": "B 良好", "count": 6240, "pct": 33.9},
+            {"grade": "C 普通", "count": 5240, "pct": 28.4},
+            {"grade": "D 低质", "count": 2760, "pct": 15.0},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_hour_chart(file_id: str):
+    """Files download-by-hour-chart · 按小时下载 chart (R414)"""
+    return {
+        "status": "ok",
+        "data": {
+            "labels": ["00", "04", "08", "12", "16", "20", "23"],
+            "datasets": [
+                {"label": "下载", "data": [3,  1,  10, 56, 42, 16,  0], "type": "bar"},
+                {"label": "唯一", "data": [2,  1,   8, 42, 28,  8,  0], "type": "line"},
+            ],
+            "chart_type": "mixed",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_throttle_rate(key_id: str):
+    """Auth api-keys/{id}/throttle-rate · 限流率 (R414)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "throttle_rate":   "100 req/min",
+            "current_rate":   "42 req/min",
+            "headroom":       58,
+            "throttled":      False,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -5880,6 +5959,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-cohort": lambda q, id="c001": get_campaigns_audience_cohort(id),
     "/api/v2/files/{id}/download-by-day-chart-v2": lambda q, id="f_001": get_files_download_by_day_chart_v2(id),
     "/api/v2/auth/api-keys/{id}/quota-histogram": lambda q, id="k_001": get_auth_api_keys_quota_histogram(id),
+    "/api/v2/skills/{id}/apply-template":    lambda q, id="s_001": get_skills_apply_template(id),
+    "/api/v2/billing/payment-methods/{id}/set-active": lambda q, id="c_001": get_billing_payment_methods_set_active(id),
+    "/api/v2/campaigns/{id}/audience-grade": lambda q, id="c001": get_campaigns_audience_grade(id),
+    "/api/v2/files/{id}/download-by-hour-chart": lambda q, id="f_001": get_files_download_by_hour_chart(id),
+    "/api/v2/auth/api-keys/{id}/throttle-rate": lambda q, id="k_001": get_auth_api_keys_throttle_rate(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
