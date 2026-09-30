@@ -6586,6 +6586,92 @@ def get_auth_api_keys_throttle_events(key_id: str):
     }
 
 
+def get_skills_clone_stats(skill_id: str):
+    """Skill clone-stats · 克隆统计 (R428)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "clone_count":  18,
+            "cloned_at":   datetime.utcnow().isoformat() + "Z",
+            "cloned_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_unset_default_for(method_id: str):
+    """Billing payment-methods/{id}/unset-default-for · 取消默认给 (R428)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "is_default": False,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_tech_detailed(campaign_id: str):
+    """Campaigns audience-tech-detailed · 技术详细 (R428)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"tech": "iOS",     "browser": "Safari",    "users": 4280, "pct": 23.2},
+            {"tech": "iOS",     "browser": "Chrome",    "users": 1560, "pct":  8.5},
+            {"tech": "Android", "browser": "Chrome",    "users": 3240, "pct": 17.6},
+            {"tech": "Android", "browser": "Samsung",   "users": 1280, "pct":  6.9},
+            {"tech": "Windows", "browser": "Chrome",    "users": 1680, "pct":  9.1},
+            {"tech": "macOS",   "browser": "Chrome",    "users": 1180, "pct":  6.4},
+            {"tech": "iPad",    "browser": "Safari",    "users":  980, "pct":  5.3},
+            {"tech": "Other",   "browser": "Other",     "users": 4220, "pct": 22.9},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_day_of_week_list(file_id: str):
+    """Files download-by-day-of-week-list · 按周天列表 (R428)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"dow": "Mon", "downloads":  52},
+            {"dow": "Tue", "downloads":  68},
+            {"dow": "Wed", "downloads":  72},
+            {"dow": "Thu", "downloads":  58},
+            {"dow": "Fri", "downloads":  42},
+            {"dow": "Sat", "downloads":  12},
+            {"dow": "Sun", "downloads":   8},
+        ],
+        "total": 312,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v3(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v3 · 轮换 secret v3 (R428)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 5,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v3",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -7094,6 +7180,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-region-detailed": lambda q, id="c001": get_campaigns_audience_region_detailed(id),
     "/api/v2/files/{id}/download-by-quarter-list": lambda q, id="f_001": get_files_download_by_quarter_list(id),
     "/api/v2/auth/api-keys/{id}/throttle-events": lambda q, id="k_001": get_auth_api_keys_throttle_events(id),
+    "/api/v2/skills/{id}/clone-stats":          lambda q, id="s_001": get_skills_clone_stats(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-for": lambda q, id="c_001": get_billing_payment_methods_unset_default_for(id),
+    "/api/v2/campaigns/{id}/audience-tech-detailed": lambda q, id="c001": get_campaigns_audience_tech_detailed(id),
+    "/api/v2/files/{id}/download-by-day-of-week-list": lambda q, id="f_001": get_files_download_by_day_of_week_list(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v3": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v3(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
