@@ -61,7 +61,7 @@ export function TasksPage() {
         <Button><Plus className="w-4 h-4" />{t('app.create_task')}</Button>
       </div>
 
-      <div className="bg-card rounded-lg border border-border">
+      <Card className="p-0">
         <div className="border-b border-border px-4">
           <nav className="flex gap-6">
             {tabs.map((t) => (
@@ -129,7 +129,8 @@ export function TasksPage() {
             })}
           </tbody>
         </table>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -2,12 +2,13 @@
  * CloudTech AppShell · AppHeader
  * 工作台顶栏（v2 视觉母版实测 56px 高）
  *
- * 组成：搜索框 + 通知 + 企业版徽章 + 用户菜单
+ * 组成：搜索框 + 通知 + 主题切换 (R358) + 企业版徽章 + 用户菜单
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,6 +37,9 @@ export function AppHeader() {
         <Bell className="w-5 h-5 text-muted-foreground" />
         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive-500 rounded-full" />
       </Link>
+
+      {/* 主题切换 (R358) */}
+      <ThemeToggle />
 
       {/* 企业版徽章 */}
       <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-brand-50 text-brand-700 border border-brand-200">

@@ -115,6 +115,7 @@
     --gradient-card: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
 
     /* ── Layout ── */
+  --sidebar-width: 240px;
     --sidebar-width: 240px;
     --sidebar-width-collapsed: 64px;
     --header-height: 56px;
@@ -156,6 +157,35 @@
   *, *::before, *::after {
     box-sizing: border-box;
   }
+
+  /* V23 · Dark mode (R358) */
+  .dark {
+    --neutral-0: 15 23 42;          /* #0F172A · 背景色 */
+    --neutral-50: 30 41 59;         /* #1E293B */
+    --neutral-100: 51 65 85;        /* #334155 */
+    --neutral-200: 71 85 105;       /* #475569 */
+    --neutral-300: 100 116 139;     /* #64748B */
+    --neutral-400: 148 163 184;    /* #94A3B8 */
+    --neutral-500: 203 213 225;    /* #CBD5E1 */
+    --neutral-600: 226 232 240;    /* #E2E8F0 */
+    --neutral-700: 241 245 249;    /* #F1F5F9 */
+    --neutral-800: 248 250 252;    /* #F8FAFC */
+    --neutral-900: 255 255 255;    /* #FFFFFF · 反转 */
+    --brand-50: 30 58 138;          /* 深蓝背景 */
+    --brand-600: 96 165 250;       /* 亮蓝主色 */
+    --brand-700: 147 197 253;
+  }
+
+  .dark body {
+    background: var(--neutral-0);
+    color: var(--neutral-800);
+  }
+
+  .dark .bg-card { background: rgb(var(--neutral-50) / 1); }
+  .dark .bg-muted { background: rgb(var(--neutral-100) / 1); }
+  .dark .border-border { border-color: rgb(var(--neutral-300) / 1); }
+  .dark .text-foreground { color: rgb(var(--neutral-800) / 1); }
+  .dark .text-muted-foreground { color: rgb(var(--neutral-500) / 1); }
 
   html {
     scroll-behavior: smooth;

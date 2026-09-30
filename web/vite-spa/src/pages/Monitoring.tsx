@@ -79,26 +79,34 @@ export function MonitoringPage() {
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">仪表盘</p>
-                <p className="text-3xl font-bold text-cyan-600">{totalDashboards}</p>
-                <p className="text-xs text-gray-400 mt-1">Grafana</p>
-              </div>
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">告警规则</p>
-                <p className="text-3xl font-bold text-red-600">{totalAlerts}</p>
-                <p className="text-xs text-gray-400 mt-1">P0-P3 四级</p>
-              </div>
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">SaaS 月成本</p>
-                <p className="text-3xl font-bold text-green-600">¥{totalSaasCost.toLocaleString()}</p>
-                <p className="text-xs text-gray-400 mt-1">不含 ICP</p>
-              </div>
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">客户漏斗</p>
-                <p className="text-3xl font-bold text-emerald-600">80</p>
-                <p className="text-xs text-gray-400 mt-1">5 状态</p>
-              </div>
+              <Card className="p-0">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">仪表盘</p>
+                  <p className="text-3xl font-bold text-cyan-600">{totalDashboards}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Grafana</p>
+                </CardContent>
+              </Card>
+              <Card className="p-0">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">告警规则</p>
+                  <p className="text-3xl font-bold text-red-600">{totalAlerts}</p>
+                  <p className="text-xs text-muted-foreground mt-1">P0-P3 四级</p>
+                </CardContent>
+              </Card>
+              <Card className="p-0">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">SaaS 月成本</p>
+                  <p className="text-3xl font-bold text-green-600">¥{totalSaasCost.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground mt-1">不含 ICP</p>
+                </CardContent>
+              </Card>
+              <Card className="p-0">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">客户漏斗</p>
+                  <p className="text-3xl font-bold text-emerald-600">80</p>
+                  <p className="text-xs text-muted-foreground mt-1">5 状态</p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
