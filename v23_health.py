@@ -7093,6 +7093,89 @@ def get_auth_api_keys_rotate_secret_v8(key_id: str):
     }
 
 
+def get_skills_import_stats(skill_id: str):
+    """Skill import-stats · 导入统计 (R434)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "import_count": 22,
+            "imported_at": datetime.utcnow().isoformat() + "Z",
+            "imported_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_unset_default_for_billing(method_id: str):
+    """Billing payment-methods/{id}/unset-default-for-billing · 取消默认 billing (R434)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "for_billing": False,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_grade_stats_v2(campaign_id: str):
+    """Campaigns audience-grade-stats-v2 · 等级统计 v2 (R434)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"grade": "A 优质", "count": 4180, "pct": 22.7, "avg_score": 920},
+            {"grade": "B 良好", "count": 6240, "pct": 33.9, "avg_score": 720},
+            {"grade": "C 普通", "count": 5240, "pct": 28.4, "avg_score": 510},
+            {"grade": "D 低质", "count": 2760, "pct": 15.0, "avg_score": 280},
+        ],
+        "total": 18420,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_month_list_v2(file_id: str):
+    """Files download-by-month-list-v2 · 按月列表 v2 (R434)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"month": "2026-04", "downloads": 168, "unique_users": 118, "avg_size_mb": 2.4},
+            {"month": "2026-05", "downloads": 248, "unique_users": 178, "avg_size_mb": 2.5},
+            {"month": "2026-06", "downloads": 312, "unique_users": 218, "avg_size_mb": 2.4},
+            {"month": "2026-07", "downloads": 428, "unique_users": 312, "avg_size_mb": 2.6},
+            {"month": "2026-08", "downloads": 487, "unique_users": 348, "avg_size_mb": 2.5},
+            {"month": "2026-09", "downloads": 312, "unique_users": 220, "avg_size_mb": 2.4},
+        ],
+        "total": 1955,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v9(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v9 · 轮换 secret v9 (R434)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 17,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v9",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -7631,6 +7714,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-list-v5": lambda q, id="c001": get_campaigns_audience_tech_list_v5(id),
     "/api/v2/files/{id}/download-by-month-list": lambda q, id="f_001": get_files_download_by_month_list(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v8": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v8(id),
+    "/api/v2/skills/{id}/import-stats":        lambda q, id="s_001": get_skills_import_stats(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-for-billing": lambda q, id="c_001": get_billing_payment_methods_unset_default_for_billing(id),
+    "/api/v2/campaigns/{id}/audience-grade-stats-v2": lambda q, id="c001": get_campaigns_audience_grade_stats_v2(id),
+    "/api/v2/files/{id}/download-by-month-list-v2": lambda q, id="f_001": get_files_download_by_month_list_v2(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v9": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v9(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
