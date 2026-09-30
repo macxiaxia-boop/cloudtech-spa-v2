@@ -28,7 +28,7 @@ POLL_INTERVAL = 30  # seconds (R363 折中 schtasks 周期)
 
 
 def check_port(port, timeout=0.5):
-    s = socket.socket(socket.AF_INET, socket.SOCK_INET6 if sys.platform == "win32" else socket.AF_INET, socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(timeout)
     try:
         return s.connect_ex(("127.0.0.1", port)) == 0
@@ -44,8 +44,8 @@ def log_event(event_type, detail):
         with LOG_FILE.open("a", encoding="utf-8") as f:
             f.write(line + "\n")
     except Exception as e:
-        print(f"[watchdog] log write failed: {e}", file=sys.stderr)
-    print(line)
+        print(f"[watchdog] log write failed: {e}", file=sys.stderr, flush=True)
+    print(line, flush=True)  # R363 治本 nohup stdout buffer
 
 
 def get_v22_pid() -> int | None:

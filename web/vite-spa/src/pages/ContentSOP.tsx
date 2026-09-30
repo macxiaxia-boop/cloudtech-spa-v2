@@ -139,7 +139,7 @@ export function ContentSOPPage() {
       </section>
 
       {/* 4 主题模板库 */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-card">
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">4 主题派最优规律（实证 4/4 稳定）</h2>
@@ -172,22 +172,22 @@ export function ContentSOPPage() {
                 </div>
 
                 <div className="grid md:grid-cols-4 gap-4 mb-4">
-                  <div className="p-3 bg-white rounded border border-gray-200">
+                  <div className="p-3 bg-card rounded border border-gray-200">
                     <p className="text-xs text-gray-500">原版 1.0</p>
                     <p className="text-2xl font-bold">{t.v1_words.toLocaleString()} 字</p>
                     <p className="text-xs text-green-600 mt-1">{t.score_v1}</p>
                   </div>
-                  <div className="p-3 bg-white rounded border border-gray-200">
+                  <div className="p-3 bg-card rounded border border-gray-200">
                     <p className="text-xs text-gray-500">豆包优化 2.0</p>
                     <p className="text-2xl font-bold">{t.v2_words.toLocaleString()} 字</p>
                     <p className="text-xs text-green-600 mt-1">{t.score_v2}</p>
                   </div>
-                  <div className="p-3 bg-white rounded border border-gray-200">
+                  <div className="p-3 bg-card rounded border border-gray-200">
                     <p className="text-xs text-gray-500">压缩比例</p>
                     <p className="text-2xl font-bold text-orange-600">{t.compression}</p>
                     <p className="text-xs text-gray-400 mt-1">2.0 vs 1.0</p>
                   </div>
-                  <div className="p-3 bg-white rounded border border-gray-200">
+                  <div className="p-3 bg-card rounded border border-gray-200">
                     <p className="text-xs text-gray-500">派最优</p>
                     <p className={`text-2xl font-bold ${t.winner === '1.0' ? 'text-yellow-600' : 'text-green-600'}`}>
                       {t.winner}
@@ -196,7 +196,7 @@ export function ContentSOPPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-white rounded border border-gray-200">
+                <div className="p-3 bg-card rounded border border-gray-200">
                   <p className="text-sm text-gray-700">
                     <span className="font-medium">理由: </span>{t.rationale}
                   </p>
@@ -226,7 +226,7 @@ export function ContentSOPPage() {
           </div>
           <div className="max-w-3xl mx-auto space-y-6">
             {DECISION_TREE.map((step, i) => (
-              <div key={i} className="p-6 bg-white rounded-lg border-2 border-indigo-200">
+              <div key={i} className="p-6 bg-card rounded-lg border-2 border-indigo-200">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="flex items-center justify-center w-8 h-8 bg-indigo-500 text-white rounded-full font-bold">
                     {i + 1}
@@ -249,7 +249,7 @@ export function ContentSOPPage() {
       </section>
 
       {/* 4 大特点 */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-card">
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">为什么用对比派最优？</h2>
@@ -279,7 +279,7 @@ export function ContentSOPPage() {
           <p className="text-lg opacity-90 mb-8">7 天免费试用 · 双轨对比 · 自动派最优</p>
           <Link
             to="/login"
-            className="px-8 py-3 bg-white text-indigo-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+            className="px-8 py-3 bg-card text-indigo-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
           >
             立即开始 <ArrowRight className="w-4 h-4" />
           </Link>

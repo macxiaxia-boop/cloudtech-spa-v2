@@ -31,7 +31,7 @@ export function FunnelPage() {
               80 → 1 的<br />
               <span className="text-orange-600">真实转化漏斗</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
+            <p className="text-lg text-muted-foreground mb-6">
               5 状态机全透明 · 每一步转化率 + 流失原因可追溯
               <br />
               <span className="text-sm text-gray-500">{FUNNEL_SNAPSHOT.period}</span>
@@ -58,7 +58,7 @@ export function FunnelPage() {
           </div>
           <div>
             {/* 漏斗可视化 */}
-            <div className="bg-white p-6 rounded-2xl shadow-2xl">
+            <div className="bg-card p-6 rounded-2xl shadow-2xl">
               <h3 className="font-bold text-lg mb-4 text-center">漏斗可视化</h3>
               <div className="space-y-3">
                 {FUNNEL_SNAPSHOT.stages.map((stage, idx) => {
@@ -74,7 +74,7 @@ export function FunnelPage() {
                         <span className={`font-medium ${stage.color}`}>
                           {stage.icon} {stage.label}
                         </span>
-                        <span className="text-gray-700 font-bold">{stage.count}</span>
+                        <span className="text-foreground font-bold">{stage.count}</span>
                       </div>
                       <div className="h-8 bg-gray-100 rounded-md overflow-hidden relative">
                         <div
@@ -99,7 +99,7 @@ export function FunnelPage() {
       </section>
 
       {/* 转化率明细 */}
-      <section className="py-12 bg-white border-b border-gray-100">
+      <section className="py-12 bg-card border-b border-gray-100">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <TrendingDown className="w-6 h-6 text-orange-500" />
@@ -109,12 +109,12 @@ export function FunnelPage() {
             {FUNNEL_SNAPSHOT.conversions.map((c, i) => (
               <div key={i} className="p-5 bg-gradient-to-br from-orange-50 to-white border border-orange-200 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-muted-foreground">
                     {FUNNEL_SNAPSHOT.stages[i].label} → {FUNNEL_SNAPSHOT.stages[i + 1].label}
                   </span>
                   <span className="text-2xl font-bold text-orange-600">{c.rate.toFixed(1)}%</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-gray-600">
+                <div className="flex items-start gap-2 text-xs text-muted-foreground">
                   <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-red-500" />
                   <span>主要流失：{c.drop_reason}</span>
                 </div>
@@ -125,7 +125,7 @@ export function FunnelPage() {
       </section>
 
       {/* 4 大洞察 */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-muted">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Lightbulb className="w-6 h-6 text-yellow-500" />
@@ -133,7 +133,7 @@ export function FunnelPage() {
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
             {FUNNEL_INSIGHTS.map((ins, i) => (
-              <div key={i} className="p-5 bg-white rounded-lg border border-gray-200 hover:shadow-md transition">
+              <div key={i} className="p-5 bg-card rounded-lg border border-gray-200 hover:shadow-md transition">
                 <div className="flex items-start gap-3 mb-3">
                   <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded font-bold">
                     洞察 #{i + 1}
@@ -146,8 +146,8 @@ export function FunnelPage() {
                     <span className="text-gray-800">{ins.action}</span>
                   </div>
                   <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
-                    <span>负责人：<span className="font-medium text-gray-700">{ins.owner}</span></span>
-                    <span>截止：<span className="font-medium text-gray-700">{ins.deadline}</span></span>
+                    <span>负责人：<span className="font-medium text-foreground">{ins.owner}</span></span>
+                    <span>截止：<span className="font-medium text-foreground">{ins.deadline}</span></span>
                   </div>
                 </div>
               </div>
@@ -166,7 +166,7 @@ export function FunnelPage() {
           <div className="flex items-center justify-center gap-3">
             <Link
               to="/try"
-              className="px-6 py-3 bg-white text-orange-600 rounded-md hover:bg-gray-100 font-medium inline-flex items-center gap-2"
+              className="px-6 py-3 bg-card text-orange-600 rounded-md hover:bg-gray-100 font-medium inline-flex items-center gap-2"
             >
               7 天免费试用 <ArrowRight className="w-4 h-4" />
             </Link>

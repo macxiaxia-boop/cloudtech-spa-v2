@@ -144,7 +144,7 @@ export function BlogPage() {
               <br />
               <span className="text-brand-500">实战手记</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
+            <p className="text-lg text-muted-foreground mb-6">
               心之所向便是光 + 5 AI 员工的真实运营记录 · 行业案例 · 技术内幕
             </p>
             <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200">
@@ -174,7 +174,7 @@ export function BlogPage() {
 
       {/* 头条 */}
       {featured && (
-        <section className="py-12 bg-white">
+        <section className="py-12 bg-card">
           <div className="max-w-page mx-auto px-6">
             <Link
               to={`/blog/${featured.id}`}
@@ -187,7 +187,7 @@ export function BlogPage() {
                 <span className="text-xs text-gray-500">{featured.date} · {featured.readTime}</span>
               </div>
               <h2 className="text-3xl font-bold mb-3">{featured.title}</h2>
-              <p className="text-gray-600 mb-4">{featured.excerpt}</p>
+              <p className="text-muted-foreground mb-4">{featured.excerpt}</p>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-500">作者：{featured.author}</p>
                 <span className="text-brand-500 font-medium flex items-center gap-1">
@@ -200,7 +200,7 @@ export function BlogPage() {
       )}
 
       {/* 列表 */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-muted">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <BookOpen className="w-6 h-6" /> 最新文章
@@ -210,7 +210,7 @@ export function BlogPage() {
               <Link
                 key={p.id}
                 to={`/blog/${p.id}`}
-                className="block p-6 bg-white rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow transition"
+                className="block p-6 bg-card rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow transition"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${CATEGORY_LABELS[p.category].color}`}>
@@ -224,7 +224,7 @@ export function BlogPage() {
                   </span>
                 </div>
                 <h3 className="text-xl font-bold mb-2 hover:text-brand-500">{p.title}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{p.excerpt}</p>
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{p.excerpt}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-wrap gap-1">
                     {p.tags.map((t) => (
@@ -242,7 +242,7 @@ export function BlogPage() {
       </section>
 
       {/* 跨页面引导 */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-card">
         <div className="max-w-page mx-auto px-6 text-center">
           <h3 className="text-xl font-bold mb-4">看完了？动手试一下</h3>
           <p className="text-sm text-gray-500 mb-6">看 5 AI 员工实时在干啥 / 进你的客户后台</p>

@@ -89,7 +89,7 @@ export function PricingPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             3 套餐 · 按需选 · 随时升
           </h1>
-          <p className="text-gray-600 text-lg mb-6">
+          <p className="text-muted-foreground text-lg mb-6">
             7 天免费试用 · 无需信用卡 · 30 分钟跑通首条管线
           </p>
           <div className="flex items-center justify-center gap-6 text-sm">
@@ -199,8 +199,8 @@ export function PricingPage() {
           <h2 className="text-2xl font-bold mb-6 text-center">老板证言</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {TESTIMONIALS.slice(0, 3).map((t, i) => (
-              <div key={i} className="p-5 bg-white rounded-lg border border-gray-200">
-                <p className="text-sm text-gray-700 mb-3 italic">"{t.quote}"</p>
+              <div key={i} className="p-5 bg-card rounded-lg border border-gray-200">
+                <p className="text-sm text-foreground mb-3 italic">"{t.quote}"</p>
                 <p className="text-xs text-gray-500">— {t.author} · {t.role}</p>
               </div>
             ))}
@@ -217,9 +217,9 @@ export function PricingPage() {
               { q: '支持哪些支付方式？', a: '微信支付、支付宝、企业网银（公对公转账）。年付可签合同 + 开增票。' },
               { q: '年付有折扣吗？', a: '有。年付 8 折，相当于 2 个月免费。标准版年付 ¥9,590（省 ¥2,398）。' },
             ].map((f) => (
-              <div key={f.q} className="p-4 bg-white rounded-lg border border-gray-200">
+              <div key={f.q} className="p-4 bg-card rounded-lg border border-gray-200">
                 <p className="font-medium mb-1">{f.q}</p>
-                <p className="text-sm text-gray-600">{f.a}</p>
+                <p className="text-sm text-muted-foreground">{f.a}</p>
               </div>
             ))}
           </div>
@@ -240,29 +240,29 @@ export function PricingPage() {
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
               <DollarSign className="w-5 h-5 text-green-600 mx-auto mb-1" />
               <p className="text-2xl font-bold text-green-700">¥{REVENUE_KEY_METRICS.arpu_baseline}</p>
-              <p className="text-xs text-gray-600">ARPU（标准版基准）</p>
+              <p className="text-xs text-muted-foreground">ARPU（标准版基准）</p>
             </div>
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
               <Target className="w-5 h-5 text-blue-600 mx-auto mb-1" />
               <p className="text-2xl font-bold text-blue-700">¥{REVENUE_KEY_METRICS.ltv_estimate.toLocaleString()}</p>
-              <p className="text-xs text-gray-600">LTV 估算（12 月）</p>
+              <p className="text-xs text-muted-foreground">LTV 估算（12 月）</p>
             </div>
             <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg text-center">
               <Calculator className="w-5 h-5 text-purple-600 mx-auto mb-1" />
               <p className="text-2xl font-bold text-purple-700">{REVENUE_KEY_METRICS.ltv_cac_ratio.toFixed(2)}</p>
-              <p className="text-xs text-gray-600">LTV/CAC（健康 &gt; 3）</p>
+              <p className="text-xs text-muted-foreground">LTV/CAC（健康 &gt; 3）</p>
             </div>
             <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
               <Clock className="w-5 h-5 text-orange-600 mx-auto mb-1" />
               <p className="text-2xl font-bold text-orange-700">{REVENUE_KEY_METRICS.payback_months} 月</p>
-              <p className="text-xs text-gray-600">回本周期</p>
+              <p className="text-xs text-muted-foreground">回本周期</p>
             </div>
           </div>
 
           {/* M1/M3/M6/M12 预测表 */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-card rounded-xl border border-gray-200 overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50">
+              <thead className="bg-muted">
                 <tr>
                   <th className="px-4 py-3 text-left font-medium">时间窗口</th>
                   <th className="px-4 py-3 text-center font-medium text-gray-500">保守（1 家）</th>

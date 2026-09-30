@@ -140,14 +140,14 @@ export function TryNowPage() {
             <br />
             <span className="text-brand-500">第一条管线</span>
           </h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
             不懂技术也能用。装企老板 / 医美老板 / 中小企业主 — 自己填表，5 AI 员工自动跑。
           </p>
         </div>
       </section>
 
       {/* 4 步骤 */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-card">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-8 text-center">4 步跑通</h2>
           <div className="grid md:grid-cols-4 gap-4">
@@ -162,7 +162,7 @@ export function TryNowPage() {
                   </span>
                 </div>
                 <h3 className="font-bold mb-2">{s.title}</h3>
-                <p className="text-sm text-gray-600">{s.desc}</p>
+                <p className="text-sm text-muted-foreground">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -170,14 +170,14 @@ export function TryNowPage() {
       </section>
 
       {/* 表单 */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-muted">
         <div className="max-w-2xl mx-auto px-6">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+          <div className="bg-card rounded-2xl shadow-xl border border-gray-200 p-8">
             {submitted ? (
               <div className="text-center py-8">
                 <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-2xl font-bold mb-2">试用开通成功！</h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-muted-foreground mb-6">
                   <strong>{form.tenant_name}</strong>（{form.email}）已开通 7 天免费试用。
                 </p>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-left">
@@ -264,7 +264,7 @@ export function TryNowPage() {
                         onChange={(e) => {
                           setForm({ ...form, industry: e.target.value, sku_id: '' });
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-card"
                       >
                         {INDUSTRIES.map((ind) => (
                           <option key={ind.value} value={ind.value}>{ind.label}</option>
@@ -277,7 +277,7 @@ export function TryNowPage() {
                         required
                         value={form.sku_id}
                         onChange={(e) => setForm({ ...form, sku_id: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-card"
                       >
                         <option value="">请先选择行业</option>
                         {SKU_OPTIONS.filter((s) => s.industry === form.industry).map((sku) => (

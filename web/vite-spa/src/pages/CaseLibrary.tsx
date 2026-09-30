@@ -245,22 +245,22 @@ export function CaseLibraryPage() {
 
           {/* 数据汇总 */}
           <div className="grid md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
+            <div className="p-4 bg-card rounded-lg border border-gray-200">
               <DollarSign className="w-6 h-6 text-green-500 mb-2" />
               <p className="text-2xl font-bold">¥200 万+</p>
               <p className="text-xs text-gray-500">客户累计节省</p>
             </div>
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
+            <div className="p-4 bg-card rounded-lg border border-gray-200">
               <TrendingUp className="w-6 h-6 text-blue-500 mb-2" />
               <p className="text-2xl font-bold">+140%</p>
               <p className="text-xs text-gray-500">平均签约率提升</p>
             </div>
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
+            <div className="p-4 bg-card rounded-lg border border-gray-200">
               <Users className="w-6 h-6 text-purple-500 mb-2" />
               <p className="text-2xl font-bold">10 行业</p>
               <p className="text-xs text-gray-500">已落地行业</p>
             </div>
-            <div className="p-4 bg-white bg-white rounded-lg border border-gray-200">
+            <div className="p-4 bg-card bg-card rounded-lg border border-gray-200">
               <Star className="w-6 h-6 text-yellow-500 mb-2" />
               <p className="text-2xl font-bold">4.9/5</p>
               <p className="text-xs text-gray-500">客户满意度</p>
@@ -270,7 +270,7 @@ export function CaseLibraryPage() {
       </section>
 
       {/* 装企案例 */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-card">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-3xl font-bold mb-2">🏠 装企案例（5 家）</h2>
           <p className="text-gray-500 mb-8">一线 + 新一线城市装企老板的真实使用</p>
@@ -307,7 +307,7 @@ export function CaseLibraryPage() {
           <div className="flex items-center justify-center gap-4">
             <Link
               to="/try"
-              className="px-8 py-3 bg-white text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+              className="px-8 py-3 bg-card text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
             >
               立即试用 <ArrowRight className="w-4 h-4" />
             </Link>

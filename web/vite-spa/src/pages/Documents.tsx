@@ -253,7 +253,7 @@ export function DocumentsPage() {
         const meta = CATEGORY_META[cat as Document['category']];
         const Icon = meta.icon;
         return (
-          <section key={cat} className="py-12 bg-white border-b border-gray-100">
+          <section key={cat} className="py-12 bg-card border-b border-gray-100">
             <div className="max-w-page mx-auto px-6">
               <div className="flex items-center gap-3 mb-6">
                 <Icon className={`w-6 h-6 ${meta.color}`} />
@@ -266,7 +266,7 @@ export function DocumentsPage() {
                   <div key={doc.id} className={`p-5 rounded-lg border ${meta.bg}`}>
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-base font-bold flex-1">{doc.title}</h3>
-                      <span className="text-xs px-2 py-0.5 bg-white rounded text-gray-500 font-mono">
+                      <span className="text-xs px-2 py-0.5 bg-card rounded text-gray-500 font-mono">
                         {doc.path.split('/').pop()}
                       </span>
                     </div>
@@ -274,7 +274,7 @@ export function DocumentsPage() {
 
                     <div className="text-xs text-gray-600 mb-2">
                       <span className="font-medium">路径: </span>
-                      <code className="px-1 py-0.5 bg-white rounded font-mono text-xs">{doc.path}</code>
+                      <code className="px-1 py-0.5 bg-card rounded font-mono text-xs">{doc.path}</code>
                     </div>
 
                     {doc.redlines.length > 0 && (
@@ -315,7 +315,7 @@ export function DocumentsPage() {
           </p>
           <Link
             to="/clients"
-            className="px-8 py-3 bg-white text-slate-700 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+            className="px-8 py-3 bg-card text-slate-700 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
           >
             查看客户清单 <ArrowRight className="w-4 h-4" />
           </Link>

@@ -142,7 +142,7 @@ export function FAQPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               你想问的，<span className="text-brand-500">都在这</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
+            <p className="text-lg text-muted-foreground mb-6">
               15 个最常见问题 · 按分类找 · 搜不到就联系我们
             </p>
             <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-gray-200">
@@ -170,7 +170,7 @@ export function FAQPage() {
         </div>
       </section>
 
-      <section className="py-8 bg-white border-b border-gray-200">
+      <section className="py-8 bg-card border-b border-gray-200">
         <div className="max-w-page mx-auto px-6">
           <div className="max-w-2xl mx-auto relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -186,7 +186,7 @@ export function FAQPage() {
       </section>
 
       {/* 分类 */}
-      <section className="py-6 bg-white border-b border-gray-200 sticky top-16 z-30">
+      <section className="py-6 bg-card border-b border-gray-200 sticky top-16 z-30">
         <div className="max-w-page mx-auto px-6">
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map((c) => (
@@ -196,7 +196,7 @@ export function FAQPage() {
                 className={`px-4 py-2 rounded-md text-sm transition ${
                   category === c.value
                     ? 'bg-brand-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 text-foreground hover:bg-gray-200'
                 }`}
               >
                 {c.label}
@@ -207,7 +207,7 @@ export function FAQPage() {
       </section>
 
       {/* FAQ 列表 */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-muted">
         <div className="max-w-4xl mx-auto px-6">
           {filtered.length === 0 ? (
             <EmptyState
@@ -236,11 +236,11 @@ export function FAQPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-card">
         <div className="max-w-page mx-auto px-6 text-center">
           <MessageCircle className="w-12 h-12 text-brand-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">还没找到答案？</h2>
-          <p className="text-gray-600 mb-6">3 种方式联系我们：1v1 demo / 微信群 / 邮件</p>
+          <p className="text-muted-foreground mb-6">3 种方式联系我们：1v1 demo / 微信群 / 邮件</p>
           <div className="flex items-center justify-center gap-4">
             <Link to="/contact" className="px-6 py-3 bg-brand-500 text-white rounded-md hover:bg-brand-600">
               约 1v1 demo
@@ -260,16 +260,16 @@ export function FAQPage() {
 
 function FAQItem({ f, open, onToggle }: { f: FAQ; open: boolean; onToggle: () => void }) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-card rounded-lg border border-gray-200 overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-gray-50"
+        className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-muted"
       >
         <span className="font-medium flex-1">{f.q}</span>
         <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="px-6 pb-4 text-gray-700 border-t border-gray-100 pt-3">
+        <div className="px-6 pb-4 text-foreground border-t border-gray-100 pt-3">
           <p className="mb-3">{f.a}</p>
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>👍 {f.helpful} 人觉得有帮助</span>

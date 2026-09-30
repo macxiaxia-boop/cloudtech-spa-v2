@@ -216,7 +216,7 @@ export function ClientListPage() {
       </section>
 
       {/* 城市分布 */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-card">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-4">
             <MapPin className="w-5 h-5 inline mr-2" />
@@ -244,7 +244,7 @@ export function ClientListPage() {
       </section>
 
       {/* 医美清单 */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-card">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-4">
             <Building2 className="w-5 h-5 inline mr-2 text-pink-600" />
@@ -262,7 +262,7 @@ export function ClientListPage() {
           <div className="grid md:grid-cols-2 gap-4">
             <a
               href="/docs/marketing/scripts/outreach_decoration.md"
-              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+              className="block p-4 bg-card rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
             >
               <p className="text-xs text-emerald-600 mb-1">marketing/scripts/</p>
               <p className="font-bold mb-1">outreach_decoration.md</p>
@@ -270,7 +270,7 @@ export function ClientListPage() {
             </a>
             <a
               href="/docs/marketing/scripts/outreach_medical.md"
-              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+              className="block p-4 bg-card rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
             >
               <p className="text-xs text-emerald-600 mb-1">marketing/scripts/</p>
               <p className="font-bold mb-1">outreach_medical.md</p>
@@ -278,7 +278,7 @@ export function ClientListPage() {
             </a>
             <a
               href="/docs/marketing/scripts/p0_8_clients.md"
-              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+              className="block p-4 bg-card rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
             >
               <p className="text-xs text-emerald-600 mb-1">marketing/scripts/</p>
               <p className="font-bold mb-1">p0_8_clients.md</p>
@@ -286,7 +286,7 @@ export function ClientListPage() {
             </a>
             <a
               href="/docs/finance/client_funnel_monitoring.md"
-              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+              className="block p-4 bg-card rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
             >
               <p className="text-xs text-emerald-600 mb-1">finance/</p>
               <p className="font-bold mb-1">client_funnel_monitoring.md</p>
@@ -304,7 +304,7 @@ export function ClientListPage() {
           <p className="text-lg opacity-90 mb-8">红线 #22 边界：实际触达动作必用户授权</p>
           <Link
             to="/dashboard"
-            className="px-8 py-3 bg-white text-emerald-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+            className="px-8 py-3 bg-card text-emerald-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
           >
             返回后台 <ArrowRight className="w-4 h-4" />
           </Link>
@@ -316,7 +316,7 @@ export function ClientListPage() {
 
 function ClientTable({ clients }: { clients: Client[] }) {
   return (
-    <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
+    <div className="overflow-x-auto bg-card rounded-lg border border-gray-200">
       <table className="w-full text-sm">
         <thead className="bg-gray-50 border-b border-gray-200">
           <tr>

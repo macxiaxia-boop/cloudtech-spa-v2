@@ -59,7 +59,7 @@ export function IndustryDecorationPage() {
               <br />
               <span className="text-brand-500">让 AI 数字员工替你跑 5 个环节</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
+            <p className="text-lg text-muted-foreground mb-6">
               从线索 → 客户画像 → 报价拆解 → 获客内容 → 工地直播 → AI 复盘，
               每步有产物可查，每条线索 ROI 归因落库。
             </p>
@@ -103,7 +103,7 @@ export function IndustryDecorationPage() {
       </section>
 
       {/* 50 装企合作 logo 网格 */}
-      <section className="py-12 bg-white border-b border-gray-200">
+      <section className="py-12 bg-card border-b border-gray-200">
         <div className="max-w-page mx-auto px-6">
           <p className="text-center text-xs uppercase font-bold text-gray-500 mb-6 tracking-wider">
             50 装企信赖（5 标杆展示）
@@ -126,19 +126,19 @@ export function IndustryDecorationPage() {
       </section>
 
       {/* 5 步闭环 */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-card">
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">5 步闭环，每步都有 AI 数字员工接管</h2>
-            <p className="text-gray-600">一键调用，无需写 prompt</p>
+            <p className="text-muted-foreground">一键调用，无需写 prompt</p>
           </div>
           <div className="grid md:grid-cols-5 gap-4">
             {STEPS.map((s, i) => (
-              <div key={s.key} className="relative p-6 bg-gray-50 rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow-md transition">
+              <div key={s.key} className="relative p-6 bg-muted rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow-md transition">
                 <div className="text-4xl mb-3">{s.emoji}</div>
                 <p className="text-xs text-gray-500 mb-1">第 {i + 1} 步</p>
                 <h3 className="text-base font-bold mb-2">{s.label}</h3>
-                <p className="text-sm text-gray-600">{s.desc}</p>
+                <p className="text-sm text-muted-foreground">{s.desc}</p>
                 {i < STEPS.length - 1 && (
                   <ArrowRight className="hidden md:block absolute top-1/2 -right-2 w-4 h-4 text-brand-500 -translate-y-1/2" />
                 )}
@@ -149,15 +149,15 @@ export function IndustryDecorationPage() {
       </section>
 
       {/* 4 大指标 */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-muted">
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">数据说话</h2>
-            <p className="text-gray-600">装企客户实测</p>
+            <p className="text-muted-foreground">装企客户实测</p>
           </div>
           <div className="grid md:grid-cols-4 gap-6">
             {METRICS.map((m) => (
-              <div key={m.label} className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+              <div key={m.label} className="bg-card p-6 rounded-lg border border-gray-200 text-center">
                 <p className="text-sm text-gray-500 mb-2">{m.label}</p>
                 <p className={`text-4xl font-bold mb-1 ${m.color}`}>{m.value}</p>
                 <p className="text-xs text-gray-400">{m.vs}</p>
@@ -168,15 +168,15 @@ export function IndustryDecorationPage() {
       </section>
 
       {/* 客户案例 */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-card">
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">客户实证</h2>
-            <p className="text-gray-600">3 个城市的装企老板怎么说</p>
+            <p className="text-muted-foreground">3 个城市的装企老板怎么说</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {CASES.map((c) => (
-              <div key={c.company} className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+              <div key={c.company} className="p-6 bg-muted rounded-lg border border-gray-200">
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="font-bold">{c.company}</p>
@@ -184,7 +184,7 @@ export function IndustryDecorationPage() {
                   </div>
                   <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">{c.stage}</span>
                 </div>
-                <p className="text-sm text-gray-700 italic">"{c.quote}"</p>
+                <p className="text-sm text-foreground italic">"{c.quote}"</p>
               </div>
             ))}
           </div>
@@ -192,42 +192,42 @@ export function IndustryDecorationPage() {
       </section>
 
       {/* 📎 配套文档引用 */}
-      <section className="py-12 bg-gray-50 border-t border-gray-200">
+      <section className="py-12 bg-muted border-t border-gray-200">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-4">📎 配套文档</h2>
-          <p className="text-gray-600 mb-6">装企行业落地页的 SOP + 客户脚本 + 行业模板</p>
+          <p className="text-muted-foreground mb-6">装企行业落地页的 SOP + 客户脚本 + 行业模板</p>
           <div className="grid md:grid-cols-2 gap-4">
             <a
               href="/docs/marketing/scripts/outreach_decoration.md"
-              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+              className="block p-4 bg-card rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
             >
               <p className="text-xs text-emerald-600 mb-1">marketing/scripts/</p>
               <p className="font-bold mb-1">outreach_decoration.md</p>
-              <p className="text-sm text-gray-600">装企 50 家外呼脚本 + 转化漏斗 + 4 步法</p>
+              <p className="text-sm text-muted-foreground">装企 50 家外呼脚本 + 转化漏斗 + 4 步法</p>
             </a>
             <a
               href="/docs/marketing/scripts/p0_8_clients.md"
-              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+              className="block p-4 bg-card rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
             >
               <p className="text-xs text-emerald-600 mb-1">marketing/scripts/</p>
               <p className="font-bold mb-1">p0_8_clients.md</p>
-              <p className="text-sm text-gray-600">P0 8 家精选清单（含 3 家北京装企）</p>
+              <p className="text-sm text-muted-foreground">P0 8 家精选清单（含 3 家北京装企）</p>
             </a>
             <a
               href="/docs/finance/financial_model.md"
-              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+              className="block p-4 bg-card rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
             >
               <p className="text-xs text-emerald-600 mb-1">finance/</p>
               <p className="font-bold mb-1">financial_model.md</p>
-              <p className="text-sm text-gray-600">装企客户单价模型 + LTV + 续约率假设</p>
+              <p className="text-sm text-muted-foreground">装企客户单价模型 + LTV + 续约率假设</p>
             </a>
             <a
               href="/docs/clients"
-              className="block p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
+              className="block p-4 bg-card rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow transition"
             >
               <p className="text-xs text-emerald-600 mb-1">→ SPA</p>
               <p className="font-bold mb-1">/clients 80 家清单</p>
-              <p className="text-sm text-gray-600">装企 50 家 + 医美 30 家全量清单</p>
+              <p className="text-sm text-muted-foreground">装企 50 家 + 医美 30 家全量清单</p>
             </a>
           </div>
         </div>
@@ -241,7 +241,7 @@ export function IndustryDecorationPage() {
           <p className="text-lg opacity-90 mb-8">7 天免费试用 · 无需信用卡 · 装企老板亲自上手</p>
           <Link
             to="/login"
-            className="px-8 py-3 bg-white text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+            className="px-8 py-3 bg-card text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
           >
             立即开始 <ArrowRight className="w-4 h-4" />
           </Link>

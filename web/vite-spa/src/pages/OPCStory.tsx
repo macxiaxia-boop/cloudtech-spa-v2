@@ -75,7 +75,7 @@ export function OPCStoryPage() {
                   </h1>
                 </div>
               </div>
-              <p className="text-lg text-gray-600 mb-4">
+              <p className="text-lg text-muted-foreground mb-4">
                 Cloud创始人 · Cloud OPC 模式实证 · Day 30 · 208/208 测试 PASS
               </p>
               <div className="flex flex-wrap gap-3">
@@ -93,7 +93,7 @@ export function OPCStoryPage() {
                 alt="OPC 1 人 + AI 创业"
                 className="rounded-2xl shadow-2xl w-full"
               />
-              <div className="absolute -bottom-4 -right-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+              <div className="absolute -bottom-4 -right-4 bg-card p-3 rounded-lg shadow-lg border border-gray-200">
                 <div className="text-xs">
                   <p className="font-bold text-indigo-600">Day 30</p>
                   <p className="text-gray-500">5 AI · 11 SPA · 80 客户</p>
@@ -105,9 +105,9 @@ export function OPCStoryPage() {
           {/* 今日指标 */}
           <div className="grid md:grid-cols-4 gap-4">
             {TODAY_METRICS.map((m) => (
-              <div key={m.label} className="p-5 bg-white rounded-lg border border-gray-200">
+              <div key={m.label} className="p-5 bg-card rounded-lg border border-gray-200">
                 <p className="text-3xl font-bold text-brand-500">{m.value}</p>
-                <p className="text-sm text-gray-700 mt-1">{m.label}</p>
+                <p className="text-sm text-foreground mt-1">{m.label}</p>
                 <p className="text-xs text-gray-500 mt-1">{m.sub}</p>
               </div>
             ))}
@@ -116,7 +116,7 @@ export function OPCStoryPage() {
       </section>
 
       {/* 今日时间线 */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-card">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Calendar className="w-6 h-6" /> 心之所向便是光的今天 · 时间线
@@ -129,16 +129,16 @@ export function OPCStoryPage() {
             {TIMELINE.map((t, i) => {
               const Icon = t.icon;
               return (
-                <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-brand-500 transition">
+                <div key={i} className="flex items-start gap-4 p-4 bg-muted rounded-lg border border-gray-200 hover:border-brand-500 transition">
                   <div className="text-center flex-shrink-0">
-                    <div className={`w-10 h-10 rounded-full bg-white flex items-center justify-center ${t.color} mb-1`}>
+                    <div className={`w-10 h-10 rounded-full bg-card flex items-center justify-center ${t.color} mb-1`}>
                       <Icon className="w-5 h-5" />
                     </div>
                     <p className="text-xs text-gray-500 font-bold">{t.time}</p>
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{t.task}</p>
-                    <p className="text-sm text-gray-600 mt-1">{t.detail}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t.detail}</p>
                   </div>
                 </div>
               );
@@ -148,7 +148,7 @@ export function OPCStoryPage() {
       </section>
 
       {/* 关键决策 */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-muted">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Award className="w-6 h-6 text-yellow-500" /> 红 #22 关键决策 · 必我拍板的 4 闸门
@@ -159,7 +159,7 @@ export function OPCStoryPage() {
 
           <div className="grid md:grid-cols-2 gap-4">
             {KEY_DECISIONS.map((d) => (
-              <div key={d.title} className="p-5 bg-white rounded-lg border border-gray-200">
+              <div key={d.title} className="p-5 bg-card rounded-lg border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-500">{d.date}</p>
                   <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded font-medium">
@@ -174,7 +174,7 @@ export function OPCStoryPage() {
       </section>
 
       {/* OPC 哲学 */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-card">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
             <Heart className="w-6 h-6 text-red-500" /> 我的 OPC 哲学
@@ -184,7 +184,7 @@ export function OPCStoryPage() {
               <div key={p.title} className="p-6 bg-gradient-to-br from-gray-50 to-white rounded-lg border border-gray-200">
                 <p className="text-4xl mb-3">{p.icon}</p>
                 <h3 className="text-lg font-bold mb-2">{p.title}</h3>
-                <p className="text-sm text-gray-700">{p.desc}</p>
+                <p className="text-sm text-foreground">{p.desc}</p>
               </div>
             ))}
           </div>
@@ -192,7 +192,7 @@ export function OPCStoryPage() {
       </section>
 
       {/* 30 天数据 */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-muted">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-6">📈 30 天 OPC 实证数据</h2>
           <div className="grid md:grid-cols-4 gap-4">
@@ -214,7 +214,7 @@ export function OPCStoryPage() {
           <div className="flex items-center justify-center gap-4">
             <Link
               to="/try"
-              className="px-8 py-3 bg-white text-indigo-600 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+              className="px-8 py-3 bg-card text-indigo-600 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
             >
               立即试用 <ArrowRight className="w-4 h-4" />
             </Link>
@@ -233,10 +233,10 @@ export function OPCStoryPage() {
 
 function BigStat({ icon: Icon, label, value, sub, color }: any) {
   return (
-    <div className="p-6 bg-white rounded-lg border border-gray-200 text-center">
+    <div className="p-6 bg-card rounded-lg border border-gray-200 text-center">
       <Icon className={`w-8 h-8 ${color} mx-auto mb-2`} />
       <p className="text-3xl font-bold mb-1">{value}</p>
-      <p className="text-sm text-gray-700 font-medium">{label}</p>
+      <p className="text-sm text-foreground font-medium">{label}</p>
       <p className="text-xs text-gray-500 mt-1">{sub}</p>
     </div>
   );

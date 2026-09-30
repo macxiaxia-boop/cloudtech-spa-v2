@@ -34,7 +34,7 @@ export function MarketingPage() {
               <br />
               像一支完整团队跑。
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-muted-foreground mb-8">
               装企全案获客闭环 + 医美合规获客闭环，2 大行业管线，5 AI 员工矩阵，
               把营销从"想法"变成"可追溯的产物"。
             </p>
@@ -85,13 +85,13 @@ export function MarketingPage() {
               alt="5 AI 数字员工团队"
               className="rounded-2xl shadow-2xl w-full"
             />
-            <div className="absolute -bottom-4 -left-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+            <div className="absolute -bottom-4 -left-4 bg-card p-3 rounded-lg shadow-lg border border-gray-200">
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 <span className="font-medium">5 AI 员工在线</span>
               </div>
             </div>
-            <div className="absolute -top-4 -right-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+            <div className="absolute -top-4 -right-4 bg-card p-3 rounded-lg shadow-lg border border-gray-200">
               <div className="text-xs">
                 <p className="font-bold text-purple-600">Hermes · 治理</p>
                 <p className="text-gray-500">49 红线全绿</p>
@@ -102,7 +102,7 @@ export function MarketingPage() {
       </section>
 
       {/* Trusted By 客户 logo */}
-      <section className="py-12 bg-white border-y border-gray-200">
+      <section className="py-12 bg-card border-y border-gray-200">
         <div className="max-w-page mx-auto px-6">
           <p className="text-center text-xs uppercase font-bold text-gray-500 mb-6 tracking-wider">
             <Building2 className="w-4 h-4 inline mr-1" /> 80+ P0 客户信赖 · 装企 + 医美 + 通用 SaaS
@@ -123,21 +123,21 @@ export function MarketingPage() {
       </section>
 
       {/* FE 3 + BE 5 员工 */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-muted">
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-sm mb-3">
               <Bot className="w-3 h-3" /> 5 AI 数字员工 · 前台 3 + 后端 5
             </span>
             <h2 className="text-3xl font-bold mb-3">不只 3 个 FE 员工，5 个后端 AI 也在跑</h2>
-            <p className="text-gray-600">Hermes（治理）+ Lyra（内容）+ Athena（架构）+ Apollo（数据）+ Artemis（运营）</p>
+            <p className="text-muted-foreground">Hermes（治理）+ Lyra（内容）+ Athena（架构）+ Apollo（数据）+ Artemis（运营）</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {FE_EMPLOYEES.map((emp) => (
-              <div key={emp.id} className="p-6 bg-white border border-gray-200 rounded-lg hover:border-brand-500 hover:shadow-md transition">
+              <div key={emp.id} className="p-6 bg-card border border-gray-200 rounded-lg hover:border-brand-500 hover:shadow-md transition">
                 <div className="text-4xl mb-3">{emp.icon}</div>
                 <h3 className="text-lg font-bold mb-2">{emp.name}</h3>
-                <p className="text-gray-600 text-sm">{emp.desc}</p>
+                <p className="text-muted-foreground text-sm">{emp.desc}</p>
                 <p className="text-xs text-brand-500 mt-3">← 前台（用户直接对话）</p>
               </div>
             ))}
@@ -166,14 +166,14 @@ export function MarketingPage() {
       </section>
 
       {/* 行业聚焦 */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-card">
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-sm mb-3">
               <Briefcase className="w-3 h-3" /> 行业聚焦（2 active · 3 deprecated）
             </span>
             <h2 className="text-3xl font-bold mb-3">2 大行业管线，闭环交付</h2>
-            <p className="text-gray-600">每条线索进入 CRM 后，每步都有产物可查</p>
+            <p className="text-muted-foreground">每条线索进入 CRM 后，每步都有产物可查</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {INDUSTRIES.map((ind) => {
@@ -182,7 +182,7 @@ export function MarketingPage() {
                 <Link
                   key={ind.id}
                   to={`/industries/${ind.id}`}
-                  className="p-6 bg-white border border-gray-200 rounded-lg hover:shadow-md transition block"
+                  className="p-6 bg-card border border-gray-200 rounded-lg hover:shadow-md transition block"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <Icon className="w-6 h-6 text-brand-500" />
@@ -193,7 +193,7 @@ export function MarketingPage() {
                       {ind.priority === 'primary' ? '重点' : '兜底'}
                     </span>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">{ind.desc}</p>
+                  <p className="text-muted-foreground text-sm mb-3">{ind.desc}</p>
                   <p className="text-brand-500 text-sm">看案例 →</p>
                 </Link>
               );
@@ -222,7 +222,7 @@ export function MarketingPage() {
                   '13 告警规则 P0-P3 + 飞书实时推送',
                   '208 测试 PASS 数据守护',
                 ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-gray-700">
+                  <li key={f} className="flex items-start gap-2 text-foreground">
                     <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                     <span>{f}</span>
                   </li>
@@ -247,20 +247,20 @@ export function MarketingPage() {
       </section>
 
       {/* 客户证言 */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-muted">
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm mb-3">
               <Quote className="w-3 h-3" /> 真实客户证言 · 6 个脱敏案例
             </span>
             <h2 className="text-3xl font-bold mb-3">老板们怎么说</h2>
-            <p className="text-gray-600">不编故事 · 每条都有客户名 + 数据可验证</p>
+            <p className="text-muted-foreground">不编故事 · 每条都有客户名 + 数据可验证</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="p-6 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition">
+              <div key={i} className="p-6 bg-card rounded-xl border border-gray-200 hover:shadow-lg transition">
                 <Quote className="w-6 h-6 text-brand-300 mb-3" />
-                <p className="text-sm text-gray-700 mb-4 leading-relaxed">"{t.quote}"</p>
+                <p className="text-sm text-foreground mb-4 leading-relaxed">"{t.quote}"</p>
                 <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
                   <div>
                     <p className="font-bold text-sm">{t.author}</p>
@@ -305,14 +305,14 @@ export function MarketingPage() {
                 👤 心之所向便是光的今天 · Day 30
               </span>
               <h2 className="text-3xl font-bold mb-4">Cloud 自己就是 OPC 跑出来的</h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-muted-foreground mb-6">
                 创始人心之所向便是光 1 人 + 5 AI 数字员工 · 30 天跑出 80 家客户清单 + 16 份公司文档 +
                 11 个 SPA 页面 + 208 测试 PASS。OPC 不是营销词，是实证。
               </p>
               <ul className="space-y-2 mb-6 text-sm">
                 {TRUST_STATS.map((s) => (
                   <li key={s.label} className="flex items-center justify-between border-b border-gray-200 pb-2">
-                    <span className="text-gray-600">{s.label}</span>
+                    <span className="text-muted-foreground">{s.label}</span>
                     <span className="font-bold text-brand-500">{s.value}</span>
                   </li>
                 ))}
@@ -337,7 +337,7 @@ export function MarketingPage() {
           <div className="flex items-center justify-center gap-4">
             <Link
               to="/try"
-              className="px-8 py-3 bg-white text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+              className="px-8 py-3 bg-card text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
             >
               立即试用 <ArrowRight className="w-4 h-4" />
             </Link>
