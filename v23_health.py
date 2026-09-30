@@ -6842,6 +6842,90 @@ def get_auth_api_keys_rotate_secret_v5(key_id: str):
     }
 
 
+def get_skills_clone_stats_v2(skill_id: str):
+    """Skill clone-stats-v2 · 克隆统计 v2 (R431)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "clone_count":  9,
+            "cloned_at":   datetime.utcnow().isoformat() + "Z",
+            "cloned_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_billing_payment_methods_unset_default_for_subscription(method_id: str):
+    """Billing payment-methods/{id}/unset-default-for-subscription · 取消默认 subscription (R431)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":      method_id,
+            "for_subscription": False,
+            "unset_at":       datetime.utcnow().isoformat() + "Z",
+            "unset_by":       "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_region_detailed_v2(campaign_id: str):
+    """Campaigns audience-region-detailed-v2 · 地域详细 v2 (R431)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"region": "深圳", "city": "深圳",   "count": 11800, "pct": 64.1},
+            {"region": "上海", "city": "上海",   "count":  2780, "pct": 15.1},
+            {"region": "北京", "city": "北京",   "count":  2120, "pct": 11.5},
+            {"region": "广州", "city": "广州",   "count":  1820, "pct":  9.9},
+        ],
+        "total": 18420,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_month_stats_v3(file_id: str):
+    """Files download-by-month-stats-v3 · 按月统计 v3 (R431)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"month": "2026-04", "downloads": 168, "unique_users": 118, "avg_size_mb": 2.4, "median_size_mb": 2.3, "p99_size_mb": 2.8},
+            {"month": "2026-05", "downloads": 248, "unique_users": 178, "avg_size_mb": 2.5, "median_size_mb": 2.4, "p99_size_mb": 2.9},
+            {"month": "2026-06", "downloads": 312, "unique_users": 218, "avg_size_mb": 2.4, "median_size_mb": 2.3, "p99_size_mb": 2.8},
+            {"month": "2026-07", "downloads": 428, "unique_users": 312, "avg_size_mb": 2.6, "median_size_mb": 2.5, "p99_size_mb": 3.0},
+            {"month": "2026-08", "downloads": 487, "unique_users": 348, "avg_size_mb": 2.5, "median_size_mb": 2.4, "p99_size_mb": 2.9},
+            {"month": "2026-09", "downloads": 312, "unique_users": 220, "avg_size_mb": 2.4, "median_size_mb": 2.3, "p99_size_mb": 2.8},
+        ],
+        "total": 1955,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v6(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v6 · 轮换 secret v6 (R431)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 11,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v6",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -7365,6 +7449,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-list-v4": lambda q, id="c001": get_campaigns_audience_tech_list_v4(id),
     "/api/v2/files/{id}/download-by-week-list": lambda q, id="f_001": get_files_download_by_week_list(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v5": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v5(id),
+    "/api/v2/skills/{id}/clone-stats-v2":        lambda q, id="s_001": get_skills_clone_stats_v2(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-for-subscription": lambda q, id="c_001": get_billing_payment_methods_unset_default_for_subscription(id),
+    "/api/v2/campaigns/{id}/audience-region-detailed-v2": lambda q, id="c001": get_campaigns_audience_region_detailed_v2(id),
+    "/api/v2/files/{id}/download-by-month-stats-v3": lambda q, id="f_001": get_files_download_by_month_stats_v3(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v6": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v6(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
