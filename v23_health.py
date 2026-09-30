@@ -2968,6 +2968,88 @@ def get_auth_2fa_regenerate():
     }
 
 
+def get_skills_reindex(skill_id: str):
+    """Skill reindex · 重建索引 (R385)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":      skill_id,
+            "reindex_status": "started",
+            "indexed_vectors": 1248,
+            "started_at":    datetime.utcnow().isoformat() + "Z",
+            "estimated_done_at": "2026-09-30T19:30:00Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_tax_rate(tenant_id: str):
+    """Billing tax rate · 税率 (R385)"""
+    return {
+        "status": "ok",
+        "data": {
+            "tenant_id":    tenant_id,
+            "country":      "CN",
+            "tax_rate":     0.06,
+            "tax_type":     "vat",
+            "is_small":     True,
+            "reduced_rate": 0.03,
+            "updated_at":   datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_clicks(campaign_id: str):
+    """Campaigns clicks · 点击流 (R385)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"timestamp": "2026-09-30T16:00:00Z", "user_id": "u_001", "ip": "127.0.0.1",     "device": "Edge/Windows"},
+            {"timestamp": "2026-09-30T15:45:00Z", "user_id": "u_002", "ip": "192.168.1.42",  "device": "Chrome/macOS"},
+            {"timestamp": "2026-09-30T15:30:00Z", "user_id": "u_003", "ip": "192.168.1.88",  "device": "Safari/iOS"},
+            {"timestamp": "2026-09-30T15:15:00Z", "user_id": "u_004", "ip": "10.0.0.15",    "device": "Edge/Windows"},
+        ],
+        "count": 4,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_comments(file_id: str):
+    """Files comments · 文件评论 (R385)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"comment_id": "c_001", "user_id": "u_001", "name": "心之所向便是光", "content": "请更新 logo 颜色",   "created_at": "2026-09-29T10:00:00Z"},
+            {"comment_id": "c_002", "user_id": "u_002", "name": "运维",          "content": "已上传 v2 版本",       "created_at": "2026-09-30T14:00:00Z"},
+            {"comment_id": "c_003", "user_id": "u_003", "name": "销售",          "content": "请改成中文版",          "created_at": "2026-09-30T15:00:00Z"},
+        ],
+        "count": 3,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_key_test(key_id: str):
+    """Auth api-keys/{id}/test · 测试 API key (R385)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":       key_id,
+            "test_status":  "valid",
+            "latency_ms":   42,
+            "scopes":       ["read", "write"],
+            "tested_at":    datetime.utcnow().isoformat() + "Z",
+            "test_request": {"endpoint": "/api/v2/auth/me", "method": "GET"},
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -3261,6 +3343,11 @@ ROUTES = {
     "/api/v2/files/{id}/share-stats":   lambda q, id="f_001": get_files_share_stats(id),
     "/api/v2/auth/2fa/regenerate":      lambda q: get_auth_2fa_regenerate(),
     "/api/v2/saas/v1/register":         lambda q: _register_v23_q_proxy(),
+    "/api/v2/skills/{id}/reindex":       lambda q, id="s_001": get_skills_reindex(id),
+    "/api/v2/billing/{tenant_id}/tax-rate": lambda q, tenant_id="t_3a59592b7619": get_billing_tax_rate(tenant_id),
+    "/api/v2/campaigns/{id}/clicks":     lambda q, id="c001": get_campaigns_clicks(id),
+    "/api/v2/files/{id}/comments":       lambda q, id="f_001": get_files_comments(id),
+    "/api/v2/auth/api-keys/{id}/test":   lambda q, id="k_001": get_auth_api_key_test(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
