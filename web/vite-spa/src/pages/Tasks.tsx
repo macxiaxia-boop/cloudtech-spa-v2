@@ -62,6 +62,7 @@ export function TasksPage() {
       </div>
 
       <Card className="p-0">
+        <CardContent className="p-0">
         <div className="border-b border-border px-4">
           <nav className="flex gap-6">
             {tabs.map((t) => (

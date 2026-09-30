@@ -212,6 +212,7 @@ export function WorkflowEditorPage() {
         {/* 右侧节点配置 */}
         <aside className="w-80 border-l border-border bg-card overflow-y-auto">
       <Card className="p-0">
+          <CardContent className="p-0">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h3 className="text-sm font-semibold flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -279,6 +280,8 @@ export function WorkflowEditorPage() {
               <Button className="w-full">保存节点配置</Button>
             </div>
           )}
+          </CardContent>
+        </Card>
         </aside>
       </div>
     </div>

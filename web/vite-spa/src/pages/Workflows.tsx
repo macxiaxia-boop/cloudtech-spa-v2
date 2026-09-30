@@ -53,7 +53,8 @@ export function WorkflowsPage() {
         {workflows.map((w) => {
           const sm = statusMap[w.status];
           return (
-            <div key={w.id} className="bg-card rounded-xl border border-border p-5 hover:shadow-md hover:border-brand-300 transition-all group">
+            <Card key={w.id} className="p-0 hover:shadow-md hover:border-brand-300 transition-all group">
+              <CardContent className="p-5">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500 to-accent-purple-500 flex items-center justify-center shrink-0">
                   <Workflow className="w-5 h-5 text-white" />
@@ -80,7 +81,8 @@ export function WorkflowsPage() {
                   <button className="p-1.5 hover:bg-destructive-bg rounded" aria-label="删除"><Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive-600" /></button>
                 </div>
               </div>
-            </div>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
