@@ -3386,6 +3386,94 @@ def get_auth_sessions_revoke_all_others(session_id: str):
     }
 
 
+def get_skills_deprecate(skill_id: str):
+    """Skill deprecate · 弃用 skill (R390)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":       skill_id,
+            "deprecated":    True,
+            "deprecated_at": datetime.utcnow().isoformat() + "Z",
+            "grace_until":    "2026-12-30T00:00:00Z",
+            "migration":      "plan_global_skill_v3_v23",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_subscription_pause(tenant_id: str):
+    """Billing subscription pause · 暂停订阅 (R390)"""
+    return {
+        "status": "ok",
+        "data": {
+            "tenant_id":       tenant_id,
+            "subscription_id": "sub_v23_R390",
+            "paused":          True,
+            "paused_at":       datetime.utcnow().isoformat() + "Z",
+            "resume_at":      "2026-11-30T00:00:00Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_stats(campaign_id: str):
+    """Campaigns audience stats · 受众统计 (R390)"""
+    return {
+        "status": "ok",
+        "data": {
+            "campaign_id":      campaign_id,
+            "total_reached":    18420,
+            "engaged":          4180,
+            "engagement_rate":  "22.7%",
+            "by_age": {
+                "18-24": 1840, "25-34": 6280, "35-44": 5240, "45-54": 3240, "55+": 1820,
+            },
+            "by_gender": {
+                "male":   9240, "female": 8640, "other": 540,
+            },
+            "by_location": {
+                "深圳": 2840, "上海": 2280, "北京": 2120, "广州": 1820, "其他": 9360,
+            },
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_duplicate_rename(file_id: str):
+    """Files duplicate-rename · 复制+重命名 (R390)"""
+    return {
+        "status": "ok",
+        "data": {
+            "source_file_id": file_id,
+            "new_file_id":    f"{file_id}_v23_R390",
+            "new_name":       f"副本_{file_id}_R390.pdf",
+            "duplicated_at":  datetime.utcnow().isoformat() + "Z",
+            "renamed_at":     datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_sessions_impersonate(session_id: str):
+    """Auth sessions/{id}/impersonate · 模拟 session (R390)"""
+    return {
+        "status": "ok",
+        "data": {
+            "impersonated_session_id":  session_id,
+            "impersonated_by":           "u_001",
+            "impersonated_user":         "u_002",
+            "impersonated_at":           datetime.utcnow().isoformat() + "Z",
+            "expires_at":                "2026-09-30T20:00:00Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -3704,6 +3792,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/creatives":   lambda q, id="c001": get_campaigns_creatives(id),
     "/api/v2/files/{id}/download-url-token": lambda q, id="f_001": get_files_download_url_token(id),
     "/api/v2/auth/sessions/{id}/revoke-all-others": lambda q, id="s_001": get_auth_sessions_revoke_all_others(id),
+    "/api/v2/skills/{id}/deprecate":      lambda q, id="s_001": get_skills_deprecate(id),
+    "/api/v2/billing/{tenant_id}/subscription-pause": lambda q, tenant_id="t_3a59592b7619": get_billing_subscription_pause(tenant_id),
+    "/api/v2/campaigns/{id}/audience-stats": lambda q, id="c001": get_campaigns_audience_stats(id),
+    "/api/v2/files/{id}/duplicate-rename": lambda q, id="f_001": get_files_duplicate_rename(id),
+    "/api/v2/auth/sessions/{id}/impersonate": lambda q, id="s_001": get_auth_sessions_impersonate(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
