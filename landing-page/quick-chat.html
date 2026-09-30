@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CloudTech 数字员工对话框 · R346 V7 治本</title>
+<style>
+:root {
+--brand-500: #6366f1;
+--brand-600: #4f46e5;
+--ink-900: #0a0e27;
+--ink-700: #1e293b;
+--ink-100: #e2e8f0;
+--bg: #f8fafc;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+background: var(--bg);
+color: var(--ink-900);
+height: 100vh;
+display: flex;
+flex-direction: column;
+}
+header {
+background: linear-gradient(135deg, #0a0e27 0%, #312e81 100%);
+color: white;
+padding: 16px 24px;
+}
+header h1 { font-size: 1.1rem; font-weight: 600; }
+header .meta { font-size: 0.75rem; opacity: 0.7; margin-top: 4px; }
+.container { flex: 1; display: grid; grid-template-columns: 240px 1fr; overflow: hidden; }
+aside { background: white; border-right: 1px solid var(--ink-100); padding: 16px; overflow-y: auto; }
+aside h3 { font-size: 0.85rem; color: var(--ink-700); margin-bottom: 12px; }
+.emp-card {
+padding: 10px;
+border-radius: 8px;
+cursor: pointer;
+margin-bottom: 6px;
+border: 2px solid transparent;
+}
+.emp-card:hover { background: var(--bg); }
+.emp-card.active { background: #f0f4ff; border-color: var(--brand-500); }
+.emp-card .avatar { font-size: 1.4rem; margin-right: 8px; }
+.emp-card .name { font-weight: 600; font-size: 0.85rem; display: block; margin-top: 4px; }
+.emp-card .desc { font-size: 0.7rem; color: var(--ink-700); opacity: 0.7; margin-top: 4px; }
+main { display: flex; flex-direction: column; background: white; }
+#messages {
+flex: 1;
+overflow-y: auto;
+padding: 24px;
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+.msg {
+max-width: 75%;
+padding: 10px 14px;
+border-radius: 14px;
+line-height: 1.5;
+font-size: 0.9rem;
+word-break: break-word;
+white-space: pre-wrap;
+}
+.msg.user { align-self: flex-end; background: var(--brand-500); color: white; border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: var(--bg); color: var(--ink-900); border-bottom-left-radius: 4px; }
+.msg.bot .meta { font-size: 0.7rem; color: var(--ink-700); opacity: 0.6; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--ink-100); }
+.msg.err { background: #fee2e2; color: #991b1b; }
+.input-bar { border-top: 1px solid var(--ink-100); padding: 16px; display: flex; gap: 8px; }
+#userInput {
+flex: 1;
+padding: 10px 14px;
+border: 1px solid var(--ink-100);
+border-radius: 22px;
+font-size: 0.9rem;
+outline: none;
+}
+#userInput:focus { border-color: var(--brand-500); }
+#sendBtn {
+padding: 10px 20px;
+background: var(--brand-500);
+color: white;
+border: none;
+border-radius: 22px;
+cursor: pointer;
+font-weight: 600;
+}
+#sendBtn:hover { background: var(--brand-600); }
+#sendBtn:disabled { background: var(--ink-100); cursor: not-allowed; }
+#status { position: absolute; top: 16px; right: 24px; font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+.dot.green { background: #10b981; }
+.dot.red { background: #ef4444; }
+</style>
+</head>
+<body>
+<header>
+<h1>🤖 CloudTech 数字员工对话框</h1>
+<div class="meta">R346 V7 治本 · 直连 venv V22 gateway · 端口 5099 · MiniMax</div>
+<div id="status"><span class="dot green"></span><span id="statusText">加载中…</span></div>
+</header>
+<div class="container">
+<aside>
+<h3>数字员工 (<span id="empCount">0</span>)</h3>
+<div id="empList"></div>
+</aside>
+<main>
+<div id="messages">
+<div class="msg bot">👋 加载员工中…</div>
+</div>
+<div class="input-bar">
+<input id="userInput" type="text" placeholder="输入消息, 按 Enter 发送..." autocomplete="off" />
+<button id="sendBtn">发送</button>
+</div>
+</main>
+</div>
+<script>
+(function(){
+'use strict';
+const GATEWAY = 'http://127.0.0.1:5099';
+let currentEmp = null;
+
+const $ = function(id){ return document.getElementById(id); };
+function setStatus(ok, msg){
+const el = $('status');
+el.innerHTML = '<span class="dot '+(ok?'green':'red')+'"></span>' + msg;
+}
+function escHtml(s){
+if (s === undefined || s === null) return '';
+return String(s).replace(/[&<>"]/g, function(c){
+return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];
+});
+}
+function addMsg(role, text, meta){
+const messages = $('messages');
+const div = document.createElement('div');
+div.className = 'msg ' + role;
+let html = '';
+if (role === 'user') {
+html = '<div>' + escHtml(text) + '</div>';
+} else {
+html = '<div>' + text + '</div>';
+if (meta) html += '<div class="meta">' + escHtml(meta) + '</div>';
+}
+div.innerHTML = html;
+messages.appendChild(div);
+messages.scrollTop = messages.scrollHeight;
+return div;
+}
+
+function loadEmployees(){
+console.log('[loadEmployees] start');
+fetch(GATEWAY + '/api/v2/employees/list')
+.then(function(r){
+console.log('[loadEmployees] status:', r.status);
+if (!r.ok) throw new Error('HTTP ' + r.status);
+return r.json();
+})
+.then(function(j){
+console.log('[loadEmployees] json keys:', Object.keys(j), 'data type:', Array.isArray(j.data) ? 'array' : typeof j.data);
+const list = (j && Array.isArray(j.data)) ? j.data : [];
+$('empCount').textContent = list.length;
+const listEl = $('empList');
+listEl.innerHTML = '';
+list.forEach(function(emp){
+const card = document.createElement('div');
+card.className = 'emp-card';
+card.dataset.id = emp.id;
+const avatar = escHtml(emp.avatar || '');
+const name = escHtml(emp.name || '');
+const desc = escHtml(emp.description || '');
+card.innerHTML = '<span class="avatar">' + avatar + '</span><span class="name">' + name + '</span><div class="desc">' + desc + '</div>';
+card.onclick = function(){ selectEmp(emp); };
+listEl.appendChild(card);
+});
+if (list.length > 0) {
+selectEmp(list[0]);
+setStatus(true, '已连接 · ' + list.length + ' 员工');
+} else {
+setStatus(false, '员工列表为空');
+$('messages').innerHTML = '<div class="msg err">❌ API 返回空 list</div>';
+}
+})
+.catch(function(e){
+console.error('[loadEmployees] error:', e);
+setStatus(false, '连接失败: ' + e.message);
+$('messages').innerHTML = '<div class="msg err">❌ 加载失败: ' + escHtml(e.message) + '</div>';
+});
+}
+
+function selectEmp(emp){
+console.log('[selectEmp]', emp.id);
+currentEmp = emp;
+const all = document.querySelectorAll('.emp-card');
+all.forEach(function(c){ c.classList.toggle('active', c.dataset.id === emp.id); });
+$('messages').innerHTML = '<div class="msg bot">👋 现在和 <b>' + escHtml(emp.avatar) + ' ' + escHtml(emp.name) + '</b> 对话<br><span style="font-size:0.75rem;color:#666">' + escHtml(emp.description) + '</span></div>';
+}
+
+function send(){
+const input = $('userInput');
+const text = input.value;
+console.log('[send] text:', JSON.stringify(text), 'currentEmp:', currentEmp ? currentEmp.id : null);
+if (!text || !text.trim()) {
+console.log('[send] empty, skip');
+return;
+}
+if (!currentEmp) {
+console.warn('[send] no currentEmp');
+addMsg('err', '❌ 请先选员工');
+return;
+}
+const btn = $('sendBtn');
+input.value = '';
+btn.disabled = true;
+addMsg('user', text);
+const typingEl = addMsg('bot', '<span class="typing">思考中…</span>');
+const startTime = Date.now();
+fetch(GATEWAY + '/api/v2/employees/' + encodeURIComponent(currentEmp.id) + '/chat', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ employee: currentEmp.id, message: text })
+})
+.then(function(r){
+const latency = Date.now() - startTime;
+console.log('[send] response status:', r.status, 'latency:', latency);
+if (!r.ok) throw new Error('HTTP ' + r.status);
+return r.json().then(function(j){ return { j: j, latency: latency }; });
+})
+.then(function(result){
+const j = result.j;
+const latency = result.latency;
+console.log('[send] json:', j);
+if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
+if (j && j.status === 'ok' && j.data) {
+const d = j.data;
+const meta = '员工: ' + d.employee + ' · 技能: ' + (d.skill_called || '-') + ' · 耗时 ' + d.latency_ms + 'ms';
+addMsg('bot', escHtml(d.reply), meta);
+} else {
+addMsg('err', '⚠️ ' + JSON.stringify(j));
+}
+})
+.catch(function(e){
+console.error('[send] error:', e);
+if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
+addMsg('err', '❌ 网络错误: ' + e.message);
+})
+.then(function(){
+btn.disabled = false;
+input.focus();
+});
+}
+
+$('sendBtn').onclick = send;
+$('userInput').onkeydown = function(e){ if (e.key === 'Enter') send(); };
+
+loadEmployees();
+})();
+</script>
+</body>
+</html>

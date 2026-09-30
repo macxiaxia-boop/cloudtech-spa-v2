@@ -1,25 +1,66 @@
 @echo off
 chcp 65001 >nul
 echo ===================================
-echo   äº‘æ•°ç§‘æŠ€ CloudTech v2.0
-echo   AIæ•°å­—è¥é”€ä¸­å°
+echo   CloudTech Æô¶¯Æ÷ (R345 ÖÎ±¾°æ)
+echo   V22 Unified Gateway: http://127.0.0.1:5099
 echo ===================================
 echo.
-echo å¯åŠ¨é€‰é¡¹:
-echo   [1] ç®¡ç†åå°  (http://localhost:5000/admin)
-echo   [2] AIä»ªè¡¨ç›˜  (http://localhost:8501)
-echo   [3] ç³»ç»Ÿå¥åº·æ£€æŸ¥
+echo   [1] V22 Gateway - È«¾Öpython  (http://localhost:5099)   [Ä¬ÈÏ]
+echo   [2] V22 Gateway - venv python   (ÍÆ¼öÖÎ±¾)
+echo   [3] ÀÏ¹ÜÀíºóÌ¨   (http://localhost:5000/admin)            [ÒÑÆúÓÃ]
+echo   [4] ÀÏ AI ÒÇ±íÅÌ (http://localhost:8501)                 [ÒÑÆúÓÃ]
+echo   [5] ½¡¿µ¼ì²é (curl /health)
+echo   [6] ½ö´ò¿ªä¯ÀÀÆ÷µ½ V22
 echo.
-set /p choice="è¯·é€‰æ‹© (1/2/3): "
+set /p choice="ÇëÑ¡Ôñ (1-6): "
+if "%choice%"=="" set choice=1
 
-if "%choice%"=="1" (
-    start "CloudTech Admin" cmd /c "python admin_dashboard.py"
-    start "" "landing-page/index.html"
-)
-if "%choice%"=="2" (
-    start "AI Dashboard" cmd /c "python -m streamlit run dashboard_app.py --server.port 8501"
-)
-if "%choice%"=="3" (
-    python integration_hub.py --health
-    pause
-)
+if "%choice%"=="1" goto v22_default
+if "%choice%"=="2" goto v22_venv
+if "%choice%"=="3" goto legacy_admin
+if "%choice%"=="4" goto legacy_dashboard
+if "%choice%"=="5" goto health
+if "%choice%"=="6" goto browser_only
+echo ÎŞĞ§Ñ¡Ïî
+pause
+exit /b 1
+
+:v22_default
+cd /d D:\CloudTech-Portable
+start "CloudTech V22" cmd /c "python -m uvicorn gateway_v22:app --host 127.0.0.1 --port 5099"
+timeout /t 3 >nul
+start "" "http://127.0.0.1:5099/"
+goto end
+
+:v22_venv
+cd /d D:\CloudTech-Portable
+start "CloudTech V22 venv" cmd /c "D:\CloudTech-Portable\.venv\Scripts\python.exe -m uvicorn gateway_v22:app --host 127.0.0.1 --port 5099"
+timeout /t 3 >nul
+start "" "http://127.0.0.1:5099/"
+goto end
+
+:legacy_admin
+echo [¾¯¸æ] ÀÏ°æ¹ÜÀíºóÌ¨¶Ë¿Ú 5000 ÒÑÆúÓÃ,´ó¸ÅÂÊÆô¶¯Ê§°Ü
+cd /d D:\CloudTech-Portable
+start "CloudTech Admin (ÀÏ)" cmd /c "python admin_dashboard.py"
+timeout /t 3 >nul
+start "" "http://localhost:5000/admin"
+goto end
+
+:legacy_dashboard
+echo [¾¯¸æ] ÀÏ°æ AI ÒÇ±íÅÌ¶Ë¿Ú 8501 ÒÑÆúÓÃ,´ó¸ÅÂÊÆô¶¯Ê§°Ü
+cd /d D:\CloudTech-Portable
+start "CloudTech Dashboard (ÀÏ)" cmd /c "python -m streamlit run dashboard_app.py --server.port 8501"
+goto end
+
+:health
+curl http://127.0.0.1:5099/health
+echo.
+pause
+goto end
+
+:browser_only
+start "" "http://127.0.0.1:5099/"
+goto end
+
+:end

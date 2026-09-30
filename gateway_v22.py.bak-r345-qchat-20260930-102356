@@ -537,8 +537,6 @@ if DIST_DIR.exists():
     # /assets/* 静态资源直出 (specific mount, 不被 catch-all 影响)
     if DIST_ASSETS.exists():
         app.mount("/assets", StaticFiles(directory=str(DIST_ASSETS)), name="vite-assets")
-    # R345 治本: 数字员工对话框 静态文件 mount (/chat/) — 与 /assets 同级, 在 if DIST_ASSETS 之外
-    app.mount("/chat", StaticFiles(directory=r"D:/CloudTech-Portable/landing-page", html=True), name="chat-quick")
     log.info(f"  + Vite dist: {DIST_DIR}  (index.html={ (DIST_DIR/'index.html').exists() }, assets={DIST_ASSETS.exists()})")
 else:
     log.error(f"  ! Vite dist NOT FOUND: {DIST_DIR}")
