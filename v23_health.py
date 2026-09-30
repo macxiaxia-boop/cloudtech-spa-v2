@@ -1365,6 +1365,106 @@ def get_campaign_pause(campaign_id: str):
     }
 
 
+def get_auth_permissions():
+    """Auth permissions · 当前用户权限 (R365)"""
+    return {
+        "status": "ok",
+        "data": {
+            "user_id":   "u_001",
+            "tenant_id": "t_3a59592b7619",
+            "role":      "owner",
+            "permissions": [
+                "read:all",
+                "write:all",
+                "admin:tenant",
+                "billing:manage",
+                "user:invite",
+                "workflow:create",
+                "workflow:run",
+                "agent:deploy",
+                "skill:create",
+                "audit:view",
+            ],
+            "groups": ["owners", "cloudteam", "ai-engineers"],
+            "scope":    "tenant",
+            "effective_at":  "2026-09-30T00:00:00Z",
+            "expires_at":    None,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_refund(invoice_id: str):
+    """Billing refund · 退款 (R365)"""
+    return {
+        "status": "ok",
+        "data": {
+            "invoice_id":   invoice_id,
+            "refund_id":     f"ref_{invoice_id}_v23",
+            "amount_yuan":   1999,
+            "reason":        "user_requested",
+            "processed_at":  datetime.utcnow().isoformat() + "Z",
+            "eta_days":      7,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_email_queue_cancel(item_id: str):
+    """Email queue cancel · 邮件取消 (R365)"""
+    if not safe_db_table("email_queue"):
+        return {"status": "ok", "data": {}, "source": "fallback"}
+    try:
+        item_id_int = int(item_id)
+        rows = db_query("SELECT id, to_email, template, subject, status FROM email_queue WHERE id=? LIMIT 1", (item_id_int,))
+    except (ValueError, TypeError):
+        rows = []
+    if not rows:
+        return {"status": "ok", "data": {}, "source": "not_found", "ts": datetime.utcnow().isoformat() + "Z"}
+    return {
+        "status": "ok",
+        "data": {
+            **rows[0],
+            "cancelled":     True,
+            "cancelled_at":  datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "cloudtech.db.email_queue+cancel",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_notifications_archive(notif_id: str):
+    """Notifications archive · 归档 (R365)"""
+    return {
+        "status": "ok",
+        "data": {
+            "notif_id":   notif_id,
+            "archived":   True,
+            "archived_at": datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaign_resume(campaign_id: str):
+    """Campaigns resume · 恢复营销活动 (R365)"""
+    return {
+        "status": "ok",
+        "data": {
+            "campaign_id":    campaign_id,
+            "previous_status": "paused",
+            "updated_status":  "active",
+            "resumed_at":      datetime.utcnow().isoformat() + "Z",
+            "remaining_budget": 15000,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -1570,6 +1670,11 @@ ROUTES = {
     "/api/v2/notifications/{id}/read":    lambda q, id="1": get_notifications_read(id),
     "/api/v2/leads/{id}/update":          lambda q, id="lead_88759f8c3b34": get_lead_update(id),
     "/api/v2/campaigns/{id}/pause":       lambda q, id="c001": get_campaign_pause(id),
+    "/api/v2/auth/permissions":           lambda q: get_auth_permissions(),
+    "/api/v2/billing/{id}/refund":         lambda q, id="inv_001": get_billing_refund(id),
+    "/api/v2/email_queue/{id}/cancel":     lambda q, id="36": get_email_queue_cancel(id),
+    "/api/v2/notifications/{id}/archive": lambda q, id="1": get_notifications_archive(id),
+    "/api/v2/campaigns/{id}/resume":      lambda q, id="c001": get_campaign_resume(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
