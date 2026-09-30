@@ -130,7 +130,7 @@ export function TryNowPage() {
 
   return (
     <>
-      <section className="py-16 bg-gradient-to-br from-orange-50 via-white to-pink-50">
+      <section className="py-16 bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900">
         <div className="max-w-page mx-auto px-6 text-center">
           <span className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm mb-4">
             <Sparkles className="w-3 h-3" /> 7 天免费试用 · 无需信用卡

@@ -21,7 +21,7 @@ export function FunnelPage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative py-16 bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-hidden">
+      <section className="relative py-16 bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 overflow-hidden">
         <div className="max-w-page mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm mb-4">
