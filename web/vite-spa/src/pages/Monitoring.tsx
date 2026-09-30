@@ -129,7 +129,7 @@ export function MonitoringPage() {
       </section>
 
       {/* 仪表盘 */}
-      <section className="py-12 bg-white border-b border-gray-100">
+      <section className="py-12 bg-card border-b border-gray-100">
         <div className="max-w-page mx-auto px-6">
           <div className="flex items-center gap-3 mb-6">
             <Server className="w-6 h-6 text-cyan-600" />
@@ -141,11 +141,11 @@ export function MonitoringPage() {
               <div key={d.name} className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-bold">{d.name}</h3>
-                  <span className="text-xs px-2 py-0.5 bg-white text-cyan-700 rounded font-mono">
+                  <span className="text-xs px-2 py-0.5 bg-card text-cyan-700 rounded font-mono">
                     {d.type}
                   </span>
                 </div>
-                <p className="text-sm text-gray-700">{d.desc}</p>
+                <p className="text-sm text-foreground">{d.desc}</p>
                 <p className="text-xs text-gray-500 mt-2">刷新: {d.refresh}</p>
               </div>
             ))}
@@ -165,11 +165,11 @@ export function MonitoringPage() {
               <div key={d.name} className="p-4 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-bold text-sm">{d.name}</h3>
-                  <span className="text-xs px-2 py-0.5 bg-white text-green-700 rounded font-mono">
+                  <span className="text-xs px-2 py-0.5 bg-card text-green-700 rounded font-mono">
                     {d.type}
                   </span>
                 </div>
-                <p className="text-xs text-gray-700">{d.desc}</p>
+                <p className="text-xs text-foreground">{d.desc}</p>
               </div>
             ))}
           </div>
@@ -177,7 +177,7 @@ export function MonitoringPage() {
       </section>
 
       {/* 告警分级 */}
-      <section className="py-12 bg-white border-b border-gray-100">
+      <section className="py-12 bg-card border-b border-gray-100">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-4">告警分级 (P0-P3)</h2>
           <p className="text-gray-600 mb-6">共 {totalAlerts} 条规则 + 4 飞书机器人通道</p>
@@ -200,7 +200,7 @@ export function MonitoringPage() {
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-4">5 SaaS 选型 (X01/F01)</h2>
           <p className="text-gray-600 mb-6">月成本 ¥{totalSaasCost.toLocaleString()} · 待用户拍板付费</p>
-          <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
+          <div className="overflow-x-auto bg-card rounded-lg border border-gray-200">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -226,7 +226,7 @@ export function MonitoringPage() {
       </section>
 
       {/* 80 家漏斗 */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-card">
         <div className="max-w-page mx-auto px-6">
           <h2 className="text-2xl font-bold mb-4">80 家客户触达漏斗</h2>
           <p className="text-gray-600 mb-6">M1 预期分布：50% 待触达 / 30% 已联系 / 12% 演示 / 5% 试用 / 3% 签约</p>
@@ -249,7 +249,7 @@ export function MonitoringPage() {
           <p className="text-lg opacity-90 mb-8">Phase 46 段 4 收官 · 内部配置 AI 全程自治</p>
           <Link
             to="/documents"
-            className="px-8 py-3 bg-white text-cyan-600 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+            className="px-8 py-3 bg-card text-cyan-600 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
           >
             查看文档中心 <ArrowRight className="w-4 h-4" />
           </Link>

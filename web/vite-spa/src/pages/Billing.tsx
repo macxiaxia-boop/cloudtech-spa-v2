@@ -61,7 +61,7 @@ export function BillingPage() {
             return (
               <div
                 key={pid}
-                className={`p-6 bg-white rounded-lg border-2 ${
+                className={`p-6 bg-card rounded-lg border-2 ${
                   isCurrent ? 'border-brand-500 shadow-lg' : 'border-gray-200'
                 }`}
               >

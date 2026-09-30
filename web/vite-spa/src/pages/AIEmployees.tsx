@@ -435,7 +435,7 @@ export function AIEmployeesPage() {
       </section>
 
       {/* 5 员工详情 */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-card">
         <div className="max-w-page mx-auto px-6 space-y-8">
           {EMPLOYEES.map((e) => (
             <EmployeeCard key={e.id} e={e} />
@@ -454,7 +454,7 @@ export function AIEmployeesPage() {
           </p>
 
           {/* 搜索 + 筛选 */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
+          <div className="bg-card p-4 rounded-lg border border-gray-200 mb-6">
             <div className="flex flex-col md:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -469,7 +469,7 @@ export function AIEmployeesPage() {
               <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={() => setFilterEmp('all')}
-                  className={`px-3 py-1.5 rounded text-xs font-medium ${filterEmp === 'all' ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  className={`px-3 py-1.5 rounded text-xs font-medium ${filterEmp === 'all' ? 'bg-brand-500 text-white' : 'bg-gray-100 text-foreground hover:bg-gray-200'}`}
                 >
                   全部 ({totalSkills})
                 </button>
@@ -477,7 +477,7 @@ export function AIEmployeesPage() {
                   <button
                     key={e.id}
                     onClick={() => setFilterEmp(e.id)}
-                    className={`px-3 py-1.5 rounded text-xs font-medium ${filterEmp === e.id ? `${e.bg} ${e.color}` : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 rounded text-xs font-medium ${filterEmp === e.id ? `${e.bg} ${e.color}` : 'bg-gray-100 text-foreground hover:bg-gray-200'}`}
                   >
                     {e.name} ({e.skills.length})
                   </button>
@@ -497,7 +497,7 @@ export function AIEmployeesPage() {
                 return (
                   <div
                     key={`${s.employee}-${i}`}
-                    className="p-3 bg-white rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow transition"
+                    className="p-3 bg-card rounded-lg border border-gray-200 hover:border-brand-500 hover:shadow transition"
                   >
                     <div className="flex items-start gap-2 mb-1">
                       <div className={`w-6 h-6 rounded ${e.bg} flex items-center justify-center ${e.color} flex-shrink-0`}>
@@ -535,7 +535,7 @@ export function AIEmployeesPage() {
           </p>
           <Link
             to="/try"
-            className="px-8 py-3 bg-white text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+            className="px-8 py-3 bg-card text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
           >
             立即试用 <ArrowRight className="w-4 h-4" />
           </Link>

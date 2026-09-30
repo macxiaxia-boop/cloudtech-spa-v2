@@ -135,7 +135,7 @@ export function AgentCreatePage() {
                         onClick={() => setDataSource({ ...dataSource, [ds.key]: !dataSource[ds.key] })}
                         className={`relative w-9 h-5 rounded-full transition-colors ${dataSource[ds.key] ? 'bg-brand-600' : 'bg-[var(--neutral-300)]'}`}
                       >
-                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${dataSource[ds.key] ? 'translate-x-4' : ''}`} />
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-card transition-transform ${dataSource[ds.key] ? 'translate-x-4' : ''}`} />
                       </button>
                     </label>
                   ))}

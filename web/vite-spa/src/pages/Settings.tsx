@@ -36,7 +36,7 @@ export function SettingsPage() {
         </div>
 
         {/* 公司信息 */}
-        <section className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <section className="bg-card rounded-lg border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
             <Building2 className="w-5 h-5" /> 公司信息
           </h2>
@@ -46,7 +46,7 @@ export function SettingsPage() {
         </section>
 
         {/* 联系信息 */}
-        <section className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <section className="bg-card rounded-lg border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
             <Phone className="w-5 h-5" /> 联系人
           </h2>
@@ -83,7 +83,7 @@ function Field({ label, value, icon, readOnly = false }: { label: string; value:
           type="text"
           defaultValue={value}
           readOnly={readOnly}
-          className={`flex-1 px-3 py-2 border rounded-md text-sm ${readOnly ? 'bg-gray-50 text-gray-500' : 'bg-white border-gray-300'}`}
+          className={`flex-1 px-3 py-2 border rounded-md text-sm ${readOnly ? 'bg-gray-50 text-gray-500' : 'bg-card border-gray-300'}`}
         />
       </div>
     </div>

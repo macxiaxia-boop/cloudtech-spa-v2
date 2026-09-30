@@ -140,7 +140,7 @@ export function SettingsSystemPage() {
                     <td className="px-4 py-2.5 text-xs text-muted-foreground">{m.provider}</td>
                     <td className="px-4 py-2.5">
                       <button className={`relative w-9 h-5 rounded-full transition-colors ${m.enabled ? 'bg-brand-600' : 'bg-[var(--neutral-300)]'}`}>
-                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${m.enabled ? 'translate-x-4' : ''}`} />
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-card transition-transform ${m.enabled ? 'translate-x-4' : ''}`} />
                       </button>
                     </td>
                     <td className="px-4 py-2.5 text-right">
