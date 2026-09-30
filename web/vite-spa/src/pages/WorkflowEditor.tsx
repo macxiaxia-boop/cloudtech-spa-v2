@@ -188,7 +188,7 @@ export function WorkflowEditorPage() {
         </aside>
 
         {/* 中间 Canvas */}
-        <div className="flex-1 bg-[var(--neutral-50)]">
+        <Card className="p-0 flex-1 border-0">
           <ReactFlowProvider>
             <ReactFlow
               nodes={nodes}
@@ -207,7 +207,7 @@ export function WorkflowEditorPage() {
               <MiniMap className="!shadow-md" maskColor="rgba(241,245,249,0.6)" pannable zoomable />
             </ReactFlow>
           </ReactFlowProvider>
-        </div>
+        </Card>
 
         {/* 右侧节点配置 */}
         <aside className="w-80 border-l border-border bg-card overflow-y-auto">
