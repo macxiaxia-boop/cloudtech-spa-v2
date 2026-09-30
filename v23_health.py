@@ -27,7 +27,7 @@
   - 真实数据从 cloudtech.db 读, 不返 stub:true
   - demo mode 鉴权 bypass (env CLOUDTECH_DEMO_MODE=1)
 """
-import json, sqlite3, os, sys, socket, shutil
+import json, sqlite3, os, sys, socket, shutil, hashlib
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
