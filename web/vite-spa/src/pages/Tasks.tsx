@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 
 type TaskStatus = 'running' | 'completed' | 'failed' | 'pending';
 type FilterTab = 'all' | 'running' | 'completed' | 'failed';
@@ -52,16 +51,15 @@ export function TasksPage() {
   const filtered = tab === 'all' ? tasks : tasks.filter((t) => t.status === tab);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t('nav.tasks')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">任务管理 · 执行进度 · 日志追踪 · 异常处理</p>
-        </div>
-        <Button><Plus className="w-4 h-4" />{t('app.create_task')}</Button>
-      </div>
-
-      <Card className="p-0">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div>
+            <CardTitle className="text-2xl font-bold">{t('nav.tasks')}</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">任务管理 · 执行进度 · 日志追踪 · 异常处理</p>
+          </div>
+          <Button><Plus className="w-4 h-4" />{t('app.create_task')}</Button>
+        </CardHeader>
         <CardContent className="p-0">
         <div className="border-b border-border px-4">
           <nav className="flex gap-6">
