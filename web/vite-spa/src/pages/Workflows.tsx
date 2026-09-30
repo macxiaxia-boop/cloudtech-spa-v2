@@ -5,6 +5,8 @@
 import { Link } from 'react-router-dom';
 import { Plus, Workflow, MoreHorizontal, Play, Edit2, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/i18n';
 
 interface Workflow {
