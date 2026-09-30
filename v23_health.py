@@ -7845,6 +7845,90 @@ def get_auth_api_keys_rotate_secret_v17(key_id: str):
     }
 
 
+def get_skills_sync_stats_v3(skill_id: str):
+    """Skill sync-stats-v3 · 同步统计 v3 (R443)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "sync_count":  36,
+            "synced_at":   datetime.utcnow().isoformat() + "Z",
+            "synced_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v3",
+    }
+
+
+def get_billing_payment_methods_unset_default_subscription_v2(method_id: str):
+    """Billing payment-methods/{id}/unset-default-subscription-v2 · 取消默认 subscription v2 (R443)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":        method_id,
+            "for_subscription": False,
+            "unset_at":         datetime.utcnow().isoformat() + "Z",
+            "unset_by":         "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_campaigns_audience_region_detailed_v4(campaign_id: str):
+    """Campaigns audience-region-detailed-v4 · 地域详细 v4 (R443)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"region": "深圳", "city": "深圳",   "count": 11800, "pct": 64.1},
+            {"region": "上海", "city": "上海",   "count":  2780, "pct": 15.1},
+            {"region": "北京", "city": "北京",   "count":  2120, "pct": 11.5},
+            {"region": "广州", "city": "广州",   "count":  1820, "pct":  9.9},
+        ],
+        "total": 18420,
+        "version": "v4",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_month_chart_v5(file_id: str):
+    """Files download-by-month-chart-v5 · 按月 chart v5 (R443)"""
+    return {
+        "status": "ok",
+        "data": {
+            "labels": ["Apr", "May", "Jun", "Jul", "Aug", "Sep"],
+            "datasets": [
+                {"label": "下载",   "data": [168, 248, 312, 428, 487, 312], "type": "bar"},
+                {"label": "唯一访客", "data": [118, 178, 218, 312, 348, 220], "type": "line"},
+            ],
+            "chart_type": "mixed",
+            "version": "v5",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v18(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v18 · 轮换 secret v18 (R443)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 35,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v18",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -8428,6 +8512,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-segment-detailed": lambda q, id="c001": get_campaigns_audience_segment_detailed(id),
     "/api/v2/files/{id}/download-by-hour-chart-v2": lambda q, id="f_001": get_files_download_by_hour_chart_v2(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v17": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v17(id),
+    "/api/v2/skills/{id}/sync-stats-v3":          lambda q, id="s_001": get_skills_sync_stats_v3(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-subscription-v2": lambda q, id="c_001": get_billing_payment_methods_unset_default_subscription_v2(id),
+    "/api/v2/campaigns/{id}/audience-region-detailed-v4": lambda q, id="c001": get_campaigns_audience_region_detailed_v4(id),
+    "/api/v2/files/{id}/download-by-month-chart-v5": lambda q, id="f_001": get_files_download_by_month_chart_v5(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v18": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v18(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
