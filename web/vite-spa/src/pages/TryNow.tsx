@@ -1,10 +1,34 @@
 // 试用页 · 7 天免费试用
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Check, ArrowRight, Sparkles, Clock, Shield } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Check, ArrowRight, Sparkles, Clock, Shield, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
+const V23_API = 'http://localhost:7791';
+
+const INDUSTRIES = [
+  { value: 'decoration', label: '装修/建材/装企' },
+  { value: 'education', label: '教育' },
+  { value: 'manufacturing', label: '制造' },
+  { value: 'service', label: '服务' },
+];
+
+const SKU_OPTIONS = [
+  { value: 'dec_basic', label: '装企 · 基础版（199元/月）', industry: 'decoration' },
+  { value: 'dec_pro', label: '装企 · 专业版（1999元/月）', industry: 'decoration' },
+  { value: 'dec_enterprise', label: '装企 · 企业版（2999元/月）', industry: 'decoration' },
+  { value: 'edu_basic', label: '教育 · 基础版（199元/月）', industry: 'education' },
+  { value: 'edu_pro', label: '教育 · 专业版（1999元/月）', industry: 'education' },
+  { value: 'edu_enterprise', label: '教育 · 企业版（2999元/月）', industry: 'education' },
+  { value: 'mfg_basic', label: '制造 · 基础版（199元/月）', industry: 'manufacturing' },
+  { value: 'mfg_pro', label: '制造 · 专业版（1999元/月）', industry: 'manufacturing' },
+  { value: 'mfg_enterprise', label: '制造 · 企业版（2999元/月）', industry: 'manufacturing' },
+  { value: 'svc_basic', label: '服务 · 基础版（199元/月）', industry: 'service' },
+  { value: 'svc_pro', label: '服务 · 专业版（1999元/月）', industry: 'service' },
+  { value: 'svc_enterprise', label: '服务 · 企业版（2999元/月）', industry: 'service' },
+];
 
 const STEPS = [
   {
@@ -34,20 +58,63 @@ const STEPS = [
 ];
 
 export function TryNowPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
-    company: '',
+    tenant_name: '',
     name: '',
-    phone: '',
     email: '',
+    password: '',
     industry: 'decoration',
-    scale: 'small',
+    sku_id: 'dec_pro',
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 实际提交到后端 (mock)
-    setSubmitted(true);
+    setError('');
+    setLoading(true);
+
+    try {
+      // 1. 尝试 GET /api/v2/saas/v1/info 验证后端连通性（实际注册走 mock）
+      let backendOk = false;
+      try {
+        const infoRes = await fetch(`${V23_API}/api/v2/saas/v1/info`);
+        backendOk = infoRes.ok;
+      } catch {
+        // 后端不可用，继续 mock
+      }
+
+      if (backendOk) {
+        // 后端真实响应 mock（POST /api/v2/auth/login + /api/v2/saas/v1/info 均未实现 501）
+        // 模拟成功：随机生成 user_id + token
+        const mockToken = `ct_trial_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const mockUserId = `u_${Math.random().toString(36).slice(2, 10)}`;
+
+        localStorage.setItem('ct_token', mockToken);
+        localStorage.setItem('ct_user_id', mockUserId);
+        localStorage.setItem('ct_tenant_name', form.tenant_name);
+        localStorage.setItem('ct_industry', form.industry);
+        localStorage.setItem('ct_sku_id', form.sku_id);
+      } else {
+        // 后端不可用，纯 mock
+        const mockToken = `ct_mock_${Date.now()}`;
+        localStorage.setItem('ct_token', mockToken);
+        localStorage.setItem('ct_user_id', `mock_u`);
+        localStorage.setItem('ct_tenant_name', form.tenant_name);
+        localStorage.setItem('ct_industry', form.industry);
+        localStorage.setItem('ct_sku_id', form.sku_id);
+      }
+
+      setSubmitted(true);
+      // 3 秒后跳转 dashboard
+      setTimeout(() => navigate('/dashboard'), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '注册失败，请重试');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

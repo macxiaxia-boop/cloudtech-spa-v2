@@ -2758,6 +2758,89 @@ def get_auth_api_key_delete(key_id: str):
     }
 
 
+def get_skills_duplicate(skill_id: str):
+    """Skill duplicate · 复制 skill (R382)"""
+    return {
+        "status": "ok",
+        "data": {
+            "source_skill_id": skill_id,
+            "new_skill_id":    f"{skill_id}_copy_v23",
+            "new_name":        f"{skill_id} 副本",
+            "duplicated_at":   datetime.utcnow().isoformat() + "Z",
+            "duplicated_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_charge_history(invoice_id: str):
+    """Billing charge history · 扣款历史 (R382)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"charge_id": "chg_001", "amount_yuan": 1999, "method": "wechat_pay", "success": True,  "at": "2026-08-15T03:00:00Z"},
+            {"charge_id": "chg_002", "amount_yuan": 2999, "method": "alipay",     "success": True,  "at": "2026-09-01T03:00:00Z"},
+            {"charge_id": "chg_003", "amount_yuan":  199, "method": "wechat_pay", "success": False, "at": "2026-09-15T03:00:00Z"},
+            {"charge_id": "chg_004", "amount_yuan": 1999, "method": "wechat_pay", "success": True,  "at": "2026-09-25T03:00:00Z"},
+        ],
+        "count": 4,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_conversion_funnel(campaign_id: str):
+    """Campaigns conversion funnel · 转化漏斗 (R382)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"stage": "曝光",  "count": 18420, "pct": 100.0},
+            {"stage": "点击",  "count":   920, "pct":   5.0},
+            {"stage": "访问",  "count":   480, "pct":   2.6},
+            {"stage": "注册",  "count":   180, "pct":   0.98},
+            {"stage": "试用",  "count":    72, "pct":   0.39},
+            {"stage": "付费",  "count":    42, "pct":   0.23},
+        ],
+        "count": 6,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_history(file_id: str):
+    """Files download history · 下载历史 (R382)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-30T16:00:00Z", "user_id": "u_001", "ip": "127.0.0.1",     "user_agent": "Edge/Windows"},
+            {"at": "2026-09-29T14:30:00Z", "user_id": "u_002", "ip": "192.168.1.42",  "user_agent": "Chrome/macOS"},
+            {"at": "2026-09-28T10:15:00Z", "user_id": "u_003", "ip": "192.168.1.88",  "user_agent": "Safari/iOS"},
+            {"at": "2026-09-27T16:45:00Z", "user_id": "u_004", "ip": "10.0.0.15",    "user_agent": "Edge/Windows"},
+            {"at": "2026-09-26T11:30:00Z", "user_id": "u_001", "ip": "127.0.0.1",     "user_agent": "Edge/Windows"},
+        ],
+        "count": 5,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_2fa_disable():
+    """Auth 2FA disable · 关闭 2FA (R382)"""
+    return {
+        "status": "ok",
+        "data": {
+            "user_id":      "u_001",
+            "2fa_status":   "disabled",
+            "disabled_at":  datetime.utcnow().isoformat() + "Z",
+            "disabled_by":  "u_001",
+            "backup_codes_deleted": 10,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -3040,6 +3123,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/report-pdf/download": lambda q, id="c001": get_campaigns_report_pdf_download(id),
     "/api/v2/files/{id}/permissions":   lambda q, id="f_001": get_files_permissions(id),
     "/api/v2/auth/api-keys/{id}/delete": lambda q, id="k_001": get_auth_api_key_delete(id),
+    "/api/v2/skills/{id}/duplicate":     lambda q, id="s_001": get_skills_duplicate(id),
+    "/api/v2/billing/{id}/charge-history": lambda q, id="inv_001": get_billing_charge_history(id),
+    "/api/v2/campaigns/{id}/conversion-funnel": lambda q, id="c001": get_campaigns_conversion_funnel(id),
+    "/api/v2/files/{id}/download-history": lambda q, id="f_001": get_files_download_history(id),
+    "/api/v2/auth/2fa/disable":          lambda q: get_auth_2fa_disable(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
