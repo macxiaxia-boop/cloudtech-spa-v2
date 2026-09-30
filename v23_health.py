@@ -3474,6 +3474,86 @@ def get_auth_sessions_impersonate(session_id: str):
     }
 
 
+def get_skills_import_v2(skill_id: str):
+    """Skill import v2 · 导入 (R391)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":        skill_id,
+            "imported":        True,
+            "imported_from":   f"https://marketplace.v23.com/skills/{skill_id}.yaml",
+            "size_kb":         18,
+            "dependencies":    ["@xyflow/react", "lucide-react", "tailwindcss"],
+            "imported_at":     datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_subscription_resume(tenant_id: str):
+    """Billing subscription resume · 恢复订阅 (R391)"""
+    return {
+        "status": "ok",
+        "data": {
+            "tenant_id":       tenant_id,
+            "subscription_id": "sub_v23_R391",
+            "resumed":         True,
+            "resumed_at":      datetime.utcnow().isoformat() + "Z",
+            "next_billing_at": "2026-10-15T00:00:00Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_aggressive(campaign_id: str):
+    """Campaigns audience-aggressive · 受众激增 (R391)"""
+    return {
+        "status": "ok",
+        "data": {
+            "campaign_id":   campaign_id,
+            "aggressive":    True,
+            "expansion_pct":  "+200%",
+            "new_segments":  12,
+            "extra_reach":    36840,
+            "applied_at":    datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_restore_from_trash(file_id: str):
+    """Files restore-from-trash · 从回收站恢复 (R391)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":     file_id,
+            "restored":    True,
+            "restored_at": datetime.utcnow().isoformat() + "Z",
+            "from_trash":  True,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_sessions_forget_device(session_id: str):
+    """Auth sessions/{id}/forget-device · 忘记设备 (R391)"""
+    return {
+        "status": "ok",
+        "data": {
+            "session_id":     session_id,
+            "device_forgot":  True,
+            "forgot_at":      datetime.utcnow().isoformat() + "Z",
+            "trusted_until":  None,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -3797,6 +3877,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-stats": lambda q, id="c001": get_campaigns_audience_stats(id),
     "/api/v2/files/{id}/duplicate-rename": lambda q, id="f_001": get_files_duplicate_rename(id),
     "/api/v2/auth/sessions/{id}/impersonate": lambda q, id="s_001": get_auth_sessions_impersonate(id),
+    "/api/v2/skills/{id}/import-v2":       lambda q, id="s_001": get_skills_import_v2(id),
+    "/api/v2/billing/{tenant_id}/subscription-resume": lambda q, tenant_id="t_3a59592b7619": get_billing_subscription_resume(tenant_id),
+    "/api/v2/campaigns/{id}/audience-aggressive": lambda q, id="c001": get_campaigns_audience_aggressive(id),
+    "/api/v2/files/{id}/restore-from-trash": lambda q, id="f_001": get_files_restore_from_trash(id),
+    "/api/v2/auth/sessions/{id}/forget-device": lambda q, id="s_001": get_auth_sessions_forget_device(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
