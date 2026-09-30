@@ -5849,6 +5849,87 @@ def get_auth_api_keys_throttle_history(key_id: str):
     }
 
 
+def get_skills_sync_from_instance(skill_id: str):
+    """Skill sync-from-instance · 从实例同步 (R419)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "synced_at":   datetime.utcnow().isoformat() + "Z",
+            "synced_by":   "u_001",
+            "instance_id": f"inst_v23_R419_{skill_id}",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_set_backup_payment(method_id: str):
+    """Billing payment-methods/{id}/set-backup-payment · 设备用 (R419)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":    method_id,
+            "is_backup":    True,
+            "set_at":       datetime.utcnow().isoformat() + "Z",
+            "set_by":       "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_tech_list(campaign_id: str):
+    """Campaigns audience-tech-list · 技术列表 (R419)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"tech": "iPhone",     "users": 6840, "pct": 37.1},
+            {"tech": "Android",    "users": 5240, "pct": 28.4},
+            {"tech": "Windows PC", "users": 2180, "pct": 11.8},
+            {"tech": "Mac",        "users": 1420, "pct":  7.7},
+            {"tech": "iPad",       "users":  980, "pct":  5.3},
+            {"tech": "Linux",      "users":  580, "pct":  3.1},
+            {"tech": "Other",      "users": 1180, "pct":  6.6},
+        ],
+        "count": 7,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_month_chart(file_id: str):
+    """Files download-by-month-chart · 按月下载 chart (R419)"""
+    return {
+        "status": "ok",
+        "data": {
+            "labels": ["2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09"],
+            "datasets": [
+                {"label": "下载",   "data": [168, 248, 312, 428, 487, 312], "type": "bar"},
+                {"label": "唯一访客", "data": [118, 178, 218, 312, 348, 220], "type": "line"},
+            ],
+            "chart_type": "mixed",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_throttle_limit_history(key_id: str):
+    """Auth api-keys/{id}/throttle-limit-history · 限流历史 (R419)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-23T00:00:00Z", "limit": "50 req/min",  "set_by": "u_001"},
+            {"at": "2026-09-26T00:00:00Z", "limit": "100 req/min", "set_by": "u_001"},
+            {"at": "2026-09-30T00:00:00Z", "limit": "500 req/min", "set_by": "u_001"},
+        ],
+        "count": 3,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -6312,6 +6393,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-language-list": lambda q, id="c001": get_campaigns_audience_language_list(id),
     "/api/v2/files/{id}/download-by-week-chart": lambda q, id="f_001": get_files_download_by_week_chart(id),
     "/api/v2/auth/api-keys/{id}/throttle-history": lambda q, id="k_001": get_auth_api_keys_throttle_history(id),
+    "/api/v2/skills/{id}/sync-from-instance":  lambda q, id="s_001": get_skills_sync_from_instance(id),
+    "/api/v2/billing/payment-methods/{id}/set-backup-payment": lambda q, id="c_001": get_billing_payment_methods_set_backup_payment(id),
+    "/api/v2/campaigns/{id}/audience-tech-list": lambda q, id="c001": get_campaigns_audience_tech_list(id),
+    "/api/v2/files/{id}/download-by-month-chart": lambda q, id="f_001": get_files_download_by_month_chart(id),
+    "/api/v2/auth/api-keys/{id}/throttle-limit-history": lambda q, id="k_001": get_auth_api_keys_throttle_limit_history(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
