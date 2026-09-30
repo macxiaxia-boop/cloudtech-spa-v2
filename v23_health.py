@@ -6509,6 +6509,83 @@ def get_auth_api_keys_rotate_secret_v2(key_id: str):
     }
 
 
+def get_skills_unsubscribe(skill_id: str):
+    """Skill unsubscribe · 取消订阅 (R427)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":        skill_id,
+            "unsubscribed_at": datetime.utcnow().isoformat() + "Z",
+            "unsubscribed_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_set_default_for(method_id: str):
+    """Billing payment-methods/{id}/set-default-for · 设默认给 (R427)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "is_default": True,
+            "set_for":    ["subscription", "billing"],
+            "set_at":     datetime.utcnow().isoformat() + "Z",
+            "set_by":     "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_region_detailed(campaign_id: str):
+    """Campaigns audience-region-detailed · 地域详细 (R427)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"region": "深圳", "city": "深圳",   "count": 11800, "pct": 64.1},
+            {"region": "上海", "city": "上海",   "count":  2780, "pct": 15.1},
+            {"region": "北京", "city": "北京",   "count":  2120, "pct": 11.5},
+            {"region": "广州", "city": "广州",   "count":  1820, "pct":  9.9},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_quarter_list(file_id: str):
+    """Files download-by-quarter-list · 按季度列表 (R427)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"quarter": "Q1 2026", "downloads":  428},
+            {"quarter": "Q2 2026", "downloads":  728},
+            {"quarter": "Q3 2026", "downloads": 1287},
+        ],
+        "total": 2443,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_throttle_events(key_id: str):
+    """Auth api-keys/{id}/throttle-events · 限流事件 (R427)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-30T15:30:00Z", "rate": 89,  "limit": 100, "action": "ok"},
+            {"at": "2026-09-30T16:00:00Z", "rate": 102, "limit": 100, "action": "throttle"},
+            {"at": "2026-09-30T16:15:00Z", "rate": 42,  "limit": 100, "action": "ok"},
+            {"at": "2026-09-30T16:30:00Z", "rate": 67,  "limit": 100, "action": "ok"},
+        ],
+        "count": 4,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -7012,6 +7089,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-source-list": lambda q, id="c001": get_campaigns_audience_source_list(id),
     "/api/v2/files/{id}/download-by-year-list": lambda q, id="f_001": get_files_download_by_year_list(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v2": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v2(id),
+    "/api/v2/skills/{id}/unsubscribe":        lambda q, id="s_001": get_skills_unsubscribe(id),
+    "/api/v2/billing/payment-methods/{id}/set-default-for": lambda q, id="c_001": get_billing_payment_methods_set_default_for(id),
+    "/api/v2/campaigns/{id}/audience-region-detailed": lambda q, id="c001": get_campaigns_audience_region_detailed(id),
+    "/api/v2/files/{id}/download-by-quarter-list": lambda q, id="f_001": get_files_download_by_quarter_list(id),
+    "/api/v2/auth/api-keys/{id}/throttle-events": lambda q, id="k_001": get_auth_api_keys_throttle_events(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
