@@ -8609,6 +8609,88 @@ def get_auth_api_keys_rotate_quota_v2(key_id: str):
     }
 
 
+def get_skills_merge_stats_v4(skill_id: str):
+    """Skill merge-stats-v4 · 合并统计 v4 (R452)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "merge_count": 12,
+            "merged_at":   datetime.utcnow().isoformat() + "Z",
+            "merged_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v4",
+    }
+
+
+def get_billing_payment_methods_unset_default_payment_method_v4(method_id: str):
+    """Billing payment-methods/{id}/unset-default-payment-method-v4 · 取消默认 payment-method v4 (R452)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "is_default": False,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v4",
+    }
+
+
+def get_campaigns_audience_language_list_v3(campaign_id: str):
+    """Campaigns audience-language-list-v3 · 语言列表 v3 (R452)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"language": "zh-CN", "name": "简体中文", "users": 16840, "pct": 91.4},
+            {"language": "en-US", "name": "English",  "users":   920, "pct":  5.0},
+            {"language": "ja-JP", "name": "日本語",    "users":   280, "pct":  1.5},
+            {"language": "es-ES", "name": "Español",  "users":   180, "pct":  1.0},
+            {"language": "other", "name": "其他",      "users":   200, "pct":  1.1},
+        ],
+        "total": 18420,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_year_stats(file_id: str):
+    """Files download-by-year-stats · 按年统计 (R452)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"year": "2024", "downloads":  680, "unique_users": 480},
+            {"year": "2025", "downloads": 4180, "unique_users": 3120},
+            {"year": "2026", "downloads": 3280, "unique_users": 2280},
+        ],
+        "total": 8140,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v21(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v21 · 轮换 secret v21 (R452)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 43,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v21",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -9237,6 +9319,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-stats-v2": lambda q, id="c001": get_campaigns_audience_tech_stats_v2(id),
     "/api/v2/files/{id}/download-by-month-chart-v6": lambda q, id="f_001": get_files_download_by_month_chart_v6(id),
     "/api/v2/auth/api-keys/{id}/rotate-quota-v2": lambda q, id="k_001": get_auth_api_keys_rotate_quota_v2(id),
+    "/api/v2/skills/{id}/merge-stats-v4":         lambda q, id="s_001": get_skills_merge_stats_v4(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-payment-method-v4": lambda q, id="c_001": get_billing_payment_methods_unset_default_payment_method_v4(id),
+    "/api/v2/campaigns/{id}/audience-language-list-v3": lambda q, id="c001": get_campaigns_audience_language_list_v3(id),
+    "/api/v2/files/{id}/download-by-year-stats":  lambda q, id="f_001": get_files_download_by_year_stats(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v21": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v21(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
