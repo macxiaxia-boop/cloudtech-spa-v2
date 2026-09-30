@@ -85,8 +85,7 @@ function ThemeInitializer() {
 /* ───── Layout: Marketing（marketing Header/Footer） ───── */
 function MarketingLayout() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <ThemeInitializer />
+    <div className="min-h-screen bg-card flex flex-col">
       <Header />
       <main className="flex-1">
         <Outlet />
@@ -104,6 +103,8 @@ function NotFound() {
 export default function App() {
   return (
     <ErrorBoundary>
+      {/* R367 全局 ThemeInitializer · 覆盖 Login/Register/WorkspaceSelect 等 centered route (治本 Login dark class 缺失) */}
+      <ThemeInitializer />
       <Routes>
       {/* 营销路由（marketing Header/Footer）*/}
       <Route element={<MarketingLayout />}>
