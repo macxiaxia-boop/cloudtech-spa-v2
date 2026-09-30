@@ -8435,6 +8435,90 @@ def get_auth_api_keys_quota_decrease(key_id: str):
     }
 
 
+def get_skills_sync_stats_v4(skill_id: str):
+    """Skill sync-stats-v4 · 同步统计 v4 (R450)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "sync_count":  48,
+            "synced_at":   datetime.utcnow().isoformat() + "Z",
+            "synced_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v4",
+    }
+
+
+def get_billing_payment_methods_verify_billing_cycle_v2(method_id: str):
+    """Billing payment-methods/{id}/verify-billing-cycle-v2 · 验证周期 v2 (R450)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":      method_id,
+            "verified":      True,
+            "verified_at":   datetime.utcnow().isoformat() + "Z",
+            "verified_by":   "u_001",
+            "cycle":         "monthly",
+            "next_billing":  "2026-10-15",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_campaigns_audience_segment_stats(campaign_id: str):
+    """Campaigns audience-segment-stats · 分群统计 (R450)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"segment_id": "seg_001", "name": "装企老板",   "size": 4280, "avg_ltv_yuan": 1999, "cvr_pct": 5.4},
+            {"segment_id": "seg_002", "name": "医美院长",   "size": 2180, "avg_ltv_yuan": 4500, "cvr_pct": 8.2},
+            {"segment_id": "seg_003", "name": "教育机构",   "size": 1240, "avg_ltv_yuan": 1200, "cvr_pct": 3.8},
+            {"segment_id": "seg_004", "name": "高活跃用户", "size": 1840, "avg_ltv_yuan": 1680, "cvr_pct": 6.5},
+            {"segment_id": "seg_005", "name": "低活跃用户", "size":  980, "avg_ltv_yuan":  420, "cvr_pct": 1.2},
+        ],
+        "total": 10520,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_quarter_list_v3(file_id: str):
+    """Files download-by-quarter-list-v3 · 按季度列表 v3 (R450)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"quarter": "Q1 2026", "downloads":  428},
+            {"quarter": "Q2 2026", "downloads":  728},
+            {"quarter": "Q3 2026", "downloads": 1287},
+        ],
+        "total": 2443,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_throttle_stats(key_id: str):
+    """Auth api-keys/{id}/throttle-stats · 限流统计 (R450)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "total_throttled": 12,
+            "last_24h":      {"count": 8,  "by_ts": ["10:30", "11:45", "15:20"]},
+            "last_7d":       {"count": 42, "by_day": {"Mon": 8, "Tue": 12, "Wed": 6, "Thu": 4, "Fri": 8, "Sat": 2, "Sun": 2}},
+            "limit":         "100 req/min",
+            "current":       42,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -9053,6 +9137,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-grade-stats-v3": lambda q, id="c001": get_campaigns_audience_grade_stats_v3(id),
     "/api/v2/files/{id}/download-by-week-chart-v3": lambda q, id="f_001": get_files_download_by_week_chart_v3(id),
     "/api/v2/auth/api-keys/{id}/quota-decrease":    lambda q, id="k_001": get_auth_api_keys_quota_decrease(id),
+    "/api/v2/skills/{id}/sync-stats-v4":          lambda q, id="s_001": get_skills_sync_stats_v4(id),
+    "/api/v2/billing/payment-methods/{id}/verify-billing-cycle-v2": lambda q, id="c_001": get_billing_payment_methods_verify_billing_cycle_v2(id),
+    "/api/v2/campaigns/{id}/audience-segment-stats": lambda q, id="c001": get_campaigns_audience_segment_stats(id),
+    "/api/v2/files/{id}/download-by-quarter-list-v3": lambda q, id="f_001": get_files_download_by_quarter_list_v3(id),
+    "/api/v2/auth/api-keys/{id}/throttle-stats":    lambda q, id="k_001": get_auth_api_keys_throttle_stats(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
