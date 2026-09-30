@@ -37,7 +37,7 @@ export function NotFoundPage() {
           </Link>
         </div>
 
-        {/* 推荐路由 */}
+        {/* 推荐路由 · shadcn Card 网格 (R355) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto">
           {[
             { label: 'AI 对话',   href: '/chat',       icon: '💬' },
@@ -49,13 +49,13 @@ export function NotFoundPage() {
             { label: '系统设置',  href: '/settings',   icon: '⚙️' },
             { label: '个人中心',  href: '/profile',    icon: '👤' },
           ].map((s) => (
-            <Link
-              key={s.href}
-              to={s.href}
-              className="flex flex-col items-center gap-1 p-3 rounded-lg border border-border hover:border-brand-500 hover:shadow-sm transition-all bg-card"
-            >
-              <span className="text-2xl">{s.icon}</span>
-              <span className="text-xs text-muted-foreground">{s.label}</span>
+            <Link key={s.href} to={s.href}>
+              <Card className="p-0 hover:border-brand-500 hover:shadow-md transition-all">
+                <CardContent className="p-3 flex flex-col items-center gap-1">
+                  <span className="text-2xl">{s.icon}</span>
+                  <span className="text-xs text-muted-foreground">{s.label}</span>
+                </CardContent>
+              </Card>
             </Link>
           ))}
         </div>

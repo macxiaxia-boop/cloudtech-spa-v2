@@ -1,6 +1,8 @@
 /**
- * CloudTech SystemSettings · v3 视觉母版 14 模块
- * 5 Tab：模型管理 / 团队管理 / 权限设置 / 使用统计 / 系统日志
+ * CloudTech SystemSettings · V23 视觉重做 (2026-09-30)
+ * 5 Tab：模型管理 / 团队管理 / 权限设置 / 使用统计 / 系统日志 + shadcn Card
+ *
+ * V23: bg-[var(--xxx)] 硬编码 → 标准 token (bg-card / text-muted-foreground / border-border)
  */
 import { useState } from 'react';
 import { Plus, Settings as SettingsIcon, Users, Shield, BarChart3, FileText, MoreHorizontal } from 'lucide-react';
@@ -8,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 type Tab = 'models' | 'team' | 'permissions' | 'stats' | 'logs';
 
