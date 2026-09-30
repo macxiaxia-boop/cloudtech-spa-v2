@@ -2679,6 +2679,85 @@ def get_auth_api_key_rotate(key_id: str):
     }
 
 
+def get_skills_truncate(skill_id: str):
+    """Skill truncate · 截断 skill (R381)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":        skill_id,
+            "truncated":       True,
+            "truncated_at":    datetime.utcnow().isoformat() + "Z",
+            "kept_versions":   3,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_subscription_cancel(tenant_id: str):
+    """Billing subscription cancel · 取消订阅 (R381)"""
+    return {
+        "status": "ok",
+        "data": {
+            "tenant_id":      tenant_id,
+            "subscription_id": "sub_v23_R381",
+            "canceled":       True,
+            "reason":         "user_requested",
+            "effective_at":   "2026-10-15T00:00:00Z",  # 当前周期结束
+            "refund_yuan":    0,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_report_pdf_download(campaign_id: str):
+    """Campaigns report PDF download · PDF 报告下载 (R381)"""
+    return {
+        "status": "ok",
+        "data": {
+            "campaign_id":   campaign_id,
+            "pdf_url":       f"https://cloudtech.example.com/api/v2/campaigns/{campaign_id}/report.pdf?token=v23_R381",
+            "filename":      f"rpt_{campaign_id}_v23.pdf",
+            "size_bytes":    524288,
+            "pages":         12,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_permissions(file_id: str):
+    """Files permissions · 文件权限 (R381)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"user_id": "u_001", "name": "心之所向便是光", "permission": "owner",    "granted_at": "2026-06-15T00:00:00Z"},
+            {"user_id": "u_002", "name": "运维",          "permission": "editor",   "granted_at": "2026-08-01T00:00:00Z"},
+            {"user_id": "u_003", "name": "销售",          "permission": "viewer",   "granted_at": "2026-09-01T00:00:00Z"},
+            {"user_id": "u_004", "name": "客服",          "permission": "viewer",   "granted_at": "2026-09-15T00:00:00Z"},
+        ],
+        "count": 4,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_key_delete(key_id: str):
+    """Auth api-keys/{id}/delete · 删除 API key (R381)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":    key_id,
+            "deleted":   True,
+            "deleted_at": datetime.utcnow().isoformat() + "Z",
+            "deleted_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -2956,6 +3035,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/budget-history": lambda q, id="c001": get_campaigns_budget_history(id),
     "/api/v2/files/{id}/upload-stats":  lambda q, id="f_001": get_files_upload_stats(id),
     "/api/v2/auth/api-keys/{id}/rotate": lambda q, id="k_001": get_auth_api_key_rotate(id),
+    "/api/v2/skills/{id}/truncate":     lambda q, id="s_001": get_skills_truncate(id),
+    "/api/v2/billing/{tenant_id}/subscription-cancel": lambda q, tenant_id="t_3a59592b7619": get_billing_subscription_cancel(tenant_id),
+    "/api/v2/campaigns/{id}/report-pdf/download": lambda q, id="c001": get_campaigns_report_pdf_download(id),
+    "/api/v2/files/{id}/permissions":   lambda q, id="f_001": get_files_permissions(id),
+    "/api/v2/auth/api-keys/{id}/delete": lambda q, id="k_001": get_auth_api_key_delete(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
