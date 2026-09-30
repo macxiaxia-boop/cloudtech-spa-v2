@@ -10979,6 +10979,94 @@ def get_auth_api_keys_quota_history_v15(key_id: str):
     }
 
 
+def get_skills_apply_template_v9(skill_id: str):
+    """Skill apply-template-v9 · 应用模板 v9 (R480)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "applied_to":  f"target_v23_R480_v9_{skill_id}",
+            "applied_at": datetime.utcnow().isoformat() + "Z",
+            "applied_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v9",
+    }
+
+
+def get_billing_payment_methods_unset_default_v13(method_id: str):
+    """Billing payment-methods/{id}/unset-default-v13 · 取消默认 v13 (R480)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "is_default": False,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v13",
+    }
+
+
+def get_campaigns_audience_source_detailed_v6(campaign_id: str):
+    """Campaigns audience-source-detailed-v6 · 来源详细 v6 (R480)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"source": "wechat",       "medium": "社交",  "country": "CN", "count": 6280, "pct": 34.1},
+            {"source": "xhs",          "medium": "社交",  "country": "CN", "count": 4180, "pct": 22.7},
+            {"source": "douyin",       "medium": "社交",  "country": "CN", "count": 3120, "pct": 16.9},
+            {"source": "wechat_group", "medium": "社交",  "country": "CN", "count": 1840, "pct": 10.0},
+            {"source": "email",        "medium": "邮件",  "country": "US", "count": 1240, "pct":  6.7},
+            {"source": "direct",       "medium": "直接",  "country": "global", "count": 1180, "pct":  6.4},
+            {"source": "baidu",        "medium": "搜索",  "country": "CN", "count":  580, "pct":  3.2},
+        ],
+        "total": 18420,
+        "version": "v6",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_day_chart_v11(file_id: str):
+    """Files download-by-day-chart-v11 · 按日 chart v11 (R480)"""
+    return {
+        "status": "ok",
+        "data": {
+            "labels": ["09-24", "09-25", "09-26", "09-27", "09-28", "09-29", "09-30"],
+            "datasets": [
+                {"label": "下载",   "data": [28, 42, 38, 56, 68, 42, 38], "type": "bar"},
+                {"label": "唯一访客", "data": [18, 28, 22, 38, 45, 28, 24], "type": "line"},
+                {"label": "新访客",   "data": [ 8, 14, 12, 18, 22, 14, 14], "type": "line"},
+            ],
+            "chart_type": "mixed",
+            "version": "v11",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_quota_history_v16(key_id: str):
+    """Auth api-keys/{id}/quota-history-v16 · quota 历史 v16 (R480)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-30T00:00:00Z", "quota":  10000, "set_by": "u_001"},
+            {"at": "2026-10-01T00:00:00Z", "quota":  20000, "set_by": "u_001"},
+            {"at": "2026-10-01T01:00:00Z", "quota":  30000, "set_by": "u_001"},
+            {"at": "2026-10-01T02:00:00Z", "quota":  40000, "set_by": "u_001"},
+        ],
+        "count": 4,
+        "version": "v16",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -11582,6 +11670,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-cohort-detailed-v6": lambda q, id="c001": get_campaigns_audience_cohort_detailed_v6(id),
     "/api/v2/files/{id}/download-by-week-stats-v12": lambda q, id="f_001": get_files_download_by_week_stats_v12(id),
     "/api/v2/auth/api-keys/{id}/quota-history-v15": lambda q, id="k_001": get_auth_api_keys_quota_history_v15(id),
+    "/api/v2/skills/{id}/apply-template-v9":     lambda q, id="s_001": get_skills_apply_template_v9(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-v13": lambda q, id="c_001": get_billing_payment_methods_unset_default_v13(id),
+    "/api/v2/campaigns/{id}/audience-source-detailed-v6": lambda q, id="c001": get_campaigns_audience_source_detailed_v6(id),
+    "/api/v2/files/{id}/download-by-day-chart-v11": lambda q, id="f_001": get_files_download_by_day_chart_v11(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v16": lambda q, id="k_001": get_auth_api_keys_quota_history_v16(id),
     "/api/v2/skills/{id}/merge-with-bundle": lambda q, id="s_001": get_skills_merge_with_bundle(id),
     "/api/v2/billing/payment-methods/{id}/set-default-payment-method": lambda q, id="c_001": get_billing_payment_methods_set_default_payment_method(id),
     "/api/v2/campaigns/{id}/audience-region-stats": lambda q, id="c001": get_campaigns_audience_region_stats(id),
@@ -11872,6 +11965,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-cohort-detailed-v6": lambda q, id="c001": get_campaigns_audience_cohort_detailed_v6(id),
     "/api/v2/files/{id}/download-by-week-stats-v12": lambda q, id="f_001": get_files_download_by_week_stats_v12(id),
     "/api/v2/auth/api-keys/{id}/quota-history-v15": lambda q, id="k_001": get_auth_api_keys_quota_history_v15(id),
+    "/api/v2/skills/{id}/apply-template-v9":     lambda q, id="s_001": get_skills_apply_template_v9(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-v13": lambda q, id="c_001": get_billing_payment_methods_unset_default_v13(id),
+    "/api/v2/campaigns/{id}/audience-source-detailed-v6": lambda q, id="c001": get_campaigns_audience_source_detailed_v6(id),
+    "/api/v2/files/{id}/download-by-day-chart-v11": lambda q, id="f_001": get_files_download_by_day_chart_v11(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v16": lambda q, id="k_001": get_auth_api_keys_quota_history_v16(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
