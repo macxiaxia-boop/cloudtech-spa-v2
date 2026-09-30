@@ -3050,6 +3050,88 @@ def get_auth_api_key_test(key_id: str):
     }
 
 
+def get_skills_reset(skill_id: str):
+    """Skill reset · 重置 skill (R386)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "reset":       True,
+            "reset_at":    datetime.utcnow().isoformat() + "Z",
+            "kept_stats":  True,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_coupon(coupon_code: str):
+    """Billing coupon · 优惠券 (R386)"""
+    coupons = {
+        "V23_R386":     {"discount_pct": 50, "valid_until": "2026-10-30T00:00:00Z", "min_amount_yuan": 1000},
+        "EARLY_BIRD":  {"discount_pct": 30, "valid_until": "2026-09-30T23:59:59Z", "min_amount_yuan": 500},
+        "FRIENDS_50":  {"discount_pct": 50, "valid_until": "2026-12-31T23:59:59Z", "min_amount_yuan": 199},
+    }
+    found = coupons.get(coupon_code)
+    if not found:
+        return {"status": "ok", "data": {}, "source": "not_found", "ts": datetime.utcnow().isoformat() + "Z"}
+    return {
+        "status": "ok",
+        "data": {
+            "coupon_code":  coupon_code,
+            **found,
+            "applied_at":   datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_recipients(campaign_id: str):
+    """Campaigns recipients · 收件人 (R386)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"user_id": "u_001", "name": "心之所向便是光", "channel": "微信",   "status": "delivered", "at": "2026-09-30T16:00:00Z"},
+            {"user_id": "u_002", "name": "运维",          "channel": "邮件",   "status": "delivered", "at": "2026-09-30T16:00:01Z"},
+            {"user_id": "u_003", "name": "销售",          "channel": "微信",   "status": "delivered", "at": "2026-09-30T16:00:02Z"},
+            {"user_id": "u_004", "name": "客服",          "channel": "短信",   "status": "pending",   "at": "2026-09-30T16:00:03Z"},
+        ],
+        "count": 4,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_share_list(file_id: str):
+    """Files share list · 分享链接列表 (R386)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"link_id": "l_001", "url": f"https://cloudtech.example.com/share/{file_id}", "permissions": ["view"],          "views": 65, "created_at": "2026-09-25T10:00:00Z"},
+            {"link_id": "l_002", "url": f"https://cloudtech.example.com/share/{file_id}/e",  "permissions": ["view", "download"], "views": 42, "created_at": "2026-09-28T10:00:00Z"},
+        ],
+        "count": 2,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_sessions_signout(session_id: str):
+    """Auth sessions/{id}/signout · 撤销单 session (R386)"""
+    return {
+        "status": "ok",
+        "data": {
+            "session_id":   session_id,
+            "signed_out":   True,
+            "signed_out_at": datetime.utcnow().isoformat() + "Z",
+            "active_sessions_remaining": 3,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -3348,6 +3430,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/clicks":     lambda q, id="c001": get_campaigns_clicks(id),
     "/api/v2/files/{id}/comments":       lambda q, id="f_001": get_files_comments(id),
     "/api/v2/auth/api-keys/{id}/test":   lambda q, id="k_001": get_auth_api_key_test(id),
+    "/api/v2/skills/{id}/reset":         lambda q, id="s_001": get_skills_reset(id),
+    "/api/v2/billing/coupon/{code}":     lambda q, code="V23_R386": get_billing_coupon(code),
+    "/api/v2/campaigns/{id}/recipients": lambda q, id="c001": get_campaigns_recipients(id),
+    "/api/v2/files/{id}/share-list":    lambda q, id="f_001": get_files_share_list(id),
+    "/api/v2/auth/sessions/{id}/signout": lambda q, id="s_001": get_auth_sessions_signout(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
