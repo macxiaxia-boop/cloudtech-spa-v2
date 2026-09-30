@@ -9356,6 +9356,91 @@ def get_auth_api_keys_quota_history_v4(key_id: str):
     }
 
 
+def get_skills_merge_stats_v5(skill_id: str):
+    """Skill merge-stats-v5 · 合并统计 v5 (R461)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "merge_count": 14,
+            "merged_at":   datetime.utcnow().isoformat() + "Z",
+            "merged_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v5",
+    }
+
+
+def get_billing_payment_methods_unset_active_v4(method_id: str):
+    """Billing payment-methods/{id}/unset-active-v4 · 取消激活 v4 (R461)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "is_active":   False,
+            "unset_at":    datetime.utcnow().isoformat() + "Z",
+            "unset_by":    "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v4",
+    }
+
+
+def get_campaigns_audience_region_stats_v4(campaign_id: str):
+    """Campaigns audience-region-stats-v4 · 地域统计 v4 (R461)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"region": "深圳",  "users": 11800, "pct": 64.1, "ltv_yuan": 1999},
+            {"region": "上海",  "users":  2780, "pct": 15.1, "ltv_yuan": 1680},
+            {"region": "北京",  "users":  2120, "pct": 11.5, "ltv_yuan": 1450},
+            {"region": "广州",  "users":  1820, "pct":  9.9, "ltv_yuan": 1180},
+        ],
+        "total": 18420,
+        "version": "v4",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_month_list_v5(file_id: str):
+    """Files download-by-month-list-v5 · 按月列表 v5 (R461)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"month": "2026-04", "downloads": 168, "unique_users": 118, "avg_size_mb": 2.4, "median_size_mb": 2.3, "p99_size_mb": 2.8},
+            {"month": "2026-05", "downloads": 248, "unique_users": 178, "avg_size_mb": 2.5, "median_size_mb": 2.4, "p99_size_mb": 2.9},
+            {"month": "2026-06", "downloads": 312, "unique_users": 218, "avg_size_mb": 2.4, "median_size_mb": 2.3, "p99_size_mb": 2.8},
+            {"month": "2026-07", "downloads": 428, "unique_users": 312, "avg_size_mb": 2.6, "median_size_mb": 2.5, "p99_size_mb": 3.0},
+            {"month": "2026-08", "downloads": 487, "unique_users": 348, "avg_size_mb": 2.5, "median_size_mb": 2.4, "p99_size_mb": 2.9},
+            {"month": "2026-09", "downloads": 312, "unique_users": 220, "avg_size_mb": 2.4, "median_size_mb": 2.3, "p99_size_mb": 2.8},
+        ],
+        "total": 1955,
+        "version": "v5",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_quota_history_v5(key_id: str):
+    """Auth api-keys/{id}/quota-history-v5 · quota 历史 v5 (R461)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-30T00:00:00Z", "quota":  10000, "set_by": "u_001"},
+            {"at": "2026-10-01T00:00:00Z", "quota":  20000, "set_by": "u_001"},
+            {"at": "2026-10-01T01:00:00Z", "quota":  30000, "set_by": "u_001"},
+            {"at": "2026-10-01T02:00:00Z", "quota":  40000, "set_by": "u_001"},
+        ],
+        "count": 4,
+        "version": "v5",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -9864,6 +9949,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-list-v9": lambda q, id="c001": get_campaigns_audience_tech_list_v9(id),
     "/api/v2/files/{id}/download-by-week-stats-v6": lambda q, id="f_001": get_files_download_by_week_stats_v6(id),
     "/api/v2/auth/api-keys/{id}/quota-history-v4": lambda q, id="k_001": get_auth_api_keys_quota_history_v4(id),
+    "/api/v2/skills/{id}/merge-stats-v5":         lambda q, id="s_001": get_skills_merge_stats_v5(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v4": lambda q, id="c_001": get_billing_payment_methods_unset_active_v4(id),
+    "/api/v2/campaigns/{id}/audience-region-stats-v4": lambda q, id="c001": get_campaigns_audience_region_stats_v4(id),
+    "/api/v2/files/{id}/download-by-month-list-v5": lambda q, id="f_001": get_files_download_by_month_list_v5(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v5": lambda q, id="k_001": get_auth_api_keys_quota_history_v5(id),
     "/api/v2/skills/{id}/merge-with-bundle": lambda q, id="s_001": get_skills_merge_with_bundle(id),
     "/api/v2/billing/payment-methods/{id}/set-default-payment-method": lambda q, id="c_001": get_billing_payment_methods_set_default_payment_method(id),
     "/api/v2/campaigns/{id}/audience-region-stats": lambda q, id="c001": get_campaigns_audience_region_stats(id),
@@ -10059,6 +10149,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-list-v9": lambda q, id="c001": get_campaigns_audience_tech_list_v9(id),
     "/api/v2/files/{id}/download-by-week-stats-v6": lambda q, id="f_001": get_files_download_by_week_stats_v6(id),
     "/api/v2/auth/api-keys/{id}/quota-history-v4": lambda q, id="k_001": get_auth_api_keys_quota_history_v4(id),
+    "/api/v2/skills/{id}/merge-stats-v5":         lambda q, id="s_001": get_skills_merge_stats_v5(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v4": lambda q, id="c_001": get_billing_payment_methods_unset_active_v4(id),
+    "/api/v2/campaigns/{id}/audience-region-stats-v4": lambda q, id="c001": get_campaigns_audience_region_stats_v4(id),
+    "/api/v2/files/{id}/download-by-month-list-v5": lambda q, id="f_001": get_files_download_by_month_list_v5(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v5": lambda q, id="k_001": get_auth_api_keys_quota_history_v5(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
