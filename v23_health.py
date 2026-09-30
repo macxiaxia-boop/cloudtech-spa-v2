@@ -2318,6 +2318,87 @@ def get_auth_tokens():
     }
 
 
+def get_skills_version(skill_id: str):
+    """Skill version · 版本管理 (R377)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"version": "v2.1.0", "created_at": "2026-09-30T10:00:00Z", "is_latest": True,  "deprecated": False, "changelog": "+ 新增对话缓存 + 优化 prompt"},
+            {"version": "v2.0.5", "created_at": "2026-09-15T10:00:00Z", "is_latest": False, "deprecated": False, "changelog": "+ 修复边界条件"},
+            {"version": "v2.0.0", "created_at": "2026-09-01T10:00:00Z", "is_latest": False, "deprecated": False, "changelog": "+ 全新 UI"},
+            {"version": "v1.5.0", "created_at": "2026-08-01T10:00:00Z", "is_latest": False, "deprecated": True,  "changelog": "+ 旧版本"},
+        ],
+        "count": 4,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_charge(invoice_id: str):
+    """Billing charge · 扣款 (R377)"""
+    return {
+        "status": "ok",
+        "data": {
+            "invoice_id":    invoice_id,
+            "charge_id":     f"chg_{invoice_id}_v23",
+            "amount_yuan":   1999,
+            "method":        "wechat_pay",
+            "success":       True,
+            "transaction_id": f"txn_{invoice_id}_v23",
+            "charged_at":    datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_schedule(campaign_id: str):
+    """Campaigns schedule · 排期 (R377)"""
+    return {
+        "status": "ok",
+        "data": {
+            "campaign_id":   campaign_id,
+            "scheduled_at":  "2026-10-01T09:00:00Z",
+            "duration_days": 14,
+            "timezone":      "Asia/Shanghai",
+            "auto_publish":  True,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_lock(file_id: str):
+    """Files lock · 文件锁 (R377)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":     file_id,
+            "locked":      True,
+            "locked_by":   "u_001",
+            "locked_at":   datetime.utcnow().isoformat() + "Z",
+            "expires_at":  "2026-09-30T20:00:00Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_sso():
+    """Auth SSO · 单点登录 (R377)"""
+    return {
+        "status": "ok",
+        "data": {
+            "sso_url":      "https://cloudtech.example.com/api/v2/auth/sso/redirect?token=sso_v23_R377&return=/dashboard",
+            "providers":    ["wechat_work", "feishu", "dingtalk", "microsoft", "google", "github"],
+            "current":      "wechat_work",
+            "expires_in":   3600,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -2575,6 +2656,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-list": lambda q, id="c001": get_campaigns_audience_list(id),
     "/api/v2/files/{id}/preview":       lambda q, id="f_001": get_files_preview(id),
     "/api/v2/auth/tokens":              lambda q: get_auth_tokens(),
+    "/api/v2/skills/{id}/version":      lambda q, id="s_001": get_skills_version(id),
+    "/api/v2/billing/{id}/charge":      lambda q, id="inv_001": get_billing_charge(id),
+    "/api/v2/campaigns/{id}/schedule": lambda q, id="c001": get_campaigns_schedule(id),
+    "/api/v2/files/{id}/lock":         lambda q, id="f_001": get_files_lock(id),
+    "/api/v2/auth/sso":                lambda q: get_auth_sso(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
