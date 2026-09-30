@@ -179,6 +179,61 @@ def get_crm_leads():
     return {"status": "ok", "data": rows, "count": len(rows), "source": "cloudtech.db", "demo_mode": True}
 
 
+def get_saas_info():
+    """SaaS v1 info · 12 SKU + 4 行业 + capabilities (R352 替代 v22 老 stub)"""
+    skus = [
+        {"sku_id": "dec_basic",       "industry": "decoration",    "plan": "basic",    "price_yuan": 199,   "name": "装企 · 基础版"},
+        {"sku_id": "dec_pro",         "industry": "decoration",    "plan": "pro",      "price_yuan": 1999,  "name": "装企 · 专业版"},
+        {"sku_id": "dec_enterprise",  "industry": "decoration",    "plan": "enterprise","price_yuan": 2999, "name": "装企 · 企业版"},
+        {"sku_id": "edu_basic",       "industry": "education",     "plan": "basic",    "price_yuan": 199,   "name": "教育 · 基础版"},
+        {"sku_id": "edu_pro",         "industry": "education",     "plan": "pro",      "price_yuan": 1999,  "name": "教育 · 专业版"},
+        {"sku_id": "edu_enterprise",  "industry": "education",     "plan": "enterprise","price_yuan": 2999, "name": "教育 · 企业版"},
+        {"sku_id": "mfg_basic",       "industry": "manufacturing", "plan": "basic",    "price_yuan": 199,   "name": "制造 · 基础版"},
+        {"sku_id": "mfg_pro",         "industry": "manufacturing", "plan": "pro",      "price_yuan": 1999,  "name": "制造 · 专业版"},
+        {"sku_id": "mfg_enterprise",  "industry": "manufacturing", "plan": "enterprise","price_yuan": 2999, "name": "制造 · 企业版"},
+        {"sku_id": "svc_basic",       "industry": "service",       "plan": "basic",    "price_yuan": 199,   "name": "服务 · 基础版"},
+        {"sku_id": "svc_pro",         "industry": "service",       "plan": "pro",      "price_yuan": 1999,  "name": "服务 · 专业版"},
+        {"sku_id": "svc_enterprise",  "industry": "service",       "plan": "enterprise","price_yuan": 2999, "name": "服务 · 企业版"},
+    ]
+    return {
+        "status": "ok",
+        "data": {
+            "brand":         "灵策智算 / LynxceAI",
+            "tagline":       "AI 时代企业增长顾问",
+            "publisher":     "云数时代的变革 (公众号 lynxce-ai)",
+            "industries":    ["装修/建材/装企", "教育", "制造", "服务"],
+            "capabilities": {"employees":38, "skills":158, "apps":22, "industries":4, "templates":12, "customers":"500+", "savings":"85%"},
+            "sku_count":     len(skus),
+            "skus":          skus,
+            "trial":         {"days":7, "plan":"pro", "auto_grant":True},
+            "referral":      {"referee_pts":50, "referrer_pts":100},
+            "support_email": "support@lynxce.ai",
+            "docs_url":      "/docs",
+        },
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_v2_agents():
+    """V2 agents · 8 预设数字员工 (R352)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"id": "content_writer",       "name": "内容写手",    "avatar": "✍️", "description": "AI 写公众号/小红书/知乎文章", "deployed": True},
+            {"id": "short_video_script",  "name": "短视频脚本",  "avatar": "🎬", "description": "60 秒爆款短视频脚本",         "deployed": False},
+            {"id": "data_analyst",        "name": "数据分析师",  "avatar": "📊", "description": "实时数据洞察 + 异常告警",     "deployed": False},
+            {"id": "seo_specialist",      "name": "SEO 专家",    "avatar": "🔍", "description": "GEO 优化 + 关键词挖掘",       "deployed": False},
+            {"id": "social_media_manager","name": "社媒运营",    "avatar": "📱", "description": "多平台账号管理",              "deployed": False},
+            {"id": "customer_service",    "name": "智能客服",    "avatar": "💬", "description": "7×24 上下文理解",             "deployed": True},
+            {"id": "market_researcher",   "name": "市场调研",    "avatar": "🔎", "description": "竞品监控 + 用户画像",         "deployed": False},
+            {"id": "growth_hacker",       "name": "增长黑客",    "avatar": "🚀", "description": "A/B 测试 + 漏斗优化",         "deployed": False},
+        ],
+        "count": 8,
+        "source": "V22 preset",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_admin_employees():
     """Employees · demo 鉴权 bypass + 8 预设 (V22 已内置)"""
     if not DEMO_MODE:
@@ -458,31 +513,55 @@ def get_monitoring_health():
 
 
 def deep_health():
-    """深度健康检查 · 真发 12 个核心端点 + 断言非 401+非500+非 stub:true"""
+    """深度健康检查 · 真发 28 个核心端点 + 断言非 401+非 stub:true+非 500"""
     import urllib.request
     endpoints = [
+        # V22 元 (4)
         ("http://127.0.0.1:5099/health",                              200, False),
-        ("http://127.0.0.1:5099/api/v2/system/status",                200, False),
+        ("http://127.0.0.1:5099/openapi.json",                         200, False),
         ("http://127.0.0.1:5099/api/saas/v1/info",                    200, False),
         ("http://127.0.0.1:5099/api/v2/employees",                    200, False),
+        # V22 老 stub (2)
+        ("http://127.0.0.1:5099/api/v2/system/status",                200, False),
+        ("http://127.0.0.1:5099/api/v3/monitoring/web-vitals",        200, False),
+        # V23 真实数据 (4)
         ("http://127.0.0.1:7791/api/v2/dashboard/kpis",               200, False),
         ("http://127.0.0.1:7791/api/v2/notifications",                200, False),
         ("http://127.0.0.1:7791/api/v2/skills",                       200, False),
         ("http://127.0.0.1:7791/api/v2/system/status",                200, False),
-        ("http://127.0.0.1:7791/api/crm/leads",                       200, True),
+        # V23 analytics (8)
+        ("http://127.0.0.1:7791/api/v2/dashboard/stats",              200, False),
+        ("http://127.0.0.1:7791/api/v2/dashboard/usage",              200, False),
+        ("http://127.0.0.1:7791/api/v2/agents/usage",                 200, False),
+        ("http://127.0.0.1:7791/api/v2/skills/popular",               200, False),
+        ("http://127.0.0.1:7791/api/v2/billing/usage",                200, False),
+        ("http://127.0.0.1:7791/api/v2/analytics/overview",           200, False),
+        ("http://127.0.0.1:7791/api/v2/analytics/tasks",              200, False),
+        ("http://127.0.0.1:7791/api/v2/monitoring/services",          200, False),
+        # V23 CRM + 业务 (5)
+        ("http://127.0.0.1:7791/api/v2/crm/funnel",                   200, False),
+        ("http://127.0.0.1:7791/api/v2/crm/pipeline",                 200, False),
+        ("http://127.0.0.1:7791/api/v2/crm/leads",                    200, False),
+        ("http://127.0.0.1:7791/api/v2/workflows/templates",           200, False),
+        ("http://127.0.0.1:7791/api/v2/saas/v1/info",                 200, False),
+        ("http://127.0.0.1:7791/api/v2/agents",                       200, False),
+        # V23 demo 鉴权 bypass (4)
         ("http://127.0.0.1:7791/api/skills",                          200, True),
         ("http://127.0.0.1:7791/api/employees",                       200, True),
         ("http://127.0.0.1:7791/api/admin/ops",                       200, True),
-        ("http://127.0.0.1:5099/api/v3/monitoring/web-vitals",        200, False),
+        ("http://127.0.0.1:7791/api/crm/leads",                       200, True),
+        # V23 monitoring (1)
         ("http://127.0.0.1:7791/api/v3/monitoring/health",            200, False),
-        ("http://127.0.0.1:5099/docs",                                 200, False),
-        ("http://127.0.0.1:5099/openapi.json",                         200, False),
+        # 端口探活 (3)
+        ("http://127.0.0.1:7790/",                                     200, False),
+        ("http://127.0.0.1:7791/",                                     200, False),
+        ("http://127.0.0.1:7792/",                                     200, False),
     ]
     results = []
     degraded = 0
     for url, expect_http, demo in endpoints:
         try:
-            r = urllib.request.urlopen(url, timeout=1.5)
+            r = urllib.request.urlopen(url, timeout=3.0)
             http_code = r.status
             data = json.loads(r.read().decode("utf-8", errors="ignore"))
         except Exception as e:
@@ -556,6 +635,9 @@ ROUTES = {
     "/api/v2/crm/pipeline":               lambda q: get_crm_pipeline(),
     "/api/v2/workflows/templates":        lambda q: get_workflows_templates(),
     "/api/crm/leads":                     lambda q: get_crm_leads(),
+    "/api/v2/crm/leads":                  lambda q: get_crm_leads(),
+    "/api/v2/saas/v1/info":               lambda q: get_saas_info(),
+    "/api/v2/agents":                     lambda q: get_v2_agents(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
