@@ -2921,6 +2921,27 @@ def get_files_share_stats(file_id: str):
     }
 
 
+def _register_v23_q_proxy():
+    """SaaS v1 register 真注册端点 (TryNow 表单后端) · 用 POST 但 vite-spa TryNow 用 GET"""
+    import urllib.parse
+    # 实际 TryNow.tsx 用 GET /api/v2/saas/v1/info 验证连通
+    # 这里返回 mock 成功 (因为 POST 没在 vite-spa 调)
+    return {
+        "status":         "ok",
+        "data": {
+            "tenant_id":      "t_v23_R384",
+            "user_id":        "u_demo",
+            "trial_started":   True,
+            "trial_days":      7,
+            "trial_end_at":    "2026-10-07T00:00:00Z",
+            "next_step_url":   "/dashboard?from=trial_v23_R384",
+            "verification":   "TryNow form 后端 OK",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_auth_2fa_regenerate():
     """Auth 2FA regenerate · 重新生成 2FA 备份码 (R383)"""
     return {
@@ -3239,6 +3260,7 @@ ROUTES = {
     "/api/v2/campaigns/{id}/cost-breakdown": lambda q, id="c001": get_campaigns_cost_breakdown(id),
     "/api/v2/files/{id}/share-stats":   lambda q, id="f_001": get_files_share_stats(id),
     "/api/v2/auth/2fa/regenerate":      lambda q: get_auth_2fa_regenerate(),
+    "/api/v2/saas/v1/register":         lambda q: _register_v23_q_proxy(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
