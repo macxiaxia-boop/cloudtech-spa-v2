@@ -8859,6 +8859,88 @@ def get_auth_api_keys_burst_quota_history(key_id: str):
     }
 
 
+def get_skills_sync_from_instance_v2(skill_id: str):
+    """Skill sync-from-instance-v2 · 从实例同步 v2 (R455)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "synced_at":   datetime.utcnow().isoformat() + "Z",
+            "instance_id": f"inst_v23_R455_{skill_id}",
+            "synced_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_billing_payment_methods_unset_active_v2(method_id: str):
+    """Billing payment-methods/{id}/unset-active-v2 · 取消激活 v2 (R455)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "is_active":   False,
+            "unset_at":    datetime.utcnow().isoformat() + "Z",
+            "unset_by":    "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_campaigns_audience_region_stats_v2(campaign_id: str):
+    """Campaigns audience-region-stats-v2 · 地域统计 v2 (R455)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"region": "深圳",  "users": 11800, "pct": 64.1, "ltv_yuan": 1999},
+            {"region": "上海",  "users":  2780, "pct": 15.1, "ltv_yuan": 1680},
+            {"region": "北京",  "users":  2120, "pct": 11.5, "ltv_yuan": 1450},
+            {"region": "广州",  "users":  1820, "pct":  9.9, "ltv_yuan": 1180},
+        ],
+        "total": 18420,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_week_stats_v5(file_id: str):
+    """Files download-by-week-stats-v5 · 按周统计 v5 (R455)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"week": "2026-09-W1", "downloads": 312, "unique_users": 218, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+            {"week": "2026-09-W2", "downloads": 428, "unique_users": 312, "avg_size_mb": 2.5, "p99_size_mb": 2.9},
+            {"week": "2026-09-W3", "downloads": 487, "unique_users": 348, "avg_size_mb": 2.5, "p99_size_mb": 2.9},
+            {"week": "2026-09-W4", "downloads": 312, "unique_users": 220, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+        ],
+        "total": 1539,
+        "version": "v5",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_throttle_history_v2(key_id: str):
+    """Auth api-keys/{id}/throttle-history-v2 · 限流历史 v2 (R455)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-25T10:30:00Z", "rate": 102, "limit": 100, "throttled": True},
+            {"at": "2026-09-28T14:20:00Z", "rate": 105, "limit": 100, "throttled": True},
+            {"at": "2026-09-30T16:15:00Z", "rate": 112, "limit": 100, "throttled": True},
+        ],
+        "count": 3,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -9337,6 +9419,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-grade-list": lambda q, id="c001": get_campaigns_audience_grade_list(id),
     "/api/v2/files/{id}/download-by-year-chart": lambda q, id="f_001": get_files_download_by_year_chart(id),
     "/api/v2/auth/api-keys/{id}/burst-quota-history": lambda q, id="k_001": get_auth_api_keys_burst_quota_history(id),
+    "/api/v2/skills/{id}/sync-from-instance-v2":  lambda q, id="s_001": get_skills_sync_from_instance_v2(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v2": lambda q, id="c_001": get_billing_payment_methods_unset_active_v2(id),
+    "/api/v2/campaigns/{id}/audience-region-stats-v2": lambda q, id="c001": get_campaigns_audience_region_stats_v2(id),
+    "/api/v2/files/{id}/download-by-week-stats-v5": lambda q, id="f_001": get_files_download_by_week_stats_v5(id),
+    "/api/v2/auth/api-keys/{id}/throttle-history-v2": lambda q, id="k_001": get_auth_api_keys_throttle_history_v2(id),
     "/api/v2/skills/{id}/merge-with-bundle": lambda q, id="s_001": get_skills_merge_with_bundle(id),
     "/api/v2/billing/payment-methods/{id}/set-default-payment-method": lambda q, id="c_001": get_billing_payment_methods_set_default_payment_method(id),
     "/api/v2/campaigns/{id}/audience-region-stats": lambda q, id="c001": get_campaigns_audience_region_stats(id),
@@ -9502,6 +9589,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-list-v8": lambda q, id="c001": get_campaigns_audience_tech_list_v8(id),
     "/api/v2/files/{id}/download-by-day-stats":   lambda q, id="f_001": get_files_download_by_day_stats(id),
     "/api/v2/auth/api-keys/{id}/burst-quota-history": lambda q, id="k_001": get_auth_api_keys_burst_quota_history(id),
+    "/api/v2/skills/{id}/sync-from-instance-v2":  lambda q, id="s_001": get_skills_sync_from_instance_v2(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v2": lambda q, id="c_001": get_billing_payment_methods_unset_active_v2(id),
+    "/api/v2/campaigns/{id}/audience-region-stats-v2": lambda q, id="c001": get_campaigns_audience_region_stats_v2(id),
+    "/api/v2/files/{id}/download-by-week-stats-v5": lambda q, id="f_001": get_files_download_by_week_stats_v5(id),
+    "/api/v2/auth/api-keys/{id}/throttle-history-v2": lambda q, id="k_001": get_auth_api_keys_throttle_history_v2(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
