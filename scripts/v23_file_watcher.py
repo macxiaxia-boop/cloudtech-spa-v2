@@ -64,20 +64,46 @@ def get_v23_pid() -> int | None:
     return None
 
 def kill_v23() -> bool:
-    pid = get_v23_pid()
-    if not pid:
+    """R379 · kill ALL V23 processes on port 7791 (治本 multi-V23 端口冲突)"""
+    pids = get_v23_pid_all()
+    if not pids:
         return False
+    for pid in pids:
+        try:
+            log(f"[KILL] V23 PID={pid}")
+            subprocess.run(
+                ["taskkill", "/PID", str(pid), "/F"],
+                capture_output=True, timeout=5
+            )
+        except Exception as e:
+            log(f"[ERR] kill_v23 PID={pid}: {e}")
+    time.sleep(STARTUP_DELAY)
+    return True
+
+
+def get_v23_pid_all() -> list:
+    """Get ALL V23 PIDs on port 7791 (R379 · 治本 multi-V23)"""
+    pids = []
     try:
-        log(f"[KILL] V23 PID={pid}")
-        subprocess.run(
-            ["taskkill", "/PID", str(pid), "/F"],
-            capture_output=True, timeout=5
-        )
-        time.sleep(STARTUP_DELAY)
-        return True
+        result = subprocess.run(["netstat", "-ano"], capture_output=True, timeout=5)
+        out = result.stdout.decode("gbk", errors="ignore")
+        for line in out.splitlines():
+            if f":{PORT}" in line and "LISTENING" in line:
+                parts = line.split()
+                if parts:
+                    try:
+                        pids.append(int(parts[-1]))
+                    except ValueError:
+                        continue
     except Exception as e:
-        log(f"[ERR] kill_v23: {e}")
-        return False
+        log(f"[ERR] get_v23_pid_all: {e}")
+    return pids
+
+
+def get_v23_pid() -> int | None:
+    """向后兼容 · 取最后一个 V23 PID"""
+    pids = get_v23_pid_all()
+    return pids[-1] if pids else None
 
 def start_v23() -> bool:
     try:
