@@ -8098,6 +8098,93 @@ def get_auth_api_keys_rotate_secret_v20(key_id: str):
     }
 
 
+def get_skills_import_template(skill_id: str):
+    """Skill import-template · 导入模板 (R446)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "imported":     True,
+            "template_id":  f"tpl_v23_R446_{skill_id}",
+            "imported_at": datetime.utcnow().isoformat() + "Z",
+            "imported_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_unset_default_for_all_v2(method_id: str):
+    """Billing payment-methods/{id}/unset-default-for-all-v2 · 取消默认 for-all v2 (R446)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "is_default": False,
+            "unset_all":  True,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_campaigns_audience_language_detailed(campaign_id: str):
+    """Campaigns audience-language-detailed · 语言详细 (R446)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"language": "zh-CN", "name": "简体中文", "country": "中国", "users": 16840, "pct": 91.4},
+            {"language": "en-US", "name": "English",  "country": "美国", "users":   920, "pct":  5.0},
+            {"language": "ja-JP", "name": "日本語",    "country": "日本", "users":   280, "pct":  1.5},
+            {"language": "es-ES", "name": "Español",  "country": "西班牙", "users":   180, "pct":  1.0},
+            {"language": "other", "name": "其他",      "country": "其他", "users":   200, "pct":  1.1},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_day_of_week_stats(file_id: str):
+    """Files download-by-day-of-week-stats · 按周天统计 (R446)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"dow": "Mon", "downloads":  52, "unique_users": 38, "avg_size_mb": 2.4},
+            {"dow": "Tue", "downloads":  68, "unique_users": 48, "avg_size_mb": 2.5},
+            {"dow": "Wed", "downloads":  72, "unique_users": 52, "avg_size_mb": 2.5},
+            {"dow": "Thu", "downloads":  58, "unique_users": 42, "avg_size_mb": 2.4},
+            {"dow": "Fri", "downloads":  42, "unique_users":  31, "avg_size_mb": 2.4},
+            {"dow": "Sat", "downloads":  12, "unique_users":   9, "avg_size_mb": 2.3},
+            {"dow": "Sun", "downloads":   8, "unique_users":   6, "avg_size_mb": 2.3},
+        ],
+        "total": 312,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_quota_reset_v2(key_id: str):
+    """Auth api-keys/{id}/quota-reset-v2 · 重置 quota v2 (R446)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "quota_reset":    True,
+            "new_quota":      30000,
+            "previous_quota": 20000,
+            "reset_at":       datetime.utcnow().isoformat() + "Z",
+            "reset_by":       "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -8696,6 +8783,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-grade-list-v3": lambda q, id="c001": get_campaigns_audience_grade_list_v3(id),
     "/api/v2/files/{id}/download-by-month-list-v4": lambda q, id="f_001": get_files_download_by_month_list_v4(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v20": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v20(id),
+    "/api/v2/skills/{id}/import-template":      lambda q, id="s_001": get_skills_import_template(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-for-all-v2": lambda q, id="c_001": get_billing_payment_methods_unset_default_for_all_v2(id),
+    "/api/v2/campaigns/{id}/audience-language-detailed": lambda q, id="c001": get_campaigns_audience_language_detailed(id),
+    "/api/v2/files/{id}/download-by-day-of-week-stats": lambda q, id="f_001": get_files_download_by_day_of_week_stats(id),
+    "/api/v2/auth/api-keys/{id}/quota-reset-v2":     lambda q, id="k_001": get_auth_api_keys_quota_reset_v2(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
