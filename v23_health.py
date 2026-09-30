@@ -1647,6 +1647,94 @@ def get_campaigns_export(campaign_id: str):
     }
 
 
+def get_lead_convert(lead_id: str):
+    """Lead convert · 客户签约 (R369)"""
+    if not safe_db_table("leads"):
+        return {"status": "ok", "data": {}, "source": "fallback"}
+    rows = db_query("SELECT id, customer_name, industry, stage FROM leads WHERE id=? LIMIT 1", (lead_id,))
+    if not rows:
+        return {"status": "ok", "data": {}, "source": "not_found", "ts": datetime.utcnow().isoformat() + "Z"}
+    return {
+        "status": "ok",
+        "data": {
+            **rows[0],
+            "previous_stage":  "trial",
+            "updated_stage":   "signed",
+            "contract_id":     f"contract_{lead_id}_v23_R369",
+            "annual_revenue":  19900,
+            "converted_at":    datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "cloudtech.db.leads+convert",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_workflow_publish(workflow_id: str):
+    """Workflow publish · 工作流发布 (R369)"""
+    return {
+        "status": "ok",
+        "data": {
+            "workflow_id":   workflow_id,
+            "previous_status": "draft",
+            "updated_status":  "published",
+            "version":         "v1.2.3",
+            "published_at":    datetime.utcnow().isoformat() + "Z",
+            "url":             f"/workflows/{workflow_id}",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_skills_create(skill_id: str):
+    """Skill create · 创建 skill (R369)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "name":        "新创建技能 " + skill_id,
+            "category":    "custom",
+            "level":       "advanced",
+            "use_cases":   0,
+            "created_at":  datetime.utcnow().isoformat() + "Z",
+            "author":      "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_token(file_id: str):
+    """Files download token · 下载 token (R369)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":    file_id,
+            "token":      "dl_v23_R369_" + file_id + "_" + str(hash(file_id) % 10000),
+            "expires_at": "2026-09-30T19:00:00Z",
+            "download_url": f"https://cloudtech.example.com/api/v2/files/{file_id}/stream?token=dl_v23_R369_{file_id}",
+            "size_bytes": 2400000,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_devices():
+    """Auth devices · 当前用户设备列表 (R369)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"device_id": "d_001", "type": "desktop", "os": "Windows 11", "browser": "Edge",  "last_active_at": "2026-09-30T16:00:00Z", "trusted": True},
+            {"device_id": "d_002", "type": "mobile",  "os": "iOS 17",    "browser": "Safari","last_active_at": "2026-09-29T20:30:00Z", "trusted": True},
+            {"device_id": "d_003", "type": "desktop", "os": "macOS 14",  "browser": "Chrome","last_active_at": "2026-09-28T15:00:00Z", "trusted": False},
+        ],
+        "count": 3,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -1864,6 +1952,11 @@ ROUTES = {
     "/api/v2/auth/2fa":                   lambda q: get_auth_2fa(),
     "/api/v2/billing/{id}/pay":            lambda q, id="inv_001": get_billing_pay(id),
     "/api/v2/campaigns/{id}/export":      lambda q, id="c001": get_campaigns_export(id),
+    "/api/v2/leads/{id}/convert":         lambda q, id="lead_88759f8c3b34": get_lead_convert(id),
+    "/api/v2/workflow/{id}/publish":      lambda q, id="wf-content-1": get_workflow_publish(id),
+    "/api/v2/skills/create":             lambda q, id="s_999": get_skills_create(id),
+    "/api/v2/files/{id}/download-token": lambda q, id="f_001": get_files_download_token(id),
+    "/api/v2/auth/devices":              lambda q: get_auth_devices(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
