@@ -6672,6 +6672,94 @@ def get_auth_api_keys_rotate_secret_v3(key_id: str):
     }
 
 
+def get_skills_merge_stats_v2(skill_id: str):
+    """Skill merge-stats-v2 · 合并统计 v2 (R429)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "merge_count":  12,
+            "merged_at":   datetime.utcnow().isoformat() + "Z",
+            "merged_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_billing_payment_methods_set_default_for_billing(method_id: str):
+    """Billing payment-methods/{id}/set-default-for-billing · 设默认给 billing (R429)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "is_default":  True,
+            "for_billing": True,
+            "set_at":      datetime.utcnow().isoformat() + "Z",
+            "set_by":      "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_source_list_v2(campaign_id: str):
+    """Campaigns audience-source-list-v2 · 来源列表 v2 (R429)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"source": "wechat",       "count": 6280, "pct": 34.1},
+            {"source": "xhs",          "count": 4180, "pct": 22.7},
+            {"source": "douyin",       "count": 3120, "pct": 16.9},
+            {"source": "wechat_group", "count": 1840, "pct": 10.0},
+            {"source": "email",        "count": 1240, "pct":  6.7},
+            {"source": "direct",       "count": 1180, "pct":  6.4},
+            {"source": "baidu",        "count":  580, "pct":  3.2},
+        ],
+        "count": 7,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_day_list(file_id: str):
+    """Files download-by-day-list · 按日下载列表 (R429)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"date": "2026-09-24", "downloads": 28, "unique_users": 18, "avg_size_mb": 2.4},
+            {"date": "2026-09-25", "downloads": 42, "unique_users": 28, "avg_size_mb": 2.5},
+            {"date": "2026-09-26", "downloads": 38, "unique_users": 22, "avg_size_mb": 2.4},
+            {"date": "2026-09-27", "downloads": 56, "unique_users": 38, "avg_size_mb": 2.6},
+            {"date": "2026-09-28", "downloads": 68, "unique_users": 45, "avg_size_mb": 2.5},
+            {"date": "2026-09-29", "downloads": 42, "unique_users": 28, "avg_size_mb": 2.4},
+            {"date": "2026-09-30", "downloads": 38, "unique_users": 24, "avg_size_mb": 2.4},
+        ],
+        "total": 312,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v4(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v4 · 轮换 secret v4 (R429)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 7,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v4",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -7185,6 +7273,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-detailed": lambda q, id="c001": get_campaigns_audience_tech_detailed(id),
     "/api/v2/files/{id}/download-by-day-of-week-list": lambda q, id="f_001": get_files_download_by_day_of_week_list(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v3": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v3(id),
+    "/api/v2/skills/{id}/merge-stats-v2":      lambda q, id="s_001": get_skills_merge_stats_v2(id),
+    "/api/v2/billing/payment-methods/{id}/set-default-for-billing": lambda q, id="c_001": get_billing_payment_methods_set_default_for_billing(id),
+    "/api/v2/campaigns/{id}/audience-source-list-v2": lambda q, id="c001": get_campaigns_audience_source_list_v2(id),
+    "/api/v2/files/{id}/download-by-day-list": lambda q, id="f_001": get_files_download_by_day_list(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v4": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v4(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
