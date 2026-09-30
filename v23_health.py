@@ -1735,6 +1735,83 @@ def get_auth_devices():
     }
 
 
+def get_skills_delete(skill_id: str):
+    """Skill delete · 删除 skill (R370)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":   skill_id,
+            "deleted":    True,
+            "deleted_at": datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_cancel(invoice_id: str):
+    """Billing cancel · 取消账单 (R370)"""
+    return {
+        "status": "ok",
+        "data": {
+            "invoice_id":   invoice_id,
+            "cancelled":    True,
+            "cancelled_at": datetime.utcnow().isoformat() + "Z",
+            "reason":       "user_requested",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_duplicate(campaign_id: str):
+    """Campaigns duplicate · 复制活动 (R370)"""
+    return {
+        "status": "ok",
+        "data": {
+            "source_campaign_id":  campaign_id,
+            "new_campaign_id":     f"c_{campaign_id}_copy_v23",
+            "name":                f"{campaign_id} 副本",
+            "starts_at":           datetime.utcnow().isoformat() + "Z",
+            "cloned_at":           datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_rename(file_id: str):
+    """Files rename · 重命名文件 (R370)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":       file_id,
+            "previous_name": f"file_{file_id}.bin",
+            "new_name":      f"renamed_{file_id}_v23.pdf",
+            "renamed_at":    datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_sessions():
+    """Auth sessions · 当前用户所有 session (R370)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"session_id": "s_001", "ip": "127.0.0.1",     "device": "Edge/Windows", "last_active_at": "2026-09-30T16:14:00Z", "current": True},
+            {"session_id": "s_002", "ip": "192.168.1.42",  "device": "Chrome/macOS", "last_active_at": "2026-09-30T16:10:00Z", "current": False},
+            {"session_id": "s_003", "ip": "192.168.1.88",  "device": "Safari/iOS",  "last_active_at": "2026-09-30T15:30:00Z", "current": False},
+            {"session_id": "s_004", "ip": "10.0.0.15",    "device": "Edge/Windows", "last_active_at": "2026-09-30T14:20:00Z", "current": False},
+        ],
+        "count":       4,
+        "current_id": "s_001",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -1957,6 +2034,11 @@ ROUTES = {
     "/api/v2/skills/create":             lambda q, id="s_999": get_skills_create(id),
     "/api/v2/files/{id}/download-token": lambda q, id="f_001": get_files_download_token(id),
     "/api/v2/auth/devices":              lambda q: get_auth_devices(),
+    "/api/v2/skills/{id}/delete":        lambda q, id="s_001": get_skills_delete(id),
+    "/api/v2/billing/{id}/cancel":       lambda q, id="inv_001": get_billing_cancel(id),
+    "/api/v2/campaigns/{id}/duplicate":  lambda q, id="c001": get_campaigns_duplicate(id),
+    "/api/v2/files/{id}/rename":         lambda q, id="f_001": get_files_rename(id),
+    "/api/v2/auth/sessions":             lambda q: get_auth_sessions(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
