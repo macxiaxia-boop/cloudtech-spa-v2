@@ -3638,6 +3638,89 @@ def get_auth_sessions_cleanup():
     }
 
 
+def get_skills_retire(skill_id: str):
+    """Skill retire · 退役 skill (R393)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":   skill_id,
+            "retired":    True,
+            "retired_at": datetime.utcnow().isoformat() + "Z",
+            "archived":   True,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_tax_rate_update(tenant_id: str):
+    """Billing tax-rate-update · 更新税率 (R393)"""
+    return {
+        "status": "ok",
+        "data": {
+            "tenant_id":   tenant_id,
+            "previous_rate": 0.13,
+            "updated_rate":  0.06,
+            "updated_at":   datetime.utcnow().isoformat() + "Z",
+            "reason":       "增值税改革",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_recipients_stats(campaign_id: str):
+    """Campaigns recipients-stats · 收件人统计 (R393)"""
+    return {
+        "status": "ok",
+        "data": {
+            "campaign_id":   campaign_id,
+            "total_sent":    4,
+            "delivered":      3,
+            "pending":       1,
+            "delivery_rate": "75%",
+            "by_channel": {
+                "微信": {"sent": 2, "delivered": 2, "pending": 0},
+                "邮件": {"sent": 1, "delivered": 1, "pending": 0},
+                "短信": {"sent": 1, "delivered": 0, "pending": 1},
+            },
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_comments_reply(comment_id: str):
+    """Files comments/{id}/reply · 评论回复 (R393)"""
+    return {
+        "status": "ok",
+        "data": {
+            "comment_id":   comment_id,
+            "reply_id":     f"rep_{comment_id}_v23",
+            "reply":        "已修复，请刷新查看",
+            "replied_by":   "u_001",
+            "replied_at":   datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_devices_revoke(device_id: str):
+    """Auth devices/{id}/revoke · 撤销设备 (R393)"""
+    return {
+        "status": "ok",
+        "data": {
+            "device_id":   device_id,
+            "revoked":     True,
+            "revoked_at":  datetime.utcnow().isoformat() + "Z",
+            "sessions_today":14,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -3971,6 +4054,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/abtest-stop":  lambda q, id="c001": get_campaigns_abtest_stop(id),
     "/api/v2/files/comments/{id}":          lambda q, id="c_001": get_files_comments_item(id),
     "/api/v2/auth/sessions/cleanup":       lambda q: get_auth_sessions_cleanup(),
+    "/api/v2/skills/{id}/retire":           lambda q, id="s_001": get_skills_retire(id),
+    "/api/v2/billing/{tenant_id}/tax-rate-update": lambda q, tenant_id="t_3a59592b7619": get_billing_tax_rate_update(tenant_id),
+    "/api/v2/campaigns/{id}/recipients-stats": lambda q, id="c001": get_campaigns_recipients_stats(id),
+    "/api/v2/files/comments/{id}/reply":   lambda q, id="c_001": get_files_comments_reply(id),
+    "/api/v2/auth/devices/{id}/revoke":     lambda q, id="d_001": get_auth_devices_revoke(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
