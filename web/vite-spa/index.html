@@ -34,6 +34,12 @@
     <!-- R364 Lighthouse FCP 优化 · hero image preload (Marketing 首页主图 624KB · LCP 关键) -->
     <link rel="preload" as="image" href="/images/opc-hero.jpeg" fetchpriority="high" />
 
+    <!-- R368 Lighthouse modulepreload 优化 · vendor chunks 提前解析 -->
+    <link rel="modulepreload" href="/assets/vendor-react.js" />
+    <link rel="modulepreload" href="/assets/vendor-radix.js" />
+    <link rel="modulepreload" href="/assets/vendor-flow.js" />
+    <link rel="modulepreload" href="/assets/vendor-icons.js" />
+
     <!-- 图标（iOS / Android）-->
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
