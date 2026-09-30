@@ -224,7 +224,7 @@ export function ClientListPage() {
           </h2>
           <div className="flex flex-wrap gap-2">
             {topCities.map(([city, n]) => (
-              <span key={city} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+              <span key={city} className="px-3 py-1 bg-gray-100 text-foreground rounded-full text-sm">
                 {city} <span className="font-bold">{n}</span>
               </span>
             ))}

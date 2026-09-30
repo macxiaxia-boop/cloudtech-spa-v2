@@ -25,7 +25,7 @@ export function FilterBar({
   onSortChange,
 }: FilterBarProps) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+    <div className="bg-card rounded-lg border border-gray-200 p-4 mb-4">
       <div className="flex flex-wrap items-center gap-3">
         {/* 搜索 */}
         <div className="flex-1 min-w-[200px] relative">
@@ -48,7 +48,7 @@ export function FilterBar({
                 key={f.label}
                 value={f.value}
                 onChange={(e) => f.onChange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md bg-white"
+                className="px-3 py-2 border border-gray-300 rounded-md bg-card"
               >
                 {f.options.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -65,7 +65,7 @@ export function FilterBar({
         {sortOptions.length > 0 && (
           <select
             onChange={(e) => onSortChange?.(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md bg-card text-sm"
           >
             {sortOptions.map((o) => (
               <option key={o.value} value={o.value}>

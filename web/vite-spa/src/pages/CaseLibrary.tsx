@@ -328,7 +328,7 @@ function CaseCard({ c }: { c: CaseStudy }) {
   return (
     <div
       className={`p-6 rounded-lg border-2 ${
-        c.highlight ? 'border-brand-500 bg-gradient-to-br from-brand-50 to-white' : 'border-gray-200 bg-white'
+        c.highlight ? 'border-brand-500 bg-gradient-to-br from-brand-50 to-card' : 'border-border bg-card'
       }`}
     >
       <div className="flex items-start justify-between mb-3">
@@ -348,11 +348,11 @@ function CaseCard({ c }: { c: CaseStudy }) {
       <div className="space-y-2 mb-4">
         <p className="text-sm">
           <span className="font-medium text-red-600">痛点：</span>
-          <span className="text-gray-700">{c.challenge}</span>
+          <span className="text-foreground">{c.challenge}</span>
         </p>
         <p className="text-sm">
           <span className="font-medium text-blue-600">方案：</span>
-          <span className="text-gray-700">{c.solution}</span>
+          <span className="text-foreground">{c.solution}</span>
         </p>
       </div>
 
@@ -365,7 +365,7 @@ function CaseCard({ c }: { c: CaseStudy }) {
         ))}
       </div>
 
-      <blockquote className="border-l-4 border-brand-500 pl-3 italic text-sm text-gray-700">
+      <blockquote className="border-l-4 border-brand-500 pl-3 italic text-sm text-foreground">
         "{c.testimonial.quote}"
         <footer className="text-xs text-gray-500 mt-1 not-italic">
           — {c.testimonial.author} · {c.testimonial.role}

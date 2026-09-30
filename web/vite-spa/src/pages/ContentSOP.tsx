@@ -197,7 +197,7 @@ export function ContentSOPPage() {
                 </div>
 
                 <div className="p-3 bg-card rounded border border-gray-200">
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-foreground">
                     <span className="font-medium">理由: </span>{t.rationale}
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">

@@ -270,7 +270,7 @@ export function DocumentsPage() {
                         {doc.path.split('/').pop()}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700 mb-3">{doc.desc}</p>
+                    <p className="text-sm text-foreground mb-3">{doc.desc}</p>
 
                     <div className="text-xs text-gray-600 mb-2">
                       <span className="font-medium">路径: </span>
@@ -291,7 +291,7 @@ export function DocumentsPage() {
                       <summary className="cursor-pointer text-gray-600 hover:text-gray-900">
                         红 #22 必拍板项 ({doc.requires_user_approval.length})
                       </summary>
-                      <ul className="mt-2 space-y-1 pl-4 list-disc text-gray-700">
+                      <ul className="mt-2 space-y-1 pl-4 list-disc text-foreground">
                         {doc.requires_user_approval.map((a, i) => (
                           <li key={i}>{a}</li>
                         ))}

@@ -509,7 +509,7 @@ export function AIEmployeesPage() {
                           <span className={`px-1.5 py-0.5 rounded text-[10px] ${
                             s.level === 'expert' ? 'bg-green-100 text-green-700' :
                             s.level === 'advanced' ? 'bg-blue-100 text-blue-700' :
-                            'bg-gray-100 text-gray-700'
+                            'bg-muted text-foreground'
                           }`}>
                             {s.level === 'expert' ? '⭐ 专家' : s.level === 'advanced' ? '✓ 高级' : '入门'}
                           </span>

@@ -33,7 +33,7 @@ const TODAY_ACTIVITIES: AIEmployeeActivity[] = [
 const STATUS_BADGE = {
   success: 'bg-green-100 text-green-700',
   running: 'bg-yellow-100 text-yellow-700 animate-pulse',
-  pending: 'bg-gray-100 text-gray-700',
+  pending: 'bg-muted text-foreground',
 };
 
 const STATUS_LABEL = {
@@ -62,7 +62,7 @@ export function AIEmployeeDashboard() {
             const Icon = e.icon;
             const tasks = TODAY_ACTIVITIES.filter((a) => a.employee === key);
             return (
-              <div key={key} className="bg-white rounded-lg border border-gray-200 p-4">
+              <div key={key} className="bg-card rounded-lg border border-gray-200 p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <div className={`w-8 h-8 rounded-md flex items-center justify-center ${e.color}`}>
                     <Icon className="w-4 h-4" />
@@ -80,7 +80,7 @@ export function AIEmployeeDashboard() {
         </div>
 
         {/* 实时 feed */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-card rounded-lg border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
             <p className="text-sm font-medium">实时活动流</p>
             <span className="flex items-center gap-1 text-xs text-green-600">

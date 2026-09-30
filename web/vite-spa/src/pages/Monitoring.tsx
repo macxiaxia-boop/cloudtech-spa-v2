@@ -47,7 +47,7 @@ const SAAS_STACK = [
 ];
 
 const FUNNEL_STAGES = [
-  { key: 'pending', label: '待触达', count: 80, color: 'bg-gray-100 text-gray-700' },
+  { key: 'pending', label: '待触达', count: 80, color: 'bg-muted text-foreground' },
   { key: 'contacted', label: '已联系', count: 24, color: 'bg-blue-100 text-blue-700' },
   { key: 'demo_scheduled', label: '已约演示', count: 10, color: 'bg-purple-100 text-purple-700' },
   { key: 'trial', label: '试用中', count: 4, color: 'bg-orange-100 text-orange-700' },
