@@ -8013,6 +8013,91 @@ def get_auth_api_keys_rotate_secret_v19(key_id: str):
     }
 
 
+def get_skills_merge_stats_v3(skill_id: str):
+    """Skill merge-stats-v3 · 合并统计 v3 (R445)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "merge_count":  8,
+            "merged_at":   datetime.utcnow().isoformat() + "Z",
+            "merged_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v3",
+    }
+
+
+def get_billing_payment_methods_unset_default_payment_method_v3(method_id: str):
+    """Billing payment-methods/{id}/unset-default-payment-method-v3 · 取消默认 payment-method v3 (R445)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "is_default": False,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v3",
+    }
+
+
+def get_campaigns_audience_grade_list_v3(campaign_id: str):
+    """Campaigns audience-grade-list-v3 · 等级列表 v3 (R445)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"grade": "A 优质", "count": 4180, "pct": 22.7, "min_score": 800, "max_score": 1000},
+            {"grade": "B 良好", "count": 6240, "pct": 33.9, "min_score": 600, "max_score":  799},
+            {"grade": "C 普通", "count": 5240, "pct": 28.4, "min_score": 400, "max_score":  599},
+            {"grade": "D 低质", "count": 2760, "pct": 15.0, "min_score":   0, "max_score":  399},
+        ],
+        "count": 4,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_month_list_v4(file_id: str):
+    """Files download-by-month-list-v4 · 按月列表 v4 (R445)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"month": "2026-04", "downloads": 168, "unique_users": 118, "avg_size_mb": 2.4, "median_size_mb": 2.3},
+            {"month": "2026-05", "downloads": 248, "unique_users": 178, "avg_size_mb": 2.5, "median_size_mb": 2.4},
+            {"month": "2026-06", "downloads": 312, "unique_users": 218, "avg_size_mb": 2.4, "median_size_mb": 2.3},
+            {"month": "2026-07", "downloads": 428, "unique_users": 312, "avg_size_mb": 2.6, "median_size_mb": 2.5},
+            {"month": "2026-08", "downloads": 487, "unique_users": 348, "avg_size_mb": 2.5, "median_size_mb": 2.4},
+            {"month": "2026-09", "downloads": 312, "unique_users": 220, "avg_size_mb": 2.4, "median_size_mb": 2.3},
+        ],
+        "total": 1955,
+        "version": "v4",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v20(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v20 · 轮换 secret v20 (R445)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 39,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v20",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -8606,6 +8691,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-list-v7": lambda q, id="c001": get_campaigns_audience_tech_list_v7(id),
     "/api/v2/files/{id}/download-by-quarter-stats-v3": lambda q, id="f_001": get_files_download_by_quarter_stats_v3(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v19": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v19(id),
+    "/api/v2/skills/{id}/merge-stats-v3":         lambda q, id="s_001": get_skills_merge_stats_v3(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-payment-method-v3": lambda q, id="c_001": get_billing_payment_methods_unset_default_payment_method_v3(id),
+    "/api/v2/campaigns/{id}/audience-grade-list-v3": lambda q, id="c001": get_campaigns_audience_grade_list_v3(id),
+    "/api/v2/files/{id}/download-by-month-list-v4": lambda q, id="f_001": get_files_download_by_month_list_v4(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v20": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v20(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
