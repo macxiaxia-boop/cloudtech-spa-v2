@@ -12647,6 +12647,102 @@ def _disk_ok(path: str) -> bool:
 
 _START = datetime.utcnow()
 
+# ═══════════════════════════════════
+# R498 · 5 个新动态端点 (V23 第 150+ 模板)
+# ═══════════════════════════════════
+
+def get_skills_sync_from_template_v12(skill_id: str):
+    """Skill sync-from-template-v12 · 从模板同步 v12 (R498)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "synced_at":   datetime.utcnow().isoformat() + "Z",
+            "template_id": f"tpl_v23_R498_v12_{skill_id}",
+            "synced_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v12",
+    }
+
+
+def get_billing_payment_methods_unset_active_v22(method_id: str):
+    """Billing payment-methods/{id}/unset-active-v22 · 取消激活 v22 (R498)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "is_active":   False,
+            "unset_at":    datetime.utcnow().isoformat() + "Z",
+            "unset_by":    "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v22",
+    }
+
+
+def get_campaigns_audience_source_stats_v12(campaign_id: str):
+    """Campaigns audience-source-stats-v12 · 来源统计 v12 (R498)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"source": "wechat_official", "count": 8820, "pct": 36.8},
+            {"source": "xhs",             "count": 5180, "pct": 21.6},
+            {"source": "douyin",          "count": 4120, "pct": 17.2},
+            {"source": "wechat_group",    "count": 2340, "pct":  9.8},
+            {"source": "email",           "count": 1640, "pct":  6.8},
+            {"source": "direct",          "count": 1180, "pct":  4.9},
+            {"source": "baidu",           "count":  680, "pct":  2.9},
+        ],
+        "total": 23960,
+        "version": "v12",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_day_list_v13(file_id: str):
+    """Files download-by-day-list-v13 · 按日列表 v13 (R498)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"date": "2026-09-25", "downloads": 32, "unique_users": 22},
+            {"date": "2026-09-26", "downloads": 48, "unique_users": 32},
+            {"date": "2026-09-27", "downloads": 42, "unique_users": 28},
+            {"date": "2026-09-28", "downloads": 62, "unique_users": 42},
+            {"date": "2026-09-29", "downloads": 76, "unique_users": 52},
+            {"date": "2026-09-30", "downloads": 48, "unique_users": 32},
+            {"date": "2026-10-01", "downloads": 42, "unique_users": 28},
+        ],
+        "total": 350,
+        "version": "v13",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_quota_history_v34(key_id: str):
+    """Auth api-keys/{id}/quota-history-v34 · quota 历史 v34 (R498)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-10-01T00:00:00Z", "quota":  40000, "set_by": "u_001"},
+            {"at": "2026-10-01T01:00:00Z", "quota":  50000, "set_by": "u_001"},
+            {"at": "2026-10-01T02:00:00Z", "quota":  60000, "set_by": "u_001"},
+            {"at": "2026-10-01T03:00:00Z", "quota":  70000, "set_by": "u_001"},
+        ],
+        "count": 4,
+        "version": "v34",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+# R498 ROUTES 注册
+# 主表 (line ~13200-13300 附近) 实际位置 - 找 ROUTES = { ... } 末尾
+
 ROUTES = {
     "/health":                            lambda q: deep_health() if q.get("deep") == ["1"] else {"status": "ok", "service": "V23", "version": "23.0.0", "uptime_s": int((datetime.utcnow() - _START).total_seconds())},
     "/api/v2/dashboard/kpis":             lambda q: get_kpis(),
@@ -13214,6 +13310,18 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-grade-stats-v14": lambda q, id="c001": get_campaigns_audience_grade_stats_v14(id),
     "/api/v2/files/{id}/download-by-week-stats-v19": lambda q, id="f_001": get_files_download_by_week_stats_v19(id),
     "/api/v2/auth/api-keys/{id}/quota-history-v32": lambda q, id="k_001": get_auth_api_keys_quota_history_v32(id),
+    "/api/v2/skills/{id}/sync-from-template-v12": lambda q, id="s_001": get_skills_sync_from_template_v12(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v22": lambda q, id="c_001": get_billing_payment_methods_unset_active_v22(id),
+    "/api/v2/campaigns/{id}/audience-source-stats-v12": lambda q, id="c001": get_campaigns_audience_source_stats_v12(id),
+    "/api/v2/files/{id}/download-by-day-list-v13": lambda q, id="f_001": get_files_download_by_day_list_v13(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v34": lambda q, id="k_001": get_auth_api_keys_quota_history_v34(id),
+    "/api/v2/skills/{id}/merge-with-bundle": lambda q, id="s_001": get_skills_merge_with_bundle(id),
+    "/api/v2/skills/{id}/sync-from-template-v12": lambda q, id="s_001": get_skills_sync_from_template_v12(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v22": lambda q, id="c_001": get_billing_payment_methods_unset_active_v22(id),
+    "/api/v2/campaigns/{id}/audience-source-stats-v12": lambda q, id="c001": get_campaigns_audience_source_stats_v12(id),
+    "/api/v2/files/{id}/download-by-day-list-v13": lambda q, id="f_001": get_files_download_by_day_list_v13(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v34": lambda q, id="k_001": get_auth_api_keys_quota_history_v34(id),
+    "/api/v2/skills/{id}/merge-with-bundle": lambda q, id="s_001": get_skills_merge_with_bundle(id),
     "/api/v2/skills/{id}/sync-from-template-v11": lambda q, id="s_001": get_skills_sync_from_template_v11(id),
     "/api/v2/billing/payment-methods/{id}/unset-active-v21": lambda q, id="c_001": get_billing_payment_methods_unset_active_v21(id),
     "/api/v2/campaigns/{id}/audience-source-stats-v11": lambda q, id="c001": get_campaigns_audience_source_stats_v11(id),
@@ -13863,3 +13971,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# 用 str.replace 方式更安全:
