@@ -7593,6 +7593,90 @@ def get_auth_api_keys_rotate_secret_v14(key_id: str):
     }
 
 
+def get_skills_export_stats_v2(skill_id: str):
+    """Skill export-stats-v2 · 导出统计 v2 (R440)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "export_count": 28,
+            "exported_at": datetime.utcnow().isoformat() + "Z",
+            "exported_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_billing_payment_methods_unset_default_payment_billing(method_id: str):
+    """Billing payment-methods/{id}/unset-default-payment-billing · 取消默认 billing (R440)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "for_billing": False,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_source_detailed(campaign_id: str):
+    """Campaigns audience-source-detailed · 来源详细 (R440)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"source": "wechat",       "medium": "社交", "count": 6280, "pct": 34.1},
+            {"source": "xhs",          "medium": "社交", "count": 4180, "pct": 22.7},
+            {"source": "douyin",       "medium": "社交", "count": 3120, "pct": 16.9},
+            {"source": "wechat_group", "medium": "社交", "count": 1840, "pct": 10.0},
+            {"source": "email",        "medium": "邮件", "count": 1240, "pct":  6.7},
+            {"source": "direct",       "medium": "直接", "count": 1180, "pct":  6.4},
+            {"source": "baidu",        "medium": "搜索", "count":  580, "pct":  3.2},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_week_stats_v3(file_id: str):
+    """Files download-by-week-stats-v3 · 按周统计 v3 (R440)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"week": "2026-09-W1", "downloads": 312, "unique_users": 218, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+            {"week": "2026-09-W2", "downloads": 428, "unique_users": 312, "avg_size_mb": 2.5, "p99_size_mb": 2.9},
+            {"week": "2026-09-W3", "downloads": 487, "unique_users": 348, "avg_size_mb": 2.5, "p99_size_mb": 2.9},
+            {"week": "2026-09-W4", "downloads": 312, "unique_users": 220, "avg_size_mb": 2.4, "p99_size_mb": 2.8},
+        ],
+        "total": 1539,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v15(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v15 · 轮换 secret v15 (R440)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 29,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v15",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -8161,6 +8245,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-list-v6": lambda q, id="c001": get_campaigns_audience_tech_list_v6(id),
     "/api/v2/files/{id}/download-by-quarter-list-v2": lambda q, id="f_001": get_files_download_by_quarter_list_v2(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v14": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v14(id),
+    "/api/v2/skills/{id}/export-stats-v2":      lambda q, id="s_001": get_skills_export_stats_v2(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-payment-billing": lambda q, id="c_001": get_billing_payment_methods_unset_default_payment_billing(id),
+    "/api/v2/campaigns/{id}/audience-source-detailed": lambda q, id="c001": get_campaigns_audience_source_detailed(id),
+    "/api/v2/files/{id}/download-by-week-stats-v3": lambda q, id="f_001": get_files_download_by_week_stats_v3(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v15": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v15(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
