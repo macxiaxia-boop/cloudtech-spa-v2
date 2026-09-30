@@ -147,31 +147,31 @@ export function PricingPage() {
           ))}
         </div>
 
-        {/* 比较表 */}
+        {/* 比较表 · V23 shadcn Table (R360) */}
         <div className="max-w-5xl mx-auto mb-16">
-          <h2 className="text-2xl font-bold mb-6 text-center">3 套餐详细对比</h2>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium">功能</th>
-                  <th className="px-4 py-3 text-center font-medium">轻装版</th>
-                  <th className="px-4 py-3 text-center font-medium bg-brand-50">标准版 ⭐</th>
-                  <th className="px-4 py-3 text-center font-medium">旗舰版</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+          <h2 className="text-2xl font-bold mb-6 text-center text-foreground">3 套餐详细对比</h2>
+          <Card className="p-0 overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left font-medium">功能</TableHead>
+                  <TableHead className="text-center font-medium">轻装版</TableHead>
+                  <TableHead className="text-center font-medium bg-brand-50">标准版 ⭐</TableHead>
+                  <TableHead className="text-center font-medium">旗舰版</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {COMPARISON.map((row) => (
-                  <tr key={row.feature}>
-                    <td className="px-4 py-3 text-gray-700">{row.feature}</td>
-                    <td className="px-4 py-3 text-center">{row.light}</td>
-                    <td className="px-4 py-3 text-center bg-brand-50 font-medium">{row.standard}</td>
-                    <td className="px-4 py-3 text-center">{row.flagship}</td>
-                  </tr>
+                  <TableRow key={row.feature}>
+                    <TableCell className="px-4 py-3 text-foreground">{row.feature}</TableCell>
+                    <TableCell className="px-4 py-3 text-center">{row.light}</TableCell>
+                    <TableCell className="px-4 py-3 text-center bg-brand-50 font-medium">{row.standard}</TableCell>
+                    <TableCell className="px-4 py-3 text-center">{row.flagship}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </Card>
         </div>
 
         {/* Trusted by */}
