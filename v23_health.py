@@ -6420,6 +6420,95 @@ def get_auth_api_keys_quota_history_v2(key_id: str):
     }
 
 
+def get_skills_export_to_marketplace(skill_id: str):
+    """Skill export-to-marketplace · 导出到 marketplace (R426)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "marketplace_url": f"https://marketplace.v23.com/skills/{skill_id}",
+            "exported_at": datetime.utcnow().isoformat() + "Z",
+            "visibility": "public",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_validate_all(method_id: str):
+    """Billing payment-methods/{id}/validate-all · 验证所有 (R426)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "all_valid":   True,
+            "checks":      [
+                {"name": "card_number",   "valid": True},
+                {"name": "expiry",        "valid": True},
+                {"name": "cvv",           "valid": True},
+                {"name": "3d_secure",     "valid": True},
+                {"name": "balance",       "valid": True},
+                {"name": "3ds_enrolled",  "valid": True},
+                {"name": "address_verified","valid": True},
+            ],
+            "validated_at": datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_source_list(campaign_id: str):
+    """Campaigns audience-source-list · 来源列表 (R426)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"source": "wechat",       "count": 6280, "pct": 34.1},
+            {"source": "xhs",          "count": 4180, "pct": 22.7},
+            {"source": "douyin",       "count": 3120, "pct": 16.9},
+            {"source": "wechat_group", "count": 1840, "pct": 10.0},
+            {"source": "email",        "count": 1240, "pct":  6.7},
+            {"source": "direct",       "count": 1180, "pct":  6.4},
+            {"source": "baidu",        "count":  580, "pct":  3.2},
+        ],
+        "count": 7,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_year_list(file_id: str):
+    """Files download-by-year-list · 按年下载列表 (R426)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"year": "2024", "downloads":  680},
+            {"year": "2025", "downloads": 4180},
+            {"year": "2026", "downloads": 3280},
+        ],
+        "total": 8140,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v2(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v2 · 轮换 secret v2 (R426)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 3,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v2",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -6918,6 +7007,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-tech-list-v3": lambda q, id="c001": get_campaigns_audience_tech_list_v3(id),
     "/api/v2/files/{id}/download-by-month-stats-v2": lambda q, id="f_001": get_files_download_by_month_stats_v2(id),
     "/api/v2/auth/api-keys/{id}/quota-history-v2": lambda q, id="k_001": get_auth_api_keys_quota_history_v2(id),
+    "/api/v2/skills/{id}/export-to-marketplace": lambda q, id="s_001": get_skills_export_to_marketplace(id),
+    "/api/v2/billing/payment-methods/{id}/validate-all": lambda q, id="c_001": get_billing_payment_methods_validate_all(id),
+    "/api/v2/campaigns/{id}/audience-source-list": lambda q, id="c001": get_campaigns_audience_source_list(id),
+    "/api/v2/files/{id}/download-by-year-list": lambda q, id="f_001": get_files_download_by_year_list(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v2": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v2(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
