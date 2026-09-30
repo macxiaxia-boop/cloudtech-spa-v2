@@ -13677,6 +13677,98 @@ class Handler(BaseHTTPRequestHandler):
 
         self._send_json(404, {"status": "error", "error": "not found", "path": path})
 
+    def do_POST(self):
+        """POST handler · R360 TryNow 真表单后端 (用 /api/v2/auth/login)"""
+        u = urlparse(self.path)
+        path = u.path
+        length = int(self.headers.get('Content-Length', 0) or 0)
+        try:
+            body_raw = self.rfile.read(length) if length else b''
+            body = json.loads(body_raw.decode('utf-8')) if body_raw else {}
+        except Exception:
+            body = {}
+
+        # TryNow 试用注册 (POST /api/v2/auth/login)
+        if path == "/api/v2/auth/login":
+            try:
+                result = post_auth_login(body)
+                code = 200 if result.get("status") == "ok" else 400
+                self._send_json(code, result)
+                return
+            except Exception as e:
+                self._send_json(500, {"status": "error", "error": str(e), "path": path})
+                return
+
+        # 通用 POST 路由 fallback (R360)
+        if path in POST_ROUTES:
+            try:
+                result = POST_ROUTES[path](body)
+                code = 200 if result.get("status") == "ok" else 500
+                self._send_json(code, result)
+                return
+            except Exception as e:
+                self._send_json(500, {"status": "error", "error": str(e), "path": path})
+                return
+
+        self._send_json(404, {"status": "error", "error": "POST not found", "path": path})
+
+
+def post_auth_login(body: dict):
+    """Auth POST login · TryNow 试用注册 (R360)
+    body: {email, password, tenant_name, industry, sku_id}
+    返回: {status, data: {user_id, tenant_id, token, role, expires_in}}
+    """
+    email = (body.get("email") or "").strip()
+    password = (body.get("password") or "").strip()
+    tenant_name = (body.get("tenant_name") or "").strip() or (email.split("@")[0] if email else "demo_tenant")
+    industry_val = (body.get("industry") or "decoration").strip()
+    sku_id = (body.get("sku_id") or "dec_pro").strip()
+
+    if not email or "@" not in email:
+        return {
+            "status": "error",
+            "error": "invalid_email",
+            "message": "邮箱格式不正确",
+            "ts": datetime.utcnow().isoformat() + "Z",
+        }
+    if len(password) < 6:
+        return {
+            "status": "error",
+            "error": "password_too_short",
+            "message": "密码至少 6 位",
+            "ts": datetime.utcnow().isoformat() + "Z",
+        }
+
+    # 简化 demo 注册: 用 email hash 生成 user_id + tenant_id
+    h = hashlib.md5(email.encode("utf-8")).hexdigest()[:10]
+    user_id = f"u_{h}"
+    tenant_id = f"t_{hashlib.md5(tenant_name.encode('utf-8')).hexdigest()[:12]}"
+    token = f"ct_trial_{h}_{int(datetime.utcnow().timestamp())}"
+
+    return {
+        "status": "ok",
+        "data": {
+            "user_id":     user_id,
+            "tenant_id":   tenant_id,
+            "tenant_name": tenant_name,
+            "industry":    industry_val,
+            "sku_id":      sku_id,
+            "token":       token,
+            "role":        "owner",
+            "expires_in":  7 * 24 * 3600,  # 7 天试用
+            "trial":       True,
+        },
+        "source": "v23_post_auth_login_R360",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "R360",
+    }
+
+
+# POST 路由表 (R360)
+POST_ROUTES = {
+    # "/api/v2/auth/login" 直接走 do_POST 内置分支（带 body 校验）
+}
+
 
 INDEX_HTML = """<!doctype html>
 <html lang=zh-CN><head><meta charset=UTF-8><title>CloudTech V23 Health</title>

@@ -77,28 +77,39 @@ export function TryNowPage() {
     setLoading(true);
 
     try {
-      // 1. 尝试 GET /api/v2/saas/v1/info 验证后端连通性（实际注册走 mock）
-      let backendOk = false;
+      // R360: 真 POST 到 V23 /api/v2/auth/login (试用注册) + 兜底 mock
+      let realOk = false;
       try {
-        const infoRes = await fetch(`${V23_API}/api/v2/saas/v1/info`);
-        backendOk = infoRes.ok;
+        const loginRes = await fetch(`${V23_API}/api/v2/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: form.email,
+            password: form.password,
+            tenant_name: form.tenant_name,
+            industry: form.industry,
+            sku_id: form.sku_id,
+          }),
+        });
+        if (loginRes.ok) {
+          const json = await loginRes.json();
+          if (json?.status === 'ok' && json?.data?.token) {
+            localStorage.setItem('ct_token', json.data.token);
+            localStorage.setItem('ct_user_id', json.data.user_id);
+            localStorage.setItem('ct_tenant_id', json.data.tenant_id);
+            localStorage.setItem('ct_trial', String(json.data.trial ?? true));
+            localStorage.setItem('ct_tenant_name', form.tenant_name);
+            localStorage.setItem('ct_industry', form.industry);
+            localStorage.setItem('ct_sku_id', form.sku_id);
+            realOk = true;
+          }
+        }
       } catch {
-        // 后端不可用，继续 mock
+        // 后端不可用，继续 mock fallback
       }
 
-      if (backendOk) {
-        // 后端真实响应 mock（POST /api/v2/auth/login + /api/v2/saas/v1/info 均未实现 501）
-        // 模拟成功：随机生成 user_id + token
-        const mockToken = `ct_trial_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-        const mockUserId = `u_${Math.random().toString(36).slice(2, 10)}`;
-
-        localStorage.setItem('ct_token', mockToken);
-        localStorage.setItem('ct_user_id', mockUserId);
-        localStorage.setItem('ct_tenant_name', form.tenant_name);
-        localStorage.setItem('ct_industry', form.industry);
-        localStorage.setItem('ct_sku_id', form.sku_id);
-      } else {
-        // 后端不可用，纯 mock
+      if (!realOk) {
+        // 后端不可用，纯 mock (兜底)
         const mockToken = `ct_mock_${Date.now()}`;
         localStorage.setItem('ct_token', mockToken);
         localStorage.setItem('ct_user_id', `mock_u`);

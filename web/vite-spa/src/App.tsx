@@ -9,7 +9,7 @@
  * 性能优化：WorkflowEditor + Workflows 懒加载（react.lazy + Suspense）
  * 错误边界：ErrorBoundary 包裹整个 App 防止单组件崩溃
  */
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import { MarketingPage } from './pages/Marketing';
 import { PricingPage } from './pages/Pricing';
@@ -65,10 +65,28 @@ import { AgentsPage } from './pages/Agents';
 import { RequireAuth } from './components/Auth/RequireAuth';
 import { NotFoundPage } from './pages/NotFoundPage';
 
+/* ───── ThemeInitializer · 全局 dark mode 初始化 (R360) ─────
+ * Marketing 路由没有 AppHeader/ThemeToggle，所以这里兜底初始化
+ * 工作台路由 ThemeToggle 也会再调一次 (幂等)
+ */
+function ThemeInitializer() {
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('ct.theme');
+      const theme = (saved === 'light' || saved === 'dark') ? saved
+        : (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+      localStorage.setItem('ct.theme', theme);
+    } catch { /* ignore */ }
+  }, []);
+  return null;
+}
+
 /* ───── Layout: Marketing（marketing Header/Footer） ───── */
 function MarketingLayout() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <ThemeInitializer />
       <Header />
       <main className="flex-1">
         <Outlet />
