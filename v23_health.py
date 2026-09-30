@@ -8269,6 +8269,88 @@ def get_auth_api_keys_quota_set(key_id: str):
     }
 
 
+def get_skills_push_to_marketplace_v2(skill_id: str):
+    """Skill push-to-marketplace-v2 · 推到 marketplace v2 (R448)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "marketplace_url": f"https://marketplace.v23.com/v2/skills/{skill_id}",
+            "pushed_at": datetime.utcnow().isoformat() + "Z",
+            "version":     "v2",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_unset_default_for_subscription_v3(method_id: str):
+    """Billing payment-methods/{id}/unset-default-for-subscription-v3 · 取消默认 subscription v3 (R448)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":        method_id,
+            "for_subscription": False,
+            "unset_at":         datetime.utcnow().isoformat() + "Z",
+            "unset_by":         "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v3",
+    }
+
+
+def get_campaigns_audience_cohort_list_v2(campaign_id: str):
+    """Campaigns audience-cohort-list-v2 · cohort 列表 v2 (R448)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"cohort_id": "c_001", "name": "2026-09-W1", "size": 8240, "retention_pct": "100%", "ltv_yuan": 1999, "source": "wechat"},
+            {"cohort_id": "c_002", "name": "2026-09-W2", "size": 6240, "retention_pct": "75.7%", "ltv_yuan": 1680, "source": "xhs"},
+            {"cohort_id": "c_003", "name": "2026-09-W3", "size": 4180, "retention_pct": "50.7%", "ltv_yuan": 1450, "source": "douyin"},
+            {"cohort_id": "c_004", "name": "2026-09-W4", "size": 3240, "retention_pct": "39.3%", "ltv_yuan": 1180, "source": "organic"},
+        ],
+        "count": 4,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_quarter_chart(file_id: str):
+    """Files download-by-quarter-chart · 按季度 chart (R448)"""
+    return {
+        "status": "ok",
+        "data": {
+            "labels": ["Q1", "Q2", "Q3"],
+            "datasets": [
+                {"label": "下载",   "data": [ 428,  728, 1287], "type": "bar"},
+                {"label": "唯一访客", "data": [ 318,  528,  920], "type": "line"},
+            ],
+            "chart_type": "mixed",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_quota_increase(key_id: str):
+    """Auth api-keys/{id}/quota-increase · 增加 quota (R448)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":           key_id,
+            "previous_quota":   10000,
+            "new_quota":        15000,
+            "increase_amount":  5000,
+            "increased_at":     datetime.utcnow().isoformat() + "Z",
+            "increased_by":     "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -8877,6 +8959,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-source-detailed-v2": lambda q, id="c001": get_campaigns_audience_source_detailed_v2(id),
     "/api/v2/files/{id}/download-by-week-stats-v4": lambda q, id="f_001": get_files_download_by_week_stats_v4(id),
     "/api/v2/auth/api-keys/{id}/quota-set":         lambda q, id="k_001": get_auth_api_keys_quota_set(id),
+    "/api/v2/skills/{id}/push-to-marketplace-v2":   lambda q, id="s_001": get_skills_push_to_marketplace_v2(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-for-subscription-v3": lambda q, id="c_001": get_billing_payment_methods_unset_default_for_subscription_v3(id),
+    "/api/v2/campaigns/{id}/audience-cohort-list-v2": lambda q, id="c001": get_campaigns_audience_cohort_list_v2(id),
+    "/api/v2/files/{id}/download-by-quarter-chart": lambda q, id="f_001": get_files_download_by_quarter_chart(id),
+    "/api/v2/auth/api-keys/{id}/quota-increase":   lambda q, id="k_001": get_auth_api_keys_quota_increase(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
