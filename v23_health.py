@@ -9022,6 +9022,89 @@ def get_auth_api_keys_burst_quota_reset_history(key_id: str):
     }
 
 
+def get_skills_merge_with_template(skill_id: str):
+    """Skill merge-with-template · 合并到模板 (R457)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":    skill_id,
+            "merged_to":   f"template_v23_R457_{skill_id}",
+            "merged_at":   datetime.utcnow().isoformat() + "Z",
+            "merged_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_validate_billing_cycle_v3(method_id: str):
+    """Billing payment-methods/{id}/validate-billing-cycle-v3 · 验证账单周期 v3 (R457)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":      method_id,
+            "verified":      True,
+            "verified_at":   datetime.utcnow().isoformat() + "Z",
+            "verified_by":   "u_001",
+            "cycle":         "monthly",
+            "next_billing":  "2026-10-15",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v3",
+    }
+
+
+def get_campaigns_audience_language_stats_v2(campaign_id: str):
+    """Campaigns audience-language-stats-v2 · 语言统计 v2 (R457)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"language": "zh-CN", "name": "简体中文",  "users": 16840, "pct": 91.4, "ltv_yuan": 1680},
+            {"language": "en-US", "name": "English",   "users":   920, "pct":  5.0, "ltv_yuan": 3200},
+            {"language": "ja-JP", "name": "日本語",     "users":   280, "pct":  1.5, "ltv_yuan": 2100},
+            {"language": "es-ES", "name": "Español",   "users":   180, "pct":  1.0, "ltv_yuan": 1500},
+            {"language": "other", "name": "其他",       "users":   200, "pct":  1.1, "ltv_yuan": 1200},
+        ],
+        "total": 18420,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_year_stats_v2(file_id: str):
+    """Files download-by-year-stats-v2 · 按年统计 v2 (R457)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"year": "2024", "downloads":  680, "unique_users": 480},
+            {"year": "2025", "downloads": 4180, "unique_users": 3120},
+            {"year": "2026", "downloads": 3280, "unique_users": 2280},
+        ],
+        "total": 8140,
+        "version": "v2",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_throttle_history_v3(key_id: str):
+    """Auth api-keys/{id}/throttle-history-v3 · 限流历史 v3 (R457)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-30T10:30:00Z", "rate": 102, "limit": 100, "throttled": True},
+            {"at": "2026-10-01T15:00:00Z", "rate": 105, "limit": 100, "throttled": True},
+            {"at": "2026-10-01T20:00:00Z", "rate": 112, "limit": 100, "throttled": True},
+        ],
+        "count": 3,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -9510,6 +9593,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-cohort-detailed-v3": lambda q, id="c001": get_campaigns_audience_cohort_detailed_v3(id),
     "/api/v2/files/{id}/download-by-month-stats-v4": lambda q, id="f_001": get_files_download_by_month_stats_v4(id),
     "/api/v2/auth/api-keys/{id}/burst-quota-reset-history": lambda q, id="k_001": get_auth_api_keys_burst_quota_reset_history(id),
+    "/api/v2/skills/{id}/merge-with-template": lambda q, id="s_001": get_skills_merge_with_template(id),
+    "/api/v2/billing/payment-methods/{id}/validate-billing-cycle-v3": lambda q, id="c_001": get_billing_payment_methods_validate_billing_cycle_v3(id),
+    "/api/v2/campaigns/{id}/audience-language-stats-v2": lambda q, id="c001": get_campaigns_audience_language_stats_v2(id),
+    "/api/v2/files/{id}/download-by-year-stats-v2": lambda q, id="f_001": get_files_download_by_year_stats_v2(id),
+    "/api/v2/auth/api-keys/{id}/throttle-history-v3": lambda q, id="k_001": get_auth_api_keys_throttle_history_v3(id),
     "/api/v2/skills/{id}/merge-with-bundle": lambda q, id="s_001": get_skills_merge_with_bundle(id),
     "/api/v2/billing/payment-methods/{id}/set-default-payment-method": lambda q, id="c_001": get_billing_payment_methods_set_default_payment_method(id),
     "/api/v2/campaigns/{id}/audience-region-stats": lambda q, id="c001": get_campaigns_audience_region_stats(id),
@@ -9685,6 +9773,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-cohort-detailed-v3": lambda q, id="c001": get_campaigns_audience_cohort_detailed_v3(id),
     "/api/v2/files/{id}/download-by-month-stats-v4": lambda q, id="f_001": get_files_download_by_month_stats_v4(id),
     "/api/v2/auth/api-keys/{id}/burst-quota-reset-history": lambda q, id="k_001": get_auth_api_keys_burst_quota_reset_history(id),
+    "/api/v2/skills/{id}/merge-with-template": lambda q, id="s_001": get_skills_merge_with_template(id),
+    "/api/v2/billing/payment-methods/{id}/validate-billing-cycle-v3": lambda q, id="c_001": get_billing_payment_methods_validate_billing_cycle_v3(id),
+    "/api/v2/campaigns/{id}/audience-language-stats-v2": lambda q, id="c001": get_campaigns_audience_language_stats_v2(id),
+    "/api/v2/files/{id}/download-by-year-stats-v2": lambda q, id="f_001": get_files_download_by_year_stats_v2(id),
+    "/api/v2/auth/api-keys/{id}/throttle-history-v3": lambda q, id="k_001": get_auth_api_keys_throttle_history_v3(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
