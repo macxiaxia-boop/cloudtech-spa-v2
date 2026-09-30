@@ -1,13 +1,6 @@
 /**
- * CloudTech WorkflowEditor · v3 视觉母版 08 模块 · 编辑器
- * 三栏布局：节点库 (200px) + Canvas (xyflow) + 节点配置面板 (320px)
- *
- * v3 实测节点库 5 类：
- * - 触发（开始/定时/Webhook）
- * - AI（AI 对话/文本生成/图像理解）
- * - 数据（HTTP 推流/数据库/API）
- * - 逻辑（条件判断/循环/并行）
- * - 操作（代码执行/文件/邮件）
+ * CloudTech WorkflowEditor · V23 视觉重做 (2026-09-30)
+ * 三栏布局：节点库 (200px) + Canvas (xyflow) + 节点配置面板 (320px) + shadcn Card
  */
 import { useCallback, useState, useMemo } from 'react';
 import {
@@ -33,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/i18n';
 
 const nodeCategories = [
