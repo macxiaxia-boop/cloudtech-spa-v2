@@ -2399,6 +2399,90 @@ def get_auth_sso():
     }
 
 
+def get_skills_share(skill_id: str):
+    """Skill share · 分享 skill (R378)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "share_url":    f"https://cloudtech.example.com/share/skill/{skill_id}?token=v23_R378",
+            "share_token":  "shr_v23_R378_" + skill_id,
+            "permissions":  ["view", "import"],
+            "expires_at":   "2026-10-30T00:00:00Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_card_list():
+    """Billing card list · 支付方式列表 (R378)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"card_id": "c_001", "brand": "Visa",       "last4": "4242", "exp": "12/27", "is_default": True},
+            {"card_id": "c_002", "brand": "MasterCard", "last4": "5555", "exp": "08/28", "is_default": False},
+        ],
+        "count": 2,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_report_csv(campaign_id: str):
+    """Campaigns report CSV · CSV 报告 (R378)"""
+    return {
+        "status": "ok",
+        "data": {
+            "campaign_id":  campaign_id,
+            "csv_url":      f"/api/v2/campaigns/{campaign_id}/report.csv",
+            "rows":         312,
+            "columns":      ["date", "channel", "impressions", "clicks", "conversions", "revenue_yuan"],
+            "size_bytes":   48720,
+            "generated_at": datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_metadata(file_id: str):
+    """Files metadata · 文件元数据 (R378)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":       file_id,
+            "name":          "产品主视觉图.png",
+            "type":          "image/png",
+            "size_bytes":    2400000,
+            "created_at":    "2026-09-15T10:00:00Z",
+            "modified_at":   "2026-09-30T16:00:00Z",
+            "tags":          ["marketing", "v23", "hero"],
+            "checksum_md5":  "9f8e7d6c5b4a3210fedcba9876543210",
+            "checksum_sha256": "abc123def456789...",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_oauth():
+    """Auth OAuth · OAuth 配置 (R378)"""
+    return {
+        "status": "ok",
+        "data": {
+            "providers": [
+                {"provider": "google",    "client_id": "google_v23_R378", "scope": "openid email profile", "auth_url": "https://accounts.google.com/o/oauth2/v2/auth?..."},
+                {"provider": "github",    "client_id": "github_v23_R378", "scope": "user:email repo",       "auth_url": "https://github.com/login/oauth/authorize?..."},
+                {"provider": "feishu",    "client_id": "feishu_v23_R378", "scope": "contact:user.id",       "auth_url": "https://open.feishu.cn/open-apis/authen/v1/index?..."},
+            ],
+            "callback_url": "https://cloudtech.example.com/auth/oauth/callback",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -2661,6 +2745,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/schedule": lambda q, id="c001": get_campaigns_schedule(id),
     "/api/v2/files/{id}/lock":         lambda q, id="f_001": get_files_lock(id),
     "/api/v2/auth/sso":                lambda q: get_auth_sso(),
+    "/api/v2/skills/{id}/share":        lambda q, id="s_001": get_skills_share(id),
+    "/api/v2/billing/card-list":        lambda q: get_billing_card_list(),
+    "/api/v2/campaigns/{id}/report-csv": lambda q, id="c001": get_campaigns_report_csv(id),
+    "/api/v2/files/{id}/metadata":      lambda q, id="f_001": get_files_metadata(id),
+    "/api/v2/auth/oauth":              lambda q: get_auth_oauth(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
