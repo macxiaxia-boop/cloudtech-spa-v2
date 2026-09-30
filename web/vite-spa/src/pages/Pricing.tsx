@@ -4,6 +4,7 @@ import { Check, ArrowRight, Shield, Building2, Clock, TrendingUp, DollarSign, Ta
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CUSTOMER_LOGOS, TESTIMONIALS } from '../data/customers';
 import { PRICING_TIERS, REVENUE_PROJECTIONS, REVENUE_KEY_METRICS } from '../data/revenue';
 
