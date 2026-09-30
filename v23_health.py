@@ -5069,6 +5069,98 @@ def get_auth_api_keys_permissions_list(key_id: str):
     }
 
 
+def get_skills_version_from_template(skill_id: str):
+    """Skill version-from-template · 从模板创建版本 (R410)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":      skill_id,
+            "new_version":   f"v3.0.0-{skill_id}",
+            "from_template": f"tpl_v23_R410_{skill_id}",
+            "created_at":   datetime.utcnow().isoformat() + "Z",
+            "created_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_payment_methods_check(method_id: str):
+    """Billing payment-methods/{id}/check · 检查支付 (R410)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "valid":      True,
+            "checked_at": datetime.utcnow().isoformat() + "Z",
+            "checks":     [
+                "card_number_valid", "expiry_valid", "cvv_valid", "3d_secure_pass", "balance_sufficient",
+            ],
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_region_detail(campaign_id: str):
+    """Campaigns audience-region-detail · 地域详细 (R410)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"region": "一线城市",  "users": 6240, "pct": 33.9},
+            {"region": "新一线",    "users": 4180, "pct": 22.7},
+            {"region": "二线城市",  "users": 3120, "pct": 16.9},
+            {"region": "三线城市",  "users": 2280, "pct": 12.4},
+            {"region": "四线+",      "users": 1840, "pct": 10.0},
+            {"region": "海外",       "users":  760, "pct":  4.1},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_channel(file_id: str):
+    """Files download-by-channel · 按渠道下载 (R410)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"channel": "网站",     "count": 142, "pct": 45.5},
+            {"channel": "邮件",     "count":  68, "pct": 21.8},
+            {"channel": "Slack",    "count":  42, "pct": 13.5},
+            {"channel": "微信群",   "count":  38, "pct": 12.2},
+            {"channel": "短信",     "count":  22, "pct":  7.0},
+        ],
+        "total": 312,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_scopes_list(key_id: str):
+    """Auth api-keys/{id}/scopes-list · scopes 列表 (R410)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":      key_id,
+            "scopes":      [
+                "read:own",
+                "read:all",
+                "write:own",
+                "write:all",
+                "deploy:own",
+                "deploy:all",
+                "admin:tenant",
+                "admin:global",
+            ],
+            "listed_at":  datetime.utcnow().isoformat() + "Z",
+            "total_count": 8,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -5487,6 +5579,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-source-detail": lambda q, id="c001": get_campaigns_audience_source_detail(id),
     "/api/v2/files/{id}/download-by-user-type": lambda q, id="f_001": get_files_download_by_user_type(id),
     "/api/v2/auth/api-keys/{id}/permissions-list": lambda q, id="k_001": get_auth_api_keys_permissions_list(id),
+    "/api/v2/skills/{id}/version-from-template": lambda q, id="s_001": get_skills_version_from_template(id),
+    "/api/v2/billing/payment-methods/{id}/check": lambda q, id="c_001": get_billing_payment_methods_check(id),
+    "/api/v2/campaigns/{id}/audience-region-detail": lambda q, id="c001": get_campaigns_audience_region_detail(id),
+    "/api/v2/files/{id}/download-by-channel": lambda q, id="f_001": get_files_download_by_channel(id),
+    "/api/v2/auth/api-keys/{id}/scopes-list": lambda q, id="k_001": get_auth_api_keys_scopes_list(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
