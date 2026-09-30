@@ -1,6 +1,9 @@
 // 案例库页 · 5 装企 + 5 医美真实案例（脱敏）
 import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Users, DollarSign, Star } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface CaseStudy {
   id: string;

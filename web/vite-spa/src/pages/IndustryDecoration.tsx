@@ -1,6 +1,9 @@
 // Phase 46 D41-44 — 装企行业落地页（SEO + 获客闭环展示）
 import { Link } from 'react-router-dom';
 import { Hammer, ArrowRight, CheckCircle2, TrendingUp, Users, Sparkles } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 const STEPS = [
   { key: 'lead_profile', label: '客户画像', desc: 'AI 自动提取客户需求 + 户型 + 预算区间', emoji: '👤' },

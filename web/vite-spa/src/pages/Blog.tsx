@@ -1,6 +1,9 @@
 // 博客列表页 · SEO 内容 · OPC 故事 + 行业洞察
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowRight, BookOpen, Tag } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface BlogPost {
   id: string;

@@ -1,6 +1,9 @@
 // OPC 故事页 · 心之所向便是光的今天 · 创始人后台
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, TrendingUp, Users, DollarSign, Heart, Code, FileText, Target, Award, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 const TIMELINE = [
   { time: '08:30', task: '5 AI 员工晨会', detail: 'Hermes 报告：49 红线全绿 · 0 违规', icon: Heart, color: 'text-purple-600' },

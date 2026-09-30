@@ -1,6 +1,9 @@
 // Phase 46 D41-44 — 医美行业落地页（合规获客闭环）
 import { Link } from 'react-router-dom';
 import { Stethoscope, ArrowRight, Shield, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 const STEPS = [
   { key: 'lead_profile', label: '客户画像', desc: '年龄段 + 需求 + 预算 + 风险偏好', emoji: '👤' },

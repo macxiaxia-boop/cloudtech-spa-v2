@@ -2,6 +2,9 @@
 // 5 状态机：待跟进 → 已联系 → 演示 → 试用 → 签约
 import { Link } from 'react-router-dom';
 import { TrendingDown, Lightbulb, AlertCircle, ArrowRight, Users, Phone, Film, FlaskConical, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { FUNNEL_SNAPSHOT, FUNNEL_INSIGHTS, OVERALL_CONVERSION } from '../data/funnel';
 
 const STAGE_ICONS: Record<string, any> = {

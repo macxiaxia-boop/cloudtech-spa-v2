@@ -1,6 +1,9 @@
 // Phase 45-47: SaaS 官网首页 · 5 AI 员工矩阵 + 客户证言 + 真插画 + i18n
 import { Link } from 'react-router-dom';
 import { Sparkles, Bot, Briefcase, Heart, ArrowRight, Hammer, Stethoscope, CheckCircle2, Quote, Building2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { CUSTOMER_LOGOS, TESTIMONIALS, TRUST_STATS } from '../data/customers';
 import { useTranslation } from '@/i18n';
 

@@ -6,6 +6,9 @@ import { useState } from 'react';
 import { Plus, Settings as SettingsIcon, Users, Shield, BarChart3, FileText, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 type Tab = 'models' | 'team' | 'permissions' | 'stats' | 'logs';
 

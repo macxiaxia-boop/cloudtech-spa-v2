@@ -1,6 +1,9 @@
 // Phase 46 D45-48 — 内容生产 SOP 工具页（Phase 41-44 4 主题派最优规律可视化）
 import { Link } from 'react-router-dom';
 import { BookOpen, ArrowRight, Sparkles, Trophy, GitBranch, Zap, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface Template {
   phase: string;

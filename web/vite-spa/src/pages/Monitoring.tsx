@@ -1,6 +1,9 @@
 // Phase 46 D61-68 — 监控 + 财务 + 客户漏斗仪表盘 SPA 页
 import { Link } from 'react-router-dom';
 import { Activity, ArrowRight, AlertCircle, DollarSign, Users, Database, Server } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface DashboardPanel {
   name: string;

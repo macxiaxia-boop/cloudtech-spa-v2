@@ -6,6 +6,9 @@ import { useState } from 'react';
 import { Users, TrendingUp, Activity, Layers, Download, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 type TimeRange = '7d' | '30d' | '90d' | '1y';
 

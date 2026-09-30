@@ -1,6 +1,9 @@
 // Phase 46 D53-60 — OPC 公司文档中心（合同/HR/财务/营业执照）
 import { Link } from 'react-router-dom';
 import { FileText, ArrowRight, AlertCircle, Shield, Users, DollarSign, Building2, Phone } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface Document {
   id: string;
