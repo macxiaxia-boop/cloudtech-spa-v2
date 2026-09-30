@@ -73,16 +73,18 @@ export function AnalyticsPage() {
         ].map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className="bg-card rounded-xl border border-border p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${kpi.color}`}>
-                  <Icon className="w-4 h-4" />
+            <Card key={kpi.label} className="p-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${kpi.color}`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className={`text-xs font-medium ${kpi.positive ? 'text-success-600' : 'text-destructive-600'}`}>{kpi.change}</span>
                 </div>
-                <span className={`text-xs font-medium ${kpi.positive ? 'text-success-600' : 'text-destructive-600'}`}>{kpi.change}</span>
-              </div>
-              <div className="text-2xl font-bold text-foreground">{kpi.value}</div>
-              <div className="text-xs text-muted-foreground mt-1">{kpi.label}</div>
-            </div>
+                <div className="text-2xl font-bold text-foreground">{kpi.value}</div>
+                <div className="text-xs text-muted-foreground mt-1">{kpi.label}</div>
+              </CardContent>
+            </Card>
           );
         })}
       </div>

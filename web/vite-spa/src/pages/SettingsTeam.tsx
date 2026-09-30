@@ -53,7 +53,7 @@ export function SettingsTeamPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {members.map((m) => (
-          <div key={m.id} className="bg-card rounded-xl border border-border p-5 hover:shadow-sm transition-shadow">
+          <Card key={m.id} className="p-0 hover:shadow-sm transition-shadow">
             <div className="flex items-start gap-3 mb-4">
               <div className="relative shrink-0">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-accent-purple-500 flex items-center justify-center text-white text-lg font-semibold">{m.name.slice(0, 1)}</div>
@@ -76,6 +76,8 @@ export function SettingsTeamPage() {
               <span className={`px-2 py-0.5 rounded-full border font-medium ${roleColors[m.role]}`}>{m.role}</span>
               <span className="text-muted-foreground">{m.lastActive}</span>
             </div>
+            </CardContent></Card>
+            <div className="mt-3 pt-3 border-t border-border text-xs text-muted-foreground">
             <div className="mt-3 pt-3 border-t border-border text-xs text-muted-foreground">
               加入于 {m.joinedAt}
             </div>
