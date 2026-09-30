@@ -8691,6 +8691,90 @@ def get_auth_api_keys_rotate_secret_v21(key_id: str):
     }
 
 
+def get_skills_import_stats_v3(skill_id: str):
+    """Skill import-stats-v3 · 导入统计 v3 (R453 · 🎉 V23 第 500 端点)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":     skill_id,
+            "import_count": 55,
+            "imported_at": datetime.utcnow().isoformat() + "Z",
+            "imported_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v3",
+        "milestone":     "V23 第 500 端点 (R453)",
+    }
+
+
+def get_billing_payment_methods_set_active(method_id: str):
+    """Billing payment-methods/{id}/set-active · 激活支付 (R453)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":   method_id,
+            "is_active":   True,
+            "set_at":      datetime.utcnow().isoformat() + "Z",
+            "set_by":      "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_cohort_list_v3(campaign_id: str):
+    """Campaigns audience-cohort-list-v3 · cohort 列表 v3 (R453)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"cohort_id": "c_001", "name": "2026-09-W1", "size": 8240, "retention_pct": "100%"},
+            {"cohort_id": "c_002", "name": "2026-09-W2", "size": 6240, "retention_pct": "75.7%"},
+            {"cohort_id": "c_003", "name": "2026-09-W3", "size": 4180, "retention_pct": "50.7%"},
+            {"cohort_id": "c_004", "name": "2026-09-W4", "size": 3240, "retention_pct": "39.3%"},
+        ],
+        "count": 4,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_quarter_stats_v4(file_id: str):
+    """Files download-by-quarter-stats-v4 · 按季度统计 v4 (R453)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"quarter": "Q1 2026", "downloads":  428, "unique_users": 318},
+            {"quarter": "Q2 2026", "downloads":  728, "unique_users": 528},
+            {"quarter": "Q3 2026", "downloads": 1287, "unique_users": 920},
+        ],
+        "total": 2443,
+        "version": "v4",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_quota_history_v3(key_id: str):
+    """Auth api-keys/{id}/quota-history-v3 · quota 历史 v3 (R453)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"at": "2026-09-23T00:00:00Z", "quota":   1000, "set_by": "u_001"},
+            {"at": "2026-09-26T00:00:00Z", "quota":   5000, "set_by": "u_001"},
+            {"at": "2026-09-28T00:00:00Z", "quota":  10000, "set_by": "u_001"},
+            {"at": "2026-09-30T00:00:00Z", "quota":  20000, "set_by": "u_001"},
+            {"at": "2026-10-01T00:00:00Z", "quota":  30000, "set_by": "u_001"},
+            {"at": "2026-10-01T01:00:00Z", "quota":  40000, "set_by": "u_001"},
+        ],
+        "count": 6,
+        "version": "v3",
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -9324,6 +9408,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-language-list-v3": lambda q, id="c001": get_campaigns_audience_language_list_v3(id),
     "/api/v2/files/{id}/download-by-year-stats":  lambda q, id="f_001": get_files_download_by_year_stats(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v21": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v21(id),
+    "/api/v2/skills/{id}/import-stats-v3":        lambda q, id="s_001": get_skills_import_stats_v3(id),
+    "/api/v2/billing/payment-methods/{id}/set-active": lambda q, id="c_001": get_billing_payment_methods_set_active(id),
+    "/api/v2/campaigns/{id}/audience-cohort-list-v3": lambda q, id="c001": get_campaigns_audience_cohort_list_v3(id),
+    "/api/v2/files/{id}/download-by-quarter-stats-v4": lambda q, id="f_001": get_files_download_by_quarter_stats_v4(id),
+    "/api/v2/auth/api-keys/{id}/quota-history-v3": lambda q, id="k_001": get_auth_api_keys_quota_history_v3(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
