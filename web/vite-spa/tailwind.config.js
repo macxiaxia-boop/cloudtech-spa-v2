@@ -14,6 +14,14 @@
 export default {
   darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  // R373 safelist · 保护 dynamic className 不被 purge (CaseLibrary line 331 / Pricing line 115 等)
+  safelist: [
+    'border-brand-500', 'bg-gradient-to-br', 'from-brand-50', 'from-orange-50',
+    'via-white', 'to-card', 'to-white', 'to-purple-50', 'to-red-50', 'to-pink-50',
+    'bg-card', 'bg-muted', 'border-border', 'text-foreground', 'text-muted-foreground',
+    'border-2', 'shadow-xl', 'shadow-lg', 'shadow-sm', 'shadow-2xl',
+    'dark:from-neutral-900', 'dark:via-neutral-800', 'dark:to-neutral-900',
+  ],
   theme: {
     extend: {
       colors: {

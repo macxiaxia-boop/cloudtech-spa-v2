@@ -29,9 +29,9 @@ export default defineConfig({
           'vendor-react':       ['react', 'react-dom', 'react-router-dom'],
           'vendor-radix':       ['radix-ui', '@radix-ui/react-dialog', 'class-variance-authority', 'clsx', 'tailwind-merge'],
           'vendor-icons':       ['lucide-react'],
-          'vendor-motion':      ['framer-motion'],
+          // R373 删 framer-motion (R362 manualChunks 实际只 0.85KB 因为只有 1-2 处用) · 改 inline
           'vendor-flow':        ['@xyflow/react'],
-          'vendor-forms':       ['react-hook-form', '@hookform/resolvers', 'zod'],
+          // R373 删 forms vendor (实际 0.09KB · TryNow 表单未用 react-hook-form)
           'vendor-other':       ['cmdk', 'sonner'],
         },
       },
