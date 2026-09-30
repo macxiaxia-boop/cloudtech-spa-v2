@@ -5,17 +5,10 @@
  * V23: bg-[var(--xxx)] 硬编码 → 标准 token (bg-card / text-muted-foreground / border-border)
  */
 import { useState } from 'react';
-import { Bell, Trash2, Check, X, AlertCircle } from 'lucide-react';
+import { Bell, Trash2, Check, X, AlertCircle, Settings as SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useTranslation } from '@/i18n';
- * CloudTech Notifications · v3 视觉母版 14 模块
- * 通知中心：4 Tab（全部/系统通知/任务通知/协作通知）+ 已读未读 + i18n
- */
-import { useState } from 'react';
-import { Bell, Check, Trash2, Settings as SettingsIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n';
 
 type Tab = 'all' | 'system' | 'task' | 'collab';
