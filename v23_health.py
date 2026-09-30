@@ -3224,6 +3224,88 @@ def get_auth_sessions_refresh(session_id: str):
     }
 
 
+def get_skills_rollback(skill_id: str):
+    """Skill rollback · 回滚 skill (R388)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":         skill_id,
+            "rolled_back_to":   "v2.0.5",
+            "rolled_back_at":   datetime.utcnow().isoformat() + "Z",
+            "previous_version": "v2.1.0",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_dunning(invoice_id: str):
+    """Billing dunning · 催收 (R388)"""
+    return {
+        "status": "ok",
+        "data": {
+            "invoice_id":   invoice_id,
+            "dunning_sent": True,
+            "reminders":    2,
+            "level":        "final",
+            "next_action":  "账户暂停 (7 天后)",
+            "sent_at":      datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_budget_pacing(campaign_id: str):
+    """Campaigns budget pacing · 预算节奏 (R388)"""
+    return {
+        "status": "ok",
+        "data": {
+            "campaign_id":     campaign_id,
+            "daily_budget":    500,
+            "spent_today":     287,
+            "pace_left":       213,
+            "pace_pct":        "57.4%",
+            "expected_pace":   "62.5%",
+            "recommendation":  "✓ 节奏正常",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_external_share(file_id: str):
+    """Files external share · 外部分享 (R388)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":         file_id,
+            "external_url":    f"https://ext.cloudtech.example.com/share/{file_id}?token=v23_R388",
+            "external_token":  "ext_v23_R388_" + file_id,
+            "expires_at":      "2026-10-30T00:00:00Z",
+            "password_protected": True,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_sessions_trust(session_id: str):
+    """Auth sessions/{id}/trust · 信任设备 (R388)"""
+    return {
+        "status": "ok",
+        "data": {
+            "session_id":      session_id,
+            "trusted":         True,
+            "trusted_until":   "2027-09-30T00:00:00Z",
+            "trusted_by":      "u_001",
+            "trusted_at":      datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -3532,6 +3614,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/abtest":       lambda q, id="c001": get_campaigns_abtest(id),
     "/api/v2/files/{id}/download-list":    lambda q, id="f_001": get_files_download_list(id),
     "/api/v2/auth/sessions/{id}/refresh":  lambda q, id="s_001": get_auth_sessions_refresh(id),
+    "/api/v2/skills/{id}/rollback":       lambda q, id="s_001": get_skills_rollback(id),
+    "/api/v2/billing/{id}/dunning":       lambda q, id="inv_001": get_billing_dunning(id),
+    "/api/v2/campaigns/{id}/budget-pacing": lambda q, id="c001": get_campaigns_budget_pacing(id),
+    "/api/v2/files/{id}/external-share": lambda q, id="f_001": get_files_external_share(id),
+    "/api/v2/auth/sessions/{id}/trust":   lambda q, id="s_001": get_auth_sessions_trust(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
