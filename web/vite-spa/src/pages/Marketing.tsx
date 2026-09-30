@@ -23,7 +23,7 @@ export function MarketingPage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 bg-gradient-to-br from-brand-50 via-white to-purple-50 overflow-hidden">
+      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 bg-gradient-to-br from-brand-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 overflow-hidden">
         <div className="max-w-page mx-auto px-6 lg:px-10 grid md:grid-cols-2 gap-8 items-center">
           <div>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm mb-5">
@@ -290,7 +290,7 @@ export function MarketingPage() {
       </section>
 
       {/* OPC 故事引流 */}
-      <section className="py-20 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <section className="py-20 bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900">
         <div className="max-w-page mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
