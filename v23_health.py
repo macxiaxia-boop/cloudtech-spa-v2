@@ -7761,6 +7761,90 @@ def get_auth_api_keys_rotate_secret_v16(key_id: str):
     }
 
 
+def get_skills_unsubscribe_stats_v2(skill_id: str):
+    """Skill unsubscribe-stats-v2 · 取消订阅统计 v2 (R442)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":        skill_id,
+            "unsubscribed_count": 12,
+            "unsubscribed_at": datetime.utcnow().isoformat() + "Z",
+            "unsubscribed_by": "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v2",
+    }
+
+
+def get_billing_payment_methods_unset_default_billing_v3(method_id: str):
+    """Billing payment-methods/{id}/unset-default-billing-v3 · 取消默认 billing v3 (R442)"""
+    return {
+        "status": "ok",
+        "data": {
+            "method_id":  method_id,
+            "for_billing": False,
+            "unset_at":   datetime.utcnow().isoformat() + "Z",
+            "unset_by":   "u_001",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version": "v3",
+    }
+
+
+def get_campaigns_audience_segment_detailed(campaign_id: str):
+    """Campaigns audience-segment-detailed · 分群详细 (R442)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"segment_id": "seg_001", "name": "装企老板",   "size": 4280, "rule": "industry=decoration&role=owner"},
+            {"segment_id": "seg_002", "name": "医美院长",   "size": 2180, "rule": "industry=medical&role=owner"},
+            {"segment_id": "seg_003", "name": "教育机构",   "size": 1240, "rule": "industry=education&role=owner"},
+            {"segment_id": "seg_004", "name": "高活跃用户", "size": 1840, "rule": "last_active_at>=7d ago"},
+            {"segment_id": "seg_005", "name": "低活跃用户", "size":  980, "rule": "last_active_at<30d ago"},
+        ],
+        "total": 10520,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_by_hour_chart_v2(file_id: str):
+    """Files download-by-hour-chart-v2 · 按小时 chart v2 (R442)"""
+    return {
+        "status": "ok",
+        "data": {
+            "labels": ["00", "04", "08", "12", "16", "20", "23"],
+            "datasets": [
+                {"label": "下载", "data": [3, 1, 10, 56, 42, 16, 0], "type": "bar"},
+                {"label": "唯一", "data": [2, 1,  8, 42, 28,  8, 0], "type": "line"},
+            ],
+            "chart_type": "mixed",
+            "version": "v2",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_rotate_secret_v17(key_id: str):
+    """Auth api-keys/{id}/rotate-secret-v17 · 轮换 secret v17 (R442)"""
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":         key_id,
+            "rotated":        True,
+            "rotated_at":     datetime.utcnow().isoformat() + "Z",
+            "rotated_by":     "u_001",
+            "rotation_count": 33,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "version":        "v17",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -8339,6 +8423,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-geo-distribution": lambda q, id="c001": get_campaigns_audience_geo_distribution(id),
     "/api/v2/files/{id}/download-by-day-chart-v5": lambda q, id="f_001": get_files_download_by_day_chart_v5(id),
     "/api/v2/auth/api-keys/{id}/rotate-secret-v16": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v16(id),
+    "/api/v2/skills/{id}/unsubscribe-stats-v2": lambda q, id="s_001": get_skills_unsubscribe_stats_v2(id),
+    "/api/v2/billing/payment-methods/{id}/unset-default-billing-v3": lambda q, id="c_001": get_billing_payment_methods_unset_default_billing_v3(id),
+    "/api/v2/campaigns/{id}/audience-segment-detailed": lambda q, id="c001": get_campaigns_audience_segment_detailed(id),
+    "/api/v2/files/{id}/download-by-hour-chart-v2": lambda q, id="f_001": get_files_download_by_hour_chart_v2(id),
+    "/api/v2/auth/api-keys/{id}/rotate-secret-v17": lambda q, id="k_001": get_auth_api_keys_rotate_secret_v17(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
