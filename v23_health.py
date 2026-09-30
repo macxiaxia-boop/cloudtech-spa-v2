@@ -3306,6 +3306,86 @@ def get_auth_sessions_trust(session_id: str):
     }
 
 
+def get_skills_promote(skill_id: str):
+    """Skill promote · 推广 skill (R389)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":       skill_id,
+            "promoted":       True,
+            "promoted_to":    "marketplace",
+            "promoted_at":    datetime.utcnow().isoformat() + "Z",
+            "visibility_boost": "10x",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_tax_invoice(invoice_id: str):
+    """Billing tax invoice · 增值税发票 (R389)"""
+    return {
+        "status": "ok",
+        "data": {
+            "invoice_id":   invoice_id,
+            "tax_invoice_id": f"tax_{invoice_id}_v23",
+            "amount_yuan":   1999,
+            "tax_rate":      0.06,
+            "tax_yuan":      120,
+            "url":           f"/api/v2/billing/{invoice_id}/tax-invoice.pdf",
+            "issued_at":     datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_creatives(campaign_id: str):
+    """Campaigns creatives · 创意素材 (R389)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"creative_id": "cr_001", "type": "image", "url": "/media/creatives/c001_1.jpg", "clicks": 87,  "ctr": "4.5%"},
+            {"creative_id": "cr_002", "type": "video", "url": "/media/creatives/c001_1.mp4", "clicks": 142, "ctr": "6.8%"},
+            {"creative_id": "cr_003", "type": "text",  "url": "/media/creatives/c001_1.txt", "clicks": 65,  "ctr": "3.8%"},
+        ],
+        "count": 3,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_download_url_token(file_id: str):
+    """Files download url token · 一次性下载 URL (R389)"""
+    return {
+        "status": "ok",
+        "data": {
+            "file_id":         file_id,
+            "download_url":    f"https://cloudtech.example.com/api/v2/files/{file_id}/stream?token=once_v23_R389",
+            "token":           f"once_v23_R389_{file_id}",
+            "expires_at":      "2030-01-01T00:00:00Z",
+            "single_use":      True,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_sessions_revoke_all_others(session_id: str):
+    """Auth sessions/{id}/revoke-all-others · 撤销其他 (R389)"""
+    return {
+        "status": "ok",
+        "data": {
+            "current_session_id":   session_id,
+            "revoked_count":         3,
+            "kept_session_id":       session_id,
+            "revoked_at":            datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -3619,6 +3699,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/budget-pacing": lambda q, id="c001": get_campaigns_budget_pacing(id),
     "/api/v2/files/{id}/external-share": lambda q, id="f_001": get_files_external_share(id),
     "/api/v2/auth/sessions/{id}/trust":   lambda q, id="s_001": get_auth_sessions_trust(id),
+    "/api/v2/skills/{id}/promote":        lambda q, id="s_001": get_skills_promote(id),
+    "/api/v2/billing/{id}/tax-invoice":   lambda q, id="inv_001": get_billing_tax_invoice(id),
+    "/api/v2/campaigns/{id}/creatives":   lambda q, id="c001": get_campaigns_creatives(id),
+    "/api/v2/files/{id}/download-url-token": lambda q, id="f_001": get_files_download_url_token(id),
+    "/api/v2/auth/sessions/{id}/revoke-all-others": lambda q, id="s_001": get_auth_sessions_revoke_all_others(id),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
