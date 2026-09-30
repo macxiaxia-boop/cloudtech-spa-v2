@@ -31,8 +31,8 @@
     <!-- PWA 占位（未来完整 PWA 时启用）-->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- 字体预连接（生产可换为 Inter / 思源黑体）-->
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <!-- R364 Lighthouse FCP 优化 · hero image preload (Marketing 首页主图 624KB · LCP 关键) -->
+    <link rel="preload" as="image" href="/images/opc-hero.jpeg" fetchpriority="high" />
 
     <!-- 图标（iOS / Android）-->
     <link rel="apple-touch-icon" href="/favicon.svg" />
