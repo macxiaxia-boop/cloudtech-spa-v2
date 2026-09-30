@@ -3975,6 +3975,98 @@ def get_auth_api_keys_rotate_all():
     }
 
 
+def get_skills_analytics_advanced(skill_id: str):
+    """Skill analytics-advanced · 高级分析 (R397)"""
+    return {
+        "status": "ok",
+        "data": {
+            "skill_id":          skill_id,
+            "trend":             "up",
+            "trend_pct":         "+18.2",
+            "retention_d1":       "82%",
+            "retention_d7":       "64%",
+            "retention_d30":      "48%",
+            "user_satisfaction":  "4.6/5",
+            "nps_score":          42,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_billing_subscription_downgrade(tenant_id: str):
+    """Billing subscription-downgrade · 降级订阅 (R397)"""
+    return {
+        "status": "ok",
+        "data": {
+            "tenant_id":       tenant_id,
+            "subscription_id": "sub_v23_R397_down",
+            "previous_plan":   "enterprise",
+            "downgraded_to":   "pro",
+            "downgraded_at":   datetime.utcnow().isoformat() + "Z",
+            "refund_yuan":     5000,
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_campaigns_audience_gender_stats(campaign_id: str):
+    """Campaigns audience-gender-stats · 受众性别 (R397)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"gender": "male",   "count": 9240, "pct": 50.2},
+            {"gender": "female", "count": 8640, "pct": 46.9},
+            {"gender": "other",  "count":  540, "pct":  2.9},
+        ],
+        "total": 18420,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_files_share_stats_by_day(file_id: str):
+    """Files share-stats-by-day · 分享按日 (R397)"""
+    return {
+        "status": "ok",
+        "data": [
+            {"date": "2026-09-24", "shares": 5,  "views": 28},
+            {"date": "2026-09-25", "shares": 3,  "views": 18},
+            {"date": "2026-09-26", "shares": 4,  "views": 24},
+            {"date": "2026-09-27", "shares": 6,  "views": 35},
+            {"date": "2026-09-28", "shares": 8,  "views": 42},
+            {"date": "2026-09-29", "shares": 5,  "views": 22},
+            {"date": "2026-09-30", "shares": 3,  "views": 18},
+        ],
+        "total_shares": 34,
+        "total_views":  187,
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
+def get_auth_api_keys_create():
+    """Auth api-keys/create · 创建 API key (R397)"""
+    import hashlib
+    seed = b"v23_R397_create"
+    kid = "k_v23_R397_" + hashlib.md5(seed).hexdigest()[:8]
+    sec = "sk_v23_R397_" + hashlib.sha256(seed + b"_secret").hexdigest()[:16]
+    return {
+        "status": "ok",
+        "data": {
+            "key_id":    kid,
+            "name":      "新创建 key",
+            "secret":    sec,
+            "scopes":    ["read"],
+            "created_by": "u_001",
+            "created_at": datetime.utcnow().isoformat() + "Z",
+        },
+        "source": "demo_seed",
+        "ts": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 def get_monitoring_health():
     """Monitoring Health · R293 漏的 /api/v3/monitoring/health"""
     return {
@@ -4328,6 +4420,11 @@ ROUTES = {
     "/api/v2/campaigns/{id}/audience-age-stats": lambda q, id="c001": get_campaigns_audience_age_stats(id),
     "/api/v2/files/{id}/comments-count":   lambda q, id="f_001": get_files_comments_count(id),
     "/api/v2/auth/api-keys/rotate-all":    lambda q: get_auth_api_keys_rotate_all(),
+    "/api/v2/skills/{id}/analytics-advanced": lambda q, id="s_001": get_skills_analytics_advanced(id),
+    "/api/v2/billing/{tenant_id}/subscription-downgrade": lambda q, tenant_id="t_3a59592b7619": get_billing_subscription_downgrade(tenant_id),
+    "/api/v2/campaigns/{id}/audience-gender-stats": lambda q, id="c001": get_campaigns_audience_gender_stats(id),
+    "/api/v2/files/{id}/share-stats-by-day": lambda q, id="f_001": get_files_share_stats_by_day(id),
+    "/api/v2/auth/api-keys/create":       lambda q, **kw: get_auth_api_keys_create(),
     "/api/skills":                        lambda q: get_skills(),
     "/api/employees":                     lambda q: get_admin_employees(),
     "/api/admin/ops":                     lambda q: get_admin_employees() if "/employees" in str(q) else get_admin_ops(),
