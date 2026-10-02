@@ -456,7 +456,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -520,7 +520,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -584,7 +584,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -648,7 +648,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -712,7 +712,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -776,7 +776,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -840,7 +840,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -904,7 +904,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -968,7 +968,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -1032,7 +1032,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -1096,7 +1096,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -1160,7 +1160,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -1224,7 +1224,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -1288,7 +1288,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
@@ -1352,7 +1352,7 @@ class DeepCRM:
         if kwargs.get("min_score") is not None:
             customers = [c for c in customers if c.get("score", 0) >= kwargs["min_score"]]
         if kwargs.get("health"):
-            customers = [c for c in customers if crm._calculate_health(c) in kwargs["health"]]
+            customers = [c for c in customers if DeepCRM()._calculate_health(c) in kwargs["health"]]
         limit = kwargs.get("limit", 50)
         offset = kwargs.get("offset", 0)
         customers = sorted(customers, key=lambda x: x.get("created_at", ""), reverse=True)
