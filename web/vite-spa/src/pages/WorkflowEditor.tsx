@@ -2,7 +2,7 @@
  * CloudTech WorkflowEditor · V23 视觉重做 (2026-09-30)
  * 三栏布局：节点库 (200px) + Canvas (xyflow) + 节点配置面板 (320px) + shadcn Card
  */
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -138,8 +138,25 @@ export function WorkflowEditorPage() {
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
   const [selectedNode, setSelectedNode] = useState<string | null>('3');
 
+  // R378 P3-D · xyflow dark variant · 监听 html.dark class 切换 isDark state
+  const [isDark, setIsDark] = useState<boolean>(() =>
+    typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  );
+  useEffect(() => {
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
+
+  // R378 P3-D · xyflow dark variant colors
+  const dotColor = isDark ? '#475569' : '#CBD5E1';
+  const edgeColor = isDark ? '#64748B' : '#94A3B8';
+  const maskColor = isDark ? 'rgba(15,23,42,0.6)' : 'rgba(241,245,249,0.6)';
+
   const onNodesChange = useCallback((changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)), []);
-  const onConnect = useCallback((conn: Connection) => setEdges((eds) => rfAddEdge({ ...conn, animated: true, style: { stroke: '#2563EB', strokeWidth: 2 } }, eds)), []);
+  const onConnect = useCallback((conn: Connection) => setEdges((eds) => rfAddEdge({ ...conn, animated: true, style: { stroke: isDark ? '#3B82F6' : '#2563EB', strokeWidth: 2 } }, eds)), [isDark]);
 
   const onNodeClick = useCallback((_: any, node: Node) => setSelectedNode(node.id), []);
   const onPaneClick = useCallback(() => setSelectedNode(null), []);
@@ -200,11 +217,31 @@ export function WorkflowEditorPage() {
               nodeTypes={nodeTypes}
               fitView
               attributionPosition="bottom-left"
-              defaultEdgeOptions={{ style: { stroke: '#94A3B8', strokeWidth: 2 } }}
+              defaultEdgeOptions={{ style: { stroke: edgeColor, strokeWidth: 2 } }}
             >
-              <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#CBD5E1" />
-              <Controls className="!shadow-md" />
-              <MiniMap className="!shadow-md" maskColor="rgba(241,245,249,0.6)" pannable zoomable />
+              {/* R378 P3-D · xyflow 内部 hardcoded 颜色 dark mode override */}
+              <style>{`
+                ${isDark ? `
+                .react-flow__node { background-color: #1e293b !important; color: #e2e8f0 !important; border-color: #475569 !important; }
+                .react-flow__node.selected { border-color: #3b82f6 !important; box-shadow: 0 0 0 2px rgba(59,130,246,0.3) !important; }
+                .react-flow__edge-path { stroke: #64748b !important; }
+                .react-flow__edge.selected .react-flow__edge-path { stroke: #3b82f6 !important; }
+                .react-flow__attribution { background-color: rgba(15,23,42,0.5) !important; color: #94a3b8 !important; }
+                .react-flow__attribution a { color: #cbd5e1 !important; }
+                .react-flow__controls-button { background-color: #1e293b !important; color: #e2e8f0 !important; border-bottom-color: #475569 !important; fill: #e2e8f0 !important; }
+                .react-flow__controls-button:hover { background-color: #334155 !important; }
+                .react-flow__controls-button svg { fill: #e2e8f0 !important; }
+                .react-flow__minimap-mask { fill: rgba(15,23,42,0.6) !important; }
+                .react-flow__handle { border-color: #475569 !important; }
+                ` : `
+                .react-flow__node { background-color: #ffffff !important; color: #0f172a !important; border-color: #e2e8f0 !important; }
+                .react-flow__edge-path { stroke: #94a3b8 !important; }
+                .react-flow__attribution { background-color: rgba(255,255,255,0.5) !important; color: #64748b !important; }
+                `}
+              `}</style>
+              <Background variant={BackgroundVariant.Dots} gap={16} size={1} color={dotColor} />
+              <Controls className="!shadow-md !bg-white dark:!bg-neutral-800 !border !border-gray-200 dark:!border-neutral-700" />
+              <MiniMap className="!shadow-md !bg-white dark:!bg-neutral-900 !border !border-gray-200 dark:!border-neutral-700" maskColor={maskColor} pannable zoomable />
             </ReactFlow>
           </ReactFlowProvider>
         </Card>

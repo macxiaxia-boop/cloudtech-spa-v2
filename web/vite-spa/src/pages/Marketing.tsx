@@ -1,6 +1,7 @@
 // Phase 45-47: SaaS 官网首页 · 5 AI 员工矩阵 + 客户证言 + 真插画 + i18n
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Bot, Briefcase, Heart, ArrowRight, Hammer, Stethoscope, CheckCircle2, Quote, Building2 } from 'lucide-react';
+import { Sparkles, Bot, Briefcase, Heart, ArrowRight, Hammer, Stethoscope, CheckCircle2, Quote, Building2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,10 +21,31 @@ const INDUSTRIES = [
 
 export function MarketingPage() {
   const { t } = useTranslation();
+  // R378 P2-C · Hero via-white toggle · 用户可选 light hero (via-white) 或 dark hero (via-neutral-800)
+  const [heroLight, setHeroLight] = useState<boolean>(() => {
+    try { return localStorage.getItem('heroLight') !== 'false'; } catch { return true; }
+  });
+  const heroGradient = heroLight
+    ? 'bg-gradient-to-br from-brand-50 via-white to-purple-50'
+    : 'bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900';
+  const toggleHero = () => {
+    const next = !heroLight;
+    setHeroLight(next);
+    try { localStorage.setItem('heroLight', String(next)); } catch {}
+  };
   return (
     <>
       {/* HERO */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 bg-gradient-to-br from-brand-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 overflow-hidden">
+      <section className={`relative pt-12 pb-20 md:pt-20 md:pb-32 ${heroGradient} dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 overflow-hidden`}>
+        {/* R378 P2-C · Hero via-white toggle button (top-right) */}
+        <button
+          onClick={toggleHero}
+          aria-label={heroLight ? '切换到深色 Hero' : '切换到浅色 Hero'}
+          className="absolute top-4 right-4 z-10 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm border border-gray-200 dark:border-neutral-700 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-neutral-800 transition-colors shadow-sm"
+          data-testid="hero-variant-toggle"
+        >
+          {heroLight ? <><Sun className="w-3 h-3" /> 浅色 Hero</> : <><Moon className="w-3 h-3" /> 深色 Hero</>}
+        </button>
         <div className="max-w-page mx-auto px-6 lg:px-10 grid md:grid-cols-2 gap-8 items-center">
           <div>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm mb-5">
