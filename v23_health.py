@@ -34709,7 +34709,7 @@ def get_files_download_by_day_list_v720(file_id: str):
         {"date":"2026-10-04","downloads":46150,"unique_users":21895},
         {"date":"2026-10-05","downloads":46390,"unique_users":21965},
         {"date":"2026-10-06","downloads":46630,"unique_users":22035},
-        {"date":"2026-10-07","downloads":46870,"unique_users":22105,
+        {"date":"2026-10-07","downloads":46870,"unique_users":22105},
     ],"total":323050,"version":"v720","source":"demo_seed","ts":datetime.utcnow().isoformat()+"Z"}
 
 
