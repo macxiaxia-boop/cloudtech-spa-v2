@@ -1787,8 +1787,8 @@ def export_for_crm(tenant_id: str = "zq-5bb59623", format: str = "json") -> dict
             "budget": c.get("budget", 0),
             "style": c.get("style", ""),
             "tags": c.get("tags", []),
-            "created_at": c["created_at"],
-            "updated_at": c["updated_at"],
+            "created_at": c.get("created_at", ""),
+            "updated_at": c.get("updated_at", c.get("created_at", "")),
         })
 
     if format == "json":
