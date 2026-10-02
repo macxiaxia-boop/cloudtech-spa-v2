@@ -40670,7 +40670,7 @@ def get_files_download_by_day_list_v650(file_id: str):
         {"date":"2026-10-04","downloads":36000,"unique_users":16995},
         {"date":"2026-10-05","downloads":36240,"unique_users":17065},
         {"date":"2026-10-06","downloads":36480,"unique_users":17135},
-        {"date":"2026-10-07","downloads":36720,"unique_users":17205,
+        {"date":"2026-10-07","downloads":36720,"unique_users":17205},
     ],"total":252000,"version":"v650","source":"demo_seed","ts":datetime.utcnow().isoformat()+"Z"}
 
 
