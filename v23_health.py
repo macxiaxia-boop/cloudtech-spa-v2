@@ -24515,11 +24515,21 @@ ROUTES = {
     "/api/v2/billing/payment-methods/{id}/unset-active-v2090": lambda q, id="c_001": get_billing_payment_methods_unset_active_v2090(id),
     "/api/v2/campaigns/{id}/audience-source-stats-v2111": lambda q, id="c001": get_campaigns_audience_source_stats_v2111(id),
     "/api/v2/files/{id}/download-by-day-list-v2111": lambda q, id="f_001": get_files_download_by_day_list_v2111(id),
+    "/api/v2/auth-api-keys/{id}/quota-history-v2112": lambda q, id="k_001": get_auth_api_keys_quota_history_v2112(id),
+    "/api/v2/skills/{id}/sync-from-template-v2087": lambda q, id="s_001": get_skills_sync_from_template_v2087(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v2090": lambda q, id="c_001": get_billing_payment_methods_unset_active_v2090(id),
+    "/api/v2/campaigns/{id}/audience-source-stats-v2111": lambda q, id="c001": get_campaigns_audience_source_stats_v2111(id),
+    "/api/v2/files/{id}/download-by-day-list-v2111": lambda q, id="f_001": get_files_download_by_day_list_v2111(id),
     "/api/v2/auth-api-keys/{id}/quota-history-v2110": lambda q, id="k_001": get_auth_api_keys_quota_history_v2110(id),
     "/api/v2/skills/{id}/sync-from-template-v2085": lambda q, id="s_001": get_skills_sync_from_template_v2085(id),
     "/api/v2/billing/payment-methods/{id}/unset-active-v2088": lambda q, id="c_001": get_billing_payment_methods_unset_active_v2088(id),
     "/api/v2/campaigns/{id}/audience-source-stats-v2109": lambda q, id="c001": get_campaigns_audience_source_stats_v2109(id),
     "/api/v2/files/{id}/download-by-day-list-v2109": lambda q, id="f_001": get_files_download_by_day_list_v2109(id),
+    "/api/v2/auth-api-keys/{id}/quota-history-v2112": lambda q, id="k_001": get_auth_api_keys_quota_history_v2112(id),
+    "/api/v2/skills/{id}/sync-from-template-v2087": lambda q, id="s_001": get_skills_sync_from_template_v2087(id),
+    "/api/v2/billing/payment-methods/{id}/unset-active-v2090": lambda q, id="c_001": get_billing_payment_methods_unset_active_v2090(id),
+    "/api/v2/campaigns/{id}/audience-source-stats-v2111": lambda q, id="c001": get_campaigns_audience_source_stats_v2111(id),
+    "/api/v2/files/{id}/download-by-day-list-v2111": lambda q, id="f_001": get_files_download_by_day_list_v2111(id),
     "/api/v2/auth-api-keys/{id}/quota-history-v2112": lambda q, id="k_001": get_auth_api_keys_quota_history_v2112(id),
     "/api/v2/skills/{id}/sync-from-template-v2087": lambda q, id="s_001": get_skills_sync_from_template_v2087(id),
     "/api/v2/billing/payment-methods/{id}/unset-active-v2090": lambda q, id="c_001": get_billing_payment_methods_unset_active_v2090(id),
@@ -113397,6 +113407,45 @@ def get_auth_api_keys_quota_history_v2110(key_id: str):
         {"at":"2026-10-03T09:15:00Z","quota":21800000,"set_by":"u_001"},
         {"at":"2026-10-03T09:30:00Z","quota":21810000,"set_by":"u_001"}
     ],"count":4,"version":"v2110","source":"demo_seed","ts":datetime.utcnow().isoformat()+"Z"}
+
+
+
+def get_skills_sync_from_template_v2087(skill_id: str):
+    return {"status":"ok","data":{"skill_id":skill_id,"synced_at":datetime.utcnow().isoformat()+"Z","template_id":"tpl_v23_R2308_v2087_"+skill_id,"synced_by":"u_001"},"source":"demo_seed","ts":datetime.utcnow().isoformat()+"Z","version":"v2087"}
+
+
+def get_billing_payment_methods_unset_active_v2090(method_id: str):
+    return {"status":"ok","data":{"method_id":method_id,"is_active":False,"unset_at":datetime.utcnow().isoformat()+"Z","unset_by":"u_001"},"source":"demo_seed","ts":datetime.utcnow().isoformat()+"Z","version":"v2090"}
+
+
+def get_campaigns_audience_source_stats_v2111(campaign_id: str):
+    return {"status":"ok","data":[
+        {"source":"ch_R2308","count":749700,"pct":344.3},
+        {"source":"xhs","count":225000,"pct":536.3},
+        {"source":"dy","count":409000,"pct":-476.4},
+        {"source":"grp","count":78800,"pct":394.7}
+    ],"total":1619700,"version":"v2111","source":"demo_seed","ts":datetime.utcnow().isoformat()+"Z"}
+
+
+def get_files_download_by_day_list_v2111(file_id: str):
+    return {"status":"ok","data":[
+        {"date":"2026-10-01","downloads":182700,"unique_users":104565},
+        {"date":"2026-10-02","downloads":182940,"unique_users":104635},
+        {"date":"2026-10-03","downloads":183180,"unique_users":104705},
+        {"date":"2026-10-04","downloads":183420,"unique_users":104775},
+        {"date":"2026-10-05","downloads":183660,"unique_users":104845},
+        {"date":"2026-10-06","downloads":183900,"unique_users":104915},
+        {"date":"2026-10-07","downloads":184140,"unique_users":104985}
+    ],"total":1281420,"version":"v2111","source":"demo_seed","ts":datetime.utcnow().isoformat()+"Z"}
+
+
+def get_auth_api_keys_quota_history_v2112(key_id: str):
+    return {"status":"ok","data":[
+        {"at":"2026-10-03T09:45:00Z","quota":21790000,"set_by":"u_001"},
+        {"at":"2026-10-03T09:00:00Z","quota":21800000,"set_by":"u_001"},
+        {"at":"2026-10-03T09:15:00Z","quota":21810000,"set_by":"u_001"},
+        {"at":"2026-10-03T09:30:00Z","quota":21820000,"set_by":"u_001"}
+    ],"count":4,"version":"v2112","source":"demo_seed","ts":datetime.utcnow().isoformat()+"Z"}
 
 
 
