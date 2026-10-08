@@ -36,6 +36,7 @@ from __future__ import annotations
 import threading
 import time
 import uuid
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -184,10 +185,66 @@ class ProviderCallback(BaseModel):
 
 
 # ════════════════════════════════════════════════════════════
-# Mock Provider
+# BillingProvider — 抽象接口 (Adapter Pattern)
 # ════════════════════════════════════════════════════════════
 
-class MockProvider:
+class BillingProvider(ABC):
+    """
+    供应商抽象基类 (Adapter Interface).
+
+    所有供应商实现必须提供:
+      - name            : 供应商标识 (写入 ProviderCallback.provider / SettledEntry.provider)
+      - issue_callback  : 发起一次回调 (模拟/真实 HTTP)
+      - replay          : 重放已发回调 (相同 charge_id, 模拟网络重试)
+      - deliver_count   : 某 charge_id 的投递次数 (用于幂等去重验证)
+      - issue_monthly_bill : 生成月度对账账单
+      - get_monthly_bill   : 查询月度账单
+
+    任何未实现方法将由 @abstractmethod 强制约束,
+    子类必须 override 才能实例化.
+    """
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """供应商标识 (e.g. 'mock_provider_a' / 'stripe' / 'openai_billing')"""
+        ...
+
+    @abstractmethod
+    def issue_callback(self, *, tenant_id: str, idempotency_key: str,
+                       amount, currency,
+                       success: bool = True):
+        """生成一次回调 (允许重放)"""
+        ...
+
+    @abstractmethod
+    def replay(self, callback) -> object:
+        """重放同一回调 (相同 charge_id, 模拟网络重试)"""
+        ...
+
+    @abstractmethod
+    def deliver_count(self, charge_id: str) -> int:
+        """返回某 charge_id 的投递次数"""
+        ...
+
+    @abstractmethod
+    def issue_monthly_bill(self, year: int, month: int, entries: list) -> dict:
+        """
+        模拟供应商月账单 — 故意与平台账本可能存在差异
+        entries: [{tenant_id, amount, currency, charge_id}, ...]
+        """
+        ...
+
+    @abstractmethod
+    def get_monthly_bill(self, year: int, month: int):
+        """查询月度账单 (year/month) -> dict 或 None"""
+        ...
+
+
+# ════════════════════════════════════════════════════════════
+# MockProvider — in-memory 模拟实现 (用于测试 + 离线开发)
+# ════════════════════════════════════════════════════════════
+
+class MockProvider(BillingProvider):
     """
     Mock 供应商 — 模拟:
       - 异步回调 (网络延迟)
@@ -196,12 +253,16 @@ class MockProvider:
       - 月度对账账单
     """
     def __init__(self, name: str = "mock_provider_a", latency_ms: int = 0):
-        self.name = name
+        self._name = name
         self.latency_ms = latency_ms
         self._sent_callbacks: list = []
         self._delivered_count: dict = defaultdict(int)  # charge_id -> 投递次数
         self._monthly_bills: list = []  # 模拟供应商月账单
         self._lock = threading.Lock()
+
+    @property
+    def name(self) -> str:
+        return self._name
 
     def issue_callback(self, *, tenant_id, idempotency_key, amount, currency, success=True):
         """生成一次回调 (允许重放)"""
@@ -248,6 +309,199 @@ class MockProvider:
         for b in self._monthly_bills:
             if b["year"] == year and b["month"] == month:
                 return b
+        return None
+
+
+# ════════════════════════════════════════════════════════════
+# StripeProvider — 真实集成 stub (接口完整, 不真调)
+# ════════════════════════════════════════════════════════════
+
+class StripeProvider(BillingProvider):
+    """
+    Stripe 供应商 stub — 接口完整, 真 HTTP 调用未启用.
+
+    设计原则 (红线 #95 EXTEND):
+      1. 完整实现 BillingProvider 接口 → 可注入 BillingEngine
+      2. 真实 HTTP 调用点用 `__REAL_PROVIDER_CALL_NEEDED__` 标记
+      3. 当前默认拒绝真调, 由 user 修 CC (connection-close) 后启用
+      4. 所有方法先走 in-memory fallback 行为, 与 MockProvider 一致
+         → 单测可独立跑, 不依赖网络
+
+    启用方式 (user 修 CC 后):
+      from billing_real import StripeProvider
+      p = StripeProvider(api_key="sk_live_...", mode="live")
+      # 把 __REAL_PROVIDER_CALL_NEEDED__ 处的 raise 替换为真 HTTP 调用
+    """
+    __REAL_PROVIDER_CALL_NEEDED__ = (
+        "__REAL_PROVIDER_CALL_NEEDED__ :: StripeProvider 真 HTTP 调用未启用 — 需 user 修 CC "
+        "(配置 STRIPE_API_KEY + 切换 mode='live' 后, 替换 issue_callback/replay/"
+        "deliver_count/issue_monthly_bill 中的 raise 为 stripe SDK 调用)"
+    )
+
+    def __init__(self, api_key=None, mode: str = "stub",
+                 latency_ms: int = 0):
+        self._api_key = api_key  # 当前不消费, 仅作接入位
+        self._mode = mode  # "stub" = 全本地; "live" = 需 user 启用真调
+        self.latency_ms = latency_ms
+        self._sent_callbacks: list = []
+        self._delivered_count: dict = defaultdict(int)
+        self._monthly_bills: list = []
+        self._lock = threading.Lock()
+
+    @property
+    def name(self) -> str:
+        return "stripe"
+
+    def issue_callback(self, *, tenant_id: str, idempotency_key: str,
+                       amount, currency,
+                       success: bool = True):
+        # 真调占位 — user 启用后改为:
+        #   stripe.Charge.create(amount=..., currency=..., idempotency_key=...)
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        # stub 行为 — 与 MockProvider 一致
+        cb = ProviderCallback(
+            charge_id=f"chg_{uuid.uuid4().hex[:16]}",
+            tenant_id=tenant_id,
+            idempotency_key=idempotency_key,
+            amount=amount,
+            currency=currency,
+            provider=self.name,
+            success=success,
+        )
+        with self._lock:
+            self._sent_callbacks.append(cb)
+        return cb
+
+    def replay(self, callback):
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        replayed = callback.model_copy()
+        with self._lock:
+            self._delivered_count[callback.charge_id] += 1
+        return replayed
+
+    def deliver_count(self, charge_id: str) -> int:
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        return self._delivered_count[charge_id]
+
+    def issue_monthly_bill(self, year: int, month: int, entries: list) -> dict:
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        bill = {
+            "year": year,
+            "month": month,
+            "provider": self.name,
+            "entries": entries,
+            "issued_at": datetime.now(timezone.utc),
+        }
+        with self._lock:
+            self._monthly_bills.append(bill)
+        return bill
+
+    def get_monthly_bill(self, year: int, month: int):
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        with self._lock:
+            for b in self._monthly_bills:
+                if b["year"] == year and b["month"] == month:
+                    return b
+        return None
+
+
+# ════════════════════════════════════════════════════════════
+# OpenAIProvider — 真实集成 stub (接口完整, 不真调)
+# ════════════════════════════════════════════════════════════
+
+class OpenAIProvider(BillingProvider):
+    """
+    OpenAI 供应商 stub — 接口完整, 真 HTTP 调用未启用.
+
+    设计原则同 StripeProvider:
+      1. 完整 BillingProvider 接口 (DI-compatible)
+      2. 真调用点用 `__REAL_PROVIDER_CALL_NEEDED__` 标记
+      3. 默认 in-memory 行为, 单测可独立跑
+
+    启用方式 (user 修 CC 后):
+      from billing_real import OpenAIProvider
+      p = OpenAIProvider(api_key="sk-...", mode="live", usage_endpoint=...)
+    """
+    __REAL_PROVIDER_CALL_NEEDED__ = (
+        "__REAL_PROVIDER_CALL_NEEDED__ :: OpenAIProvider 真 HTTP 调用未启用 — 需 user 修 CC "
+        "(配置 OPENAI_API_KEY + 切换 mode='live' + 设置 usage_endpoint 后, "
+        "替换 issue_callback/replay/deliver_count/issue_monthly_bill 中的 raise 为 "
+        "OpenAI Usage API 调用)"
+    )
+
+    def __init__(self, api_key=None,
+                 usage_endpoint=None,
+                 mode: str = "stub", latency_ms: int = 0):
+        self._api_key = api_key
+        self._usage_endpoint = usage_endpoint or "https://api.openai.com/v1/usage"
+        self._mode = mode
+        self.latency_ms = latency_ms
+        self._sent_callbacks: list = []
+        self._delivered_count: dict = defaultdict(int)
+        self._monthly_bills: list = []
+        self._lock = threading.Lock()
+
+    @property
+    def name(self) -> str:
+        return "openai_billing"
+
+    def issue_callback(self, *, tenant_id: str, idempotency_key: str,
+                       amount, currency,
+                       success: bool = True):
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        cb = ProviderCallback(
+            charge_id=f"chg_{uuid.uuid4().hex[:16]}",
+            tenant_id=tenant_id,
+            idempotency_key=idempotency_key,
+            amount=amount,
+            currency=currency,
+            provider=self.name,
+            success=success,
+        )
+        with self._lock:
+            self._sent_callbacks.append(cb)
+        return cb
+
+    def replay(self, callback):
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        replayed = callback.model_copy()
+        with self._lock:
+            self._delivered_count[callback.charge_id] += 1
+        return replayed
+
+    def deliver_count(self, charge_id: str) -> int:
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        return self._delivered_count[charge_id]
+
+    def issue_monthly_bill(self, year: int, month: int, entries: list) -> dict:
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        bill = {
+            "year": year,
+            "month": month,
+            "provider": self.name,
+            "entries": entries,
+            "issued_at": datetime.now(timezone.utc),
+        }
+        with self._lock:
+            self._monthly_bills.append(bill)
+        return bill
+
+    def get_monthly_bill(self, year: int, month: int):
+        if self._mode == "live":
+            raise NotImplementedError(self.__REAL_PROVIDER_CALL_NEEDED__)
+        with self._lock:
+            for b in self._monthly_bills:
+                if b["year"] == year and b["month"] == month:
+                    return b
         return None
 
 
