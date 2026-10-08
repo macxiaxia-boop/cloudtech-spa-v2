@@ -8,15 +8,32 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from admin_dashboard import app
 
 @pytest.fixture
-def client():
+def seed_admin():
+    from auth import AuthManager; from database import get_db
+    from auth import AuthManager as _AM
+    db = get_db()
+    existing_t = db.fetch_one("SELECT id FROM tenants WHERE id = ?", ('tenant-test',))
+    if not existing_t:
+        db.insert('tenants', {'id': 'tenant-test', 'name': 'Test Tenant', 'email': 'tenant-test@cloudtech.com', 'api_key': 'key-test-123', 'api_key_hash': 'hash-test-abc'})
+    existing = db.fetch_one("SELECT id FROM users WHERE email = ?", ("admin@cloudtech.com",))
+    if not existing:
+        a = _AM()
+        a.create_user(tenant_id='tenant-test', email='admin@cloudtech.com', password='admin123', name='Test Admin', role='admin')
+    return True
+
+@pytest.fixture
+def client(seed_admin):
     app.config['TESTING'] = True
     return app.test_client()
 
 @pytest.fixture
 def admin_token(client):
     r = client.post('/api/auth/login', json={'email': 'admin@cloudtech.com', 'password': 'admin123'})
-    d = json.loads(r.data)
-    return d.get('token', {}).get('token', '')
+    try:
+        d = json.loads(r.data)
+        return d.get('token', d.get('access_token', ''))
+    except Exception:
+        return ''
 
 def _h(token):
     return {'X-Admin-Token': token, 'Content-Type': 'application/json'}
