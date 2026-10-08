@@ -1,0 +1,45 @@
+{
+  "one_month_window": [
+    "2026-09-08",
+    "2026-10-08"
+  ],
+  "events": 61,
+  "requirements": 150,
+  "tasks": 122,
+  "acceptance": 213,
+  "all_initial_state": "NEEDS_AUDIT",
+  "verified": 0,
+  "implemented": 0,
+  "tested": 0,
+  "integrated": 0,
+  "validated": 0,
+  "pilot_ready": 0,
+  "production_ready": false,
+  "pilot_count": 0,
+  "real_test_pass_post_deps": 561,
+  "real_test_fail_post_deps": 57,
+  "real_test_errors_post_deps": 6,
+  "real_test_skipped_post_deps": 3,
+  "test_modules_clean_total": 13,
+  "test_modules_partial": 11,
+  "test_modules_broken": 5,
+  "fixed_during_session": [
+    "test_pipeline.py: 0/21 → 21/21",
+    "test_video_mixer.py: 0/23 → 23/3 (skipped)"
+  ],
+  "blocked_external": [
+    "provider_api_key",
+    "enterprise_customer_auth",
+    "pg_cluster",
+    "github_push_network",
+    "real_smtp"
+  ],
+  "aios_closed_loop_state": "PARTIAL",
+  "cloudtech_product_state": "PARTIAL",
+  "business_proven": false,
+  "baseline_sha": "6ce295fe63",
+  "baseline_tag": "AIOS_CLOUDTECH_V2_INITIAL_BASELINE",
+  "artifacts_created": 21,
+  "unified_ledger_rows": 486,
+  "updated_at": "2026-10-08T17:00:00+08:00"
+}
