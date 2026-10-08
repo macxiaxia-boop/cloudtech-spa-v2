@@ -1,0 +1,11 @@
+# MIGRATION_MAP.csv — 旧 → 新 资产映射
+
+old_item | new_item | classification | migration_action | status
+CLOUDTECH_MASTER_ARCHITECTURE_v1.md,ADR-PRODUCT-001 命名冲突,historical_architecture (AIOS 底座 vs Product SaaS),明确为 ADR,DOING
+_gateway_v22.py,v2 gateway code,legacy_sub_runtime,识别为旧 AIOS 路由,保留作为 Shared Runtime,DONE (分类)
+_v23_*.py,V23 patch/watchdog scripts,code-recorders,识别为迭代历史,DONE
+v22 → v23 → R2xxx 命名,CloudTech evolution history,version_tags,作为 commit SHA 记录,DONE
+_cloudtech.db,本地 SQLite,local_dev_db,NOT_TESTED,需 PG 切换,PENDING
+docker-compose.yml,Docker/airgap infrastructure,containerized_部署,VALIDATED 模式,PENDING (用真实 PG 时 dry-run)
+.env,API keys (高敏感),secrets,不入 git, 需 .env.example + Secret Manager,PENDING
+AIOS kernel core + PARENT,AIOS 持久化 Kernel,SaaS 持久化层,VALIDATED (Phase A+B+C+D+E Done),DONE

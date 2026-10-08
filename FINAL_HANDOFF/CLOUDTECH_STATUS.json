@@ -1,0 +1,99 @@
+{
+  "aios_real_closed_loop": "PARTIAL",
+  "aios_implemented": 38,
+  "aios_tested": 38,
+  "aios_validated": 38,
+  "aios_production_ready": false,
+  "aios_pass_count": 38,
+  "aios_fail_count": 0,
+  "aios_blocked_count": 0,
+  "aios_not_run_count": 0,
+  "aios_actual_evidence_paths": [
+    "D:\\\\AIOS\\\\kernel\\\\.git\\\\refs\\\\heads\\\\main",
+    "D:\\\\AIOS\\\\_agent-hub\\\\reports\\\\aios_vnext_phase_a_done_*.md",
+    "D:\\\\AIOS\\\\_agent-hub\\\\reports\\\\aios_vnext_phase_b_done_*.md",
+    "D:\\\\AIOS\\\\_agent-hub\\\\reports\\\\aios_vnext_phase_c_done_*.md",
+    "D:\\\\AIOS\\\\_agent-hub\\\\reports\\\\aios_vnext_phase_d_done_*.md",
+    "D:\\\\AIOS\\\\_agent-hub\\\\reports\\\\aios_vnext_phase_e_done_*.md"
+  ],
+  "aios_blocking_reasons": [
+    "Real closed loop requires external authorization bridge to Windows host",
+    "Real Provider Golden Task requires real LLM provider API key + signed contract",
+    "Pilot requires real enterprise customer authorization + CRM access"
+  ],
+  "cloudtech_implementation": "PARTIAL",
+  "cloudtech_features_requested": 68,
+  "cloudtech_pages_requested": 32,
+  "cloudtech_workflows_requested": 24,
+  "cloudtech_tasks_requested": 40,
+  "cloudtech_acceptance_requested": 87,
+  "cloudtech_features_implemented": 0,
+  "cloudtech_features_tested": 0,
+  "cloudtech_features_validated": 0,
+  "cloudtech_features_production_ready": false,
+  "cloudtech_real_test_pass": 430,
+  "cloudtech_real_test_fail": 70,
+  "cloudtech_clean_test_modules": 13,
+  "cloudtech_partial_test_modules": 11,
+  "cloudtech_broken_test_modules": 5,
+  "cloudtech_clean_modules": [
+    "tests/test_content.py (25/25)",
+    "tests/test_crm.py (33/33)",
+    "tests/test_d24_27_funnel_analytics.py (17/17)",
+    "tests/test_d28_30_opentelemetry.py (18/18)",
+    "tests/test_d31_37_billing_quotas.py (22/22)",
+    "tests/test_d4_7_prune.py (19/19)",
+    "tests/test_d41_44_industry_landing.py (18/18)",
+    "tests/test_d45_52_content_sop_clients.py (23/23)",
+    "tests/test_d53_60_documents.py (44/44)",
+    "tests/test_d61_68_finance_monitoring.py (44/44)",
+    "tests/test_m0_prep_4_docs.py (36/36)",
+    "tests/test_phase48_d_c_a_b2_preparation.py (10/10)"
+  ],
+  "cloudtech_blocking_reasons": [
+    "87 acceptance tests not yet implemented (CSV says UNKNOWN status)",
+    "Real enterprise customer authorization for PILOT_READY",
+    "Real provider API key + signed contract for BILL/MOD tests",
+    "32 pages full route wiring verification (UI-001 to UI-032) not yet performed"
+  ],
+  "host_execution_environment": "WINDOWS_LOCAL",
+  "host_computer": "DESKTOP-0JKD1FQ",
+  "host_user": "xinzh",
+  "host_cwd": "D:\\\\CloudTech-Portable",
+  "host_git_remote": "github.com/macxiaxia-boop/cloudtech-spa-v2.git",
+  "host_authorized_roots": [
+    "D:\\\\CloudTech-Portable",
+    "D:\\\\AIOS",
+    "D:\\\\AIOS\\\\kernel"
+  ],
+  "host_forbidden_modifications": [
+    "Network adapters / Wi-Fi / Bluetooth / USB",
+    "DNS / Hosts / Proxy / Firewall",
+    "Drivers / Defender / UAC / Registry",
+    "System services / Scheduled tasks / Startup items",
+    "Real customer payment / Real ad deployment / Production deploy"
+  ],
+  "critical_failed_items": [
+    "tests/test_pipeline.py - 21 failed (workflow broken)",
+    "tests/test_video_mixer.py - 23 failed (broken)",
+    "tests/test_api.py - error (no test file structure complete)",
+    "tests/test_models.py - test_email mock + tenant_scoped ModuleNotFound",
+    "tests/test_d13_16_postgres_migration.py - 5 pass + 6 error"
+  ],
+  "real_blockers": [
+    "No real Provider API contract",
+    "No real enterprise customer authorization",
+    "No production DB cluster connection",
+    "32 pages UI wiring matrix not yet built"
+  ],
+  "evidence_root": "D:\\\\CloudTech-Portable\\\\FINAL_HANDOFF\\\\",
+  "baseline_sha": "6ce295fe63",
+  "baseline_branch": "main",
+  "baseline_tag": "AIOS_CLOUDTECH_V2_INITIAL_BASELINE",
+  "deployment_status": "NOT_DEPLOYED",
+  "deployment_environment": "LOCAL",
+  "current_state_summary": "Audit complete. 13/30 test modules clean. AIOS kernel phases A-E done (38 cards). 87 CloudTech acceptance tests not yet implemented.",
+  "business_proven": false,
+  "blocked_notes": "No external enterprise customer authorization for business_proven.",
+  "updated_at": "2026-10-08T16:30:00+08:00"
+}

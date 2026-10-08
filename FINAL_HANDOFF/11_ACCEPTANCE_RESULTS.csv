@@ -1,0 +1,124 @@
+# ACCEPTANCE_RESULTS.csv — CloudTech 87 项验证状态 (基于真实测试)
+
+test_id,phase,area,experiment,result,evidence_path,git_sha,command
+1,P0,CORE,企业开户+Owner唯一+重试幂等,NOT_TESTED,,6ce295fe63,tests/test_models.py (run once: 2 failed / 6 passed)
+2,P0,SEC,A/B企业API跨租户读写拒绝,NOT_TESTED,,6ce295fe63,(no test file found)
+4,P0,SEC,撤销成员后JWT/Session即时失效,NOT_TESTED,,6ce295fe63,
+5,P0,SEC,顾问临时授权到期,NOT_TESTED,,6ce295fe63,
+6,P0,SEC,RAG跨租户召回隔离,NOT_TESTED,,6ce295fe63,
+7,P0,SEC,对象存储签名URL越权,NOT_TESTED,,6ce295fe63,
+8,P0,SEC,队列回调/事件重放tenant spoof,NOT_TESTED,,6ce295fe63,
+9,P0,SEC,日志不含API Key/敏感信息,NOT_TESTED,,6ce295fe63,
+10,P0,SEC,客服/交付方最小权限,NOT_TESTED,,6ce295fe63,
+11,P0,SEC,数据导出被非owner请求,NOT_TESTED,,6ce295fe63,
+12,P0,SEC,离职用户知识引用缓存隔离,NOT_TESTED,,6ce295fe63,
+13,P0,WF,无效DAG/死循环/上限,NOT_TESTED,,6ce295fe63,test_pipeline.py: 21 failed (broken)
+14,P0,WF,编辑草稿后历史run版本不变,NOT_TESTED,,6ce295fe63,test_pipeline.py: 21 failed
+15,P0,WF,无发布权限尝试发布,NOT_TESTED,,6ce295fe63,
+16,P0,WF,节点超时和受限自动重试,NOT_TESTED,,6ce295fe63,
+17,P0,WF,用户离开页面后长期任务继续,NOT_TESTED,,6ce295fe63,
+18,P0,WF,取消任务后外部副作用记录,NOT_TESTED,,6fe635fe63,
+19,P0,WF,人工拒绝高风险发布,NOT_TESTED,,6ce295fe63,
+20,P0,WF,执行阶段证据与轨迹齐全,NOT_TESTED,,6ce295fe63,
+21,P0,WF,Worker崩溃恢复,NOT_TESTED,,6ce295fe63,
+22,P0,WF,模型替换与降级,NOT_TESTED,,6ce295fe63,
+23,P0,WF,审批节点逾期超时,NOT_TESTED,,6ce295fe63,
+24,P0,WF,Skill候选版本不直升生产,NOT_TESTED,,6ce295fe63,
+25,P0,KB,知识文档版本/上传/重试,NOT_TESTED,,6ce295fe63,
+26,P0,KB,文档删除后索引不可召回,NOT_TESTED,,6ce295fe63,
+27,P0,KB,过期知识默认不被用作现时事实,NOT_TESTED,,6ce295fe63,
+28,P0,KB,引用来源无授权不得展示,NOT_TESTED,,6ce295fe63,
+29,P0,CON,连接器授权/过期/解绑,NOT_TESTED,,6ce295fe63,
+30,P0,CON,供应商Token轮换不中断历史单据,NOT_TESTED,,6ce295fe63,
+31,P0,MOD,真实Provider调用凭回执验收,NOT_TESTED,,6ce295fe63,no real provider contract tests found
+32,P0,MOD,模型能力表不兼容调用拒绝,NOT_TESTED,,6ce295fe63,
+33,P0,MOD,供应商超时未知费用入待对账,NOT_TESTED,,6ce295fe63,
+34,P0,MOD,Provider A/B故障回退不重复扣费,NOT_TESTED,,6ce295fe63,
+35,P0,BILL,首次调用reserve-settle-release,NOT_TESTED,,6ce295fe63,
+36,P0,BILL,相同idempotency_key并发10次,NOT_TESTED,,6ce295fe63,
+37,P0,BILL,供应商Callback重放100次,NOT_TESTED,,6ce295fe63,
+38,P0,BILL,无余额/硬预算不足拒绝,NOT_TESTED,,6ce295fe63,
+39,P0,BILL,流式调用提前中止/用量不明,NOT_TESTED,,6ce295fe63,
+40,P0,BILL,模型输入/输出/缓存价格分别结算,NOT_TESTED,,6ce295fe63,
+41,P0,BILL,成本价变更不影响历史账单,NOT_TESTED,,6ce295fe63,
+42,P0,BILL,充值未成功不可增加余额,NOT_TESTED,,6ce295fe63,
+43,P0,BILL,退款/修正单双向记账,NOT_TESTED,,6ce295fe63,
+44,P0,BILL,供应商月账单对账差异单,NOT_TESTED,,6ce295fe63,
+45,P0,BILL,跨币种与汇率版本化,NOT_TESTED,,6ce295fe63,
+46,P0,BILL,多模态单位核算,NOT_TESTED,,6ce295fe63,
+47,P0,MKT,脚本选题到审核有版本来源,NOT_TESTED,,6ce295fe63,
+48,P0,MKT,无渠道授权时不能自动发布,NOT_TESTED,,6ce295fe63,
+49,P0,MKT,直播数据缺失显示未取得,NOT_TESTED,,6ce295fe63,
+50,P0,MKT,广告未审批不发生扣费操作,NOT_TESTED,,6ce295fe63,
+51,P0,CRM,线索导入同企业去重,NOT_TESTED,,6ce295fe63,
+52,P0,CRM,CRM联系人脱敏与权限,NOT_TESTED,,6ce295fe63,
+53,P0,CRM,来源-线索-沟通-转化链,NOT_TESTED,,6ce295fe63,
+54,P0,CRM,跨企业相同手机号不串联,NOT_TESTED,,6ce295fe63,
+55,P0,BI,无成交数据则报表显示N/A,NOT_TESTED,,6ce295fe63,
+56,P0,BI,曝光增长与线索成本冲突,NOT_TESTED,,6ce295fe63,
+57,P0,BI,实验样本不足输出UNKNOWN,NOT_TESTED,,6ce295fe63,
+58,P0,PILOT,试点诊断->基线->动作->证据,NOT_TESTED,,6ce295fe63,
+59,P0,PILOT,客户拒绝公开案例,NOT_TESTED,,6ce295fe63,
+60,P0,PILOT,SOP跨租户复用受许可控制,NOT_TESTED,,6ce295fe63,
+61,P0,PILOT,服务人时与签收记录,NOT_TESTED,,6ce295fe63,
+62,P0,OPS,备份恢复实测,NOT_TESTED,,6ce295fe63,
+63,P0,OPS,Staging->Pilot发布可回滚,NOT_TESTED,,6ce295fe63,
+64,P0,OPS,Provider全停不丢任务或双扣,NOT_TESTED,,6ce295fe63,
+65,P0,OPS,队列积压与告警,NOT_TESTED,,6ce295fe63,
+66,P0,OPS,日志/凭据泄漏自动扫描,NOT_TESTED,,6ce295fe63,
+67,P0,UI,页面route->API->DB->action核对,NOT_TESTED,,6ce295fe63,
+68,P0,UI,空白/加载/异常/不足额/越权态,NOT_TESTED,,6ce295fe63,
+69,P0,UI,键盘操作/响应式/错误反馈,NOT_TESTED,,6ce295fe63,
+70,P0,COMM,套餐权益与实际席位限制,NOT_TESTED,,6ce295fe63,
+71,P0,COMM,定制报价/项目/合同签收,NOT_TESTED,,6ce295fe63,
+72,P0,COMM,渠道代理商范围隔离,NOT_TESTED,,6ce295fe63,
+73,P0,COMM,套餐席位与工作流配额,NOT_TESTED,,6ce295fe63,
+74,P0,DE,数字员工模板从草稿入库,NOT_TESTED,,6ce295fe63,
+75,P0,DE,数字员工绑定租户知识及权限,NOT_TESTED,,6ce295fe63,
+76,P0,DE,员工发布后版本冻结及回滚,NOT_TESTED,,6ce295fe63,
+77,P0,DE,数字员工正在执行时刷新页面,NOT_TESTED,,6ce295fe63,
+78,P1,DEP,私有化安装/隔离与升级回滚,NOT_TESTED,,6ce295fe63,
+79,P1,MKT,直播运营脚本/数据来源,NOT_TESTED,,6ce295fe63,
+80,P1,MKT,广告审批与真实外部动作限制,NOT_TESTED,,6ce295fe63,
+81,P1,PILOT,客户撤回案例展示授权,NOT_TESTED,,6ce295fe63,
+82,P1,UI,页面动作API与DB一致性,NOT_TESTED,,6ce295fe63,
+83,P1,UI,上手文档和产品版本一致,NOT_TESTED,,6ce295fe63,
+84,P1,UI,UI模版统一Design System一致,NOT_TESTED,,6ce295fe63,
+85,P1,BILL,多模态资源计量,NOT_TESTED,,6ce295fe63,
+86,P1,KB,知识引用与反馈,NOT_TESTED,,6ce295fe63,
+87,P1,COMM,渠道代理范围隔离,NOT_TESTED,,6ce295fe63,
+
+# Phase A (CloudTech) note: 
+# tests/test_models.py: 6/8 PASS (real runs)
+# tests/test_content.py: 25/25 PASS
+# tests/test_crm.py: 33/33 PASS
+# tests/test_d24_27_funnel_analytics.py: 17/17 PASS
+# tests/test_d28_30_opentelemetry.py: 18/18 PASS
+# tests/test_d31_37_billing_quotas.py: 22/22 PASS
+# tests/test_d4_7_prune.py: 19/19 PASS
+# tests/test_d41_44_industry_landing.py: 18/18 PASS
+# tests/test_d45_52_content_sop_clients.py: 23/23 PASS
+# tests/test_d53_60_documents.py: 44/44 PASS
+# tests/test_d61_68_finance_monitoring.py: 44/44 PASS
+# tests/test_m0_prep_4_docs.py: 36/36 PASS
+# tests/test_phase48_d_c_a_b2_preparation.py: 10/10 PASS
+
+# Phase B (broken) to address:
+# tests/test_api.py: ERROR (empty result)
+# tests/test_d13_16_postgres_migration.py: 5 passed + 6 errors
+# tests/test_d17_23_website_scaffold.py: 13 passed + 3 failed
+# tests/test_d38_40_customer_dashboard.py: 16 passed + 5 failed
+# tests/test_d8_12_gateway_meta.py: 18 passed + 3 failed
+# tests/test_geo.py: 23 passed + 1 failed
+# tests/test_integration.py: 9 passed + 1 failed
+# tests/test_models.py: 6 passed + 2 failed (email + tenant_scoped)
+# tests/test_modules.py: 24 passed + 1 failed
+# tests/test_phase47_5_illustrations_density.py: 13 passed + 1 failed
+# tests/test_phase47_6_remaining_pages_density.py: 8 passed + 1 failed
+# tests/test_phase47_7_rename_integrity.py: 6 passed + 2 failed
+# tests/test_phase47_stage123_all.py: 29 passed + 1 failed
+# tests/test_phase48_b2_c_outreach_wechat.py: 5 passed + 5 failed
+# tests/test_phase48_d_spa_integration.py: 6 passed + 1 failed
+# tests/test_pipeline.py: 21 failed (broken)
+# tests/test_stress.py: 2 passed + 4 failed
+# tests/test_video_mixer.py: 3 skipped + 23 failed (broken)

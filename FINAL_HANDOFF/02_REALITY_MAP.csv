@@ -1,0 +1,6 @@
+# REALITY_MAP.csv — CloudTech 真实代码层面身份
+
+repo_id,absolute_path,remote_url_redacted,branch,HEAD_sha,dirty_files,test_command,last_successful_test_evidence,runtime_endpoint,deployment_environment,owner,classification,read_permission,write_permission
+CLOUDTECH_PRODUCT,D:\CloudTech-Portable,github.com/macxiaxia-boop/cloudtech-spa-v2,main,6ce295c8,3 deleted / 70+ untracked,pytest tests/test_models.py -v,NOT_TESTED_YET,localhost:9000 (cloudtech_main.py),UNDEFINED,xinzh,ENTERPRISE_PRODUCT_REPO,owner,owner
+AIOS_KERNEL,D:\AIOS\kernel,(local only),main,ab37b07,clean,pytest tests/integration/test_workers.py -v,25/25 PASS 2026-10-08,cli,None,RESULT,owner,owner
+HISTORICAL_CLOUDTECH_RUNTIME,(archived),(archived),,n/a,read-only,read,UNUSED,UNUSED,UNUSED,xinzh,HISTORICAL_REFERENCE,owner,owner

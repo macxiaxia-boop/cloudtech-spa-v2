@@ -1,0 +1,8 @@
+repo_id,absolute_path,branch,HEAD_sha,purpose,existed,done_yet
+CLOUDTECH_PRODUCT,D:\CloudTech-Portable,main,6ce295c8,SaaS enterprise product (per V2 spec),YES,YES
+CLOUDTECH_PRODUCT_GUI,D:\CloudTech-Portable\web\,main,6ce295c8,React SPA,PRESENT,NO (not running)
+CLOUDTECH_PRODUCT_API,D:\CloudTech-Portable\api\,main,6ce295c8,REST API,PRESENT,NO
+CLOUDTECH_PRODUCT_BACKEND,D:\CloudTech-Portable\backend\,main,6ce295c8,FastAPI backend,PRESENT,NO
+CLOUDTECH_PRODUCT_DB,D:\CloudTech-Portable\db\,main,n/a,DB models,UNKNOWN_PRESENT,NO
+AIOS_KERNEL,D:\AIOS\kernel\,main,ab37b07,Phase A+B+C+D+E kernel,PRESENT,26/26 PASS
+AIOS_PERSONAL,D:\AIOS\,main,0b964e6,AIOS root + aios_tasks,PRESENT,21/21 cards Verified
