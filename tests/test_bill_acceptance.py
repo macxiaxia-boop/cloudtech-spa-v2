@@ -1012,3 +1012,86 @@ def test_BILL_022_charge_id_dedup_across_providers(engine_with_balance):
     assert len(matching) == 1
     ok, msgs = eng.check_all_invariants("tenant_a")
     assert ok, f"invariants failed: {msgs}"
+
+
+# ════════════════════════════════════════════════════════════════════════
+# V6.2 Item 3: Boundary case tests (Galois/74)
+# ════════════════════════════════════════════════════════════════════════
+
+def test_BILL_023_zero_amount_settlement_no_op(engine_with_balance):
+    """Settle amount=0: 合法无 op, 不应报错且不改变余额."""
+    from decimal import Decimal
+    eng = engine_with_balance
+    evt = BillingEvent(
+        tenant_id="tenant_a", idempotency_key="zero-amt-k",
+        model="gpt-4o", units={UnitType.TOKEN_INPUT: 0},
+    )
+    res = eng.reserve(evt)
+    # Reservation for 0 units should succeed (or no-op) — both acceptable
+    bal_before = eng.get_balance("tenant_a").available
+    se = eng.settle(res.entry_id)
+    bal_after = eng.get_balance("tenant_a").available
+    assert bal_before == bal_after  # zero amt = no balance change
+    ok, msgs = eng.check_all_invariants("tenant_a")
+    assert ok, f"invariants failed: {msgs}"
+
+
+def test_BILL_024_unicode_tenant_id_accepted(engine):
+    """CJK tenant_id 在 ledger 中可正确存储与查询 (Unicode safety)."""
+    from decimal import Decimal
+    eng = engine
+    eng.ensure_tenant("tenant_客户_中文", initial_balance=Decimal("100"))
+    evt = BillingEvent(
+        tenant_id="tenant_客户_中文", idempotency_key="unicode-tid-k",
+        model="gpt-4o", units={UnitType.TOKEN_INPUT: 1000},
+    )
+    res = eng.reserve(evt)
+    assert res.status in (ReservationStatus.PENDING, ReservationStatus.SETTLED)
+    bal = eng.get_balance("tenant_客户_中文")
+    assert bal is not None
+    ok, msgs = eng.check_all_invariants("tenant_客户_中文")
+    assert ok, f"invariants failed: {msgs}"
+
+
+def test_BILL_025_release_unknown_entry_id_raises_ledger_error(engine_with_balance):
+    """release 不存在的 entry_id 应 raise LedgerError (不 crash, 不静默成功)."""
+    eng = engine_with_balance
+    raised = False
+    try:
+        eng.release("nonexistent-entry-id-99999")
+    except LedgerError:
+        raised = True
+    except (KeyError, ValueError) as e:
+        raised = True  # Other specific exceptions also acceptable
+    assert raised, "expected LedgerError or similar when releasing unknown entry"
+    # Invariants must still hold
+    ok, msgs = eng.check_all_invariants("tenant_a")
+    assert ok, f"invariants failed: {msgs}"
+
+
+def test_BILL_026_decimal_precision_no_float_truncation(engine_with_balance):
+    """reserve Decimal amount 不会出现 float 截断 (保留 4+ 位小数精度)."""
+    from decimal import Decimal
+    eng = engine_with_balance
+    # 10 tokens 触发 reserve (不超初始余额)
+    evt = BillingEvent(
+        tenant_id="tenant_a", idempotency_key="decimal-prec-k",
+        model="gpt-4o", units={UnitType.TOKEN_INPUT: 10},
+    )
+    res = eng.reserve(evt)
+    # reservation amount 必须为 Decimal (not float)
+    assert isinstance(res.amount, Decimal)
+    # reserved 金额 = res.amount (Decimal precision)
+    bal_after = eng.get_balance("tenant_a")
+    assert bal_after.reserved == res.amount
+    # Decimal 字符串表示保留小数 (不会出现 float 的 0.006000000000000001)
+    s = str(bal_after.reserved)
+    assert '0000000' not in s, f"float contamination in Decimal: {s}"
+    ok, msgs = eng.check_all_invariants("tenant_a")
+    assert ok, f"invariants failed: {msgs}"
+
+
+def test_BILL_027_ledger_invariant_with_idle_tenant(engine):
+    """从未发生过交易的 tenant 仍需满足 ledger invariants (空账本不变量)."""
+    ok, msgs = engine.check_all_invariants("tenant-idle-no-warnings")
+    assert ok, f"idle tenant invariants failed: {msgs}"

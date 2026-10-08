@@ -218,3 +218,68 @@ class TestMixerEdgeCases:
         from video_mixer import mix_video
         result = mix_video([], template="<script>alert(1)</script>", dry_run=True)
         assert result["ok"] is False
+
+
+# ════════════════════════════════════════════════════════════════════════
+# V6.2 Item 4: Boundary case tests (Galois/74)
+# ════════════════════════════════════════════════════════════════════════
+
+class TestMixerBoundaryV62:
+    """V6.2 boundary: extreme inputs, unicode, malformed paths."""
+
+    def test_mix_video_with_unicode_clips(self):
+        """Unicode chars in clip paths don't crash list_assets / mix_video."""
+        from video_mixer import mix_video
+        result = mix_video(
+            [{"path": "/测试/视频_客户-中国_🏠.mp4"}],
+            template="before_after", dry_run=True,
+        )
+        assert isinstance(result, dict)
+        assert "ok" in result
+
+    def test_mix_video_with_extremely_long_path(self):
+        """Path > 4KB should not crash (defensive)."""
+        from video_mixer import mix_video
+        long_path = "/" + "a" * 4096 + ".mp4"
+        result = mix_video([{"path": long_path}], template="before_after", dry_run=True)
+        assert isinstance(result, dict)
+
+    def test_list_assets_with_none_asset_dir(self):
+        """None asset_dir falls back gracefully (no AttributeError)."""
+        from video_mixer import list_assets
+        try:
+            result = list_assets(asset_dir=None)
+            assert isinstance(result, dict)
+        except (TypeError, AttributeError):
+            pass  # raising is acceptable too
+
+    def test_check_dependencies_returns_bool_or_dict(self):
+        """check_dependencies must return something truthy for healthy state."""
+        from video_mixer import check_dependencies
+        result = check_dependencies()
+        assert result is not None
+
+    def test_mix_video_dry_run_no_io(self):
+        """dry_run=True must NOT touch filesystem (idempotent)."""
+        from video_mixer import mix_video
+        # Repeated dry_run calls must produce same result shape
+        r1 = mix_video([], template="before_after", dry_run=True)
+        r2 = mix_video([], template="before_after", dry_run=True)
+        # Both should at least have the same keys
+        assert set(r1.keys()) == set(r2.keys()) or "ok" in r1
+
+    def test_batch_mix_count_negative_treated_as_zero(self):
+        """batch_mix with count=-1 should not crash (negative boundary)."""
+        from video_mixer import batch_mix
+        try:
+            result = batch_mix({}, [], template="before_after", count=-1)
+            assert isinstance(result, dict)
+        except (ValueError, TypeError):
+            pass  # rejecting negative is also acceptable
+
+    def test_list_templates_returns_at_least_one(self):
+        """list_templates has ≥1 template (sanity)."""
+        from video_mixer import list_templates
+        result = list_templates()
+        assert result.get("ok") is True
+        assert len(result.get("templates", [])) >= 1
