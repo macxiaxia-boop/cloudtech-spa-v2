@@ -261,8 +261,38 @@ def _safe_summary(obj: Any) -> Dict[str, Any]:
 # YAML/JSON 校验器 (Pydantic-based)
 # ════════════════════════════════════════════════════════
 
+def _split_top_level(text: str, sep: str) -> List[str]:
+    """按顶层分隔符切分, 不切分括号/花括号/字符串内字符."""
+    out: List[str] = []
+    buf = []
+    depth = 0
+    quote = None
+    for ch in text:
+        if quote:
+            buf.append(ch)
+            if ch == quote:
+                quote = None
+            continue
+        if ch in ("'", "\""):
+            quote = ch
+            buf.append(ch)
+            continue
+        if ch in ("{", "[", "("):
+            depth += 1
+        elif ch in ("}", "]", ")"):
+            depth -= 1
+        if ch == sep and depth == 0:
+            out.append("".join(buf).strip())
+            buf = []
+            continue
+        buf.append(ch)
+    if buf:
+        out.append("".join(buf).strip())
+    return out
+
+
 def _coerce_yaml_value(v: str) -> Any:
-    """YAML scalar 简单类型推断"""
+    """YAML scalar 简单类型推断 (支持 inline list/inline dict, pydantic v2 友好)"""
     s = v.strip()
     if not s:
         return s
@@ -272,17 +302,33 @@ def _coerce_yaml_value(v: str) -> Any:
         return False
     if s.lower() in ("null", "~", "none"):
         return None
+    # inline dict: {k1: v1, k2: v2}
+    if s.startswith("{") and s.endswith("}"):
+        inner = s[1:-1].strip()
+        if not inner:
+            return {}
+        out: Dict[str, Any] = {}
+        for part in _split_top_level(inner, ","):
+            if ":" not in part:
+                continue
+            k, _, vv = part.partition(":")
+            out[k.strip()] = _coerce_yaml_value(vv.strip())
+        return out
+    # inline list: [a, b, c]
+    if s.startswith("[") and s.endswith("]"):
+        inner = s[1:-1].strip()
+        if not inner:
+            return []
+        return [_coerce_yaml_value(x) for x in _split_top_level(inner, ",")]
     try:
         if "." in s:
             return float(s)
         return int(s)
     except ValueError:
         pass
-    if s.startswith("[") and s.endswith("]"):
-        inner = s[1:-1].strip()
-        if not inner:
-            return []
-        return [_coerce_yaml_value(x) for x in inner.split(",")]
+    # strip matching quotes
+    if len(s) >= 2 and s[0] == s[-1] and s[0] in ("'", "\""):
+        return s[1:-1]
     return s
 
 

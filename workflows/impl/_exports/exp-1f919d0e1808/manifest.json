@@ -1,0 +1,15 @@
+{
+  "export_id": "exp-1f919d0e1808",
+  "tenant_id": "zq-tr",
+  "format": "jsonl",
+  "scope": [
+    "leads"
+  ],
+  "sections": {
+    "leads": {
+      "count": 1,
+      "sha256": "97a9e67649f6bce18764f5413fcce884f5162b9e0b9e3f6f0b84e3344791fd46",
+      "size": 14
+    }
+  }
+}

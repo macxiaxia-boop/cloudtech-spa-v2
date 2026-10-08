@@ -61,6 +61,9 @@ def run_followup(inp: FollowupInput) -> FollowupOutput:
     for l in inp.leads:
         try:
             last = datetime.fromisoformat(l.last_contact_at.replace("Z", "+00:00"))
+            # pydantic v2 / datetime compat: 如果 ISO 字符串无 tz, 默认按 UTC 处理
+            if last.tzinfo is None:
+                last = last.replace(tzinfo=timezone.utc)
         except Exception:
             continue
         if l.status != "open":

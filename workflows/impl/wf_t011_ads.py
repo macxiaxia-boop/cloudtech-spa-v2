@@ -31,7 +31,7 @@ class AdCampaign(BaseModel):
 class AdsInput(BaseModel):
     tenant_id: str = Field(..., min_length=2)
     campaigns: List[AdCampaign] = Field(..., min_length=1, max_length=100)
-    budget_total: float = Field(..., ge=0)
+    budget_total: float = Field(..., gt=0)  # pydantic v2 schema fix: 必须 > 0 (测试期望 ValidationError on 0)
     target_roi: float = Field(default=2.0, ge=0.5)
     workflow_id: str = Field(default="WF-T-011", pattern=r"^WF-T-\d{3}$")
 

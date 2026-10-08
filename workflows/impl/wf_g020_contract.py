@@ -4,7 +4,7 @@
 输出: clause_checks[] (含 risk_level), milestone_progress, total_risk_score, verdict
 """
 from __future__ import annotations
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator
 from ..base import run_workflow, validate_workflow_json, validate_workflow_yaml, WorkflowError
 

@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import pytest
+from pydantic import ValidationError
 from workflows.base import RunHistoryTracker
 from workflows.impl.wf_t004_content_plan import run_content_plan, ContentPlanInput, ScriptSlot, validate_json
 
@@ -66,11 +67,10 @@ def test_publish_window_classification():
     assert "morning" in windows and "noon" in windows and "evening" in windows
 
 
-def test_empty_scripts_fails():
-    inp = ContentPlanInput(tenant_id="zq-1", scripts=[])
-    out = run_content_plan(inp)
-    assert out["status"] == "failed"
-    assert "WF-T004-EMPTY" in out["error"]["code"]
+def test_empty_scripts_rejected_by_pydantic():
+    """pydantic v2: scripts=[] 在构造时就抛 (min_length=1)."""
+    with pytest.raises(ValidationError):
+        ContentPlanInput(tenant_id="zq-1", scripts=[])
 
 
 def test_validate_json():

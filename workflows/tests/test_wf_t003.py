@@ -54,13 +54,13 @@ def test_validate_json_bad_platform():
     assert res["ok"] is False
 
 
-def test_tracker_records_failure():
-    # word_count 过小 在脚本层抛错
-    inp = ScriptInput(tenant_id="zq-fail", topic="x", word_count=10)
-    # 注: ScriptInput 模型允许 word_count>=100, 改在 run 函数抛
-    # 直接让模型接受 word_count=100 (>=100), 不触发错误路径
+def test_tracker_records_success():
+    """pydantic v2 在构造时拒绝 topic<2 字符/word_count<100, 故改用合法输入.
+    测试目的: 验证 RunHistoryTracker 记录到 success 运行 (与失败形成对照)."""
+    inp = ScriptInput(tenant_id="zq-trk", topic="厦门装修日记", platform="douyin", word_count=200)
     out = run_script(inp)
-    # 此时应 success, 但 review_score 可能低
-    assert out["status"] in ("success", "failed")
-    status = RunHistoryTracker.instance().list_runs(workflow_id="WF-T-003")
-    assert len(status) >= 1
+    assert out["status"] == "success"
+    # tracker 至少记录 1 条 WF-T-003 运行
+    runs = RunHistoryTracker.instance().list_runs(workflow_id="WF-T-003", tenant_id="zq-trk")
+    assert len(runs) >= 1
+    assert runs[0]["status"] == "success"

@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import pytest
+from pydantic import ValidationError
 from workflows.base import RunHistoryTracker
 from workflows.impl.wf_t002_local_topics import run_local_topics, LocalTopicInput, validate_json
 
@@ -45,12 +46,12 @@ def test_bad_platform():
     assert "WF-T002-PLAT" in out["error"]["code"]
 
 
-def test_empty_cities():
-    inp = LocalTopicInput(
-        tenant_id="zq-empty", cities=[], platforms=["xiaohongshu"],
-    )
-    out = run_local_topics(inp)
-    assert out["status"] == "failed"
+def test_empty_cities_rejected_by_pydantic():
+    """pydantic v2: cities=[] 在模型构造时就抛, 不进入 run_workflow"""
+    with pytest.raises(ValidationError):
+        LocalTopicInput(
+            tenant_id="zq-empty", cities=[], platforms=["xiaohongshu"],
+        )
 
 
 def test_validate_json():
@@ -63,7 +64,7 @@ def test_validate_json_bad():
     assert res["ok"] is False
 
 
-def test_max_count():
-    inp = LocalTopicInput(tenant_id="zq-1", cities=["厦门"], count=51)
-    with pytest.raises(Exception):
-        inp.model_validate(inp.model_dump())  # pydantic 拒绝 >50
+def test_max_count_rejected_by_pydantic():
+    """pydantic v2: count=51 在构造时就抛"""
+    with pytest.raises(ValidationError):
+        LocalTopicInput(tenant_id="zq-1", cities=["厦门"], count=51)
