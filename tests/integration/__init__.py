@@ -1,0 +1,1 @@
+# tests/integration package — E2E integration tests for V6.3
