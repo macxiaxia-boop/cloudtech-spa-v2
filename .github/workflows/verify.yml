@@ -1,0 +1,123 @@
+name: Verify (pytest + lint)
+
+# V6.3 T05 — CI pipeline for the standard pytest verify command from
+# aios_tasks/aios_vnext/INDEX.md sec 1.1. Triggered on PR + push to master.
+# Gates the merge on real test evidence (PASS / FAIL counts), so the
+# `524 PASS / 0 FAIL / 7 SKIP` V6.2 baseline is enforceable for every change
+# rather than being a one-off snapshot.
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "tests/**"
+      - "workflows/**"
+      - "billing_real.py"
+      - "requirements*.txt"
+      - "pyproject.toml"
+      - ".github/workflows/verify.yml"
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+# Allow concurrent runs; each PR is its own clean verify.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: pytest + collect-evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install pytest pytest-asyncio
+
+      - name: Smoke: import surface
+        run: |
+          python -c "import pytest; print('pytest', pytest.__version__)"
+          python -c "import sqlite3; print('sqlite', sqlite3.sqlite_version)"
+
+      - name: Standard verify (INDEX sec 1.1)
+        # The exact command documented in aios_tasks/aios_vnext/INDEX.md sec 1.1.
+        # Tests that require live network / Provider API keys are expected to
+        # skip themselves; the gate is on FAIL count == 0, not on SKIP.
+        run: |
+          set -o pipefail
+          python -m pytest \
+            tests/test_models.py \
+            tests/test_bill_acceptance.py \
+            tests/test_bill_provider_interface.py \
+            tests/test_pipeline.py \
+            tests/test_video_mixer.py \
+            tests/test_cloudtech_acceptance.py \
+            tests/test_crm.py \
+            tests/test_modules.py \
+            tests/test_v63_t03_multitenant_stress.py \
+            workflows/tests/ \
+            tests/test_ui_pages_binding.py \
+            --tb=short -q \
+            --junitxml=verify_junit.xml \
+            -o junit_family=xunit2
+
+      - name: Fail gate (FAIL > 0 fails the build)
+        # The V6.2 baseline invariant: actual_fail_count == 0.
+        # The verify.yml CI contract is that any regression to FAIL>0
+        # blocks the merge. SKIPs are tolerated (they are infra-dependent).
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          import sys
+          tree = ET.parse("verify_junit.xml")
+          root = tree.getroot()
+          # Junit family=xunit2 wraps in testsuites root
+          if root.tag == "testsuites":
+              testsuite = root.find("testsuite")
+          else:
+              testsuite = root
+          total = int(testsuite.attrib.get("tests", 0))
+          failures = int(testsuite.attrib.get("failures", 0))
+          errors = int(testsuite.attrib.get("errors", 0))
+          skipped = int(testsuite.attrib.get("skipped", 0))
+          passed = total - failures - errors - skipped
+          print(f"PASS={passed} FAIL={failures} ERR={errors} SKIP={skipped} TOTAL={total}")
+          if failures > 0 or errors > 0:
+              print("GATE FAILED: regressions are not allowed at PR time.", file=sys.stderr)
+              sys.exit(1)
+          print("GATE PASSED: 0 FAIL / 0 ERR")
+          PY
+
+      - name: Upload JUnit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-junit
+          path: verify_junit.xml
+          retention-days: 30
+
+      - name: Print summary
+        if: always()
+        run: |
+          echo "## V6.3 T05 CI Pipeline" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Verify contract: \`FAIL=0 AND ERR=0\`" >> $GITHUB_STEP_SUMMARY
+          echo "- See attached JUnit for per-test detail." >> $GITHUB_STEP_SUMMARY
+          echo "- JUnit family: xunit2" >> $GITHUB_STEP_SUMMARY
