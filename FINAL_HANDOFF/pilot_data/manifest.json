@@ -1,0 +1,42 @@
+{
+  "task_id": "V6.3-T04-pilot-data-gen",
+  "generated_at": "2026-10-08T15:01:30+00:00",
+  "seed": 42,
+  "out_dir": "D:\\CloudTech-Portable\\FINAL_HANDOFF\\pilot_data",
+  "sources": {
+    "poc_count": 30,
+    "poc_industries": [
+      "catering",
+      "decoration",
+      "education",
+      "medical_beauty",
+      "retail"
+    ],
+    "baseline_industries": [
+      "catering",
+      "decoration",
+      "education",
+      "medical",
+      "retail"
+    ]
+  },
+  "outputs": {
+    "tenants_csv": "D:\\CloudTech-Portable\\FINAL_HANDOFF\\pilot_data\\tenants.csv",
+    "tenants_jsonl": "D:\\CloudTech-Portable\\FINAL_HANDOFF\\pilot_data\\tenants.jsonl",
+    "leads_jsonl": "D:\\CloudTech-Portable\\FINAL_HANDOFF\\pilot_data\\leads.jsonl",
+    "billing_ledger_jsonl": "D:\\CloudTech-Portable\\FINAL_HANDOFF\\pilot_data\\billing_ledger.jsonl",
+    "email_drafts_jsonl": "D:\\CloudTech-Portable\\FINAL_HANDOFF\\pilot_data\\email_drafts.jsonl",
+    "import_script": "D:\\CloudTech-Portable\\FINAL_HANDOFF\\pilot_data\\import_pilot_data.py"
+  },
+  "counts": {
+    "tenants": 50,
+    "leads": 1500,
+    "billing_ledger": 5000,
+    "email_drafts": 200
+  },
+  "red_line_compliance": {
+    "no_external_api": true,
+    "no_red_line_files_touched": true,
+    "real_data_source_used": true
+  }
+}
