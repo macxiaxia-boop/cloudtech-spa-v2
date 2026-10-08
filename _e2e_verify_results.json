@@ -1,0 +1,437 @@
+{
+  "summary": {
+    "import_pass": 24,
+    "import_total": 24,
+    "run_pass": 24,
+    "run_total": 24,
+    "pydantic_pass": 24,
+    "pydantic_total": 24,
+    "dag_ok": true,
+    "dag_edges": 6,
+    "dag_cycles": [],
+    "pydantic_version": "2.13.4",
+    "python_version": "3.14.5",
+    "all_modules_pass": true
+  },
+  "import": {
+    "wf_t001_diagnosis": {
+      "ok": true,
+      "module": "workflows.impl.wf_t001_diagnosis"
+    },
+    "wf_t002_local_topics": {
+      "ok": true,
+      "module": "workflows.impl.wf_t002_local_topics"
+    },
+    "wf_t003_script": {
+      "ok": true,
+      "module": "workflows.impl.wf_t003_script"
+    },
+    "wf_t004_content_plan": {
+      "ok": true,
+      "module": "workflows.impl.wf_t004_content_plan"
+    },
+    "wf_t005_leads": {
+      "ok": true,
+      "module": "workflows.impl.wf_t005_leads"
+    },
+    "wf_t006_followup": {
+      "ok": true,
+      "module": "workflows.impl.wf_t006_followup"
+    },
+    "wf_t007_funnel": {
+      "ok": true,
+      "module": "workflows.impl.wf_t007_funnel"
+    },
+    "wf_t008_experiment": {
+      "ok": true,
+      "module": "workflows.impl.wf_t008_experiment"
+    },
+    "wf_t009_competitor": {
+      "ok": true,
+      "module": "workflows.impl.wf_t009_competitor"
+    },
+    "wf_t010_live": {
+      "ok": true,
+      "module": "workflows.impl.wf_t010_live"
+    },
+    "wf_t011_ads": {
+      "ok": true,
+      "module": "workflows.impl.wf_t011_ads"
+    },
+    "wf_t012_quote": {
+      "ok": true,
+      "module": "workflows.impl.wf_t012_quote"
+    },
+    "wf_g013_init": {
+      "ok": true,
+      "module": "workflows.impl.wf_g013_init"
+    },
+    "wf_g014_deploy": {
+      "ok": true,
+      "module": "workflows.impl.wf_g014_deploy"
+    },
+    "wf_g015_acl": {
+      "ok": true,
+      "module": "workflows.impl.wf_g015_acl"
+    },
+    "wf_g016_provider": {
+      "ok": true,
+      "module": "workflows.impl.wf_g016_provider"
+    },
+    "wf_g017_long_flow": {
+      "ok": true,
+      "module": "workflows.impl.wf_g017_long_flow"
+    },
+    "wf_g018_meeting": {
+      "ok": true,
+      "module": "workflows.impl.wf_g018_meeting"
+    },
+    "wf_g019_qa": {
+      "ok": true,
+      "module": "workflows.impl.wf_g019_qa"
+    },
+    "wf_g020_contract": {
+      "ok": true,
+      "module": "workflows.impl.wf_g020_contract"
+    },
+    "wf_g021_promotion": {
+      "ok": true,
+      "module": "workflows.impl.wf_g021_promotion"
+    },
+    "wf_g022_token_recon": {
+      "ok": true,
+      "module": "workflows.impl.wf_g022_token_recon"
+    },
+    "wf_g023_incident": {
+      "ok": true,
+      "module": "workflows.impl.wf_g023_incident"
+    },
+    "wf_g024_export": {
+      "ok": true,
+      "module": "workflows.impl.wf_g024_export"
+    }
+  },
+  "run": {
+    "wf_t001_diagnosis": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_02daf8ae325c71bc",
+      "tracker_status": "success"
+    },
+    "wf_t002_local_topics": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_ea7e0ae4fa70294e",
+      "tracker_status": "success"
+    },
+    "wf_t003_script": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_608fc6d1f5385064",
+      "tracker_status": "success"
+    },
+    "wf_t004_content_plan": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_aa11dd91956f2cbc",
+      "tracker_status": "success"
+    },
+    "wf_t005_leads": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_80482c539d7e5ec3",
+      "tracker_status": "success"
+    },
+    "wf_t006_followup": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_0aa4e690d4cf1b0e",
+      "tracker_status": "success"
+    },
+    "wf_t007_funnel": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_6673e82f7fa2425a",
+      "tracker_status": "success"
+    },
+    "wf_t008_experiment": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_1954b3bd52eb0e63",
+      "tracker_status": "success"
+    },
+    "wf_t009_competitor": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_077f5f3d674c28d3",
+      "tracker_status": "success"
+    },
+    "wf_t010_live": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_22d5c936eebb5a04",
+      "tracker_status": "success"
+    },
+    "wf_t011_ads": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_02c166b0625314c2",
+      "tracker_status": "success"
+    },
+    "wf_t012_quote": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_d34395486c8c8989",
+      "tracker_status": "success"
+    },
+    "wf_g013_init": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_1d4338c537aa71e2",
+      "tracker_status": "success"
+    },
+    "wf_g014_deploy": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_deb8f7d35ce50876",
+      "tracker_status": "success"
+    },
+    "wf_g015_acl": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_f9e7a6a88931d583",
+      "tracker_status": "success"
+    },
+    "wf_g016_provider": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_68031459829413b0",
+      "tracker_status": "success"
+    },
+    "wf_g017_long_flow": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_9cde4555d57a536c",
+      "tracker_status": "success"
+    },
+    "wf_g018_meeting": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_cad1d79d6f3ed3d1",
+      "tracker_status": "success"
+    },
+    "wf_g019_qa": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_09083994403f5269",
+      "tracker_status": "success"
+    },
+    "wf_g020_contract": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_63c42683d029b94b",
+      "tracker_status": "success"
+    },
+    "wf_g021_promotion": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_ea6c770a5e6132e1",
+      "tracker_status": "success"
+    },
+    "wf_g022_token_recon": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_72fb8e4ce5af58bd",
+      "tracker_status": "success"
+    },
+    "wf_g023_incident": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_fdd3d91e5e72e6a4",
+      "tracker_status": "success"
+    },
+    "wf_g024_export": {
+      "ok": true,
+      "status": "success",
+      "run_id": "run_2dd03b09df2bf25f",
+      "tracker_status": "success"
+    }
+  },
+  "pydantic": {
+    "wf_t001_diagnosis": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 4,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t002_local_topics": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 4,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t003_script": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 4,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t004_content_plan": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t005_leads": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t006_followup": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t007_funnel": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t008_experiment": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 6,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t009_competitor": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t010_live": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t011_ads": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_t012_quote": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 7,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g013_init": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 4,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g014_deploy": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g015_acl": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 6,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g016_provider": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g017_long_flow": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g018_meeting": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 7,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g019_qa": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 3,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g020_contract": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 6,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g021_promotion": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g022_token_recon": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 5,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g023_incident": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 4,
+      "pydantic_version": "2.13.4"
+    },
+    "wf_g024_export": {
+      "ok": true,
+      "has_v2_models": true,
+      "model_count": 4,
+      "pydantic_version": "2.13.4"
+    }
+  },
+  "dag": {
+    "ok": true,
+    "cycles": [],
+    "edges": [
+      {
+        "from": "WF-T-001",
+        "to": "WF-T-002"
+      },
+      {
+        "from": "WF-T-001",
+        "to": "WF-T-003"
+      },
+      {
+        "from": "WF-T-001",
+        "to": "WF-T-007"
+      },
+      {
+        "from": "WF-G-013",
+        "to": "WF-T-002"
+      },
+      {
+        "from": "WF-G-013",
+        "to": "WF-T-005"
+      },
+      {
+        "from": "WF-G-013",
+        "to": "WF-T-007"
+      }
+    ],
+    "edge_count": 6
+  }
+}
