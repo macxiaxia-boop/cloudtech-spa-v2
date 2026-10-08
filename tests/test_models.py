@@ -95,7 +95,8 @@ def test_tenant_scoped_db():
 
 
 # ── Email service ──
-def test_email_mock():
+def test_email_mock(monkeypatch):
+    monkeypatch.setattr("email_service.SMTP_HOST", "")
     from email_service import send_welcome, send_billing
     assert send_welcome("test@test.com", "TestUser", "入门版") is True
     assert send_billing("test@test.com", "TestUser", "入门版", 99.0, "2026-08-01") is True
