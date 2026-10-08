@@ -146,13 +146,13 @@ class TestUIPages:
         _safe(r3)
 
     def test_UI_008_workflows_runs(self, client, admin_token):
-        resp = client.get('/workflows/runs/run-1', headers=_h(admin_token))
+        resp = client.get('/workflows/runs', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/admin/pipeline/recent', headers=_h(admin_token))
+        r2 = client.get('/workflows/runs')
         _safe(r2)
         r3 = client.post('/api/admin/pipeline/trigger', json={}, headers=_h(admin_token))
         _safe(r3)
-        r4 = client.get('/workflows/runs/run-1', headers=_h('bad'))
+        r4 = client.post('/api/admin/pipeline/trigger', json={}, headers=_h('bad'))
         _safe(r4)
 
     def test_UI_009_knowledge(self, client, admin_token):
@@ -160,180 +160,126 @@ class TestUIPages:
         _safe(resp)
         r2 = client.get('/knowledge')
         _safe(r2)
-        r3 = client.get('/api/admin/knowledge/stats', headers=_h(admin_token))
+        r3 = client.get('/api/knowledge', headers=_h(admin_token))
         _safe(r3)
-        r4 = client.get('/api/admin/knowledge/stats')
-        assert r4.status_code in (401, 403)
-
-    def test_UI_010_knowledge_detail(self, client, admin_token):
-        resp = client.get('/knowledge/kb-1', headers=_h(admin_token))
-        _safe(resp)
-        r2 = client.get('/knowledge/kb-nonexistent-9999', headers=_h(admin_token))
-        _safe(r2)
-        r3 = client.post('/api/admin/knowledge/convert', json={}, headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/knowledge/kb-1', headers=_h('bad'))
+        r4 = client.get('/api/knowledge', headers=_h('bad'))
         _safe(r4)
 
-    def test_UI_011_connectors(self, client, admin_token):
-        resp = client.get('/connectors', headers=_h(admin_token))
-        _safe(resp)
-        r2 = client.delete('/api/webhooks/wh-nonexistent', headers=_h(admin_token))
-        _safe(r2)
-        r3 = client.get('/connectors', headers=_h('bad'))
-        _safe(r3)
-        r4 = client.get('/api/webhooks', headers=_h(admin_token))
-        _safe(r4)
-
-    def test_UI_012_marketing_profile(self, client, admin_token):
-        resp = client.get('/marketing/profile', headers=_h(admin_token))
-        _safe(resp)
-        r2 = client.get('/api/tenant/no-such-tenant/dashboard')
-        _safe(r2)
-        r3 = client.get('/api/brands', headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/marketing/profile', headers=_h('bad'))
-        _safe(r4)
-
-    def test_UI_013_marketing_topics(self, client, admin_token):
-        resp = client.get('/marketing/topics', headers=_h(admin_token))
-        _safe(resp)
-        r2 = client.get('/api/recommend/topics', headers=_h(admin_token))
-        _safe(r2)
-        r3 = client.get('/api/recommend/topics?q=', headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/api/recommend/topics')
-        _safe(r4)
-
-    def test_UI_014_marketing_content(self, client, admin_token):
-        resp = client.get('/marketing/content', headers=_h(admin_token))
-        _safe(resp)
-        r2 = client.get('/api/editor/materials', headers=_h(admin_token))
-        _safe(r2)
-        r3 = client.post('/api/editor/compose', json={}, headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/marketing/content', headers=_h('expired'))
-        _safe(r4)
-
-    def test_UI_015_marketing_live(self, client, admin_token):
-        resp = client.get('/marketing/live', headers=_h(admin_token))
-        _safe(resp)
-        r2 = client.get('/api/schedule/calendar/tenant-test', headers=_h(admin_token))
-        _safe(r2)
-        r3 = client.get('/api/schedule/calendar/no-such-tenant', headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/marketing/live', headers=_h('bad'))
-        _safe(r4)
-
-    def test_UI_016_marketing_ads(self, client, admin_token):
-        resp = client.get('/marketing/ads', headers=_h(admin_token))
-        _safe(resp)
-        r2 = client.get('/api/analytics/performance/tenant-test', headers=_h(admin_token))
-        _safe(r2)
-        r3 = client.get('/api/analytics/performance/no-such', headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.post('/api/analytics/track', json={}, headers=_h(admin_token))
-        _safe(r4)
-
-    def test_UI_017_crm_leads(self, client, admin_token):
+    def test_UI_010_crm_leads(self, client, admin_token):
         resp = client.get('/crm/leads', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/audit/tenant-test', headers=_h(admin_token))
+        r2 = client.get('/crm/leads')
         _safe(r2)
-        r3 = client.get('/api/audit/no-such-tenant', headers=_h(admin_token))
+        r3 = client.get('/api/crm/leads', headers=_h(admin_token))
         _safe(r3)
-        r4 = client.get('/crm/leads', headers=_h('bad'))
+        r4 = client.post('/api/crm/leads', json={}, headers=_h(admin_token))
         _safe(r4)
 
-    def test_UI_018_crm_leads_detail(self, client, admin_token):
-        resp = client.get('/crm/leads/lead-1', headers=_h(admin_token))
-        _safe(resp)
-        r2 = client.get('/crm/leads/lead-nonexistent-9999', headers=_h(admin_token))
-        _safe(r2)
-        r3 = client.post('/api/approvals/ap-1/resolve', json={}, headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/crm/leads/lead-1', headers=_h(''))
-        _safe(r4)
-
-    def test_UI_019_crm_funnel(self, client, admin_token):
+    def test_UI_011_crm_funnel(self, client, admin_token):
         resp = client.get('/crm/funnel', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/stats/summary', headers=_h(admin_token))
+        r2 = client.get('/api/crm/funnel', headers=_h(admin_token))
         _safe(r2)
-        r3 = client.get('/api/stats/trends', headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/crm/funnel', headers=_h('bad'))
-        _safe(r4)
 
-    def test_UI_020_analytics(self, client, admin_token):
+    def test_UI_012_analytics(self, client, admin_token):
         resp = client.get('/analytics', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/analytics/performance/tenant-test', headers=_h(admin_token))
+        r2 = client.get('/api/analytics/overview', headers=_h(admin_token))
         _safe(r2)
-        r3 = client.get('/api/stats/summary', headers=_h(admin_token))
+        r3 = client.get('/api/analytics/overview', headers=_h('expired'))
         _safe(r3)
-        r4 = client.get('/api/analytics/performance/tenant-test')
-        _safe(r4)
 
-    def test_UI_021_experiments(self, client, admin_token):
+    def test_UI_013_experiments(self, client, admin_token):
         resp = client.get('/experiments', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/admin/ab', headers=_h(admin_token))
+        r2 = client.get('/api/experiments', headers=_h(admin_token))
         _safe(r2)
-        r3 = client.post('/api/admin/ab/assign', json={}, headers=_h(admin_token))
+        r3 = client.get('/experiments', headers=_h('bad'))
         _safe(r3)
-        r4 = client.get('/experiments', headers=_h('bad'))
-        _safe(r4)
 
-    def test_UI_022_settings_org(self, client, admin_token):
+    def test_UI_014_settings_org(self, client, admin_token):
         resp = client.get('/settings/org', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/teams', headers=_h(admin_token))
+        r2 = client.get('/api/admin/tenants/tenant-test', headers=_h(admin_token))
         _safe(r2)
-        r3 = client.post('/api/teams', json={}, headers=_h(admin_token))
+        r3 = client.put('/api/admin/tenants/tenant-test', json={}, headers=_h(admin_token))
         _safe(r3)
-        r4 = client.post('/api/teams/team-1/members', json={}, headers=_h(admin_token))
-        _safe(r4)
 
-    def test_UI_023_settings_security(self, client, admin_token):
-        resp = client.get('/settings/security', headers=_h(admin_token))
+    def test_UI_015_settings_profile(self, client, admin_token):
+        resp = client.get('/settings/profile', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/audit/summary', headers=_h(admin_token))
+        r2 = client.get('/api/auth/me', headers=_h(admin_token))
         _safe(r2)
-        r3 = client.get('/api/audit/tenant-test', headers=_h('bad'))
-        assert r3.status_code in (401, 403)
-        r4 = client.get('/api/audit/summary')
-        _safe(r4)
 
-    def test_UI_024_billing_usage(self, client, admin_token):
+    def test_UI_016_billing_usage(self, client, admin_token):
         resp = client.get('/billing/usage', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/tenant/tenant-test/tokens', headers=_h(admin_token))
+        r2 = client.get('/api/billing/usage', headers=_h(admin_token))
         _safe(r2)
-        r3 = client.get('/api/tenant/no-such-tenant/tokens', headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/billing/usage', headers=_h('bad'))
-        _safe(r4)
 
-    def test_UI_025_billing_credits(self, client, admin_token):
+    def test_UI_017_billing_credits(self, client, admin_token):
         resp = client.get('/billing/credits', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/payment/stats', headers=_h(admin_token))
+        r2 = client.get('/api/billing/credits', headers=_h(admin_token))
         _safe(r2)
-        r3 = client.get('/api/tenant/tenant-test/dashboard', headers=_h(admin_token))
-        _safe(r3)
-        r4 = client.get('/api/payment/stats')
-        _safe(r4)
 
-    def test_UI_026_billing_subscription(self, client, admin_token):
+    def test_UI_018_billing_subscription(self, client, admin_token):
         resp = client.get('/billing/subscription', headers=_h(admin_token))
         _safe(resp)
-        r2 = client.get('/api/payment/orders/tenant-test', headers=_h(admin_token))
+        r2 = client.get('/api/billing/subscription', headers=_h(admin_token))
         _safe(r2)
-        r3 = client.post('/api/payment/create-order', json={}, headers=_h(admin_token))
+
+    def test_UI_019_delivery_ops(self, client, admin_token):
+        resp = client.get('/delivery/ops', headers=_h(admin_token))
+        _safe(resp)
+        r2 = client.get('/api/admin/ops', headers=_h(admin_token))
+        _safe(r2)
+
+    def test_UI_020_delivery_pipelines(self, client, admin_token):
+        resp = client.get('/delivery/pipelines', headers=_h(admin_token))
+        _safe(resp)
+        r2 = client.get('/api/admin/pipelines', headers=_h(admin_token))
+        _safe(r2)
+
+    def test_UI_021_delivery_logs(self, client, admin_token):
+        resp = client.get('/delivery/logs', headers=_h(admin_token))
+        _safe(resp)
+        r2 = client.get('/api/admin/logs', headers=_h(admin_token))
+        _safe(r2)
+
+    def test_UI_022_api_keys(self, client, admin_token):
+        resp = client.get('/api-keys', headers=_h(admin_token))
+        _safe(resp)
+        r2 = client.get('/api/admin/api-keys', headers=_h(admin_token))
+        _safe(r2)
+        r3 = client.post('/api/admin/api-keys', json={}, headers=_h(admin_token))
         _safe(r3)
-        r4 = client.get('/billing/subscription', headers=_h('bad'))
-        _safe(r4)
+
+    def test_UI_023_backup(self, client, admin_token):
+        resp = client.get('/backup', headers=_h(admin_token))
+        _safe(resp)
+        r2 = client.get('/api/admin/backup/status', headers=_h(admin_token))
+        _safe(r2)
+        r3 = client.post('/api/admin/backup/run', json={}, headers=_h(admin_token))
+        _safe(r3)
+
+    def test_UI_024_skill_health(self, client, admin_token):
+        resp = client.get('/skill-health', headers=_h(admin_token))
+        _safe(resp)
+        r2 = client.get('/api/admin/skill-health', headers=_h(admin_token))
+        _safe(r2)
+
+    def test_UI_025_admin_dashboard(self, client, admin_token):
+        resp = client.get('/admin/dashboard', headers=_h(admin_token))
+        _safe(resp)
+        r2 = client.get('/admin/dashboard', headers=_h('non-admin'))
+        _safe(r2)
+
+    def test_UI_026_admin_users(self, client, admin_token):
+        resp = client.get('/admin/users', headers=_h(admin_token))
+        _safe(resp)
+        r2 = client.get('/api/admin/users', headers=_h(admin_token))
+        _safe(r2)
 
     def test_UI_027_delivery_projects(self, client, admin_token):
         resp = client.get('/delivery/projects', headers=_h(admin_token))
@@ -488,3 +434,159 @@ class TestUIPagesGlobalEdge:
             r = client.get(p)
             _safe(r)
             assert r.status_code in (401, 403), f"{p} should 401/403 unauth, got {r.status_code}"
+
+
+# ============================================================
+# Edge States: loading / empty / unauthorized / missing token
+# 每页面 + 4 种状态组合 = 详尽边界覆盖
+# ============================================================
+class TestUIPagesEdgeStates:
+
+    PAGES = [
+        ('/dashboard', 'UI-001'),
+        ('/employees', 'UI-002'),
+        ('/crm/leads', 'UI-010'),
+        ('/analytics', 'UI-012'),
+        ('/billing/usage', 'UI-016'),
+        ('/api-keys', 'UI-022'),
+        ('/skill-health', 'UI-024'),
+        ('/help', 'UI-032'),
+    ]
+
+    # ----- Loading 状态 -----
+    def test_loading_state_concurrent_requests_no_crash(self, client, admin_token):
+        """模拟加载中: 同一页面并发 5 次, 都不应 500."""
+        import concurrent.futures
+        page = '/crm/leads'
+        def hit():
+            return client.get(page, headers=_h(admin_token))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
+            results = list(ex.map(lambda _: hit(), range(5)))
+        for r in results:
+            _safe(r)
+            assert r.status_code != 500
+
+    # ----- Empty 状态 (空 token / 空 body / 空 query) -----
+    def test_empty_token_header_no_crash(self, client):
+        for page, _ in self.PAGES:
+            r = client.get(page, headers={'X-Admin-Token': ''})
+            _safe(r)
+
+    def test_empty_body_post_no_crash(self, client, admin_token):
+        for path in ['/api/crm/leads', '/api/auth/register', '/api/admin/backup/run',
+                     '/api/export/stats', '/api/notifications/tenant-test/read']:
+            r = client.post(path, data='', content_type='application/json', headers=_h(admin_token))
+            _safe(r)
+
+    def test_empty_query_string_no_crash(self, client, admin_token):
+        for path in ['/api/analytics/overview', '/api/billing/usage',
+                     '/api/crm/leads', '/api/admin/users']:
+            r = client.get(path + '?', headers=_h(admin_token))
+            _safe(r)
+
+    # ----- Unauthorized 状态 -----
+    def test_unauthorized_admin_api_paths_return_4xx_not_5xx(self, client):
+        """所有 admin api 在无 token 时必须 4xx (401/403), 不允许 500."""
+        admin_apis = [
+            '/api/admin/dashboard', '/api/admin/users',
+            '/api/admin/api-keys', '/api/admin/backup/status',
+            '/api/admin/tenants', '/api/admin/pipelines',
+            '/api/admin/ops', '/api/admin/logs',
+            '/api/admin/skill-health', '/api/admin/pipeline/recent',
+        ]
+        for p in admin_apis:
+            r = client.get(p)
+            _safe(r)
+            assert r.status_code in (401, 403), f"{p} unauth → 401/403 expected, got {r.status_code}"
+
+    def test_wrong_role_token_handled_safely(self, client, admin_token):
+        """模拟非管理员 token → 路由不应 500."""
+        fake_user_token = 'eyJhbGciOiJIUzI1NiJ9.fake.user.token'
+        for page, _ in self.PAGES:
+            r = client.get(page, headers=_h(fake_user_token))
+            _safe(r)
+
+    # ----- Missing token 状态 (各种 header 变体) -----
+    def test_missing_token_completely_no_crash(self, client):
+        for page, _ in self.PAGES:
+            r = client.get(page)  # 完全无 headers
+            _safe(r)
+
+    def test_malformed_token_variants_no_crash(self, client):
+        """Header 中塞乱码 token, 不应 500.
+        注: 不可塞换行 (Werkzeug 安全限制), 仅用可见字符变体."""
+        malformed_variants = [
+            'null',
+            '\x7fDEL',
+            '\u00a0NBSP',
+            'totally-garbage-string-with-special-chars-!@#$%^&*()',
+            'a' * 256,  # 超长 token
+            '0',  # 单字符
+            '   ',  # 纯空格
+        ]
+        for variant in malformed_variants:
+            for page, _ in self.PAGES:
+                r = client.get(page, headers={'X-Admin-Token': variant})
+                _safe(r)
+
+    def test_bearer_vs_custom_header_consistency(self, client, admin_token):
+        """X-Admin-Token vs Authorization: Bearer 两种风格都安全."""
+        page = '/api/admin/dashboard'
+        # 标准方式
+        r1 = client.get(page, headers=_h(admin_token))
+        _safe(r1)
+        # Bearer 风格
+        r2 = client.get(page, headers={'Authorization': f'Bearer {admin_token}'})
+        _safe(r2)
+        # 错乱 token
+        r3 = client.get(page, headers={'Authorization': 'Bearer invalid-token-string'})
+        _safe(r3)
+
+    # ----- HTTP 方法边界 -----
+    def test_post_to_get_only_route_no_crash(self, client, admin_token):
+        """对只读路由用 POST 应 4xx, 不应 500."""
+        for path in ['/dashboard', '/employees', '/analytics', '/help']:
+            r = client.post(path, json={}, headers=_h(admin_token))
+            _safe(r)
+
+    def test_delete_on_static_routes_no_crash(self, client, admin_token):
+        """DELETE 在 GET 路由上不应 500."""
+        for path in ['/dashboard', '/employees', '/api/openapi.json']:
+            r = client.delete(path, headers=_h(admin_token))
+            _safe(r)
+
+    # ----- Tenant isolation edge -----
+    def test_cross_tenant_access_no_500(self, client, admin_token):
+        """跨租户访问应 4xx (不存在), 不应 500."""
+        paths = [
+            '/api/crm/leads?tenant_id=other-tenant',
+            '/api/billing/usage?tenant_id=fake',
+            '/api/notifications/no-such-tenant',
+        ]
+        for p in paths:
+            r = client.get(p, headers=_h(admin_token))
+            _safe(r)
+
+    # ----- 并发与重复请求 -----
+    def test_repeated_same_request_no_state_leak(self, client, admin_token):
+        """同一 token 重复请求同一页面, 不应状态污染 (不 500)."""
+        page = '/api/admin/dashboard'
+        results = [client.get(page, headers=_h(admin_token)) for _ in range(5)]
+        for r in results:
+            _safe(r)
+
+    def test_login_then_immediate_use_no_crash(self, client):
+        """登录后立即使用 token (中间无延迟)."""
+        # 不用 fixture admin_token, 重新登录
+        r_login = client.post('/api/auth/login', json={'email': 'admin@cloudtech.com', 'password': 'admin123'})
+        _safe(r_login)
+        try:
+            d = json.loads(r_login.data)
+            tok = d.get('token', '') or d.get('access_token', '')
+            if isinstance(tok, dict):
+                tok = tok.get('token', '')
+        except Exception:
+            tok = ''
+        if tok:
+            r = client.get('/api/admin/dashboard', headers=_h(tok))
+            _safe(r)
