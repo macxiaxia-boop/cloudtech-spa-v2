@@ -1,6 +1,14 @@
 """
 多模型聚合框架 — Multi-Model Aggregation
 对标InVideo 200+模型·筷子多模型调度·模型路由·切换·对比
+
+2026-10-09 AIOS-SOVEREIGNTY-V A+B 治理 (v3 修正):
+- 真实 model 目录来自 https://api.minimaxi.com/v1/models (8 个 model)
+- 用户实际使用: MiniMax-M3 (深度推理) / MiniMax-M2.7 (标准) / MiniMax-M2.7-highspeed (高速)
+- text 段全部用真实 model id (删除了 v1 编的 MiniMax-M3-deep, 实际不存在)
+- provider 字段从 DeepSeek 改成 MiniMax
+- video / image / voice 段保留 (非 LLM 推理, 不在 Policy 范围)
+- quota: 300亿 token/账号/月 × 3账号 = 900亿/月
 """
 import json
 from pathlib import Path
@@ -11,12 +19,34 @@ MODEL_DIR = Path("D:/个人文件/AI/云数科技/models")
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 # ═══════════════════════════════════
-# 模型注册表(对标InVideo 200+ models)
+# 模型注册表 (2026-10-09 SOVEREIGNTY-V v3 修正: 真实 model id from /v1/models API)
 # ═══════════════════════════════════
 MODELS = {
     "text": {
-        "deepseek-v4-pro": {"provider": "DeepSeek", "type": "text", "strength": "深度推理·长文", "cost_per_1k": 0.01},
-        "deepseek-v4-flash": {"provider": "DeepSeek", "type": "text", "strength": "快速响应·短文", "cost_per_1k": 0.003},
+        "MiniMax-M3": {
+            "provider": "MiniMax",
+            "type": "text",
+            "strength": "深度推理·30% thinking budget·长文",
+            "cost_per_1k": 0.01,
+            "api_id": "MiniMax-M3",
+            "_r_sovereignty_note": "v3 修正: 替代 v1 编的 MiniMax-M3-deep (实际不存在) · 2026-10-09"
+        },
+        "MiniMax-M2.7-highspeed": {
+            "provider": "MiniMax",
+            "type": "text",
+            "strength": "快速响应·短文·高速版",
+            "cost_per_1k": 0.003,
+            "api_id": "MiniMax-M2.7-highspeed",
+            "_r_sovereignty_note": "v3 修正 · 2026-10-09"
+        },
+        "MiniMax-M2.7": {
+            "provider": "MiniMax",
+            "type": "text",
+            "strength": "标准推理·中等速度",
+            "cost_per_1k": 0.005,
+            "api_id": "MiniMax-M2.7",
+            "_r_sovereignty_note": "v3 修正 · 2026-10-09"
+        },
     },
     "video": {
         "seedance-2.0": {"provider": "ByteDance", "type": "video", "strength": "1080P·商业级", "cost_per_sec": 0.8},
@@ -48,10 +78,10 @@ def list_models(model_type: str = "") -> list:
 
 
 def route_model(task: str, budget: str = "balanced") -> dict:
-    """智能模型路由: 根据任务类型·预算选择最优模型"""
+    """智能模型路由 (2026-10-09 v3: MiniMax 真实 model)"""
     routing = {
-        "social_post": {"model": "deepseek-v4-flash", "reason": "短文·快速"},
-        "long_article": {"model": "deepseek-v4-pro", "reason": "深度·长文"},
+        "social_post": {"model": "MiniMax-M2.7-highspeed", "reason": "短文·高速"},
+        "long_article": {"model": "MiniMax-M3", "reason": "深度·长文·30% thinking"},
         "video_ad": {"model": "seedance-2.0", "reason": "商业级1080P" if budget != "low" else "jimeng-video-1.5"},
         "video_social": {"model": "jimeng-video-1.5", "reason": "社交短视频·低成本"},
         "video_cinematic": {"model": "kling-3.0", "reason": "电影级画质"},
@@ -61,15 +91,13 @@ def route_model(task: str, budget: str = "balanced") -> dict:
         "voice_enterprise": {"model": "azure-tts", "reason": "企业级多角色"},
     }
 
-    # Budget override
     if budget == "low":
         routing["video_ad"]["model"] = "jimeng-video-1.5"
         routing["voice_narrator"]["model"] = "azure-tts"
 
-    route = routing.get(task, {"model": "deepseek-v4-flash", "reason": "默认路由"})
+    route = routing.get(task, {"model": "MiniMax-M2.7", "reason": "默认路由"})
     model_id = route["model"]
 
-    # Find model details
     for t, models in MODELS.items():
         if model_id in models:
             return {"task": task, "model_id": model_id, "model": models[model_id], "reason": route["reason"]}
@@ -85,7 +113,6 @@ def compare_models(model_ids: list, task_desc: str = "") -> dict:
             if mid in models:
                 comparison.append({"id": mid, **models[mid]})
 
-    # 计算最优
     def _cost(m):
         return m.get("cost_per_sec") or m.get("cost_per_1k") or m.get("cost_per_img") or m.get("cost_per_char") or 999
     best = min(comparison, key=_cost) if comparison else None

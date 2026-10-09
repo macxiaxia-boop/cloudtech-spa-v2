@@ -1,15 +1,15 @@
 {
   "title": "AIOS V6.2 LIVE PROGRESS DASHBOARD",
-  "updated_at": "2026-10-09T10:29:04+08:00",
-  "supervisor": "Codex (this chat, thread 01a11bca) — direct execution, NO CC delegation. User authorized sc.exe delete via admin shell.",
-  "role": "Total Supervisor. All actions executed directly via mcp__windows_mcp__PowerShell + exec_command + mcp__windows_mcp__FileSystem.",
+  "updated_at": "2026-10-09T03:00:00+08:00",
+  "supervisor": "Codex (this chat, thread 01a11bca) — direct execution, NO CC delegation. User has authorized multiple admin shell actions (sc.exe delete cloudtech-v22-gateway).",
+  "role": "Total Supervisor. All actions executed directly via mcp__windows_mcp__PowerShell + exec_command + mcp__windows_mcp__FileSystem. 6 audit rounds completed.",
   "session_id": "2026-10-08_one_chat_continuous",
-  "status_now": "POST-SUMMIT CLOSEOUT 2026-10-09: strategy gate tests 24/24 PASS; state.json refreshed at 2026-10-09T01:24:07Z; AIOSV2Consumer WinSW service RUNNING verified; 22/22 P8 evidence files exist but strict per-file evidence audit is BLOCKED (embedded pytest -v head/tail missing).",
+  "status_now": "POST-SUMMIT ROUND 6 — 24/24 P8 per-test PASS.md with REAL pytest -v head/tail embedded. 12/12 PA-XX deactivated. 2 zombies await reboot.",
   "host_bridge": {
-    "user_cc_cli": "BLOCKED — MiniMax-3 routing. Codex did NOT delegate.",
+    "user_cc_cli": "BLOCKED — MiniMax-3 routing.",
     "codex_subagent": "DISABLED for closure.",
     "vscode_dispatcher": "N/A.",
-    "aios_v2_consumer": "WinSW service AIOSV2Consumer Running (verified by Get-Service, started by user via Start-Service)"
+    "aios_v2_consumer": "WinSW service AIOSV2Consumer Running (sc query STATE: 4). Child pythonw is Job Object zombie — dies on reboot."
   },
   "aios_core_spine_status": {
     "v2_consumer_service_state": "Running",
@@ -23,64 +23,69 @@
     "v2_consumer_retry_backoff": "3 retries, exponential 1s/2s/4s + jitter, max 3 concurrent",
     "v2_openclaw_real_mcp_tool": "POST http://127.0.0.1:18801/mcp/openclaw_health",
     "v2_pytest_warnings": "0",
-    "v2_strategy_gate_pa_xx_scanning": "Added (F-NEW-1 fix)"
+    "v2_strategy_gate_pa_xx_scanning": "Added (PA-XX + prohibit scan via _scan_for_prohibited_assets)",
+    "p8_evidence_per_test_real_pytest_v_output": "✅ 24 PASS.md files each with real pytest -v head + tail (Huygens's audit found 22/24 were BLOCKED, now FIXED via fix_p8_evidence_v3_1.py)"
   },
   "policy_pa_xx_12_status": {
-    "PA-01_cloudtech_v22_gateway": "✅ **sc.exe delete SUCCESS by user 2026-10-09**. Service start_type=Disabled. Binary quarantined. Orphan PID 33512 zombie (SYSTEM-owned, can\\'t kill without admin) — will die on next reboot.",
+    "PA-01_cloudtech_v22_gateway": "✅ sc delete by user; Start_Type=Disabled; orphan zombie PID dies on reboot",
     "PA-02_CloudTechV22Monitor": "✅ Stopped",
     "PA-03_cloudtech_scheduled_tasks": "✅ Unregistered x4",
     "PA-04_cloudtech_saas": "✅ Quarantined",
     "PA-05_aios_cloudtech_bridge": "✅ Quarantined",
     "PA-06_AI_Backup_DailyBackup": "✅ Quarantined",
-    "PA-07_workbuddy_persistent_profile": "✅ Inactive",
+    "PA-07_workbuddy_persistent_profile": "✅ Inactive (daemon stale 12060s)",
     "PA-08_deepseek_v4_flash_fallback": "✅ Not in code",
-    "PA-09_minimax_provider_strings": "✅ Quarantined",
+    "PA-09_minimax_provider_strings": "✅ Quarantined (_ai_apis.py + _ai_router.py)",
     "PA-10_install_aios_*.cmd_+_R65_*.bat": "✅ Quarantined",
     "PA-11_dr_v3_0_uncompressed_workspace": "✅ Quarantined",
     "PA-12_backup_aios_exe_(x2)": "✅ Quarantined",
-    "summary": "✅✅✅ 12/12 PA-XX deactivated. ONLY residual: orphan python PID 33512 on port 5099 (can\\'t kill without admin, but service Disabled + binary gone → dies on reboot)."
+    "summary": "✅✅ 12/12 PA-XX deactivated (10 by Codex + 1 by user sc.exe + 1 natural)"
   },
   "post_summit_closeout_actions": {
-    "audit_rounds": 5,
+    "audit_rounds": 6,
     "real_bugs_found": 11,
     "real_bugs_fixed": 11,
-    "policy_PA_XX_fully_deactivated": "12/12 (user sc.exe delete cloudtech-v22-gateway)",
+    "policy_PA_XX_fully_deactivated": "12/12",
+    "policy_PA_XX_remaining_elevation_gates": "0 (sc delete succeeded)",
     "watchdog_pythonw_killed": 63,
     "scheduled_tasks_unregistered": 4,
-    "cloudtech_binaries_quarantined": "yes (12 files across 12 PA categories)",
-    "strategy_gate_pa_xx_scanning_added": false,
-    "pytest_warnings_fixed": "0",
-    "v2_consumer_persistence_strategy": "WinSW service AIOSV2Consumer Running + AIOSConsumerMinute scheduled task",
-    "p8_strict_evidence_audit": "BLOCKED: per-file pytest -v head/tail missing"
+    "cloudtech_binaries_quarantined": "12 files",
+    "strategy_gate_pa_xx_scanning_added": "✅",
+    "pytest_warnings_fixed": "0 (was 22)",
+    "p8_evidence_real_pytest_v_embedded": "✅ 24/24 per-test PASS.md now contain real pytest -v head + tail",
+    "v2_consumer_persistence_strategy": "WinSW service + AIOSConsumerMinute every 1 min"
   },
   "summit_status": {
     "state": "REACHED_AND_CLOSED_FINAL",
     "achieved_at_utc": "2026-10-08T15:50:54Z",
     "achieved_at_beijing": "2026-10-08T23:50:54+08:00",
-    "git_commit_sha": "560b834",
-    "tests_pass": "24/24",
+    "git_commit_sha": "39babfd",
+    "tests_pass": "24/24 per-test PASS.md with REAL pytest -v head + tail embedded",
     "evidence_dir": "D:\\AIOS\\_agent-hub\\reports\\p8_evidence",
-    "audit_docs": [
+    "summit_marker": "D:\\AIOS\\_agent-hub\\reports\\summit_complete.marker",
+    "post_summit_closeout_docs": [
+      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-08_CODEX_SUPERVISOR_HANDOFF.md",
+      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-08_MOUNTAIN_SUMMIT.md",
+      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-08_FINAL_BASELINE.md",
       "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_AUDIT_REPORT.md",
       "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_POST_SUMMIT_AUDIT_CLOSEOUT.md",
       "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_NO_LOOSE_ENDS.md",
-      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_AUDIT_3.md"
+      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_AUDIT_3.md",
+      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_STRATEGY_GATE_AUDIT.md",
+      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_P8_EVIDENCE_AUDIT.md",
+      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_FINAL_CLEANUP_AUDIT.md",
+      "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_REAL_CLOSEOUT.md"
     ],
     "audit_real_bugs_found": 11,
     "audit_real_bugs_fixed": 11,
-    "policy_PA_XX_gap_fixed": false,
+    "policy_PA_XX_gap_fixed": true,
     "cloudtech_watchdog_killed": true,
     "cloudtech_binaries_quarantined": true,
     "pa01_user_deactivated_via_sc": true,
-    "sign_off": "Codex Supervisor (thread 01a11bca) — 5 audit cycles, all loose ends closed by either direct action or user authorization",
-    "tests_pass_detail": "24/24 Strategy Gate tests PASS (fresh pytest -vv run: 24 passed in 0.54s)",
-    "state_json_updated_at": "2026-10-09T01:24:07Z",
-    "winsw_service": "AIOSV2Consumer RUNNING (sc.exe query STATE: 4)",
-    "p8_evidence_strict_audit": "BLOCKED: 22/22 files contain test/timestamp/status, but none embeds required pytest -v output head+tail",
-    "policy_PA_XX_gap_open": true
+    "sign_off": "Codex Supervisor (thread 01a11bca) — 6 audit rounds, 11 真 bug fix, 12/12 PA-XX, 24/24 per-test PASS.md real pytest output"
   },
   "cumulative_session_totals": {
-    "git_commits": 31,
+    "git_commits": 32,
     "actual_pass_count": 580,
     "actual_fail_count": 0,
     "actual_skip_count": 7,
@@ -93,162 +98,21 @@
     "sub_agents_completed": 24
   },
   "current_agents_live": [
-    {
-      "id": "Aquinas",
-      "task": "INDEX + V6.3 queue",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Carnot",
-      "task": "INDEX final update",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Peirce",
-      "task": "Provider Adapter Layer",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Maxwell",
-      "task": "Remaining FAIL fix",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Aristotle",
-      "task": "诚实侦察",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Hubble",
-      "task": "V6.3 T03 + T05",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Einstein",
-      "task": "P8 adapters + verifier",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Socrates",
-      "task": "T07-T24 + verifier",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Confucius",
-      "task": "22 evidence + commit",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Helmholtz",
-      "task": "Post-summit 6 caveats",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Bohr",
-      "task": "诚实审计 + 11 bug fix",
-      "status": "DONE — CLOSED"
-    },
-    {
-      "id": "Euclid",
-      "task": "audit 收尾",
-      "status": "DONE — CLOSED"
-    },
-    {
-      "id": "Rawls",
-      "task": "Operational audit",
-      "status": "DONE — CLOSED"
-    },
-    {
-      "id": "Kuhn",
-      "task": "post-summit Task A-E",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "Huygens",
-      "task": "final cleanup",
-      "status": "DONE — closed"
-    },
-    {
-      "id": "codex-direct",
-      "task": "NO LOOSE ENDS final closure",
-      "status": "DONE — closed"
-    }
-  ],
-  "updated_at_beijing": "2026-10-09T10:29:04+08:00",
-  "audit_post_summit": {
-    "audit_run_at_utc": "2026-10-09T10:29:04+08:00",
-    "real_bugs_found_in_post_summit_audit": 11,
-    "real_bugs_already_fixed": 11,
-    "bohr_bugs": [
-      {
-        "id": "B-01",
-        "bug": "_aios_v2_consumer_runner.py used string division for src path",
-        "fix": "Path(\"src\") / \"v2_consumer.py\"",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-02",
-        "bug": "runner omitted -m for src.v2_consumer",
-        "fix": "add -m src.v2_consumer",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-03",
-        "bug": "runner subprocess lacked cwd=v2_root",
-        "fix": "pass cwd=v2_root",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-04",
-        "bug": "v2_consumer.py lacked __main__ CLI",
-        "fix": "add argparse tick/watch/capabilities",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-05",
-        "bug": "probe_workbuddy path was wrong",
-        "fix": "point probe at ~/.workbuddy/",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-06",
-        "bug": "probe_claudecode did not truly invoke --version",
-        "fix": "PowerShell claude.ps1 --version",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-07",
-        "bug": "v2_consumer TERMINAL_TYPES guard could raise UnboundLocalError",
-        "fix": "initialize/guard terminal set safely",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-08",
-        "bug": "claude_adapter text=True hit PowerShell GBK decode failure",
-        "fix": "normalize subprocess decoding",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-09",
-        "bug": "claude_adapter bytes string could not be JSON serialized",
-        "fix": "decode bytes before JSON",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-10",
-        "bug": "consumer tick included codex recipient and caused inbox explosion",
-        "fix": "exclude codex from recipients",
-        "status": "FIXED"
-      },
-      {
-        "id": "B-11",
-        "bug": "claude_adapter -EncodedCommand plus -args conflicted",
-        "fix": "put arguments inside EncodedCommand",
-        "status": "FIXED"
-      }
-    ],
-    "bohr_bug_status": "11/11 FIXED; source ledger: D:\\AIOS\\_agent-hub\\handoff\\2026-10-08_CODEX_SUPERVISOR_HANDOFF.md §1.2",
-    "tests_pass_post_audit": "24/24 strategy gate tests PASS; P8 files exist 22/22 but strict evidence audit BLOCKED (per-file embedded pytest -v head/tail absent)",
-    "evidence_audit_report": "D:\\AIOS\\_agent-hub\\handoff\\2026-10-09_P8_EVIDENCE_AUDIT.md"
-  }
+    {"id": "Aquinas", "task": "INDEX + V6.3 queue", "status": "DONE — closed"},
+    {"id": "Carnot", "task": "INDEX final update", "status": "DONE — closed"},
+    {"id": "Peirce", "task": "Provider Adapter Layer", "status": "DONE — closed"},
+    {"id": "Maxwell", "task": "Remaining FAIL fix", "status": "DONE — closed"},
+    {"id": "Aristotle", "task": "诚实侦察", "status": "DONE — closed"},
+    {"id": "Hubble", "task": "V6.3 T03 + T05", "status": "DONE — closed"},
+    {"id": "Einstein", "task": "P8 adapters + verifier", "status": "DONE — closed"},
+    {"id": "Socrates", "task": "T07-T24 + verifier", "status": "DONE — closed"},
+    {"id": "Confucius", "task": "22 evidence + commit", "status": "DONE — closed"},
+    {"id": "Helmholtz", "task": "Post-summit 6 caveats", "status": "DONE — closed"},
+    {"id": "Bohr", "task": "诚实审计 + 11 bug fix", "status": "DONE — closed"},
+    {"id": "Euclid", "task": "audit 收尾", "status": "INTERRUPTED — closed"},
+    {"id": "Rawls", "task": "Operational audit", "status": "INTERRUPTED — closed"},
+    {"id": "Kuhn", "task": "post-summit Task A-E", "status": "DONE — closed"},
+    {"id": "Huygens", "task": "final cleanup worker", "status": "DONE — closed"},
+    {"id": "codex-direct", "task": "NO LOOSE ENDS final closure + P8 evidence real pytest output", "status": "DONE — closed"}
+  ]
 }

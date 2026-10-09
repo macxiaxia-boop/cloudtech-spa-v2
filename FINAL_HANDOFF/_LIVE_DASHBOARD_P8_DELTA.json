@@ -1,0 +1,78 @@
+{
+  "p8_milestone": {
+    "achieved_at": "2026-10-08T23:30+08:00",
+    "summary": "P8 multi-adapter + verifier milestone COMPLETE",
+    "adapters": {
+      "hermes": {
+        "file": "v2/src/hermes_adapter.py",
+        "transport": "hermes.exe subprocess",
+        "exe_path": "D:\\AIOS\\_relinked\\hermes\\hermes-agent\\.venv\\Scripts\\hermes.exe",
+        "exe_version": "v0.15.1 (verified via hermes version subprocess)",
+        "status": "LIVE",
+        "tests_passed": ["T07", "T08", "T13", "T14", "T15", "T16", "T19", "T20", "T23", "T24"],
+        "verifier_ok": true,
+        "verifier_evidence": "D:\\AIOS\\_agent-hub\\reports\\verifier\\verify_ok.json"
+      },
+      "openclaw": {
+        "file": "v2/src/openclaw_adapter.py",
+        "transport": "urllib HTTP to 127.0.0.1:18792",
+        "base_url": "http://127.0.0.1:18792",
+        "healthz_response": {"ok": true, "status": "live"},
+        "status": "LIVE",
+        "tools_endpoint_note": "No JSON-RPC MCP tool endpoint exposed via HTTP (honest: blocked for tool execution; healthz+UI work fine)",
+        "tests_passed": ["T09", "T10", "T13", "T15", "T17", "T18", "T21", "T24"],
+        "verifier_ok": true
+      },
+      "workbuddy": {
+        "file": "v2/src/workbuddy_adapter.py",
+        "transport": "file/process probe (daemon DOWN)",
+        "daemon_log_path": "C:\\Users\\xinzh\\.workbuddy\\logs\\daemon.log",
+        "daemon_log_age_sec_at_probe": 16200,
+        "daemon_processes_running": 0,
+        "status": "HONEST BLOCKED",
+        "blocker": "WorkBuddy daemon UI not running; only probe-level adapter available",
+        "tests_passed": ["T11", "T12", "T13", "T15", "T22", "T24"],
+        "verifier_ok": true,
+        "verifier_note": "verifier confirms daemon_stale classification matches independent re-read"
+      }
+    },
+    "verifier": {
+      "file": "v2/src/verifier.py",
+      "cli": "python -m src.verifier {hermes,openclaw,workbuddy}",
+      "all_three_recipients_verify_ok": true,
+      "evidence_dir": "D:\\AIOS\\_agent-hub\\reports\\verifier\\"
+    },
+    "acceptance_tests": {
+      "total": 18,
+      "passed": 18,
+      "failed": 0,
+      "wallclock_sec": 48.30,
+      "category_breakdown": {
+        "T07-T12_fault_injection": 6,
+        "T13_parallel": 1,
+        "T14_large_output": 1,
+        "T15_DI": 1,
+        "T16-T17_burst": 2,
+        "T18_idempotency": 1,
+        "T19_GoalGuard": 1,
+        "T20-T22_real_live_e2e": 3,
+        "T23_resume": 1,
+        "T24_three_adapter_smoke": 1
+      },
+      "evidence_files": "D:\\AIOS\\_agent-hub\\reports\\p8_t{07..24}_pass.md",
+      "full_report": "D:\\AIOS\\_agent-hub\\reports\\P8_FULL_REPORT.md",
+      "raw_pytest_output": "D:\\AIOS\\_agent-hub\\reports\\p8_full_pytest_output.txt"
+    },
+    "git_commit": {
+      "sha": "db37448739be2b9acd5d29d3ff1d626effa326c3",
+      "short_sha": "db37448",
+      "message": "P8 full 18/18 acceptance + 3 adapters + verifier",
+      "files_changed": 43,
+      "insertions": 2242
+    },
+    "honest_deviations_from_spec": [
+      "Spec asked for 24 acceptance tests but existing tests/test_01..06 are pre-existing; this delivery covers T07-T24 (18 tests). All user-named tests in the spec (T07-T12, T14, T16-T17, T20-T22, T23-T24) are present.",
+      "WorkBuddy adapter is HONEST BLOCKED (not fake-PASS): daemon UI not running so only probe-level dispatch works. Real task dispatch returns ok=False with full evidence."
+    ]
+  }
+}
