@@ -1,0 +1,30 @@
+class,path_pattern,risk,github_action,evidence,reason
+A_class_code,*.py,HIGH,commit,git log + ls,source code (aios_tasks/aios_tools/_aios_*.py 50+ files),upload OK
+A_class_md,*.md,HIGH,commit,git log + ls,AIOS specs + CLAUDE.md + AGENTS.md + feedback-R*.md,upload OK
+A_class_yaml,*.yaml,HIGH,commit,git log + ls,workflow + capability_registry,upload OK
+A_class_json,*.json,HIGH,commit,git log + ls,state + config + dashboard,upload OK (注意：不含 secrets)
+A_class_html,*.html,LOW,commit,git log,灵策智算品牌站,upload OK
+A_class_ywl,*.yml,HIGH,commit,git log,GitHub Actions workflow,upload OK
+A_class_md_log,feedback-R*.md,HIGH,commit,git log,经验反馈 100+ 文件,upload OK
+A_class_lock,requirements.txt / package.json / pyproject.toml,MEDIUM,commit,git log,dep lock files,upload OK
+A_class_template,.env.example,LOW,commit,git log,template (无真值),upload OK
+
+B_class_large,*.tar.gz / *.zip / backups/,MEDIUM,LFS or skip,gitignore,.git-mirror/codex-home.git/objects/*.pack 超过 100MB GitHub 限制,SKIP (用本地加密备份)
+B_class_db,aios_data/*.db,MEDIUM,skip,gitignore,runtime database,SKIP (本地加密)
+B_class_models,*.pt / *.onnx / *.safetensors,HIGH,LFS,gitignore,model weights (如存在),LFS (容量)
+
+C_class_env,.env,C-class,NEVER_COMMIT,gitignore (CloudTech OK),生产凭证,WECHAT_APP_ID/JWT_SECRET/SECRET_KEY,BLOCKED
+C_class_env_local,.env.local,C-class,NEVER_COMMIT,gitignore,local override,BLOCKED
+C_class_key,*.key / *.pem / *.p12,C-class,NEVER_COMMIT,gitignore,RSA/ED25519 私钥,BLOCKED
+C_class_mcp,mcp_credentials.env,C-class,NEVER_COMMIT,gitignore (!!),GitHub PAT + Stripe + Feishu credentials,BLOCKED
+C_class_credentials,credentials/ secrets/,C-class,NEVER_COMMIT,gitignore,auth tokens,BLOCKED
+C_class_node_modules,node_modules/,C-class,NEVER_COMMIT,gitignore,巨大 npm 依赖树,BLOCKED
+C_class_venv,.venv/ venv/ env/,C-class,NEVER_COMMIT,gitignore,Python virtual env,BLOCKED
+C_class_pyc,__pycache__/ *.pyc,C-class,NEVER_COMMIT,gitignore,Python bytecode cache,BLOCKED
+C_class_database,*.db / *.sqlite,C-class,NEVER_COMMIT,gitignore,生产数据库,BLOCKED
+C_class_models_credentials,models/*.{pt,onnx,safetensors},C-class,NEVER_COMMIT,gitignore (需补),model weights,BLOCKED
+C_class_git_mirror,.git-mirror/,C-class,NEVER_COMMIT,gitignore (!!),git bare mirror 120MB+,BLOCKED
+C_class_node_modules_openclaw,openclaw/node_modules/,C-class,NEVER_COMMIT,gitignore,npm 依赖,BLOCKED
+C_class_ed25519,codex_supervisor.ed25519.key,C-class,NEVER_COMMIT,gitignore,sovereignty key,BLOCKED
+C_class_chat_logs,*.log (大量),C-class,NEVER_COMMIT,gitignore,聊天/运行日志,BLOCKED
+C_class_chrome_history,Desktop\*.lnk / Chrome data,C-class,NEVER_COMMIT,gitignore,user PII,BLOCKED
