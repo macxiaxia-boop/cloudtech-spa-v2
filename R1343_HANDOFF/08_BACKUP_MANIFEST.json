@@ -1,0 +1,98 @@
+{
+  "$schema": "aios-v1-backup-manifest",
+  "schema_version": "1.0",
+  "created_utc": "2026-10-09T20:08:00+08:00",
+  "primary_backup_link": {
+    "name": "GitHub 代码同步",
+    "description": "可安全提交文件 push 到 4 个 GitHub 仓库",
+    "method": "git push",
+    "repositories": [
+      {
+        "repo": "macxiaxia-boop/cloudtech-spa-v2",
+        "url": "https://github.com/macxiaxia-boop/cloudtech-spa-v2",
+        "visibility": "public",
+        "default_branch": "master",
+        "local_path": "D:\\CloudTech-Portable",
+        "local_head_sha": "d0dcd392",
+        "pushed_commits_count": "TBD (ls-remote required)",
+        "last_verified_utc": null,
+        "verification_status": "BLOCKED (sandbox network)"
+      },
+      {
+        "repo": "macxiaxia-boop/aios-sovereignty-v",
+        "url": "https://github.com/macxiaxia-boop/aios-sovereignty-v",
+        "visibility": "public",
+        "default_branch": "main",
+        "local_path": "D:\\AIOS",
+        "local_head_sha": "4e5447f",
+        "pushed_commits_count": "TBD",
+        "last_verified_utc": null,
+        "verification_status": "BLOCKED (sandbox network + remote forced update)"
+      },
+      {
+        "repo": "macxiaxia-boop/round45-aios-rebuild",
+        "url": "https://github.com/macxiaxia-boop/round45-aios-rebuild",
+        "visibility": "private",
+        "default_branch": "master",
+        "local_paths": [
+          "D:\\个人文件\\AI\\Operator\\aios_tasks",
+          "D:\\个人文件\\AI\\Operator\\aios_tools"
+        ],
+        "local_head_sha_aios_tasks": "e5beb002",
+        "local_head_sha_aios_tools": "abc88f86",
+        "pushed_commits_count": "PARTIAL (24 commits ahead + sandbox network)",
+        "last_verified_utc": null,
+        "verification_status": "BLOCKED (sandbox network + .git-mirror pack files)"
+      }
+    ]
+  },
+  "secondary_backup_link": {
+    "name": "独立加密恢复副本",
+    "description": "指令一第 5 节第二条链路 · 带日期版本的加密归档",
+    "method": "tar.gz + GPG encrypt",
+    "target": "BLOCKED (L4 越界 · 需用户拍板备份目标路径 + 加密密码)",
+    "encryption": "GPG AES-256 (待 GPG 密钥生成)",
+    "compression": "tar.gz (level 9)",
+    "contents": [
+      "git refs (完整 branches + tags)",
+      "lfs objects (如启用)",
+      "授权范围内配置文件（不含 secrets）",
+      "授权范围内数据库备份（如有）"
+    ],
+    "checksum_algorithm": "sha256",
+    "retention_policy": "TBD (用户决定)",
+    "restore_test": "BLOCKED (沙箱网络隔离 + 无加密备份目标)",
+    "unresolved_blockers": ["B07 (加密目标 + 密钥 · L4 待 user)"]
+  },
+  "exclusions": {
+    "class_A_excluded_for_size": [
+      ".venv/ (Python virtual env, ~50MB)",
+      "node_modules/ (npm deps, ~500MB+)",
+      ".git-mirror/codex-home.git/objects/ (git bare pack, ~120MB)",
+      "dist/ build/ *.egg-info/ (build artifacts)"
+    ],
+    "class_C_never_committed": [
+      ".env / *.env (production secrets)",
+      "*.key / *.pem / *.p12 (RSA/ED25519 private keys)",
+      "mcp_credentials.env (GitHub PAT + Stripe + Feishu)",
+      "credentials/ secrets/ (auth tokens)",
+      "codex_supervisor.ed25519.key (sovereignty key)"
+    ]
+  },
+  "integrity_checks": {
+    "pre_push": [
+      "git log --all --full-history -- '*.env' '*.key' '*.pem' 'credentials*' (empty = pass)",
+      "canonical .gitignore 复制到 4 仓库",
+      "git status clean 或 explicit commits"
+    ],
+    "post_push": [
+      "git ls-remote <remote> <branch> 比对 SHA (BLOCKED 沙箱)",
+      "GitHub API: GET /repos/{owner}/{repo}/commits/{sha} (BLOCKED 沙箱)",
+      "git clone + checkout + git log + diff 比对 (BLOCKED 沙箱)"
+    ]
+  },
+  "manifest_signing": {
+    "method": "GPG detached signature",
+    "status": "BLOCKED (L4 越界 · 待用户拍板 GPG key)"
+  }
+}

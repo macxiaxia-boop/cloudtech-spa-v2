@@ -1,0 +1,23 @@
+source_id,project,absolute_local_path,repo_root,git_remote,HEAD_SHA,branch,dirty_status,tracked_count,untracked_count,size_bytes,last_modified,owner_guess,evidence,confidence,conflict_note
+SC01,CloudTech-SPA-v2,D:\CloudTech-Portable,D:\CloudTech-Portable\.git,https://github.com/macxiaxia-boop/cloudtech-spa-v2.git,d0dcd392,master,dirty (5 modified + 5 untracked + 2 renamed),N/A,N/A,~50MB,2026-10-09 16:02,user,git log + ls + .git/config,1.0,CloudTech SPA v2.0.0 release per README
+SC02,AIOS-Sovereignty-V,D:\AIOS,D:\AIOS\.git,git@github.com:macxiaxia-boop/aios-sovereignty-v.git (HTTPS rewritten),4e5447f,main,dirty (11 modified + 11 new + 6 deleted),N/A,N/A,~30MB,2026-10-09 15:55,user,git log + ls + .git/config,1.0,V5 Round 2 SSOT (R1336 V5.2 spec 实施处)
+SC04,AIOS-aios_tasks,D:\个人文件\AI\Operator\aios_tasks,D:\个人文件\AI\Operator\aios_tasks\.git,https://github.com/macxiaxia-boop/round45-aios-rebuild.git,e5beb002,master,dirty (submodule deletions + 24 ahead),N/A,N/A,~150MB,2026-10-09 15:54,user,git log + ls + .git/config,0.9,**缺 .gitignore · 需立即补**
+SC05,AIOS-aios_tools,D:\个人文件\AI\Operator\aios_tools,D:\个人文件\AI\Operator\aios_tools\.git,https://github.com/macxiaxia-boop/round45-aios-rebuild.git,abc88f86,master,dirty (submodule deletions + 24 ahead + 1121 files),N/A,N/A,~200MB,2026-10-09 15:55,user,git log + ls + .git/config,0.9,**缺 .gitignore · 需立即补**
+SC06,AIOS-aios_data,D:\个人文件\AI\Operator\aios_data,N/A,N/A,N/A,N/A,N/A,N/A,N/A,~5MB,2026-10-08,user,ls only (no .git),0.5,**不是 git repo · 是 MCP 凭证目录**
+SC07,AIOS-00_CORE,D:\个人文件\AI\Operator\00_CORE,N/A,N/A,N/A,N/A,N/A,N/A,N/A,~3MB,2026-10-08,user,ls only (no .git),0.5,**不是 git repo · 是宪法层文档**
+SC03,AIOS-aios_vnext,D:\AIOS\aios_tasks\aios_vnext,D:\AIOS\aios_tasks\aios_vnext\.git,N/A,N/A,N/A,N/A,N/A,N/A,~2MB,2026-10-09,user,ls + submodule,0.6,**是 D:\AIOS 的子模块**
+
+# 风险文件清单
+RISK01,D:\CloudTech-Portable\.env,real env file,C-class,gitignored in CloudTech .gitignore,1.0,2.95KB,2026-10-09 09:58,WECHAT_APP_ID + JWT_SECRET 等,BLOCKED
+RISK02,D:\CloudTech-Portable\deploy\.env,real env file,C-class,gitignored,1.0,~2KB,2026-09,生产部署,BLOCKED
+RISK03,D:\AIOS\_backups_relinked_1790674911\openclaw\.env,real env file,C-class,in backups,0.9,5KB,2026-09,openclaw install env,BLOCKED
+RISK04,D:\AIOS\_backups_relinked_1790674911\openclaw\config-journal-fingerprint.key,ED25519 private key,CRITICAL,in backups,1.0,2KB,2026-09,ssh/agent fingerprint,BLOCKED
+RISK05,D:\AIOS\kernel\etc\sovereignty\codex_supervisor.ed25519.key,ED25519 private key,CRITICAL,in sovereignty dir,1.0,1KB,2026-10,sovereignty key,BLOCKED
+RISK06,D:\个人文件\AI\Operator\aios_data\mcp_credentials.env,GitHub PAT + Stripe + Feishu,HIGH-class,no gitignore,1.0,5KB,2026-10-08,**CRITICAL: 需立即移出 git repo**,BLOCKED
+RISK07,D:\个人文件\AI\Operator\aios_tools\mcp_credentials.env,GitHub PAT + Stripe + Feishu,HIGH-class,no gitignore (aios_tools!),1.0,5KB,2026-10-08,**CRITICAL: 需立即移出 git repo**,BLOCKED
+
+# 历史 push 风险
+HIST_RISK01,aios_tasks 24 commits 已 push (2026-09-27 ~ 2026-10-09),D:\个人文件\AI\Operator\aios_tasks,committed code,HIGH-class,git log --all --full-history -- "*.env" "*.key" "*.pem" "credentials*" empty,1.0,**已扫历史无 .env/.key/.pem**,PASS
+HIST_RISK02,aios_tools 24 commits 已 push,D:\个人文件\AI\Operator\aios_tools,committed code,HIGH-class,pending scan,0.7,**待扫描**,PENDING
+HIST_RISK03,CloudTech 24+ commits 已 push,D:\CloudTech-Portable,committed code,HIGH-class,gitignored .env (CloudTech .gitignore OK),1.0,**已扫 + gitignore 排除 .env**,PASS
+HIST_RISK04,D:\AIOS 2 commits 未 push (远端 forced update),D:\AIOS,committed code,HIGH-class,gitignored .env (D:\AIOS .gitignore OK),0.9,**已扫 + gitignore 排除**,PASS

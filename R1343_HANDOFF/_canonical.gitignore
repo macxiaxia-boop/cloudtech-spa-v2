@@ -1,0 +1,144 @@
+# R1343 Canonical .gitignore (指令一第 2/3 节资产分级 C 类保护)
+# 复制到: aios_tasks/.gitignore / aios_tools/.gitignore
+# CloudTech-Portable 已有 · D:\AIOS 已有
+
+# === C 类绝不提交（红线 #22 + #59 + 指令一第 2 节）===
+
+# Environment & Secrets
+.env
+.env.example
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets/
+credentials/
+*.credentials
+jwt_secret*
+api_token*
+oauth_token*
+
+# MCP Credentials
+mcp_credentials.env
+mcp_credentials*.env
+*_credentials.env
+
+# 飞书 / 微信 / Stripe / Langfuse 等
+feishu_*
+wechat_*
+stripe_*
+langfuse_*
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+*.spec
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+.tox/
+
+# Virtual Environment
+.venv/
+venv/
+env/
+.python-version
+
+# === Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/
+.pnp.*
+.parcel-cache/
+
+# === IDE / Editor ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# === OS / 临时 ===
+*.tmp
+*.log
+.cache/
+tmp/
+temp/
+
+# === 数据库 / 数据 ===
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.dump
+
+# === 大型二进制 / 模型 / 备份 ===
+*.tar.gz
+*.zip
+*.7z
+*.iso
+*.dmg
+*.exe
+*.dylib
+*.so
+*.whl
+*.pyc
+*.pyd
+*.so
+models/*.bin
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.safetensors
+backups/
+_archived_*/
+.git-mirror/
+
+# === AIOS 特定 ===
+# Codex / OpenClaw 内部凭证
+.openclaw-install-stage-*/
+.codex-home.git/
+.cox_supervisor*
+codex_supervisor.ed25519.key
+node_modules/
+openclaw/dist/credentials-*.mjs
+openclaw/dist/credentials-*.cjs
+
+# 心之所向 / CloudTech SaaS 数据库
+aios_data/*.db
+aios_data/*.sqlite*
+FINAL_HANDOFF/_LIVE_DASHBOARD.json.bak-*
+
+# === AIOS 工具产物 ===
+# Auto-sync daemon
+_r1342_auto_push_daemon.log
+_r1342_auto_push_daemon.pid
+
+# 任务调度 state
+aios_tasks/state/*.json
+!aios_tasks/state/R95-MODELERERIVERING.json  # 例外（业务必要）
+
+# === 调试/开发（保留但分类） ===
+.ipynb_checkpoints/
+*.pyc.bak
+.coverage.preserve
