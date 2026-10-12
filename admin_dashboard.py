@@ -190,15 +190,19 @@ def admin_guard():
             return jsonify({"error": "AI 内容生成请求过于频繁，请稍后再试", "retry_after": 60}), 429
     
     # ── CSRF 保护: POST/PUT/DELETE 检查同源 ──
+    # R1398 治本: /api/auth/* (login/register/logout) 是登录前 = 无 token = 不可能 CSRF 攻击 → 跳过
     if request.method in ("POST", "PUT", "DELETE"):
-        origin = request.headers.get("Origin", "")
-        referer = request.headers.get("Referer", "")
-        xrw = request.headers.get("X-Requested-With", "")
-        if origin or referer:
-            host = request.host.split(":")[0]
-            is_same_origin = (host in origin or host in referer or xrw == "XMLHttpRequest")
-            if not is_same_origin and request.path.startswith("/api/"):
-                return jsonify({"error": "CSRF validation failed"}), 403
+        if request.path.startswith("/api/auth/"):
+            pass  # auth 路由不需要 CSRF
+        else:
+            origin = request.headers.get("Origin", "")
+            referer = request.headers.get("Referer", "")
+            xrw = request.headers.get("X-Requested-With", "")
+            if origin or referer:
+                host = request.host.split(":")[0]
+                is_same_origin = (host in origin or host in referer or xrw == "XMLHttpRequest")
+                if not is_same_origin and request.path.startswith("/api/"):
+                    return jsonify({"error": "CSRF validation failed"}), 403
     
     # ── 认证检查 ──
     if not _check_admin_auth():

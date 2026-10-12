@@ -1,0 +1,97 @@
+name: Lighthouse CI
+
+on:
+  push:
+    branches: [master, ui-rebuild/**]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+# 同一时间最多 1 个 build（节省 CI 资源）
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Lighthouse Audit (release-v2.0.0)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: web/vite-spa/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web/vite-spa
+        run: npm ci
+
+      - name: Build
+        working-directory: web/vite-spa
+        run: npm run build
+
+      - name: Start preview server
+        working-directory: web/vite-spa
+        run: |
+          npm run preview &
+          sleep 5
+          echo "Preview server started on http://localhost:5098"
+
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:5098 > /dev/null; then
+              echo "Server ready"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: '.github/lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  bundle-size:
+    name: Bundle Size Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: web/vite-spa/package-lock.json
+
+      - name: Build
+        working-directory: web/vite-spa
+        run: npm run build
+
+      - name: Check bundle size
+        working-directory: web/vite-spa
+        run: |
+          main_size=$(stat -c %s dist-v45/assets/index-*.js | head -1)
+          main_gzip_size=$(gzip -c dist-v45/assets/index-*.js | wc -c)
+          editor_size=$(stat -c %s dist-v45/assets/WorkflowEditor-*.js 2>/dev/null || echo 0)
+          echo "Main bundle: $main_size bytes ($main_gzip_size gzipped)"
+          echo "Editor lazy chunk: $editor_size bytes"
+
+          # 阈值警告：主包 > 250KB gzip 时 fail
+          if [ "$main_gzip_size" -gt 256000 ]; then
+            echo "::error::Main bundle exceeded 250KB gzip threshold!"
+            exit 1
+          fi
+          echo "Bundle size check passed"

@@ -1,50 +1,102 @@
+# ──────────────────────────────────────────────────
+# CloudTech SaaS - Root .gitignore (R1501)
+# ──────────────────────────────────────────────────
+
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-dist/
-build/
-*.spec
-
-# Virtual Environment
+*$py.class
+*.so
+.Python
 .venv/
+venv/
+env/
+ENV/
+*.egg-info/
 
-# Environment
-.env
-.jwt_secret
+# Node
+.npm/
+node_modules/
+package-lock.json
+yarn.lock
+.vite/
 
-# IDE
+# Build / Cache
+.cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.tox/
+coverage/
+
+# SQLite (T3 治理 - 数据库不入 git)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
 .vscode/
 .idea/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Data
-data/
-backups/
-repurpose_output/
-
-# Generated output
-output/
-test_output/
-
 # Logs
-*.log
 logs/
+*.log
+*.log.*
+*.jsonl
 
-# Sensitive
+# Env / Secrets / 浏览器 Cookies
+.env
+.env.local
+.env.*.local
+*.jwt_secret
+*.pem
+*.key
 cookies_*.json
-*.db\n.env\n.jwt_secret\n*.log
+data/*.bin
+data/*_key*.bin
 
-# ── UI Rebuild v2 (2026-09-29) ──
-# 浅克隆参考仓库不入库（3 仓库约 200MB）
-design/research/references/_cloned/
-# P0 备份目录（恢复用）
+# Test
+tests/.tmp/
+
+# 备份目录
+backups/
+data/backups/
+data/cloudtech_backups/
 web/vite-spa.bak-*/
+web/vite-spa/dist*/
 
-# Node / Build artifacts
-web/vite-spa/node_modules/
-web/vite-spa/dist-v45/
-web/vite-spa/.vite/
+# 临时 _nav.* truncated (历史产物)
+landing-page/_nav.html
+landing-page/_nav.js
+
+# ──────────────────────────────────────────────────
+# BLOCKER-B: LynxceAI 集成模块 (隔离待拍板)
+# 当前默认嵌 CloudTech 子目录 (作为功能模块)
+# 如要新建独立仓库, 取消下面注释 + 移出
+# ──────────────────────────────────────────────────
+lynxce-replica-final/
+web/lynxce_backend/
+web/vite-spa/public/lynxce.html
+web/vite-spa/src/pages/LynxcePage.tsx
+web/vite-spa/src/pages/lynxce/
+landing-page/lynxce.html
+
+# 大文件 data/
+data/_yxer_*.json
+data/_yxer_*.txt
+data/v*.json.bak.*
+data/v*.json.bak2
+data/v*.json.bak3
+data/*.json.bak-*
+
+# 设计/调研参考 (本地)
+design/research/references/
+
+# R1501 housekeeping 备份
+.gitignore.r1501.bak

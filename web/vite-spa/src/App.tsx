@@ -16,6 +16,13 @@ import { PricingPage } from './pages/Pricing';
 import { DashboardPage } from './pages/Dashboard';
 import { SettingsPage } from './pages/Settings';
 import { BillingPage } from './pages/Billing';
+import LynxcePage from './pages/LynxcePage';
+import {
+  LynxceIndex, LynxceChatPage, LynxceDrawPage, LynxceMjPage, LynxceVideoPage,
+  LynxceMusicPage, LynxceEffectsPage, LynxceStudyPage, LynxceAppsPage,
+  LynxceSquarePage, LynxceAssetsPage, LynxceViralPage, LynxceLeadsPage,
+  LynxceMePage, LynxceAdminPage
+} from './pages/lynxce/index';
 import { IndustryDecorationPage } from './pages/IndustryDecoration';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -122,6 +129,21 @@ export default function App() {
         <Route path="/clients" element={<ClientListPage />} />
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/billing" element={<BillingPage />} />
+        <Route path="/lynxce" element={<LynxceIndex />} />
+        <Route path="/lynxce/chat" element={<LynxceChatPage />} />
+        <Route path="/lynxce/draw" element={<LynxceDrawPage />} />
+        <Route path="/lynxce/mj" element={<LynxceMjPage />} />
+        <Route path="/lynxce/video" element={<LynxceVideoPage />} />
+        <Route path="/lynxce/music" element={<LynxceMusicPage />} />
+        <Route path="/lynxce/effects" element={<LynxceEffectsPage />} />
+        <Route path="/lynxce/study" element={<LynxceStudyPage />} />
+        <Route path="/lynxce/apps" element={<LynxceAppsPage />} />
+        <Route path="/lynxce/square" element={<LynxceSquarePage />} />
+        <Route path="/lynxce/assets" element={<LynxceAssetsPage />} />
+        <Route path="/lynxce/viral" element={<LynxceViralPage />} />
+        <Route path="/lynxce/leads" element={<LynxceLeadsPage />} />
+        <Route path="/lynxce/me" element={<LynxceMePage />} />
+        <Route path="/lynxce/admin" element={<LynxceAdminPage />} />
       </Route>
 
       {/* 居中路由（全屏居中卡片，不套 layout）*/}

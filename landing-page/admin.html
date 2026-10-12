@@ -722,7 +722,7 @@ document.querySelectorAll('.sb-sub').forEach(function(s){
   s.addEventListener('click',function(){navTo(this.getAttribute('data-panel'))});
 });
 function toast(m,t){var d=document.createElement('div');d.className='toast '+(t||'ok');d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.remove()},3000)}
-async function api(u,o){o=o||{};var h={'Content-Type':'application/json'};if(_adminToken)h['X-Admin-Token']=_adminToken;var r=await fetch(u,{headers:h,method:o.method||'GET',body:o.body||undefined});if(r.status===401){_adminToken='';localStorage.removeItem('admin_token');document.getElementById('loginOverlay').style.display='flex';return{status:'error',message:'请重新登录'}}return r.json()}
+async function api(u,o){o=o||{};var h={'Content-Type':'application/json'};if(_adminToken)h['X-Admin-Token']=_adminToken;var r=await fetch('http://127.0.0.1:5099'+u,{headers:h,method:o.method||'GET',body:o.body||undefined});if(r.status===401){_adminToken='';localStorage.removeItem('admin_token');document.getElementById('loginOverlay').style.display='flex';return{status:'error',message:'请重新登录'}}return r.json()}
 setInterval(function(){document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN')},10000);
 document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN');
 

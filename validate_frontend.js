@@ -14,7 +14,7 @@ const path = require('path');
 const vm = require('vm');
 
 const LANDING = path.join(__dirname, 'landing-page');
-const HTML_FILES = fs.readdirSync(LANDING).filter(f => f.endsWith('.html'));
+const HTML_FILES = fs.readdirSync(LANDING).filter(f => f.endsWith('.html') && !/^(lynxce.|_nav.|replica)/i.test(f));
 
 let totalErrors = 0;
 
