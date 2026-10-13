@@ -16,13 +16,17 @@ TEST_FILES = [
     "test_v4_paths.py",
     "test_v4_api.py",
     "test_v4_end_to_end_mock.py",
+    "test_v4_end_to_end_mock_more.py",
+    "test_v4_end_to_end_paths.py",
     "test_v4_registry_real_load.py",
+    "test_v4_auth.py",
     "test_adapters_platform.py",
     "test_adapters_transcribe.py",
     "test_adapters_article.py",
     "test_adapters_content.py",
     "test_adapters_media.py",
     "test_workbuddy_bridge.py",
+    "test_real_provider_clients.py",
 ]
 
 

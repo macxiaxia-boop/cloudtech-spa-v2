@@ -20,6 +20,7 @@ def direct(
     industry: str,
     source_transcript: Optional[str] = None,
     source_structure: Optional[dict] = None,
+    provider=None,
 ) -> DirectorResult:
     """主编排器：goal + 受众 → 串接 analyze → generate → review
 
@@ -29,9 +30,10 @@ def direct(
         industry: 目标行业
         source_transcript: 原始转写 (可选，缺则走纯原创 stub)
         source_structure: 预分结构 (可选)
+        provider: LLM provider(传入则下游 analyze/generate/review 用)
 
     Returns:
-        含 script_text / structure / qc_result / mode / mock=True
+        含 script_text / structure / qc_result / mode / mock
     """
     if not goal:
         raise ValueError("goal 不能为空")
@@ -41,11 +43,11 @@ def direct(
     if source_transcript:
         # 有转写：走完整 pipeline
         if source_structure is None:
-            structure = analyze([], source_transcript)
+            structure = analyze([], source_transcript, provider=provider)
         else:
             structure = source_structure
 
-        script_data = generate(structure, audience, industry, source_transcript)
+        script_data = generate(structure, audience, industry, source_transcript, provider=provider)
         qc_result = review(source_transcript, script_data["script_text"], structure)
 
         return DirectorResult(
@@ -53,7 +55,7 @@ def direct(
             structure=structure,
             qc_result=qc_result,
             mode="rewrite",
-            mock=True,
+            mock=script_data.get("mock", True),
         )
     else:
         # 纯原创 stub

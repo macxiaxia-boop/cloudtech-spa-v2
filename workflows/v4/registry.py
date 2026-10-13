@@ -129,6 +129,151 @@ class OperationRegistry:
     def count(self) -> int:
         return len(self._ops)
 
+    # ------------------------------------------------------------------
+    # 执行层 dispatch:op_id → adapter → result
+    # ------------------------------------------------------------------
+    def dispatch(self, op_id: str, inputs: Dict, llm_provider=None) -> Dict:
+        """将 op_id 路由到具体 adapter/函数,返回 dict
+
+        内置路由:
+          url.normalize          → 简单 URL 标准化
+          platform.*             → adapters.platform.*
+          transcript.*           → adapters.transcribe.*
+          content.*              → adapters.content.* (LLM 注入)
+          doubao.tts             → adapters.tts.*
+          ocr.*                  → adapters.ocr.*
+          search.*               → adapters.search.*
+          metrics.*              → adapters.metrics.*
+          meeting.*              → adapters.meeting.*
+          video.assembly         → adapters.ffmpeg_video.*
+          export.zip             → 打包 export(简化)
+          其他                   → stub
+        """
+        from dataclasses import asdict, is_dataclass
+        def _to_dict(obj):
+            if obj is None:
+                return {}
+            if isinstance(obj, dict):
+                return obj
+            if is_dataclass(obj):
+                return asdict(obj)
+            if isinstance(obj, (list, tuple)):
+                return [_to_dict(x) for x in obj]
+            return obj
+
+        from adapters.ocr import MockOCREngine
+        from adapters.search import MockSearchEngine
+        from adapters.tts import MockTTSEngine
+        from adapters.ffmpeg_video import FFmpegEngine
+        from adapters.metrics import MockMetricsStore
+        from adapters.meeting import MockMeetingProcessor
+        from adapters import platform as Aplat
+        from adapters import transcribe as Atrans
+        from adapters import content as Acont
+
+        try:
+            if op_id == "url.normalize":
+                from urllib.parse import urlparse
+                u = inputs.get("url", "")
+                p = urlparse(u)
+                return {"normalized": f"{p.scheme}://{p.netloc}{p.path}", "host": p.netloc, "path": p.path}
+
+            if op_id == "platform.permission_check":
+                r = Aplat.permission_gate.check(inputs["url"])
+                return {"status": getattr(r, "status", "unknown"), "reason": getattr(r, "reason", "")}
+
+            if op_id == "platform.homepage_parse":
+                works = Aplat.homepage_parser.parse_homepage(inputs["url"], limit=inputs.get("limit", 30))
+                return {"total": len(works), "items": _to_dict(works[:30])}
+
+            if op_id == "content.dedupe":
+                items = inputs.get("items", [])
+                seen, out = set(), []
+                for x in items:
+                    if isinstance(x, dict):
+                        k = x.get("url") or x.get("id") or str(x)
+                    else:
+                        k = str(x)
+                    if k not in seen:
+                        seen.add(k); out.append(x)
+                return {"deduped": len(out), "items": out}
+
+            if op_id == "transcript.extract":
+                audio = inputs.get("audio_path") or inputs.get("video_path")
+                if not audio:
+                    return {"text": "", "segments": []}
+                return _to_dict(Atrans.asr_engine.transcribe(audio))
+
+            if op_id == "video.frame_extract":
+                return {"frames": _to_dict(Atrans.frame_extractor.extract(inputs["video_path"], n=8))}
+
+            if op_id == "content.structure.analyze":
+                return _to_dict(Acont.structure_analyzer.analyze(
+                    inputs.get("segments", []),
+                    inputs.get("transcript", ""),
+                    provider=llm_provider,
+                ))
+
+            if op_id == "content.original_script.generate":
+                return _to_dict(Acont.original_script_generator.generate(
+                    inputs.get("structure", {}),
+                    inputs.get("audience", ""),
+                    inputs.get("industry", ""),
+                    inputs.get("transcript", ""),
+                    provider=llm_provider,
+                ))
+
+            if op_id == "content.storyboard.generate":
+                result = Acont.director.direct(
+                    inputs.get("goal", ""),
+                    inputs.get("audience", ""),
+                    inputs.get("industry", ""),
+                    inputs.get("transcript"),
+                    provider=llm_provider,
+                )
+                return {"storyboard": _to_dict(result)}
+
+            if op_id == "content.similarity.review":
+                r = Acont.similarity_qc.review(
+                    inputs.get("original", ""),
+                    inputs.get("derivative", ""),
+                    inputs.get("structure", {}),
+                )
+                return _to_dict(r)
+
+            if op_id == "doubao.tts":
+                from adapters.tts import TTSRequest
+                return _to_dict(MockTTSEngine().synthesize(TTSRequest(text=inputs.get("text", ""))))
+
+            if op_id == "ocr.recognize":
+                return _to_dict(MockOCREngine().recognize(inputs.get("image_path", "")))
+
+            if op_id == "search.authors":
+                return _to_dict(MockSearchEngine().search_authors(
+                    inputs.get("keywords", []), platform=inputs.get("platform", "douyin")))
+
+            if op_id == "metrics.fetch":
+                return _to_dict(MockMetricsStore().fetch_videos(inputs.get("author_id", "")))
+
+            if op_id == "meeting.process":
+                from adapters.meeting import MeetingRequest
+                return _to_dict(MockMeetingProcessor().process(
+                    MeetingRequest(audio_path=inputs.get("audio_path", ""))))
+
+            if op_id == "video.assembly":
+                from adapters.ffmpeg_video import AssemblyRequest
+                return _to_dict(FFmpegEngine().assemble(
+                    AssemblyRequest(segments=inputs.get("segments", []),
+                                   output_path=inputs.get("output_path", "/tmp/out.mp4"))))
+
+            if op_id == "export.zip":
+                return {"package": "mock-zip", "files": list(inputs.keys()), "mock": True}
+
+            return {"op": op_id, "status": "stub", "inputs": inputs, "mock": True}
+
+        except Exception as e:
+            return {"op": op_id, "status": "error", "error": str(e)[:300]}
+
     # --- 内部启发式 ---
 
     def _infer_op_id(self, name: str) -> str:
