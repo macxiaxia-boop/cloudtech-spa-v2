@@ -1,0 +1,44 @@
+name: V4 Tests
+
+on:
+  push:
+    paths:
+      - 'workflows/v4/**'
+      - 'adapters/**'
+      - 'api/v4/**'
+      - 'tests/test_v4_*.py'
+      - 'tests/test_adapters_*.py'
+  pull_request:
+    paths:
+      - 'workflows/v4/**'
+      - 'adapters/**'
+      - 'api/v4/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest fastapi pydantic pillow httpx
+      - name: Run V4 unit + integration tests
+        run: |
+          python -m pytest tests/test_v4_*.py tests/test_adapters_*.py -v --tb=short
+      - name: Run migration audit (dry-run)
+        run: python scripts/run_v4_migration.py
+      - name: V4 Evidence Summary
+        if: always()
+        run: |
+          echo "## V4 7-维基线" >> $GITHUB_STEP_SUMMARY
+          echo "Identified: 60+" >> $GITHUB_STEP_SUMMARY
+          echo "Mapped: 6 workpath typed contracts" >> $GITHUB_STEP_SUMMARY
+          echo "Implemented: 6 (mock-only)" >> $GITHUB_STEP_SUMMARY
+          echo "Tested: 174 tests" >> $GITHUB_STEP_SUMMARY
+          echo "Integrated: 0 (TikHub/Yihook/Kling 未串)" >> $GITHUB_STEP_SUMMARY
+          echo "Validated: 0" >> $GITHUB_STEP_SUMMARY
+          echo "Production Ready: 0 (红线 #60)" >> $GITHUB_STEP_SUMMARY
