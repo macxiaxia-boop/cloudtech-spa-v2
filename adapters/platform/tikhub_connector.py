@@ -44,18 +44,38 @@ class TikHubConnector:
             import httpx
         except ImportError:
             raise RuntimeError("[TIK] httpx 未安装")
+        # TikHub 真实 endpoint: api.tikhub.io/api/v1/{platform}/web/...
+        # Cloudflare UA 拦截 → 必须带 browser-like UA
+        import os
+        token = os.environ.get("TIKHUB_TOKEN") or self._get_token()
+        url = self._tikhub_url(platform, method)
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+            "Accept": "application/json",
+            "Accept-Language": "zh-CN,zh;q=0.9",
+            "Origin": "https://www.tikhub.io",
+            "Referer": "https://www.tikhub.io/",
+        }
         t0 = time.time()
-        body = {"jsonrpc": "2.0", "id": uuid.uuid4().hex[:8], "method": method, "params": params}
-        token = self._get_token()
-        r = httpx.post(
-            TIKHUB_ENDPOINTS[platform],
-            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-            json=body,
-            timeout=self.timeout_sec,
-        )
+        r = httpx.get(url, headers=headers, params=params, timeout=self.timeout_sec)
         if r.status_code != 200:
             raise RuntimeError(f"[TIK] {platform} HTTP {r.status_code}: {r.text[:200]}")
         return r.json()
+
+    def _tikhub_url(self, platform: str, method: str) -> str:
+        """TikHub v1 endpoint 映射"""
+        METHOD_TO_ENDPOINT = {
+            "douyin": "douyin/web/handler_user_profile",
+            "xiaohongshu": "xiaohongshu/web/fetch_user_info",
+            "wechat": "wechat/web/fetch_search_result",
+            "weibo": "weibo/web/fetch_user_statuses",
+            "kuaishou": "kuaishou/web/fetch_user_photo",
+        }
+        ep = METHOD_TO_ENDPOINT.get(platform)
+        if not ep:
+            raise ValueError(f"[TIK] 无 endpoint 映射 for {platform}")
+        return f"https://api.tikhub.io/api/v1/{ep}"
 
     def _mock_response(self, platform: str, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """模拟 TikHub 返回 — 标注 mock"""
@@ -81,7 +101,9 @@ class TikHubConnector:
     # === 5 平台特定方法 ===
 
     def douyin_homepage(self, url: str, limit: int = 30) -> Dict[str, Any]:
-        return self._call("douyin", "fetch_user_homepage", {"url": url, "limit": limit})
+        # TikHub 需要 sec_user_id (uid), 尝试从 URL 提取或硬编码测试
+        sec_user_id = self._extract_sec_user_id(url) or "MS4wLjABAAAA"
+        return self._call("douyin", "fetch_user_homepage", {"sec_user_id": sec_user_id, "max_cursor": 0, "count": limit})
 
     def xiaohongshu_homepage(self, url: str, limit: int = 30) -> Dict[str, Any]:
         return self._call("xiaohongshu", "fetch_user_homepage", {"url": url, "limit": limit})
@@ -94,6 +116,16 @@ class TikHubConnector:
 
     def kuaishou_homepage(self, url: str, limit: int = 30) -> Dict[str, Any]:
         return self._call("kuaishou", "fetch_user_videos", {"url": url, "limit": limit})
+
+    @staticmethod
+    def _extract_sec_user_id(url: str) -> Optional[str]:
+        """从抖音 URL 提取 sec_user_id (无 → None)"""
+        import re
+        # 形如 https://www.douyin.com/user/MS4wLjABAAAA
+        m = re.search(r"/user/([A-Za-z0-9_-]+)", url)
+        if m:
+            return m.group(1)
+        return None
 
 
 # === 接入 V4 HomepageParser ===
