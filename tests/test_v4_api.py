@@ -130,7 +130,7 @@ def test_alias_resolve_404():
 
 def test_new_version_sofa_replace():
     """图 6 沙发替换 — parent_version_id 必须匹配"""
-    client.post("/v4/assets/bind", json={
+    client.post("/v4/assets/bind?tenant_id=t1", json={
         "tenant_id": "t1",
         "conversation_id": "c2",
         "alias": "图6",
@@ -139,7 +139,7 @@ def test_new_version_sofa_replace():
         "version_id": "v1",
         "message_id": "msg_1"
     })
-    r = client.post("/v4/assets/asset_sofa/versions", json={
+    r = client.post("/v4/assets/asset_sofa/versions?tenant_id=t1", json={
         "tenant_id": "t1",
         "conversation_id": "c2",
         "alias": "图6",
@@ -155,7 +155,7 @@ def test_new_version_sofa_replace():
 
 
 def test_new_version_wrong_parent():
-    client.post("/v4/assets/bind", json={
+    client.post("/v4/assets/bind?tenant_id=t1", json={
         "tenant_id": "t1",
         "conversation_id": "c3",
         "alias": "图6",
@@ -164,7 +164,7 @@ def test_new_version_wrong_parent():
         "version_id": "v1",
         "message_id": "msg_1"
     })
-    r = client.post("/v4/assets/asset_sofa/versions", json={
+    r = client.post("/v4/assets/asset_sofa/versions?tenant_id=t1", json={
         "tenant_id": "t1",
         "conversation_id": "c3",
         "alias": "图6",

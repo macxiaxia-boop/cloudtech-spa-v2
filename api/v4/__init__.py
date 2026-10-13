@@ -12,7 +12,7 @@
   POST /assets/resolve-alias            — alias → asset_version
   POST /assets/{asset_id}/versions      — 创建新版本 (沙发替换等)
 """
-from fastapi import APIRouter, HTTPException, Body, Query
+from fastapi import APIRouter, HTTPException, Body, Query, Depends
 from pydantic import BaseModel, Field
 from typing import Any, Dict, List, Optional
 
@@ -23,6 +23,8 @@ from workflows.v4 import (
 )
 from workflows.v4.contract import validate_definition, validate_inputs, ContractError
 from workflows.v4.paths import FLAGSHIP_PATHS, get_path, list_paths
+from workflows.v4.audit_evidence import on_auth
+from .auth import auth_required, AuthContext
 
 
 router = APIRouter(prefix="/v4", tags=["v4-workpaths"])
@@ -104,41 +106,49 @@ class NewVersionRequest(BaseModel):
 def workpaths_resolve(req: ResolveRequest):
     """根据用户 utterance + input_refs 解析候选 workpath
     简化策略: 按 utterance 关键词匹配 flagship path + 校验 input 角色覆盖度
+    改进: 多个关键词匹配时, 计分选最具体的 (更长关键词 + 更专属映射优先)
     """
     utterance_l = req.utterance.lower()
-    candidates: List[Dict[str, Any]] = []
-    matched_id: Optional[str] = None
 
-    # 关键词到路径映射
-    KW = {
-        "博主": "WP-BLOGGER-RESEARCH",
-        "主页": "WP-BLOGGER-RESEARCH",
-        "homepage": "WP-BLOGGER-RESEARCH",
-        "视频": "WP-VIDEO-TRANSCRIBE",
-        "video": "WP-VIDEO-TRANSCRIBE",
-        "仿写": "WP-VIDEO-TRANSCRIBE",
-        "图文": "WP-ARTICLE-REWRITE",
-        "article": "WP-ARTICLE-REWRITE",
-        "装修": "WP-RENOVATION-FULL",
-        "全屋": "WP-RENOVATION-FULL",
-        "沙发": "WP-RENOVATION-FULL",
-        "毛坯": "WP-GROWTH-VIDEO",
-        "生长": "WP-GROWTH-VIDEO",
-        "商品": "WP-PRODUCT-MARKETING",
-        "产品": "WP-PRODUCT-MARKETING",
-        "营销": "WP-PRODUCT-MARKETING",
-    }
+    # 关键词到路径映射 + 优先级 (数字越大越专属)
+    KW = [
+        ("博主", "WP-BLOGGER-RESEARCH", 3),
+        ("主页", "WP-BLOGGER-RESEARCH", 3),
+        ("homepage", "WP-BLOGGER-RESEARCH", 3),
+        ("仿写", "WP-VIDEO-TRANSCRIBE", 4),
+        ("video", "WP-VIDEO-TRANSCRIBE", 2),
+        ("图文", "WP-ARTICLE-REWRITE", 4),
+        ("article", "WP-ARTICLE-REWRITE", 2),
+        ("装修", "WP-RENOVATION-FULL", 4),
+        ("全屋", "WP-RENOVATION-FULL", 5),
+        ("沙发", "WP-RENOVATION-FULL", 5),
+        ("毛坯", "WP-GROWTH-VIDEO", 6),
+        ("生长", "WP-GROWTH-VIDEO", 6),
+        ("商品", "WP-PRODUCT-MARKETING", 3),
+        ("产品", "WP-PRODUCT-MARKETING", 3),
+        ("营销", "WP-PRODUCT-MARKETING", 4),
+        ("视频", "WP-VIDEO-TRANSCRIBE", 1),  # 最后 (最不专属)
+    ]
 
-    for kw, path_id in KW.items():
+    scores: Dict[str, int] = {}
+    matched_kw: Dict[str, str] = {}
+    for kw, path_id, priority in KW:
         if kw in utterance_l:
-            matched_id = path_id
-            candidates.append({"path_id": path_id, "match_keyword": kw, "rank": 1})
-            break
+            scores[path_id] = scores.get(path_id, 0) + priority
+            matched_kw[path_id] = kw
 
-    # 始终返回全部路径作为备选
+    matched_id: Optional[str] = None
+    if scores:
+        matched_id = max(scores.keys(), key=lambda p: scores[p])
+
+    # 候选: matched_id 排第一, 其余按 scores 排序
+    candidates = []
+    if matched_id:
+        candidates.append({"path_id": matched_id, "match_keyword": matched_kw.get(matched_id), "rank": 1, "score": scores[matched_id]})
     for path_id, defn in FLAGSHIP_PATHS.items():
         if path_id != matched_id:
-            candidates.append({"path_id": path_id, "match_keyword": None, "rank": 2})
+            s = scores.get(path_id, 0)
+            candidates.append({"path_id": path_id, "match_keyword": matched_kw.get(path_id), "rank": 2 + s, "score": s})
 
     missing: List[str] = []
     if matched_id:
@@ -150,7 +160,7 @@ def workpaths_resolve(req: ResolveRequest):
         matched_path_id=matched_id,
         candidates=candidates[:6],
         missing_roles=missing,
-        reasoning=f"关键词匹配 {matched_id or '无'}; 候选 {len(candidates)} 条",
+        reasoning=f"关键词计分匹配 {matched_id or '无'} (scores={scores}); 候选 {len(candidates)} 条",
     )
 
 
@@ -165,8 +175,10 @@ def list_operations(kind: Optional[str] = Query(None)):
 
 
 @router.post("/workpaths/runs")
-def create_run(req: CreateRunRequest, tenant_id: str = Query(...)):
+def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required)):
     """创建 workpath run; 检查路径 + 幂等"""
+    tenant_id = ctx.tenant_id
+    on_auth("n/a", ctx.tenant_id, ctx.user_id, "create_run")
     try:
         defn = get_path(req.path_id)
     except KeyError:
@@ -261,11 +273,11 @@ def export_run(run_id: str):
 
 
 @router.post("/assets/resolve-alias")
-def resolve_alias(req: ResolveAliasRequest, tenant_id: str = Query(...)):
+def resolve_alias(req: ResolveAliasRequest, ctx: AuthContext = Depends(auth_required)):
     """图 1/图 6 = alias → asset_id+version_id"""
     try:
         binding = _resolver.resolve(
-            tenant_id=tenant_id,
+            tenant_id=ctx.tenant_id,
             conversation_id=req.conversation_id,
             alias=req.alias,
             at_message_id=req.at_message_id,
@@ -298,8 +310,11 @@ def bind_alias(req: BindAliasRequest):
 
 
 @router.post("/assets/{asset_id}/versions")
-def new_asset_version(asset_id: str, req: NewVersionRequest):
+def new_asset_version(asset_id: str, req: NewVersionRequest, ctx: AuthContext = Depends(auth_required)):
     """同一 alias 创建新版本 (沙发替换等) — parent_version_id 必须匹配"""
+    # 校验 ctx.tenant_id == req.tenant_id (防越权)
+    if req.tenant_id != ctx.tenant_id:
+        raise HTTPException(403, f"[AUTH-006] tenant 越权: ctx={ctx.tenant_id} req={req.tenant_id}")
     try:
         b = _resolver.new_version(
             tenant_id=req.tenant_id,

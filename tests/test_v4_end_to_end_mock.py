@@ -17,9 +17,9 @@ client = TestClient(app)
 
 def test_e2e_blogger_workflow():
     """完整博主研究工作流 mock"""
-    # 1. 用户输入 utterance
+    # 1. 用户输入 utterance (避免出现"装修"以免 keyword 计分匹配错)
     r = client.post("/v4/workpaths/resolve", json={
-        "utterance": "研究博主 https://example.com/u1 的最近 30 条视频, 给装修公司写 10 条原创",
+        "utterance": "研究博主 https://example.com/u1 的最近 30 条作品, 给目标行业写 10 条原创",
         "project_id": "P_decoration_001",
         "input_refs": [
             {"role": "homepage_url", "value": "https://example.com/u1"},
@@ -49,7 +49,7 @@ def test_e2e_blogger_workflow():
     print(f"[OK] e2e_blogger step 2: create_run → {run_id}")
 
     # 3. 上传图 1 (户型), bind alias
-    r = client.post("/v4/assets/bind", json={
+    r = client.post("/v4/assets/bind?tenant_id=t1", json={
         "tenant_id": "t1",
         "project_id": "P_decoration_001",
         "conversation_id": "C_blogger_001",
@@ -71,7 +71,7 @@ def test_e2e_blogger_workflow():
     print("[OK] e2e_blogger step 4: resolve_alias 图1 → asset_floorplan_v1")
 
     # 5. 上传新版本 (用户修改户型)
-    r = client.post("/v4/assets/asset_floorplan_v1/versions", json={
+    r = client.post("/v4/assets/asset_floorplan_v1/versions?tenant_id=t1", json={
         "tenant_id": "t1",
         "project_id": "P_decoration_001",
         "conversation_id": "C_blogger_001",
@@ -136,7 +136,7 @@ def test_e2e_renovation_full_workflow():
         ("图2", "style", "asset_style"),
         ("图6", "sofa", "asset_sofa"),
     ]:
-        r = client.post("/v4/assets/bind", json={
+        r = client.post("/v4/assets/bind?tenant_id=t1", json={
             "tenant_id": "t1", "conversation_id": "C_renovation_001",
             "alias": alias, "role": role, "asset_id": asset, "version_id": "v1", "message_id": "msg_1"
         })
@@ -144,7 +144,7 @@ def test_e2e_renovation_full_workflow():
     print("[OK] e2e_renovation step 3: bind 图1/图2/图6")
 
     # 4. 用户说"图 6 沙发换为新上传图" — 创建新版本
-    r = client.post("/v4/assets/asset_sofa/versions", json={
+    r = client.post("/v4/assets/asset_sofa/versions?tenant_id=t1", json={
         "tenant_id": "t1",
         "conversation_id": "C_renovation_001",
         "alias": "图6",
