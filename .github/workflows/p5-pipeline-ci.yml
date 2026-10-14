@@ -1,3 +1,5 @@
+# Scoped integration of PR1 pipeline code into PR2; remaining PR1-specific tests
+# stay required on the original PR1 until reconciled, never claim full PR1 parity.
 name: P5 CloudTech pipeline truth tests
 
 on:
@@ -22,8 +24,6 @@ on:
       - "workflows/v4/local_prefix.py"
       - "api/v4/auth.py"
       - ".github/workflows/p5-pipeline-ci.yml"
-  push:
-    branches: ["fix/cloudtech-pipeline-truth-p5-20261014"]
   workflow_dispatch:
 
 jobs:
@@ -39,8 +39,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install pytest streamlit fastapi httpx
-      - name: Test pipeline false-success guards (no live publishing)
+      - name: Test migrated P5 pipeline false-success guards (no live publishing)
         env:
           CLOUDTECH_DATA_DIR: ${{ runner.temp }}/cloudtech-p5-data
           CLOUDTECH_OUTPUT_DIR: ${{ runner.temp }}/cloudtech-p5-output
-        run: python -m pytest tests/test_p5_pipeline_truth.py tests/test_p5_auth_fail_closed.py tests/test_p8_v4_path_cell_contracts.py tests/test_p9_v4_executable_preflight_and_tenant.py tests/test_p9_local_prefix.py tests/test_p9_v4_asgi_host.py tests/test_p11_v4_durable_snapshots.py -q --tb=short
+        run: python -m pytest tests/test_p5_pipeline_truth.py -q --tb=short
