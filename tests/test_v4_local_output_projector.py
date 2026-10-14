@@ -11,6 +11,7 @@ import time
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+import pytest
 
 from workflows.v4 import IdempotencyStore, RunStatus, V4Orchestrator
 from workflows.v4.local_job_queue import LocalJobQueue
@@ -210,3 +211,50 @@ def test_analysis_output_requires_original_unmodified_extraction(tmp_path):
         "BLOCKED_INVALID_EVIDENCE"
     )
     assert LocalOutputProjector(other_store).list_for_tenant("tenant-one") == []
+
+
+
+@pytest.mark.parametrize("invalid_json", ['{broken-json', '[]', '"string"'])
+def test_malformed_outbox_payload_isolated_without_stopping_next_job(tmp_path, invalid_json):
+    """A poisoned durable outbox event must not halt the real independent poller."""
+    store, bad_id = setup_completed(tmp_path)
+    orch = V4Orchestrator(IdempotencyStore(), run_store=store)
+    next_run = orch.create_run(
+        "WP-LOCAL-ARTICLE-EXTRACT", 1, "tenant-one",
+        {"html": "<html><h1>second real work</h1><p>独立运行的后续内容</p></html>"},
+        idempotency_key="second-healthy-event",
+    )
+    orch.transition(next_run.run_id, RunStatus.INPUT_BOUND)
+    orch.transition(next_run.run_id, RunStatus.READY)
+    LocalJobQueue(store).enqueue(next_run.run_id, "tenant-one")
+    assert process_one(store)["outcome"] == "DONE"
+
+    with store._connect() as db:
+        db.execute(
+            "UPDATE v4_local_outbox SET payload_json=? WHERE run_id=?",
+            (invalid_json, bad_id),
+        )
+    consumer = LocalOutputProjector(SQLiteRunStore(store.path))
+    invalid = consumer.consume_one()
+    assert invalid["outcome"] == "BLOCKED_INVALID_EVIDENCE", invalid
+    # Poison stays inspectable, not ACKed and not advertised as an output.
+    with store._connect() as db:
+        poisoned = db.execute(
+            "SELECT state, attempts, available_at FROM v4_local_outbox WHERE run_id=?",
+            (bad_id,),
+        ).fetchone()
+        assert poisoned["state"] == "PENDING"
+        assert poisoned["attempts"] == 1
+        assert poisoned["available_at"] > time.time()
+    healthy = consumer.consume_one()
+    assert healthy["outcome"] == "CATALOGUED", healthy
+    assert healthy["run_id"] == next_run.run_id
+    assert consumer.consume_one()["outcome"] == "IDLE"
+    catalog = consumer.list_for_tenant("tenant-one")
+    assert len(catalog) == 1
+    assert catalog[0]["run_id"] == next_run.run_id
+    with store._connect() as db:
+        good = db.execute(
+            "SELECT state FROM v4_local_outbox WHERE run_id=?", (next_run.run_id,)
+        ).fetchone()
+        assert good["state"] == "ACKED"
