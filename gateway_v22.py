@@ -542,6 +542,11 @@ if DIST_DIR.exists():
     # /assets/* 静态资源直出 (specific mount, 不被 catch-all 影响)
     if DIST_ASSETS.exists():
         app.mount("/assets", StaticFiles(directory=str(DIST_ASSETS)), name="vite-assets")
+    # Generated maskable/public icons from npm prebuild are immutable public
+    # assets, not private tenant media. They must be served as actual PNGs.
+    pwa_icons = DIST_DIR / "icons"
+    if pwa_icons.is_dir():
+        app.mount("/icons", StaticFiles(directory=str(pwa_icons)), name="pwa-public-icons")
     # R345 治本: 数字员工对话框 静态文件 mount (/chat/) — 与 /assets 同级, 在 if DIST_ASSETS 之外
     app.mount("/chat", StaticFiles(directory=r"D:/CloudTech-Portable/landing-page", html=True), name="chat-quick")
     log.info(f"  + Vite dist: {DIST_DIR}  (index.html={ (DIST_DIR/'index.html').exists() }, assets={DIST_ASSETS.exists()})")
@@ -765,7 +770,8 @@ else:
 # 排除前缀: /api /assets /docs /openapi.json /redoc /health /vite.svg /manifest.json 等
 SPA_EXEMPT = (
     "/api/", "/assets/", "/docs", "/openapi.json", "/redoc", "/health",
-    "/vite.svg", "/manifest.json", "/sw.js", "/icon-", "/favicon.ico",
+    "/vite.svg", "/manifest.json", "/manifest.webmanifest", "/offline.html",
+    "/icons/", "/sw.js", "/icon-", "/favicon.ico",
     "/decoration-landing.html",
 )
 if DIST_DIR.exists():
@@ -786,6 +792,16 @@ if DIST_DIR.exists():
     def _manifest():
         f = DIST_DIR / "manifest.json"
         return FileResponse(f, media_type="application/manifest+json") if f.exists() else JSONResponse(status_code=404)
+
+    @app.get("/manifest.webmanifest", include_in_schema=False)
+    def _pwa_manifest():
+        path = DIST_DIR / "manifest.webmanifest"
+        return FileResponse(path, media_type="application/manifest+json") if path.is_file() else JSONResponse(status_code=404)
+
+    @app.get("/offline.html", include_in_schema=False)
+    def _pwa_offline():
+        path = DIST_DIR / "offline.html"
+        return FileResponse(path, media_type="text/html") if path.is_file() else JSONResponse(status_code=404)
 
     @app.get("/sw.js", include_in_schema=False)
     def _sw():
