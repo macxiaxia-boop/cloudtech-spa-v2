@@ -75,7 +75,7 @@ class TestPathE2E_Blogger:
         assert r2.json().get("idempotent_hit") is True
 
         # 4. export (未完成, ready=False)
-        r3 = client.get(f"/v4/workpaths/runs/{run_id}/export")
+        r3 = client.get(f"/v4/workpaths/runs/{run_id}/export?tenant_id=t1")
         assert r3.json()["ready"] is False
 
 
