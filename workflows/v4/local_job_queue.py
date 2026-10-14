@@ -46,8 +46,10 @@ class LocalJobQueue:
             if row is None:
                 raise RunStoreError("run not found for authorized tenant")
             rec = _restore(row["snapshot"])
-            if rec.path_id != "WP-LOCAL-ARTICLE-EXTRACT":
-                raise RunStoreConflict("only local HTML extraction may enter this queue")
+            if rec.path_id not in {
+                "WP-LOCAL-ARTICLE-EXTRACT", "WP-LOCAL-SUBTITLE-EXPORT",
+            }:
+                raise RunStoreConflict("only allowlisted deterministic local workpaths may be queued")
             existing = db.execute(
                 "SELECT state,attempts FROM v4_local_jobs WHERE run_id=?",
                 (run_id,),
