@@ -1,5 +1,6 @@
 """ASR Engine — 4 个 provider stub (mock-only, 禁止调用真实 ASR API)"""
 import hashlib
+import os
 from typing import Literal
 
 Segment = dict  # {start_ms, end_ms, text, speaker, confidence}
@@ -33,6 +34,15 @@ def transcribe(
     - provider_hint='auto' 默认为 doubao
     - 所有 provider 均返回 _mock_segments()，mock=True
     """
+    # This implementation generates fixed synthetic subtitles, not real ASR.
+    # Prevent an API caller from believing it transcribed the supplied media.
+    if not (
+        os.environ.get("CLOUDTECH_ENV", "").lower() in {"test", "development"}
+        and os.environ.get("CLOUDTECH_ALLOW_MOCK_ASR") == "1"
+    ):
+        raise RuntimeError(
+            "[ASR-MOCK-403] Real ASR provider not connected; mock transcription disabled"
+        )
     providers = ["doubao", "whisper_local", "kuaishou_asr", "jimeng_asr"]
     if provider_hint == "auto":
         provider = "doubao"
