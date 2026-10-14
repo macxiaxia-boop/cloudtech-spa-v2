@@ -24,6 +24,7 @@ from workflows.v4 import (
 from workflows.v4.contract import validate_definition, validate_inputs, ContractError
 from workflows.v4.paths import FLAGSHIP_PATHS, get_path, list_paths
 from workflows.v4.capability_preflight import inspect_all_paths, inspect_path
+from workflows.v4.local_prefix import execute_local_prefix
 from workflows.v4.orchestrator import RunStatusError
 from workflows.v4.audit_evidence import on_auth
 from .auth import auth_required, AuthContext
@@ -259,6 +260,18 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
 def get_run(run_id: str, ctx: AuthContext = Depends(auth_required)):
     rec = _owned_run(run_id, ctx)
     return rec.to_dict()
+
+
+@router.post("/workpaths/runs/{run_id}/execute-local")
+def execute_local_run(run_id: str, ctx: AuthContext = Depends(auth_required)):
+    """Run only audited local operations. Never call a provider or pretend full completion."""
+    _owned_run(run_id, ctx)
+    try:
+        return execute_local_prefix(
+            _orchestrator, run_id=run_id, tenant_id=ctx.tenant_id,
+        )
+    except (RunStatusError, KeyError) as exc:
+        raise HTTPException(409, str(exc)) from exc
 
 
 @router.post("/workpaths/runs/{run_id}/approve")
