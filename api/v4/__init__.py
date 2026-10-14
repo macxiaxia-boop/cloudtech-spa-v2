@@ -40,6 +40,14 @@ _budget = BudgetGate.instance()
 _resolver = AssetResolver.instance()
 
 
+def _active_local_workers() -> int:
+    store = getattr(_orchestrator, "_store", None)
+    if store is None or getattr(store, "kind", "") != "SQLITE_LOCAL_DURABLE":
+        return 0
+    from workflows.v4.local_job_queue import LocalJobQueue
+    return LocalJobQueue(store).active_workers()
+
+
 # === 请求/响应模型 ===
 
 class SuppliedArticleRequest(BaseModel):
@@ -260,7 +268,7 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
             "run_id": rec.run_id,
             "status": rec.status.value,
             "idempotent_hit": True,
-            "worker_connected": False,
+            "worker_connected": _active_local_workers() > 0,
             "execution_started": False,
             "storage": _orchestrator.storage_kind,
         }
@@ -288,7 +296,7 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
     return {
         "run_id": rec.run_id,
         "status": saved.status.value if saved else "UNKNOWN",
-        "worker_connected": False,
+        "worker_connected": _active_local_workers() > 0,
         "execution_started": False,
         "storage": _orchestrator.storage_kind,
     }
@@ -305,8 +313,9 @@ def list_run_records(
         "items": [rec.to_dict() for rec in runs],
         "returned": len(runs),
         "storage": _orchestrator.storage_kind,
-        "worker_connected": False,
+        "worker_connected": _active_local_workers() > 0,
         "production_ready": False,
+        "active_local_workers": _active_local_workers(),
     }
 
 
@@ -368,7 +377,7 @@ def local_queue_status(run_id: str, ctx: AuthContext = Depends(auth_required)):
     state = LocalJobQueue(store).get_state(run_id, ctx.tenant_id)
     if state is None:
         raise HTTPException(404, "该任务没有入队记录")
-    return {"run_id": run_id, **state, "worker_connected": False}
+    return {"run_id": run_id, **state, "worker_connected": _active_local_workers() > 0}
 
 
 @router.post("/workpaths/runs/{run_id}/execute-local")
@@ -598,7 +607,7 @@ def health():
         "paths_registered": len(FLAGSHIP_PATHS),
         "operations_count": 0,
         "orchestrator_runs": len(_orchestrator.list_runs()),
-        "worker_connected": False,
+        "worker_connected": _active_local_workers() > 0,
         "run_storage": _orchestrator.storage_kind,
         "production_ready": False,
     }
