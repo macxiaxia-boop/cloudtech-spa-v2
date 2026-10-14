@@ -3,6 +3,7 @@
 严禁假装版权清晰；所有 rights_status 必须是 unknown_need_user_confirm。
 """
 from __future__ import annotations
+import os
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
@@ -93,7 +94,17 @@ def parse_homepage(url: str, limit: int = 30) -> dict:
     - 所有 rights_status 强制为 'unknown_need_user_confirm'
     - 永不返回 'rights_cleared' / 'likely_fair_use' 等模糊状态
     """
+    if not (
+        os.environ.get("CLOUDTECH_ENV", "").lower() in {"test", "development"}
+        and os.environ.get("CLOUDTECH_ALLOW_MOCK_PLATFORM") == "1"
+    ):
+        raise RuntimeError(
+            "[PLATFORM-MOCK-403] Public homepage connector not linked; "
+            "refusing to fabricate author works"
+        )
     perm = check(url)
+    if not perm["allowed"]:
+        raise PermissionError(f"[PLATFORM-403] {perm['reason']}")
     platform = perm["source_platform"]
     author = MOCK_AUTHORS.get(platform, f"{platform}_unknown")
 
