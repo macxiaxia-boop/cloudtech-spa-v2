@@ -28,17 +28,37 @@ jobs:
           pip install pytest fastapi pydantic pillow httpx
       - name: Run V4 unit + integration tests
         run: |
-          python -m pytest tests/test_v4_*.py tests/test_adapters_*.py -v --tb=short
+          python -m pytest tests/test_v4_*.py tests/test_adapters_*.py -v --tb=short --junitxml=v4-junit.xml
       - name: Run migration audit (dry-run)
         run: python scripts/run_v4_migration.py
-      - name: V4 Evidence Summary
+      - name: Upload actual V4 JUnit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v4-junit
+          path: v4-junit.xml
+          if-no-files-found: warn
+
+      - name: V4 Evidence Summary (actual, not hardcoded)
         if: always()
         run: |
-          echo "## V4 7-维基线" >> $GITHUB_STEP_SUMMARY
-          echo "Identified: 60+" >> $GITHUB_STEP_SUMMARY
-          echo "Mapped: 6 workpath typed contracts" >> $GITHUB_STEP_SUMMARY
-          echo "Implemented: 6 (mock-only)" >> $GITHUB_STEP_SUMMARY
-          echo "Tested: 174 tests" >> $GITHUB_STEP_SUMMARY
-          echo "Integrated: 0 (TikHub/Yihook/Kling 未串)" >> $GITHUB_STEP_SUMMARY
-          echo "Validated: 0" >> $GITHUB_STEP_SUMMARY
-          echo "Production Ready: 0 (红线 #60)" >> $GITHUB_STEP_SUMMARY
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          p = Path("v4-junit.xml")
+          with open(__import__("os").environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("## CloudTech V4 CI evidence\n\n")
+              f.write("- Scope: existing V4 unit/mock/integration tests (not production validation)\n")
+              if not p.exists():
+                  f.write("- No JUnit file produced; TEST_STATUS=UNKNOWN\n")
+              else:
+                  root = ET.parse(p).getroot()
+                  suites = [root] if root.tag == "testsuite" else list(root.findall("testsuite"))
+                  total = sum(int(s.get("tests", 0)) for s in suites)
+                  failures = sum(int(s.get("failures", 0)) for s in suites)
+                  errors = sum(int(s.get("errors", 0)) for s in suites)
+                  skipped = sum(int(s.get("skipped", 0)) for s in suites)
+                  passed = total - failures - errors - skipped
+                  f.write(f"- PASS={passed} FAIL={failures} ERR={errors} SKIP={skipped} TOTAL={total}\n")
+                  f.write("- Integrated/Validated/Production Ready: NOT ASSERTED by this workflow\n")
+          PY
