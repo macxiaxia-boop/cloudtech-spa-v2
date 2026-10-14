@@ -104,7 +104,7 @@ def test_e2e_growth_video():
         "utterance": "给我生成毛坯到完工的生长视频 15 秒",
         "input_refs": [
             {"role": "first_frame", "value": "asset_first"},
-            {"role": "last", "value": "asset_last"},
+            {"role": "last_frame", "value": "asset_last"},
             {"role": "duration_sec", "value": 15},
         ]
     })
@@ -115,7 +115,7 @@ def test_e2e_growth_video():
         "path_id": "WP-GROWTH-VIDEO", "revision": 1,
         "input_bindings": {
             "first_frame": "asset_first",
-            "frame": "asset_last",
+            "last_frame": "asset_last",
             "duration_sec": 15,
         },
         "idempotency_key": "growth_video_e2e_002",
@@ -180,7 +180,7 @@ def test_e2e_all_six_paths_resolvable():
         ("WP-VIDEO-TRANSCRIBE", "提取视频逐字稿", {"video_source": "x"}),
         ("WP-ARTICLE-REWRITE", "改写图文笔记", {"article_url": "x"}),
         ("WP-RENOVATION-FULL", "装修全屋效果图", {"floorplan_image": "x", "style_reference": "y"}),
-        ("WP-GROWTH-VIDEO", "毛坯生长视频", {"first_frame": "x", "frame": "y"}),
+        ("WP-GROWTH-VIDEO", "毛坯生长视频", {"first_frame": "x", "last_frame": "y"}),
         ("WP-PRODUCT-MARKETING", "商品营销全套", {"product_image": "x"}),
     ]
     for path_id, utterance, inputs in paths_utterances_inputs:
