@@ -51,18 +51,18 @@ export function MarketingPage() {
               <Sparkles className="w-3 h-3" /> Phase 47 · 1 人 + 5 AI 员工的整家公司
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-[1.1]">
-              让 AI 成为 <span className="text-brand-500 italic">5 位数字员工</span>，
+              让 AI 成为 <span className="text-brand-700 italic">5 位数字员工</span>，
               <br />
               像一支完整团队跑。
             </h1>
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-slate-700 dark:text-slate-300 mb-8">
               装企全案获客闭环 + 医美合规获客闭环，2 大行业管线，5 AI 员工矩阵，
               把营销从"想法"变成"可追溯的产物"。
             </p>
             <div className="flex flex-wrap gap-4 mb-8">
               <Link
                 to="/try"
-                className="px-6 py-3 bg-brand-500 text-white rounded-md hover:bg-brand-600 inline-flex items-center gap-2 font-medium"
+                className="px-6 py-3 bg-brand-700 text-white rounded-md hover:bg-brand-600 inline-flex items-center gap-2 font-medium"
               >
                 了解试用方式 <ArrowRight className="w-4 h-4" />
               </Link>
@@ -74,12 +74,12 @@ export function MarketingPage() {
               </Link>
               <Link
                 to="/cases"
-                className="px-6 py-3 text-brand-500 hover:bg-brand-50 rounded-md inline-flex items-center gap-2"
+                className="px-6 py-3 text-brand-700 hover:bg-brand-50 rounded-md inline-flex items-center gap-2"
               >
                 查看产品示例 →
               </Link>
             </div>
-            <p className="text-sm text-muted-foreground border-t border-gray-200 pt-4">
+            <p className="text-sm text-slate-700 dark:text-slate-300 border-t border-gray-200 pt-4">
               功能演示不是已交付的客户成果。真实能力以实际工作流输出及验收记录为准。
             </p>
           </div>
@@ -114,7 +114,7 @@ export function MarketingPage() {
       <section className="py-10 bg-card border-y border-gray-200">
         <div className="max-w-page mx-auto px-6 text-center">
           <p className="text-sm font-semibold text-foreground">真实功能，逐项验证</p>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
             当前已完成部分本地能力：用户授权的 HTML 提取，以及用户已提供时间戳的字幕导出。
             其他供应商与业务链需以实际接通和验收为准。
           </p>
@@ -129,15 +129,15 @@ export function MarketingPage() {
               <Bot className="w-3 h-3" /> 数字员工与工作流 · 规划中的产品能力
             </span>
             <h2 className="text-3xl font-bold mb-3">数字员工协作体系</h2>
-            <p className="text-muted-foreground">Hermes（治理）+ Lyra（内容）+ Athena（架构）+ Apollo（数据）+ Artemis（运营）。各项功能以实际验收为准</p>
+            <p className="text-slate-700 dark:text-slate-300">Hermes（治理）+ Lyra（内容）+ Athena（架构）+ Apollo（数据）+ Artemis（运营）。各项功能以实际验收为准</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {FE_EMPLOYEES.map((emp) => (
               <div key={emp.id} className="p-6 bg-card border border-gray-200 rounded-lg hover:border-brand-500 hover:shadow-md transition">
                 <div className="text-4xl mb-3">{emp.icon}</div>
                 <h3 className="text-lg font-bold mb-2">{emp.name}</h3>
-                <p className="text-muted-foreground text-sm">{emp.desc}</p>
-                <p className="text-xs text-brand-500 mt-3">← 前台（用户直接对话）</p>
+                <p className="text-slate-700 dark:text-slate-300 text-sm">{emp.desc}</p>
+                <p className="text-xs text-brand-700 mt-3">← 前台（用户直接对话）</p>
               </div>
             ))}
           </div>
@@ -152,12 +152,12 @@ export function MarketingPage() {
               <div key={e.name} className={`p-4 ${e.color} rounded-lg text-center`}>
                 <p className="text-2xl mb-1">{e.icon}</p>
                 <p className="font-bold text-sm">{e.name}</p>
-                <p className="text-xs opacity-75">{e.desc}</p>
+                <p className="text-xs">{e.desc}</p>
               </div>
             ))}
           </div>
           <div className="text-center mt-6">
-            <Link to="/employees" className="text-brand-500 hover:underline text-sm">
+            <Link to="/employees" className="text-brand-700 hover:underline text-sm">
               看完整 5 AI 员工工时表 →
             </Link>
           </div>
@@ -172,7 +172,7 @@ export function MarketingPage() {
               <Briefcase className="w-3 h-3" /> 行业聚焦（2 active · 3 deprecated）
             </span>
             <h2 className="text-3xl font-bold mb-3">2 大行业管线，闭环交付</h2>
-            <p className="text-muted-foreground">每条线索进入 CRM 后，每步都有产物可查</p>
+            <p className="text-slate-700 dark:text-slate-300">每条线索进入 CRM 后，每步都有产物可查</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {INDUSTRIES.map((ind) => {
@@ -184,7 +184,7 @@ export function MarketingPage() {
                   className="p-6 bg-card border border-gray-200 rounded-lg hover:shadow-md transition block"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <Icon className="w-6 h-6 text-brand-500" />
+                    <Icon className="w-6 h-6 text-brand-700" />
                     <h3 className="text-lg font-bold">{ind.name}</h3>
                     <span className={`text-xs px-2 py-1 rounded ${
                       ind.priority === 'primary' ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-600'
@@ -192,13 +192,13 @@ export function MarketingPage() {
                       {ind.priority === 'primary' ? '重点' : '兜底'}
                     </span>
                   </div>
-                  <p className="text-muted-foreground text-sm mb-3">{ind.desc}</p>
-                  <p className="text-brand-500 text-sm">看案例 →</p>
+                  <p className="text-slate-700 dark:text-slate-300 text-sm mb-3">{ind.desc}</p>
+                  <p className="text-brand-700 text-sm">看案例 →</p>
                 </Link>
               );
             })}
           </div>
-          <p className="text-center text-xs text-gray-400 mt-6">
+          <p className="text-center text-xs text-gray-600 mt-6">
             注：教培/餐饮/零售行业已 P3-BA 撤回（2026-09-11），永久 deprecated
           </p>
         </div>
@@ -229,7 +229,7 @@ export function MarketingPage() {
               </ul>
               <Link
                 to="/monitoring"
-                className="mt-6 inline-flex items-center gap-2 text-brand-500 hover:underline font-medium"
+                className="mt-6 inline-flex items-center gap-2 text-brand-700 hover:underline font-medium"
               >
                 看监控 demo <ArrowRight className="w-4 h-4" />
               </Link>
@@ -253,7 +253,7 @@ export function MarketingPage() {
       <section className="py-14 bg-muted">
         <div className="max-w-page mx-auto px-6 text-center">
           <h2 className="text-2xl font-bold mb-3">结果必须能够核验</h2>
-          <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
             每项真实交付应保留任务状态、来源哈希、节点输出和审计回执。
             获得许可、核实数据后才发布客户评价与案例。
           </p>
@@ -280,13 +280,13 @@ export function MarketingPage() {
                 👤 心之所向便是光的今天 · Day 30
               </span>
               <h2 className="text-3xl font-bold mb-4">Cloud 自己就是 OPC 跑出来的</h2>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-slate-700 dark:text-slate-300 mb-6">
                 探索一人公司如何利用 AI 解决真实企业问题：从需求分析、工作流、
                 任务执行直到实际结果的验证。未上线的能力不会被表述为已交付。
               </p>
               <Link
                 to="/opc-story"
-                className="px-6 py-3 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 inline-flex items-center gap-2"
+                className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-600 inline-flex items-center gap-2"
               >
                 看心之所向便是光的 OPC 故事 <ArrowRight className="w-4 h-4" />
               </Link>
@@ -296,15 +296,15 @@ export function MarketingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-brand-500 text-white">
+      <section className="py-20 bg-brand-700 text-white">
         <div className="max-w-page mx-auto px-6 text-center">
           <Heart className="w-12 h-12 mx-auto mb-4" />
           <h2 className="text-3xl font-bold mb-4">了解 CloudTech 的真实能力</h2>
-          <p className="text-lg opacity-90 mb-8">根据已接通的功能安排试用；实施范围与服务时间以实际沟通为准。</p>
+          <p className="text-lg mb-8">根据已接通的功能安排试用；实施范围与服务时间以实际沟通为准。</p>
           <div className="flex items-center justify-center gap-4">
             <Link
               to="/try"
-              className="px-8 py-3 bg-card text-brand-500 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
+              className="px-8 py-3 bg-card text-brand-700 rounded-md hover:bg-gray-100 inline-flex items-center gap-2 font-medium"
             >
               立即试用 <ArrowRight className="w-4 h-4" />
             </Link>
