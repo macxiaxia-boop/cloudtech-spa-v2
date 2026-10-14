@@ -12,10 +12,10 @@
 import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import { MarketingPage } from './pages/Marketing';
-import { PricingPage } from './pages/Pricing';
-import { DashboardPage } from './pages/Dashboard';
-import { SettingsPage } from './pages/Settings';
-import { BillingPage } from './pages/Billing';
+
+
+
+
 /**
  * Existing Lynxce source lives on the user's Windows machine but has not
  * been synchronized to this GitHub tree. Do not replace its functionality
@@ -69,8 +69,43 @@ const LynxceViralPage = optionalLynxcePage('LynxceViralPage');
 const LynxceLeadsPage = optionalLynxcePage('LynxceLeadsPage');
 const LynxceMePage = optionalLynxcePage('LynxceMePage');
 const LynxceAdminPage = optionalLynxcePage('LynxceAdminPage');
-import { IndustryDecorationPage } from './pages/IndustryDecoration';
+
 import { ErrorBoundary } from './components/ErrorBoundary';
+
+/* Feature routes load only when visited. Never bundle the entire back office
+ * into login/marketing; preserve existing route paths and authorization gates.
+ */
+const PricingPage = lazy(() => import('./pages/Pricing').then(m => ({ default: m.PricingPage })));
+const DashboardPage = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.DashboardPage })));
+const SettingsPage = lazy(() => import('./pages/Settings').then(m => ({ default: m.SettingsPage })));
+const BillingPage = lazy(() => import('./pages/Billing').then(m => ({ default: m.BillingPage })));
+const IndustryDecorationPage = lazy(() => import('./pages/IndustryDecoration').then(m => ({ default: m.IndustryDecorationPage })));
+const IndustryMedicalPage = lazy(() => import('./pages/IndustryMedical').then(m => ({ default: m.IndustryMedicalPage })));
+const ContentSOPPage = lazy(() => import('./pages/ContentSOP').then(m => ({ default: m.ContentSOPPage })));
+const ClientListPage = lazy(() => import('./pages/ClientList').then(m => ({ default: m.ClientListPage })));
+const DocumentsPage = lazy(() => import('./pages/Documents').then(m => ({ default: m.DocumentsPage })));
+const MonitoringPage = lazy(() => import('./pages/Monitoring').then(m => ({ default: m.MonitoringPage })));
+const CaseLibraryPage = lazy(() => import('./pages/CaseLibrary').then(m => ({ default: m.CaseLibraryPage })));
+const FAQPage = lazy(() => import('./pages/FAQ').then(m => ({ default: m.FAQPage })));
+const BlogPage = lazy(() => import('./pages/Blog').then(m => ({ default: m.BlogPage })));
+const TryNowPage = lazy(() => import('./pages/TryNow').then(m => ({ default: m.TryNowPage })));
+const AIEmployeesPage = lazy(() => import('./pages/AIEmployees').then(m => ({ default: m.AIEmployeesPage })));
+const OPCStoryPage = lazy(() => import('./pages/OPCStory').then(m => ({ default: m.OPCStoryPage })));
+const FunnelPage = lazy(() => import('./pages/Funnel').then(m => ({ default: m.FunnelPage })));
+const WorkspaceSelectorPage = lazy(() => import('./pages/WorkspaceSelect').then(m => ({ default: m.WorkspaceSelectorPage })));
+const RegisterPage = lazy(() => import('./pages/Register').then(m => ({ default: m.RegisterPage })));
+const ChatPage = lazy(() => import('./pages/Chat').then(m => ({ default: m.ChatPage })));
+const TasksPage = lazy(() => import('./pages/Tasks').then(m => ({ default: m.TasksPage })));
+const AgentCreatePage = lazy(() => import('./pages/AgentCreate').then(m => ({ default: m.AgentCreatePage })));
+const KnowledgePage = lazy(() => import('./pages/Knowledge').then(m => ({ default: m.KnowledgePage })));
+const FilesPage = lazy(() => import('./pages/Files').then(m => ({ default: m.FilesPage })));
+const AnalyticsPage = lazy(() => import('./pages/Analytics').then(m => ({ default: m.AnalyticsPage })));
+const SettingsSystemPage = lazy(() => import('./pages/SettingsSystem').then(m => ({ default: m.SettingsSystemPage })));
+const SettingsTeamPage = lazy(() => import('./pages/SettingsTeam').then(m => ({ default: m.SettingsTeamPage })));
+const ProfilePage = lazy(() => import('./pages/Profile').then(m => ({ default: m.ProfilePage })));
+const NotificationsPage = lazy(() => import('./pages/Notifications').then(m => ({ default: m.NotificationsPage })));
+const AgentsPage = lazy(() => import('./pages/Agents').then(m => ({ default: m.AgentsPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 /* Lazy-load WorkflowEditor + Workflows (xyflow 67KB) */
 const WorkflowsPage = lazy(() => import('./pages/Workflows').then((m) => ({ default: m.WorkflowsPage })));
@@ -84,39 +119,39 @@ function PageLoading() {
     </div>
   );
 }
-import { IndustryMedicalPage } from './pages/IndustryMedical';
-import { ContentSOPPage } from './pages/ContentSOP';
-import { ClientListPage } from './pages/ClientList';
-import { DocumentsPage } from './pages/Documents';
-import { MonitoringPage } from './pages/Monitoring';
-import { CaseLibraryPage } from './pages/CaseLibrary';
-import { FAQPage } from './pages/FAQ';
-import { BlogPage } from './pages/Blog';
-import { TryNowPage } from './pages/TryNow';
-import { AIEmployeesPage } from './pages/AIEmployees';
-import { OPCStoryPage } from './pages/OPCStory';
-import { FunnelPage } from './pages/Funnel';
+
+
+
+
+
+
+
+
+
+
+
+
 
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { OnboardingTrigger } from './components/OnboardingTrigger';
 import { BasicLayout } from './components/AppShell/BasicLayout';
-import { WorkspaceSelectorPage } from './pages/WorkspaceSelect';
+
 import { LoginPage } from './pages/Login';
-import { RegisterPage } from './pages/Register';
-import { ChatPage } from './pages/Chat';
-import { TasksPage } from './pages/Tasks';
-import { AgentCreatePage } from './pages/AgentCreate';
-import { KnowledgePage } from './pages/Knowledge';
-import { FilesPage } from './pages/Files';
-import { AnalyticsPage } from './pages/Analytics';
-import { SettingsSystemPage } from './pages/SettingsSystem';
-import { SettingsTeamPage } from './pages/SettingsTeam';
-import { ProfilePage } from './pages/Profile';
-import { NotificationsPage } from './pages/Notifications';
-import { AgentsPage } from './pages/Agents';
+
+
+
+
+
+
+
+
+
+
+
+
 import { RequireAuth } from './components/Auth/RequireAuth';
-import { NotFoundPage } from './pages/NotFoundPage';
+
 
 /* ───── ThemeInitializer · 全局 dark mode 初始化 (R360) ─────
  * Marketing 路由没有 AppHeader/ThemeToggle，所以这里兜底初始化
@@ -160,7 +195,8 @@ export default function App() {
     <ErrorBoundary>
       {/* R367 全局 ThemeInitializer · 覆盖 Login/Register/WorkspaceSelect 等 centered route (治本 Login dark class 缺失) */}
       <ThemeInitializer />
-      <Routes>
+      <Suspense fallback={<PageLoading />}>
+        <Routes>
       {/* 营销路由（marketing Header/Footer）*/}
       <Route element={<MarketingLayout />}>
         <Route path="/" element={<MarketingPage />} />
@@ -223,7 +259,8 @@ export default function App() {
 
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
-    </Routes>
+        </Routes>
+      </Suspense>
     </ErrorBoundary>
   );
 }
