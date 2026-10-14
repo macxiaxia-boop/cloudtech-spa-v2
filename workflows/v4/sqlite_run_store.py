@@ -120,6 +120,21 @@ class SQLiteRunStore:
                 CREATE UNIQUE INDEX IF NOT EXISTS v4_provider_receipt_once
                   ON v4_node_receipts (tenant_id, provider_name, provider_req_id)
                   WHERE provider_req_id IS NOT NULL AND provider_name IS NOT NULL;
+                CREATE TABLE IF NOT EXISTS v4_local_outbox (
+                    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    run_id TEXT NOT NULL UNIQUE REFERENCES v4_runs(run_id),
+                    tenant_id TEXT NOT NULL,
+                    event_type TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    state TEXT NOT NULL DEFAULT 'PENDING'
+                      CHECK (state IN ('PENDING','LEASED','ACKED')),
+                    lease_token TEXT,
+                    lease_until REAL,
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    available_at REAL NOT NULL DEFAULT 0
+                );
+                CREATE INDEX IF NOT EXISTS v4_local_outbox_claim
+                  ON v4_local_outbox(state,available_at,event_id);
                 CREATE TABLE IF NOT EXISTS v4_local_jobs (
                     job_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id TEXT NOT NULL UNIQUE REFERENCES v4_runs(run_id),
@@ -281,6 +296,21 @@ class SQLiteRunStore:
                 ).rowcount
                 if updated != 1:
                     raise RunStoreConflict("worker lease changed before commit")
+            if record.status == RunStatus.COMPLETED:
+                event_payload = json.dumps({
+                    "run_id": run_id,
+                    "tenant_id": record.tenant_id,
+                    "event_type": "LOCAL_RUN_COMPLETED",
+                    "snapshot_sha256": hashlib.sha256(
+                        json.dumps(record.to_dict(), ensure_ascii=False,
+                                   sort_keys=True, allow_nan=False).encode("utf-8")
+                    ).hexdigest(),
+                }, ensure_ascii=False, sort_keys=True)
+                db.execute("""
+                    INSERT OR IGNORE INTO v4_local_outbox
+                      (run_id,tenant_id,event_type,payload_json)
+                    VALUES (?,?,?,?)
+                """, (run_id, record.tenant_id, "LOCAL_RUN_COMPLETED", event_payload))
             db.commit()
             return result
 
