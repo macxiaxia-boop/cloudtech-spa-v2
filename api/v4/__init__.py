@@ -39,6 +39,11 @@ _resolver = AssetResolver.instance()
 
 # === 请求/响应模型 ===
 
+class SuppliedArticleRequest(BaseModel):
+    html: str = Field(min_length=1, max_length=1_800_000)
+    source_url: str = Field(default="", max_length=2048)
+
+
 class ResolveRequest(BaseModel):
     utterance: str
     project_id: Optional[str] = None
@@ -105,6 +110,26 @@ class NewVersionRequest(BaseModel):
 
 
 # === 端点 ===
+
+@router.post("/article/extract-html")
+def extract_supplied_article(
+    req: SuppliedArticleRequest,
+    ctx: AuthContext = Depends(auth_required),
+):
+    """Extract only caller-supplied HTML, no web fetch and no invented article."""
+    from adapters.article.article_parser import parse_html
+    try:
+        result = parse_html(req.html, source_url=req.source_url)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+    return {
+        **result,
+        "tenant_id": ctx.tenant_id,
+        "saved": False,
+        "provider_called": False,
+        "permission_status": "rights_unknown_need_user_confirm",
+    }
+
 
 @router.post("/workpaths/resolve", response_model=ResolveResponse)
 def workpaths_resolve(req: ResolveRequest):
