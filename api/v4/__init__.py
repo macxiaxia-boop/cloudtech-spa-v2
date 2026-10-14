@@ -337,6 +337,40 @@ def resume_run(run_id: str, req: ResumeRequest,
     raise HTTPException(501, "节点恢复未接入实际执行器；未重新执行或扣费")
 
 
+@router.post("/workpaths/runs/{run_id}/enqueue-local")
+def enqueue_local_workpath(run_id: str, ctx: AuthContext = Depends(auth_required)):
+    """Authorize enqueue only. Actual execution is a separate local worker."""
+    get_owned_run(_orchestrator, run_id, ctx.tenant_id)
+    store = getattr(_orchestrator, "_store", None)
+    if store is None or getattr(store, "kind", "") != "SQLITE_LOCAL_DURABLE":
+        raise HTTPException(503, "本地任务队列必须先配置单机 SQLite 事务存储")
+    from workflows.v4.local_job_queue import LocalJobQueue
+    from workflows.v4.sqlite_run_store import RunStoreError
+    try:
+        queued = LocalJobQueue(store).enqueue(run_id, ctx.tenant_id)
+    except RunStoreError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return {
+        **queued, "queued_only": True, "worker_invoked": False,
+        "storage": "SQLITE_LOCAL_DURABLE",
+        "provider_called": False,
+    }
+
+
+@router.get("/workpaths/runs/{run_id}/local-queue")
+def local_queue_status(run_id: str, ctx: AuthContext = Depends(auth_required)):
+    """Tenant-safe view of a real queue row; never assume a live worker."""
+    get_owned_run(_orchestrator, run_id, ctx.tenant_id)
+    store = getattr(_orchestrator, "_store", None)
+    if store is None or getattr(store, "kind", "") != "SQLITE_LOCAL_DURABLE":
+        raise HTTPException(503, "当前没有可查询的持久化本地任务队列")
+    from workflows.v4.local_job_queue import LocalJobQueue
+    state = LocalJobQueue(store).get_state(run_id, ctx.tenant_id)
+    if state is None:
+        raise HTTPException(404, "该任务没有入队记录")
+    return {"run_id": run_id, **state, "worker_connected": False}
+
+
 @router.post("/workpaths/runs/{run_id}/execute-local")
 def execute_local_workpath(run_id: str, ctx: AuthContext = Depends(auth_required)):
     """Execute the ONE safe, deterministic HTML extraction workpath.
