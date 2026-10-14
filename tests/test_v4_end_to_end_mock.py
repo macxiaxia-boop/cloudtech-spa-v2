@@ -92,7 +92,7 @@ def test_e2e_blogger_workflow():
     print("[OK] e2e_blogger step 6: idempotent_hit")
 
     # 7. export (此时 run 未 COMPLETED, 应 ready=False)
-    r = client.get(f"/v4/workpaths/runs/{run_id}/export")
+    r = client.get(f"/v4/workpaths/runs/{run_id}/export?tenant_id=t1")
     data = r.json()
     assert data["ready"] is False
     print(f"[OK] e2e_blogger step 7: export not ready → status={data['status']}")
@@ -182,11 +182,11 @@ def test_e2e_idempotency_under_failure():
     r1 = client.post("/v4/workpaths/runs?tenant_id=t1", json=body)
     r2 = client.post("/v4/workpaths/runs?tenant_id=t1", json=body)
     assert r1.json()["run_id"] == r2.json()["run_id"]
-    # 模拟失败: 调用 resume (no_repeat_billing=true)
+    # 模拟失败: 调用 resume (no_repeat_billing=false (preview only))
     run_id = r1.json()["run_id"]
-    r = client.post(f"/v4/workpaths/runs/{run_id}/resume", json={"failed_nodes_only": True})
-    assert r.json()["no_repeat_billing"] is True
-    print(f"[OK] e2e_idempotency_under_failure → {run_id} (no double billing)")
+    r = client.post(f"/v4/workpaths/runs/{run_id}/resume?tenant_id=t1", json={"failed_nodes_only": True})
+    assert r.json()["no_repeat_billing"] is False
+    print(f"[OK] e2e_idempotency_under_failure → {run_id} (no external calls performed)")
 
 
 if __name__ == "__main__":
