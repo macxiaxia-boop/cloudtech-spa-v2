@@ -133,6 +133,21 @@ export class WorkPathClient {
     return this.get('/workpaths/runs');
   }
 
+  async enqueueLocalRun(runId: string): Promise<{
+    run_id: string; state: string; queued_only: boolean;
+    worker_invoked: boolean; storage: string; idempotent_hit: boolean;
+  }> {
+    return this.post(`/workpaths/runs/${encodeURIComponent(runId)}/enqueue-local`, {});
+  }
+
+  async getLocalQueueStatus(runId: string): Promise<{
+    run_id: string; state: 'QUEUED' | 'LEASED' | 'DONE' | 'FAILED';
+    attempts: number; max_attempts: number; error_code: string | null;
+    worker_connected: boolean;
+  }> {
+    return this.get(`/workpaths/runs/${encodeURIComponent(runId)}/local-queue`);
+  }
+
   async executeLocalRun(runId: string): Promise<{
     run_id: string;
     status: string;
