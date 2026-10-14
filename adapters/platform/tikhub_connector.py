@@ -38,8 +38,19 @@ class TikHubConnector:
         if platform not in TIKHUB_ENDPOINTS:
             raise ValueError(f"[TIK] 未知平台 {platform}")
         if not self.enable_real:
-            # mock 输出 — 真实公开元数据样板
+            if not (
+                os.environ.get("CLOUDTECH_ENV", "").lower() in {"test", "development"}
+                and os.environ.get("CLOUDTECH_ALLOW_MOCK_PLATFORM") == "1"
+            ):
+                raise PermissionError(
+                    "[TIK-MOCK-403] Mock public metadata is forbidden outside isolated tests"
+                )
             return self._mock_response(platform, method, params)
+        if os.environ.get("CLOUDTECH_ALLOW_REAL_PLATFORM") != "1":
+            raise PermissionError(
+                "[TIK-LIVE-403] Explicit external-provider authorization required"
+            )
+        self._get_token()
         try:
             import httpx
         except ImportError:
