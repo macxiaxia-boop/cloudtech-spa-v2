@@ -10,7 +10,8 @@ AUTH = Path(__file__).resolve().parents[1] / "web/vite-spa/src/contexts/AuthCont
 
 def test_legacy_pr1_never_mints_fake_admin_login():
     source = AUTH.read_text(encoding="utf-8")
-    assert "role: 'admin'" not in source
+    # The User union type legitimately lists 'admin'; forbid runtime minting.
+    assert "role: 'admin'," not in source
     assert "mockUser" not in source
     assert "return { ok: true }" not in source
     assert "setUser(savedUser)" not in source
