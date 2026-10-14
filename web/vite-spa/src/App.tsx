@@ -9,20 +9,66 @@
  * 性能优化：WorkflowEditor + Workflows 懒加载（react.lazy + Suspense）
  * 错误边界：ErrorBoundary 包裹整个 App 防止单组件崩溃
  */
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import { MarketingPage } from './pages/Marketing';
 import { PricingPage } from './pages/Pricing';
 import { DashboardPage } from './pages/Dashboard';
 import { SettingsPage } from './pages/Settings';
 import { BillingPage } from './pages/Billing';
-import LynxcePage from './pages/LynxcePage';
-import {
-  LynxceIndex, LynxceChatPage, LynxceDrawPage, LynxceMjPage, LynxceVideoPage,
-  LynxceMusicPage, LynxceEffectsPage, LynxceStudyPage, LynxceAppsPage,
-  LynxceSquarePage, LynxceAssetsPage, LynxceViralPage, LynxceLeadsPage,
-  LynxceMePage, LynxceAdminPage
-} from './pages/lynxce/index';
+/**
+ * Existing Lynxce source lives on the user's Windows machine but has not
+ * been synchronized to this GitHub tree. Do not replace its functionality
+ * with invented implementations and do not break the whole CloudTech build.
+ *
+ * Vite discovers the original index.tsx/index.ts dynamically when present.
+ * In the incomplete checkout a clear unavailable state is rendered instead.
+ */
+const optionalLynxceModules = import.meta.glob<Record<string, unknown>>(
+  './pages/lynxce/index.{ts,tsx}'
+);
+
+function LynxceSourceUnavailable() {
+  return (
+    <main className="mx-auto max-w-3xl p-8" role="status">
+      <h1 className="text-xl font-semibold">此功能暂不可用</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        当前部署的 CloudTech 版本尚未包含这一功能的页面源码。
+        未执行任何 AI 生成或外部任务；请联系管理员同步原有模块。
+      </p>
+    </main>
+  );
+}
+
+function optionalLynxcePage(exportName: string) {
+  return lazy(async () => {
+    const loader = optionalLynxceModules['./pages/lynxce/index.tsx']
+      ?? optionalLynxceModules['./pages/lynxce/index.ts'];
+    if (!loader) return { default: LynxceSourceUnavailable };
+    const module = await loader();
+    const component = module[exportName];
+    if (typeof component !== 'function') {
+      return { default: LynxceSourceUnavailable };
+    }
+    return { default: component as ComponentType };
+  });
+}
+
+const LynxceIndex = optionalLynxcePage('LynxceIndex');
+const LynxceChatPage = optionalLynxcePage('LynxceChatPage');
+const LynxceDrawPage = optionalLynxcePage('LynxceDrawPage');
+const LynxceMjPage = optionalLynxcePage('LynxceMjPage');
+const LynxceVideoPage = optionalLynxcePage('LynxceVideoPage');
+const LynxceMusicPage = optionalLynxcePage('LynxceMusicPage');
+const LynxceEffectsPage = optionalLynxcePage('LynxceEffectsPage');
+const LynxceStudyPage = optionalLynxcePage('LynxceStudyPage');
+const LynxceAppsPage = optionalLynxcePage('LynxceAppsPage');
+const LynxceSquarePage = optionalLynxcePage('LynxceSquarePage');
+const LynxceAssetsPage = optionalLynxcePage('LynxceAssetsPage');
+const LynxceViralPage = optionalLynxcePage('LynxceViralPage');
+const LynxceLeadsPage = optionalLynxcePage('LynxceLeadsPage');
+const LynxceMePage = optionalLynxcePage('LynxceMePage');
+const LynxceAdminPage = optionalLynxcePage('LynxceAdminPage');
 import { IndustryDecorationPage } from './pages/IndustryDecoration';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -95,7 +141,9 @@ function MarketingLayout() {
     <div className="min-h-screen bg-card flex flex-col">
       <Header />
       <main className="flex-1">
-        <Outlet />
+        <Suspense fallback={<PageLoading />}>
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
       <OnboardingTrigger />
