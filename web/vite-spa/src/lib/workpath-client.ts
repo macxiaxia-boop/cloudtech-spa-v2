@@ -123,6 +123,19 @@ export class WorkPathClient {
     return this.get('/operations');
   }
 
+  async getLocalOutputByRun(runId: string): Promise<{
+    item: {
+      run_id: string; node_id: string; path_id: string;
+      artifact_kind: string; source_sha256: string; output_sha256: string;
+      created_at: string;
+    };
+    source: 'verified_local_outbox_catalog';
+    raw_customer_content_in_response: false;
+    production_ready: false;
+  }> {
+    return this.get(`/workpaths/local-outputs/${encodeURIComponent(runId)}`);
+  }
+
   async listLocalOutputs(): Promise<{
     items: Array<{
       run_id: string; node_id: string; path_id: string;
