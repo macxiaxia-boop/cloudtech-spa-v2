@@ -1,8 +1,25 @@
 """Media Extractor — 从 HTML 中提取图片/视频引用 (mock-only)"""
 import re
+from urllib.parse import urljoin, urlsplit
 from typing import Literal
 
 MediaRef = dict  # {url, alt, width, height, license}
+
+def _safe_media_reference(src: str, base_url: str) -> str | None:
+    """Resolve references without network access; reject active URL schemes."""
+    value = src.strip()
+    if not value or any(ord(ch) < 32 or ord(ch) == 127 for ch in value):
+        return None
+    parts = urlsplit(value)
+    if parts.scheme and parts.scheme.lower() not in {"http", "https"}:
+        return None
+    base = urlsplit(base_url)
+    if base.scheme.lower() in {"https", "http"} and base.netloc:
+        value = urljoin(base_url, value)
+    elif value.startswith("//"):
+        return None
+    return value
+
 
 
 def extract(html: str, base_url: str = "") -> dict:
@@ -20,7 +37,9 @@ def extract(html: str, base_url: str = "") -> dict:
 
     # <img ... src="..." alt="...">
     for img_match in re.finditer(r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>', html, re.IGNORECASE):
-        url = img_match.group(1)
+        url = _safe_media_reference(img_match.group(1), base_url)
+        if url is None:
+            continue
         alt_match = re.search(r'alt=["\']([^"\']*)["\']', img_match.group(0), re.IGNORECASE)
         alt = alt_match.group(1) if alt_match else ""
         # 解析 width/height (简化)
@@ -41,6 +60,8 @@ def extract(html: str, base_url: str = "") -> dict:
             src_match = re.search(r'src=["\']([^"\']+)["\']', vid_match.group(0))
             src = src_match.group(1) if src_match else ""
         if src:
+            src = _safe_media_reference(src, base_url)
+        if src:
             videos.append({
                 "url": src,
                 "alt": "",
@@ -51,8 +72,11 @@ def extract(html: str, base_url: str = "") -> dict:
 
     # 独立 <source> 标签
     for src_match in re.finditer(r'<source[^>]+src=["\']([^"\']+)["\'][^>]*>', html, re.IGNORECASE):
+        url = _safe_media_reference(src_match.group(1), base_url)
+        if url is None:
+            continue
         videos.append({
-            "url": src_match.group(1),
+            "url": url,
             "alt": "",
             "width": None,
             "height": None,
