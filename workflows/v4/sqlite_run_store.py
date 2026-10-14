@@ -8,6 +8,7 @@ implementation, never a shared network-filesystem SQLite database.
 from __future__ import annotations
 
 import copy
+from contextlib import contextmanager
 import hashlib
 import json
 import sqlite3
@@ -74,12 +75,17 @@ class SQLiteRunStore:
             raise RunStoreError("run store path must be a file")
         self._create_schema()
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self):
+        """Always close DB handles; an uncommitted transaction rolls back."""
         conn = sqlite3.connect(str(self.path), timeout=15, isolation_level=None)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA busy_timeout=15000")
-        conn.execute("PRAGMA foreign_keys=ON")
-        return conn
+        try:
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA busy_timeout=15000")
+            conn.execute("PRAGMA foreign_keys=ON")
+            yield conn
+        finally:
+            conn.close()
 
     def _create_schema(self) -> None:
         with self._connect() as db:
