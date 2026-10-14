@@ -67,6 +67,7 @@ jobs:
             tests/test_bill_acceptance.py \
             tests/test_bill_provider_interface.py \
             tests/test_pipeline.py \
+            tests/test_p5_pipeline_truth.py \
             tests/test_video_mixer.py \
             tests/test_cloudtech_acceptance.py \
             tests/test_crm.py \
