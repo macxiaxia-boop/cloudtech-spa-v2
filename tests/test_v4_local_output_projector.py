@@ -139,7 +139,7 @@ def test_tenant_scoped_http_catalog_is_only_verified_metadata(tmp_path, monkeypa
     assert client.get("/v4/workpaths/local-outputs").status_code == 422
 
 
-def _forge_consistent_receipts(store, run_id, *, field, value):
+def _forge_consistent_receipts(store, run_id, *, field, value, node_id="html_parse"):
     """Simulate corrupt but mutually consistent snapshot/receipt/outbox metadata."""
     with store._connect() as db:
         row = db.execute(
@@ -152,8 +152,9 @@ def _forge_consistent_receipts(store, run_id, *, field, value):
             "UPDATE v4_runs SET snapshot=? WHERE run_id=?", (raw, run_id),
         )
         db.execute(
-            "UPDATE v4_node_receipts SET receipt_json=? WHERE run_id=? AND node_id='html_parse'",
-            (json.dumps(snapshot["nodes"][0], ensure_ascii=False, allow_nan=False), run_id),
+            "UPDATE v4_node_receipts SET receipt_json=? WHERE run_id=? AND node_id=?",
+            (json.dumps(snapshot["nodes"][0], ensure_ascii=False, allow_nan=False),
+             run_id, node_id),
         )
         event_payload = {
             "run_id": run_id,
@@ -181,6 +182,29 @@ def test_forged_extraction_with_matching_receipts_is_not_catalogued(tmp_path):
     with store._connect() as db:
         event = db.execute("SELECT state FROM v4_local_outbox WHERE run_id=?",
                            (run_id,)).fetchone()
+        assert event["state"] == "PENDING"
+
+
+@pytest.mark.parametrize("tampered_field", ["srt", "vtt", "segment_count"])
+def test_forged_subtitle_with_consistent_receipts_is_never_catalogued(tmp_path, tampered_field):
+    """A matching source SHA and forged receipt must not prove output bytes."""
+    store, run_id = setup_completed(
+        tmp_path, path_id="WP-LOCAL-SUBTITLE-EXPORT",
+    )
+    _forge_consistent_receipts(
+        store, run_id, field=tampered_field,
+        value="forged subtitle contents" if tampered_field != "segment_count" else 999,
+        node_id="subtitle_export",
+    )
+    projector = LocalOutputProjector(store)
+    result = projector.consume_one()
+    assert result["outcome"] == "BLOCKED_INVALID_EVIDENCE", result
+    assert projector.list_for_tenant("tenant-one") == []
+    assert projector.get_for_tenant_run("tenant-one", run_id) is None
+    with store._connect() as db:
+        event = db.execute(
+            "SELECT state FROM v4_local_outbox WHERE run_id=?", (run_id,),
+        ).fetchone()
         assert event["state"] == "PENDING"
 
 
