@@ -73,3 +73,89 @@ def parse(url: str) -> dict:
 class ArticleParser:
     def run(self, url: str) -> dict:
         return parse(url)
+
+
+# === Real, offline parsing of HTML supplied by an authorized user ===
+# Unlike parse(url), this function NEVER fetches a URL and NEVER invents text.
+from html.parser import HTMLParser
+import hashlib
+import re
+
+
+class _UserHTMLText(HTMLParser):
+    BLOCKS = {"p", "div", "section", "article", "h1", "h2", "h3", "li", "br"}
+    SKIP = {"script", "style", "svg", "noscript", "template"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.ignore = 0
+        self.title_depth = 0
+        self.heading_depth = 0
+        self.title_parts = []
+        self.heading_parts = []
+        self.parts = []
+
+    def handle_starttag(self, tag, attrs):
+        tag = tag.lower()
+        if tag in self.SKIP:
+            self.ignore += 1
+        if self.ignore:
+            return
+        if tag == "title":
+            self.title_depth += 1
+        if tag == "h1":
+            self.heading_depth += 1
+        if tag in self.BLOCKS:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag):
+        tag = tag.lower()
+        if tag in self.SKIP:
+            self.ignore = max(0, self.ignore - 1)
+            return
+        if self.ignore:
+            return
+        if tag == "title":
+            self.title_depth = max(0, self.title_depth - 1)
+        if tag == "h1":
+            self.heading_depth = max(0, self.heading_depth - 1)
+        if tag in self.BLOCKS:
+            self.parts.append("\n")
+
+    def handle_data(self, data):
+        if self.ignore:
+            return
+        if self.title_depth:
+            self.title_parts.append(data)
+            return
+        if self.heading_depth:
+            self.heading_parts.append(data)
+        self.parts.append(data)
+
+
+def parse_html(html: str, source_url: str = "") -> dict:
+    """Extract only the content of supplied HTML. No network calls or fabricated data.
+
+    Source ownership/copyright checks and external URL fetching are separate gates.
+    """
+    if not isinstance(html, str) or not html.strip():
+        raise ValueError("html is required")
+    if len(html.encode("utf-8")) > 2_000_000:
+        raise ValueError("html exceeds 2MB input limit")
+    parser = _UserHTMLText()
+    parser.feed(html)
+    parser.close()
+    from .media_extractor import extract as extract_media
+    media = extract_media(html, base_url=source_url)
+    text = "\n".join(line.strip() for line in
+                     re.split(r"\n+", "".join(parser.parts)) if line.strip())
+    return {
+        "source_url": source_url,
+        "title": " ".join(parser.title_parts).strip() or " ".join(parser.heading_parts).strip(),
+        "text": text,
+        "images": media["images"],
+        "videos": media["videos"],
+        "content_sha256": hashlib.sha256(html.encode("utf-8")).hexdigest(),
+        "retrieval_policy": "supplied_html_only",
+        "mock": False,
+    }
