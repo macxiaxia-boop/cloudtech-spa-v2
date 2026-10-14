@@ -298,6 +298,11 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
+# Attach the existing V4 workpaths router to the single CloudTech gateway.
+# No second API server is created. Router dependencies must load successfully.
+from api.v4 import router as _v4_workpaths_router
+app.include_router(_v4_workpaths_router)
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
