@@ -639,8 +639,27 @@ def _try_forward_v23(rest: str, method: str = "GET", body: bytes = None):
                 # V23 返非 JSON → 直接返 raw
                 return JSONResponse(content={"raw": raw.decode("utf-8", errors="ignore")}, status_code=resp.status)
     except urllib.error.HTTPError as e:
-        # V23 返 4xx/5xx → 走 V22 stub 兜底 (V22 stub 通常 200 + stub:true)
-        return None
+        # An actual V23 4xx/5xx is evidence of an attempted request, not a
+        # missing route. Never convert rejected credentials, throttling or
+        # upstream failures into a V22 mock/404 and hide the real outcome.
+        # Do not expose upstream response bodies (may contain private data).
+        try:
+            upstream_status = int(e.code)
+        except (TypeError, ValueError):
+            upstream_status = 502
+        if not 400 <= upstream_status <= 599:
+            upstream_status = 502
+        response_headers = {"X-CloudTech-Upstream": "v23"}
+        if upstream_status == 429:
+            retry_after = e.headers.get("Retry-After", "") if e.headers else ""
+            if retry_after.isdecimal() and int(retry_after) <= 86400:
+                response_headers["Retry-After"] = retry_after
+        return JSONResponse(
+            status_code=upstream_status,
+            content={"status": "error", "error": "v23_upstream_http_error",
+                     "upstream_status": upstream_status, "stub": False},
+            headers=response_headers,
+        )
     except Exception:
         # V23 不可达 (timeout/refused/etc) → 走 V22 stub 兜底
         return None
