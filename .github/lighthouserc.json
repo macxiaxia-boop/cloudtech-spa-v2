@@ -25,7 +25,7 @@
         "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
         "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
 
-        "errors-in-console": ["error", { "maxNumericValue": 0 }]
+        "errors-in-console": ["error", { "minScore": 1 }]
       }
     },
     "upload": {
