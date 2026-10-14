@@ -68,27 +68,48 @@ const DEFAULT_BASE = '/v4';
 export class WorkPathClient {
   constructor(private baseUrl: string = DEFAULT_BASE, private tenantId: string = '') {}
 
-  private async post<T>(path: string, body: unknown): Promise<T> {
-    const url = `${this.baseUrl}${path}${path.includes('?') ? '&' : '?'}tenant_id=${this.tenantId}`;
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!r.ok) {
-      const txt = await r.text();
-      throw new Error(`[WorkPathClient] ${path} → ${r.status} ${txt}`);
+  private requestIdentity(path: string): {
+    url: string;
+    authHeader: Record<string, string>;
+  } {
+    const token = sessionStorage.getItem('ct.auth.session');
+    const tenant = this.tenantId || sessionStorage.getItem('ct.auth.tenant_id');
+    const publicRequest = path === '/workpaths/resolve' || path === '/health';
+    if (!publicRequest && (!token || !tenant)) {
+      throw new Error('[WorkPathClient] 需要先登录已验证的企业账号');
     }
-    return r.json() as Promise<T>;
+    const query = !publicRequest && tenant
+      ? `${path.includes('?') ? '&' : '?'}tenant_id=${encodeURIComponent(tenant)}`
+      : '';
+    return {
+      url: `${this.baseUrl}${path}${query}`,
+      authHeader: token ? { Authorization: `Bearer ${token}` } : {},
+    };
+  }
+
+  private async post<T>(path: string, body: unknown): Promise<T> {
+    const { url, authHeader } = this.requestIdentity(path);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeader },
+      body: JSON.stringify(body),
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      const txt = await response.text();
+      throw new Error(`[WorkPathClient] ${path} → ${response.status} ${txt}`);
+    }
+    return response.json() as Promise<T>;
   }
 
   private async get<T>(path: string): Promise<T> {
-    const r = await fetch(`${this.baseUrl}${path}`);
-    if (!r.ok) {
-      const txt = await r.text();
-      throw new Error(`[WorkPathClient] ${path} → ${r.status} ${txt}`);
+    const { url, authHeader } = this.requestIdentity(path);
+    const response = await fetch(url, { headers: authHeader, cache: 'no-store' });
+    if (!response.ok) {
+      const txt = await response.text();
+      throw new Error(`[WorkPathClient] ${path} → ${response.status} ${txt}`);
     }
-    return r.json() as Promise<T>;
+    return response.json() as Promise<T>;
   }
 
   async resolve(req: ResolveRequest): Promise<ResolveResponse> {
