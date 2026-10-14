@@ -1,13 +1,6 @@
-/**
- * CloudTech AuthContext · 真实接入版
- *
- * 改造：
- * - login 真实 fetch /api/v2/_meta/routes/summary（验证后端连通）
- * - 失败时降级为本地 mock（确保离线可用）
- * - 注入 setUnauthorizedHandler 让 api-client 401 时清登录态
- */
+/** CloudTech SaaS identity — signed backend session, no fake browser admins. */
 import { createContext, useContext, useEffect, useState, type ReactNode, useCallback } from 'react';
-import { api, checkBackendHealth } from '@/lib/api';
+import { checkBackendHealth, setUnauthorizedHandler } from '@/lib/api';
 
 export interface User {
   id: string;
@@ -41,31 +34,75 @@ interface AuthContextValue extends AuthState {
   refreshBackend: () => Promise<void>;
 }
 
+type VerifiedSession = {
+  verified: true;
+  user_id: string;
+  email: string;
+  tenant_id: string;
+  workspace_name: string;
+  role: string;
+};
+
+type AuthToken = { token: string; tenant_id: string };
+
 const AuthContext = createContext<AuthContextValue | null>(null);
+const TOKEN_KEY = 'ct.auth.session';
+const TENANT_KEY = 'ct.auth.tenant_id';
 
-// An unavailable backend is not a substitute for identity verification.
-// Legacy front-end-only auth is permitted ONLY in an explicitly configured
-// local Vite dev session, never in a production build.
-const ALLOW_LOCAL_DEMO_AUTH =
-  import.meta.env.DEV && import.meta.env.VITE_CLOUDTECH_DEMO_AUTH === '1';
-
-const STORAGE_KEYS = {
-  user: 'ct.auth.user',
-  workspace: 'ct.auth.workspace',
-} as const;
-
-function loadFromStorage<T>(key: string): T | null {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
+function clearSession() {
+  sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TENANT_KEY);
+  // Old browser-local fake identities must never grant access.
+  localStorage.removeItem('ct.auth.user');
+  localStorage.removeItem('ct.auth.workspace');
 }
 
-function saveToStorage(key: string, value: unknown) {
-  try {
-    if (value === null || value === undefined) localStorage.removeItem(key);
-    else localStorage.setItem(key, JSON.stringify(value));
-  } catch { /* ignore quota */ }
+async function verifySession(token: string): Promise<VerifiedSession> {
+  const response = await fetch('/api/saas/v1/me', {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  if (!response.ok) throw new Error('会话无效、已过期或所属企业无访问权限');
+  const data: VerifiedSession = await response.json();
+  if (!data.verified || !data.user_id || !data.tenant_id || !data.email) {
+    throw new Error('认证服务未返回可验证的用户和租户信息');
+  }
+  return data;
+}
+
+async function submitCredentials(endpoint: 'login' | 'register', body: object): Promise<AuthToken> {
+  const response = await fetch(`/api/saas/v1/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('邮箱或密码错误');
+    if (response.status === 409) throw new Error('该邮箱已经注册');
+    if (response.status === 503) throw new Error('认证服务尚未完成安全配置');
+    throw new Error(`认证服务请求失败（HTTP ${response.status}）`);
+  }
+  const payload = await response.json();
+  if (payload.status !== 'ok' || typeof payload.token !== 'string' ||
+      typeof payload.tenant_id !== 'string') {
+    throw new Error('服务器没有返回有效登录凭证');
+  }
+  return { token: payload.token, tenant_id: payload.tenant_id };
+}
+
+function profileFromVerified(data: VerifiedSession): { user: User; workspace: Workspace } {
+  return {
+    user: {
+      id: data.user_id, email: data.email,
+      name: data.email.split('@')[0] || '成员', role: 'member',
+    },
+    workspace: {
+      id: data.tenant_id, name: data.workspace_name || '我的企业',
+      description: '已验证的企业工作空间', memberCount: 1,
+      role: '团队成员',
+    },
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -74,120 +111,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [backendOnline, setBackendOnline] = useState(false);
 
-  // 启动时恢复 + 健康检查
-  useEffect(() => {
-    const savedUser = loadFromStorage<User>(STORAGE_KEYS.user);
-    const savedWorkspace = loadFromStorage<Workspace>(STORAGE_KEYS.workspace);
-    if (ALLOW_LOCAL_DEMO_AUTH) {
-      if (savedUser) setUser(savedUser);
-      if (savedWorkspace) setCurrentWorkspaceState(savedWorkspace);
-    } else {
-      saveToStorage(STORAGE_KEYS.user, null);
-      saveToStorage(STORAGE_KEYS.workspace, null);
-    }
-    setLoading(false);
-
-    // 异步健康检查
-    checkBackendHealth().then(setBackendOnline).catch(() => setBackendOnline(false));
-  }, []);
-
-  // 注册 401 处理器（避免循环依赖）
-  useEffect(() => {
-    // 动态 require 防止循环
-    import('@/lib/api').then(({ setUnauthorizedHandler }) => {
-      setUnauthorizedHandler(() => {
-        setUser(null);
-        setCurrentWorkspaceState(null);
-        saveToStorage(STORAGE_KEYS.user, null);
-        saveToStorage(STORAGE_KEYS.workspace, null);
-        // 注意：导航到 /login 由 RequireAuth 处理
-      });
-    });
-  }, []);
-
-  const refreshBackend = useCallback(async () => {
-    const ok = await checkBackendHealth();
-    setBackendOnline(ok);
-  }, []);
-
-  const setCurrentWorkspace = useCallback((ws: Workspace) => {
-    setCurrentWorkspaceState(ws);
-    saveToStorage(STORAGE_KEYS.workspace, ws);
-  }, []);
-
-  const login = useCallback(async (email: string, password: string) => {
-    if (!ALLOW_LOCAL_DEMO_AUTH) {
-      return { ok: false, error: 'CloudTech 尚未接通真实身份认证；本地演示登录在正式版本中被禁用。' };
-    }
-    // 前端格式校验
-    if (!email || !password) return { ok: false, error: '邮箱和密码不能为空' };
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: '邮箱格式不正确' };
-    if (password.length < 6) return { ok: false, error: '密码至少 6 位' };
-
-    // 健康检查后端（真实接入）
-    const online = await checkBackendHealth();
-    setBackendOnline(online);
-
-    // 模拟延迟（让用户感受到"真实"）
-    await new Promise((resolve) => setTimeout(resolve, online ? 300 : 200));
-
-    // 创建 user 对象
-    const mockUser: User = {
-      id: 'u_' + btoa(email).slice(0, 12).replace(/[=+/]/g, ''),
-      email,
-      name: email.split('@')[0] || 'User',
-      role: 'admin',
-    };
-    setUser(mockUser);
-    saveToStorage(STORAGE_KEYS.user, mockUser);
-
-    // 登录成功后立即清 workspace（强制用户选择）
-    setCurrentWorkspaceState(null);
-    saveToStorage(STORAGE_KEYS.workspace, null);
-
-    return { ok: true };
-  }, []);
-
-  const register = useCallback(async (email: string, password: string, company: string) => {
-    if (!ALLOW_LOCAL_DEMO_AUTH) {
-      return { ok: false, error: 'CloudTech 尚未接通真实注册服务；不能在正式版本中伪造注册成功。' };
-    }
-    if (!email || !password || !company) return { ok: false, error: '所有字段必填' };
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: '邮箱格式不正确' };
-    if (password.length < 6) return { ok: false, error: '密码至少 6 位' };
-
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const mockUser: User = {
-      id: 'u_' + btoa(email).slice(0, 12).replace(/[=+/]/g, ''),
-      email,
-      name: company || email.split('@')[0],
-      role: 'admin',
-    };
-    setUser(mockUser);
-    saveToStorage(STORAGE_KEYS.user, mockUser);
-    return { ok: true };
+  const acceptVerified = useCallback((data: VerifiedSession) => {
+    const profile = profileFromVerified(data);
+    setUser(profile.user);
+    setCurrentWorkspaceState(profile.workspace);
   }, []);
 
   const logout = useCallback(() => {
+    clearSession();
     setUser(null);
     setCurrentWorkspaceState(null);
-    saveToStorage(STORAGE_KEYS.user, null);
-    saveToStorage(STORAGE_KEYS.workspace, null);
   }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(logout);
+    let active = true;
+    (async () => {
+      // This cannot be a trusted session without a server-side /me check.
+      try {
+        const token = sessionStorage.getItem(TOKEN_KEY);
+        if (token) {
+          const data = await verifySession(token);
+          if (active) {
+            sessionStorage.setItem(TENANT_KEY, data.tenant_id);
+            acceptVerified(data);
+          }
+        } else {
+          clearSession();
+        }
+      } catch {
+        if (active) logout();
+      } finally {
+        if (active) setLoading(false);
+      }
+      const online = await checkBackendHealth().catch(() => false);
+      if (active) setBackendOnline(online);
+    })();
+    return () => { active = false; };
+  }, [acceptVerified, logout]);
+
+  const refreshBackend = useCallback(async () => {
+    const online = await checkBackendHealth().catch(() => false);
+    setBackendOnline(online);
+  }, []);
+
+  const setCurrentWorkspace = useCallback((ws: Workspace) => {
+    // A client-side workspace choice must not override a server-verified tenant.
+    const signedTenant = sessionStorage.getItem(TENANT_KEY);
+    if (!signedTenant || signedTenant !== ws.id) return;
+    setCurrentWorkspaceState(ws);
+  }, []);
+
+  const authenticate = useCallback(async (
+    endpoint: 'login' | 'register', body: object,
+  ): Promise<{ ok: boolean; error?: string }> => {
+    try {
+      const session = await submitCredentials(endpoint, body);
+      const verified = await verifySession(session.token);
+      if (session.tenant_id !== verified.tenant_id) {
+        throw new Error('登录响应与验证后的租户不一致');
+      }
+      sessionStorage.setItem(TOKEN_KEY, session.token);
+      sessionStorage.setItem(TENANT_KEY, verified.tenant_id);
+      acceptVerified(verified);
+      return { ok: true };
+    } catch (error) {
+      logout();
+      return { ok: false, error: error instanceof Error ? error.message : '认证失败' };
+    }
+  }, [acceptVerified, logout]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    if (!email || !password) return { ok: false, error: '邮箱和密码不能为空' };
+    return authenticate('login', { email, password });
+  }, [authenticate]);
+
+  const register = useCallback(async (email: string, password: string, company: string) => {
+    if (!email || !password || !company) return { ok: false, error: '所有字段必填' };
+    return authenticate('register', { email, password, tenant_name: company });
+  }, [authenticate]);
 
   return (
     <AuthContext.Provider value={{
-      user,
-      currentWorkspace,
-      isAuthenticated: !!user,
-      loading,
-      backendOnline,
-      login,
-      register,
-      logout,
-      setCurrentWorkspace,
-      refreshBackend,
+      user, currentWorkspace, isAuthenticated: !!user,
+      loading, backendOnline, login, register, logout,
+      setCurrentWorkspace, refreshBackend,
     }}>
       {children}
     </AuthContext.Provider>
