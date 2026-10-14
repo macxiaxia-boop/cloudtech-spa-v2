@@ -117,11 +117,26 @@ def validate_definition(def_dict: Dict[str, Any]) -> WorkPathDefinition:
 def validate_inputs(defn: WorkPathDefinition, provided: Dict[str, Any]) -> List[str]:
     """校验 provided inputs 是否满足 min/max; 返回缺哪些 role"""
     role_counts: Dict[str, int] = {}
-    for k, v in provided.items():
-        role_counts[k] = role_counts.get(k, 0) + (1 if isinstance(v, list) else 1)
+    for role, value in provided.items():
+        values = value if isinstance(value, list) else [value]
+        role_counts[role] = sum(
+            1 for item in values if item is not None and item != ""
+        )
     missing: List[str] = []
     for spec in defn.inputs:
         got = role_counts.get(spec.role, 0)
         if got < spec.min:
             missing.append(f"{spec.role}(need>={spec.min}, got={got})")
     return missing
+
+
+def validate_input_cardinality(defn: WorkPathDefinition, provided: Dict[str, Any]) -> List[str]:
+    """Validate lower and upper bounds for supplied role values."""
+    violations = validate_inputs(defn, provided)
+    for spec in defn.inputs:
+        value = provided.get(spec.role)
+        values = value if isinstance(value, list) else [value]
+        count = sum(1 for item in values if item is not None and item != "")
+        if count > spec.max:
+            violations.append(f"{spec.role}(max<={spec.max}, got={count})")
+    return violations
