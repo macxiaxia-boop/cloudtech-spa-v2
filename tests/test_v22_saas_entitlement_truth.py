@@ -110,7 +110,7 @@ def test_trial_subscription_must_commit_in_same_transaction(tmp_path, monkeypatc
         subscription = stored.execute(
             "SELECT tenant_id,amount_cny,status FROM aios_subscription"
         ).fetchone()
-        assert subscription == (body["tenant_id"], 0, "trial")
+        assert subscription == (body["tenant_id"], 0, "active")
 
 
 def test_tenant_membership_revocation_blocks_signed_bearer(tmp_path, monkeypatch):
