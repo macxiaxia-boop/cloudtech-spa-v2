@@ -5,13 +5,35 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from pathlib import Path
+
+import pytest
+
 from workflows.v4.registry import OperationRegistry, OperationDefinition
 from workflows.v4.media_gate import MediaGate
 
 
+def _real_skill_root() -> Path:
+    """Require real Windows catalog without fabricating it in Linux CI.
+
+    When the user explicitly supplied CLOUDTECH_SKILL_ROOT, a bad path is an
+    actual error. When absent, only this external-environment integration
+    check is SKIPPED. Local registry logic is still tested independently.
+    """
+    configured = os.environ.get("CLOUDTECH_SKILL_ROOT")
+    root = Path(configured or "D:/CloudTech-Portable/data/skill_orchestrator")
+    if not root.is_dir():
+        if configured:
+            pytest.fail(f"explicit CLOUDTECH_SKILL_ROOT is missing: {root}")
+        pytest.skip(
+            "EXTERNAL_BLOCKER: Windows skill_orchestrator directory is not in "
+            "GitHub checkout; provide CLOUDTECH_SKILL_ROOT on the authorized PC"
+        )
+    return root
+
+
 def test_load_real_skills_orchestrator():
     """真实加载 D:\CloudTech-Portable\data\skill_orchestrator\200 SKILL.md"""
-    skill_root = Path(os.environ.get("CLOUDTECH_SKILL_ROOT", "D:/CloudTech-Portable/data/skill_orchestrator"))
+    skill_root = _real_skill_root()
     assert skill_root.exists(), f"skill_orchestrator 不存在: {skill_root}"
     reg = OperationRegistry(skill_root=skill_root)
     n = reg.count()
@@ -34,7 +56,7 @@ def test_load_real_skills_orchestrator():
 
 def test_specific_skill_categories():
     """验证 5 行业 + 80 通用 = 200 skill 目录存在"""
-    skill_root = Path(os.environ.get("CLOUDTECH_SKILL_ROOT", "D:/CloudTech-Portable/data/skill_orchestrator"))
+    skill_root = _real_skill_root()
     # 至少含 5 行业前缀
     industries = ["catering", "decoration", "education", "medical", "retail"]
     found = 0
@@ -61,7 +83,7 @@ def test_registry_dedupe_and_query():
 
 def test_real_skill_kind_distribution():
     """真实加载后 kind 分布"""
-    reg = OperationRegistry(skill_root=Path(os.environ.get("CLOUDTECH_SKILL_ROOT", "D:/CloudTech-Portable/data/skill_orchestrator")))
+    reg = OperationRegistry(skill_root=_real_skill_root())
     all_ops = reg.list_all()
     from collections import Counter
     kinds = Counter(o.kind for o in all_ops)
