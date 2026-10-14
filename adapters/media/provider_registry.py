@@ -1,6 +1,7 @@
 """Provider 注册表 + 4 个 mock stub provider"""
 from __future__ import annotations
 import base64
+import os
 import io
 import uuid
 from typing import Dict, List, Any
@@ -8,6 +9,16 @@ from typing import Dict, List, Any
 from PIL import Image
 
 from .types import MediaRequest, MediaResponse, ProviderError
+
+
+def _require_explicit_mock_media() -> None:
+    """Never return fabricated assets in a real deployment by accident."""
+    is_isolated = os.environ.get("CLOUDTECH_ENV", "").lower() in {"test", "development"}
+    allowed = os.environ.get("CLOUDTECH_ALLOW_MOCK_MEDIA") == "1"
+    if not (is_isolated and allowed):
+        raise ProviderError(
+            "[MEDIA-MOCK-403] No real provider is wired; enable explicit mock media only in isolated tests"
+        )
 
 
 # ── shared mock helpers ──────────────────────────────────────────────────────
@@ -59,6 +70,7 @@ class JimengProvider(BaseProvider):
     capabilities = ["image.generate", "image.edit", "image.inpaint"]
 
     def dispatch(self, req: MediaRequest) -> MediaResponse:
+        _require_explicit_mock_media()
         if req.operation not in self.capabilities:
             raise ProviderError(f"[{self.name}] 不支持 operation={req.operation}")
         import time; t0 = time.monotonic()
@@ -82,6 +94,7 @@ class YihookProvider(BaseProvider):
     capabilities = ["image.generate"]
 
     def dispatch(self, req: MediaRequest) -> MediaResponse:
+        _require_explicit_mock_media()
         if req.operation not in self.capabilities:
             raise ProviderError(f"[{self.name}] 不支持 operation={req.operation}")
         import time; t0 = time.monotonic()
@@ -105,6 +118,7 @@ class KlingProvider(BaseProvider):
     capabilities = ["video.generate", "video.extend", "video.image_to_video"]
 
     def dispatch(self, req: MediaRequest) -> MediaResponse:
+        _require_explicit_mock_media()
         if req.operation not in self.capabilities:
             raise ProviderError(f"[{self.name}] 不支持 operation={req.operation}")
         duration = req.inputs.get("duration_sec", 5)
@@ -131,6 +145,7 @@ class DoubaoSeedreamProvider(BaseProvider):
     capabilities = ["image.generate"]
 
     def dispatch(self, req: MediaRequest) -> MediaResponse:
+        _require_explicit_mock_media()
         if req.operation not in self.capabilities:
             raise ProviderError(f"[{self.name}] 不支持 operation={req.operation}")
         import time; t0 = time.monotonic()
