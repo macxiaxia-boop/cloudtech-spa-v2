@@ -260,10 +260,45 @@ class OperationRegistry:
                 return _to_dict(MockMetricsStore().fetch_videos(inputs.get("author_id", "")))
 
             if op_id == "meeting.process":
-                from adapters.meeting import MockMeetingProcessor
-                from adapters.meeting import MeetingRequest
-                return _to_dict(MockMeetingProcessor().process(
-                    MeetingRequest(audio_path=inputs.get("audio_path", ""))))
+                # Reuse the existing WF-G-018 extractor. Audio -> transcript is
+                # NOT yet connected: never fabricate a meeting summary.
+                transcript = inputs.get("transcript")
+                if not transcript:
+                    return {
+                        "status": "blocked",
+                        "error_code": "TRANSCRIPT_REQUIRED",
+                        "reason": "需要真实会议转写文本；ASR 音频链路尚未接通",
+                        "mock": False,
+                    }
+                tenant_id = inputs.get("tenant_id")
+                if not isinstance(tenant_id, str) or len(tenant_id.strip()) < 2:
+                    return {
+                        "status": "blocked",
+                        "error_code": "TENANT_REQUIRED",
+                        "reason": "会议提取必须携带可信租户标识",
+                        "mock": False,
+                    }
+                from workflows.impl.wf_g018_meeting import MeetingInput, run_meeting
+                meeting = MeetingInput(
+                    tenant_id=tenant_id,
+                    transcript=transcript,
+                    auto_create=False,
+                )
+                outcome = run_meeting(meeting)
+                if outcome.get("status") != "success":
+                    return {
+                        "status": "failed",
+                        "source_workflow": "WF-G-018",
+                        "error": outcome.get("error"),
+                        "mock": False,
+                    }
+                return {
+                    **outcome["output"],
+                    "status": "completed",
+                    "source_workflow": "WF-G-018",
+                    "extraction_method": "keyword_rules",
+                    "mock": False,
+                }
 
             if op_id == "video.assembly":
                 from adapters.ffmpeg_video import FFmpegEngine
