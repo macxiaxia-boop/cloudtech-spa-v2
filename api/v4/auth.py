@@ -8,6 +8,8 @@ import hashlib
 import hmac
 import os
 import secrets
+import sqlite3
+from pathlib import Path
 import time
 from dataclasses import dataclass
 from typing import Optional
@@ -72,6 +74,39 @@ def _verify_jwt(token: str, secret: str, tenant_id: str) -> Optional[dict]:
         return None
 
 
+def _active_saas_member(tenant_id: str, user_id: str) -> bool:
+    """Read-only membership check. Signed tokens alone are not current access."""
+    db_name = os.environ.get(
+        "CLOUDTECH_SAAS_DB_PATH",
+        r"D:\CloudTech-Portable\data\cloudtech.db",
+    )
+    db_path = Path(db_name).expanduser()
+    if not db_path.is_file():
+        raise HTTPException(
+            status_code=503,
+            detail="[AUTH-008] SaaS identity database is not available",
+        )
+    try:
+        from contextlib import closing
+        with closing(sqlite3.connect(
+            db_path.resolve().as_uri() + "?mode=ro",
+            uri=True, timeout=5,
+        )) as connection:
+            user = connection.execute(
+                """SELECT 1 FROM saas_users u
+                   INNER JOIN saas_tenants t ON t.tenant_id=u.tenant_id
+                   WHERE u.user_id=? AND u.tenant_id=? AND t.active=1
+                   LIMIT 1""",
+                (user_id, tenant_id),
+            ).fetchone()
+            return user is not None
+    except sqlite3.Error as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="[AUTH-008] SaaS membership could not be verified",
+        ) from exc
+
+
 def auth_required(
     tenant_id: str = Query(..., description="租户 ID (query param)"),
     authorization: Optional[str] = Header(None, description="Bearer JWT (生产模式必填)"),
@@ -113,7 +148,16 @@ def auth_required(
     payload = _verify_jwt(token, secret, tid)
     if payload is None:
         raise AuthError("005", "JWT 签名/tenant/exp 校验失败")
-    ctx.user_id = payload.get("user_id")
+    ctx.user_id = payload.get("user_id") or payload.get("sub")
+    if not isinstance(ctx.user_id, str) or not ctx.user_id:
+        raise AuthError("006", "JWT 缺少可验证的用户身份")
+    # Only isolated test/dev opt-in may bypass the SaaS membership database.
+    if not (dev_mode and explicit_bypass):
+        if not _active_saas_member(tid, ctx.user_id):
+            raise HTTPException(
+                status_code=403,
+                detail="[AUTH-009] user membership or tenant is inactive",
+            )
     ctx.jwt_verified = True
     ctx.permissions = payload.get("permissions", [])
     return ctx
