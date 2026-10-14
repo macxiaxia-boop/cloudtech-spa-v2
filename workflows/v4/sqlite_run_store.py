@@ -137,6 +137,12 @@ class SQLiteRunStore:
                 );
                 CREATE INDEX IF NOT EXISTS v4_local_jobs_claim
                   ON v4_local_jobs(state,available_at,job_id);
+                CREATE TABLE IF NOT EXISTS v4_local_worker_heartbeats (
+                    worker_id TEXT PRIMARY KEY,
+                    last_seen REAL NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS v4_local_workers_recent
+                  ON v4_local_worker_heartbeats(last_seen);
             """)
 
     def create_or_get(self, record: Any) -> Any:
