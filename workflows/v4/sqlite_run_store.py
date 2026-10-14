@@ -135,6 +135,20 @@ class SQLiteRunStore:
                 );
                 CREATE INDEX IF NOT EXISTS v4_local_outbox_claim
                   ON v4_local_outbox(state,available_at,event_id);
+                CREATE TABLE IF NOT EXISTS v4_local_output_catalog (
+                    tenant_id TEXT NOT NULL,
+                    run_id TEXT NOT NULL REFERENCES v4_runs(run_id),
+                    node_id TEXT NOT NULL,
+                    path_id TEXT NOT NULL,
+                    artifact_kind TEXT NOT NULL,
+                    source_sha256 TEXT NOT NULL,
+                    output_sha256 TEXT NOT NULL,
+                    snapshot_sha256 TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(tenant_id,run_id,node_id)
+                );
+                CREATE INDEX IF NOT EXISTS v4_local_output_by_tenant
+                  ON v4_local_output_catalog(tenant_id,created_at DESC,run_id);
                 CREATE TABLE IF NOT EXISTS v4_local_jobs (
                     job_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id TEXT NOT NULL UNIQUE REFERENCES v4_runs(run_id),
