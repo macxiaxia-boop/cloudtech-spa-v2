@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .paths import FLAGSHIP_PATHS, get_path
+from .paths import ALL_PATHS, get_path
 
 
 def inspect_path(path_id: str) -> dict[str, Any]:
@@ -54,7 +54,7 @@ def inspect_path(path_id: str) -> dict[str, Any]:
 
 
 def inspect_all_paths() -> dict[str, Any]:
-    paths = [inspect_path(pid) for pid in FLAGSHIP_PATHS]
+    paths = [inspect_path(pid) for pid in ALL_PATHS]
     return {
         "total_paths": len(paths),
         "execution_ready_paths": 0,
