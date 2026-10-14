@@ -47,27 +47,14 @@ export function setUnauthorizedHandler(fn: () => void) {
 
 /** 当前 localStorage 读取 token（避免循环依赖 AuthContext） */
 function getAuthHeaders(): Record<string, string> {
-  try {
-    const userRaw = localStorage.getItem('ct.auth.user');
-    const wsRaw = localStorage.getItem('ct.auth.workspace');
-    const headers: Record<string, string> = {};
+  // Browser-supplied user IDs and role headers are not authentication.
+  const token = sessionStorage.getItem('ct.auth.session');
+  const tenantId = sessionStorage.getItem('ct.auth.tenant_id');
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (tenantId) headers['X-Tenant-Id'] = tenantId;
+  return headers;
 
-    if (userRaw) {
-      const user = JSON.parse(userRaw);
-      // 注：后端暂未启用 JWT，发送 mock token 即可
-      if (user.email) headers['X-User-Email'] = user.email;
-      if (user.id)    headers['X-User-Id'] = user.id;
-      if (user.role)  headers['X-User-Role'] = user.role;
-    }
-    if (wsRaw) {
-      const ws = JSON.parse(wsRaw);
-      if (ws.id)   headers['X-Workspace-Id'] = ws.id;
-      if (ws.role) headers['X-Workspace-Role'] = ws.role;
-    }
-    return headers;
-  } catch {
-    return {};
-  }
 }
 
 /** fetch with timeout */
