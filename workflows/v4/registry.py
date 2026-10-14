@@ -263,22 +263,31 @@ class OperationRegistry:
                 return _to_dict(r)
 
             if op_id == "doubao.tts":
-                from adapters.tts import MockTTSEngine
-                from adapters.tts import TTSRequest
-                return _to_dict(MockTTSEngine().synthesize(TTSRequest(text=inputs.get("text", ""))))
+                return {
+                    "status": "blocked",
+                    "error_code": "TTS_PROVIDER_NOT_CONNECTED",
+                    "reason": "No authorized real TTS provider available; no synthetic audio created",
+                    "mock": False,
+                }
 
             if op_id == "ocr.recognize":
-                from adapters.ocr import MockOCREngine
-                return _to_dict(MockOCREngine().recognize(inputs.get("image_path", "")))
+                from adapters.ocr import LocalOCREngine
+                return LocalOCREngine().recognize(inputs.get("image_path", ""))
 
             if op_id == "search.authors":
-                from adapters.search import MockSearchEngine
-                return _to_dict(MockSearchEngine().search_authors(
-                    inputs.get("keywords", []), platform=inputs.get("platform", "douyin")))
+                from adapters.search import LocalAuthorSearch
+                return LocalAuthorSearch().search_authors(
+                    inputs.get("keywords", []),
+                    platform=inputs.get("platform", ""),
+                    catalog=inputs.get("catalog"),
+                )
 
             if op_id == "metrics.fetch":
-                from adapters.metrics import MockMetricsStore
-                return _to_dict(MockMetricsStore().fetch_videos(inputs.get("author_id", "")))
+                from adapters.metrics import LocalMetrics
+                return LocalMetrics().fetch_videos(
+                    inputs.get("author_id", ""),
+                    records=inputs.get("records"),
+                )
 
             if op_id == "meeting.process":
                 # Reuse the existing WF-G-018 extractor. Audio -> transcript is
