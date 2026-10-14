@@ -91,10 +91,26 @@ class AutoPipeline:
             count: 批量生成数量
         """
         self.state = {"input": input_data, "dry_run": self.dry_run}
-        selected_stages = stages or [s["id"] for s in PIPELINE_STAGES]
+        self.results = []  # reusing the instance must not inherit last-run results
+        selected_stages = (
+            [s["id"] for s in PIPELINE_STAGES] if stages is None else list(stages)
+        )
+        known_stages = {s["id"] for s in PIPELINE_STAGES}
+        unknown = set(selected_stages) - known_stages
+        if unknown:
+            raise ValueError(f"unknown pipeline stages: {sorted(unknown)}")
+        failed_stage = None
 
         for stage in PIPELINE_STAGES:
             if stage["id"] not in selected_stages:
+                continue
+
+            if failed_stage is not None:
+                self.results.append({
+                    "ok": False, "status": "blocked", "stage": stage["id"],
+                    "stage_name": stage["name"], "elapsed": 0.0,
+                    "error": f"blocked by failed upstream stage: {failed_stage}",
+                })
                 continue
 
             start_time = time.time()
@@ -103,10 +119,12 @@ class AutoPipeline:
 
             try:
                 handler = globals().get(stage["handler"])
-                if handler:
-                    result = handler(self)
+                if not callable(handler):
+                    result = {"ok": False, "error": f"missing stage handler: {stage['handler']}"}
                 else:
-                    result = {"ok": True, "stage": stage["id"], "message": f"阶段跳过: {stage['name']}"}
+                    result = handler(self)
+                    if not isinstance(result, dict) or not isinstance(result.get("ok"), bool):
+                        result = {"ok": False, "error": "invalid stage result contract: expected boolean ok"}
 
                 elapsed = round(time.time() - start_time, 1)
                 result["elapsed"] = elapsed
@@ -117,6 +135,7 @@ class AutoPipeline:
                 status = "✅" if result.get("ok") else "❌"
                 _log.info(f"  {status} 完成 ({elapsed}s)")
                 if not result.get("ok"):
+                    failed_stage = stage["id"]
                     _log.warning(f"  错误: {result.get('error', '未知错误')}")
 
             except Exception as e:
@@ -126,6 +145,7 @@ class AutoPipeline:
                     "error": str(e),
                     "elapsed": round(time.time() - start_time, 1),
                 })
+                failed_stage = stage["id"]
                 _log.error(f"  ❌ 异常: {e}")
 
         # 生成报告
@@ -139,7 +159,7 @@ class AutoPipeline:
         total = len(self.results)
         return {
             "pipeline_id": self.pipeline_id,
-            "ok": ok_count == total,
+            "ok": total > 0 and ok_count == total,
             "started_at": self.started_at,
             "finished_at": datetime.now().isoformat()[:19],
             "total_stages": total,
@@ -346,6 +366,8 @@ def _stage_video_production(pipeline: AutoPipeline) -> dict:
     style = inp.get("style", "现代简约")
     provider = inp.get("video_provider", "mock")
     template = inp.get("video_template", "before_after")
+    if not pipeline.dry_run and provider in (None, "mock"):
+        return {"ok": False, "error": "production video provider missing; mock forbidden"}
 
     video_results = {}
 
@@ -395,7 +417,7 @@ def _stage_video_production(pipeline: AutoPipeline) -> dict:
         pipeline.state["output"]["video"] = video_results
 
         return {
-            "ok": True,
+            "ok": bool(video_results.get("ai_video", {}).get("ok")),
             "ai_video": video_results.get("ai_video", {}).get("ok"),
             "mix_plan": video_results.get("mix_plan", {}).get("ok"),
             "has_digital_human": "digital_human" in video_results,
@@ -440,7 +462,20 @@ def _stage_publish_distribution(pipeline: AutoPipeline) -> dict:
             "success": result.get("success", 0),
         }
 
-        return {"ok": True, "published_to": platforms, "success_count": result.get("success", 0)}
+        completed = result.get("success", 0) == len(platforms) and result.get("failed", 0) == 0
+        actual_results = result.get("results", [])
+        if not pipeline.dry_run:
+            completed = completed and len(actual_results) == len(platforms)
+            completed = completed and all(
+                item.get("ok") and item.get("mode") != "dry_run"
+                for item in actual_results
+            )
+        return {
+            "ok": bool(result.get("ok")) and completed,
+            "published_to": platforms,
+            "success_count": result.get("success", 0),
+            "error": None if completed else "some publications failed or were simulated",
+        }
 
     except Exception as e:
         return {"ok": False, "error": f"发布失败: {str(e)}"}
