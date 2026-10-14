@@ -21,10 +21,14 @@ from workflows.v4 import (
     BudgetGate, CostClass, MediaGate, MediaGateError,
     IdempotencyStore, AssetResolver, AssetBindingError,
 )
-from workflows.v4.contract import validate_definition, validate_inputs, ContractError
+from workflows.v4.contract import validate_definition, validate_inputs, validate_input_cardinality, ContractError
 from workflows.v4.paths import FLAGSHIP_PATHS, get_path, list_paths
 from workflows.v4.audit_evidence import on_auth
 from .auth import auth_required, AuthContext
+from .p0_guard import (
+    get_owned_run, scoped_idempotency_key, compatible_run_request,
+    collect_role_values,
+)
 
 
 router = APIRouter(prefix="/v4", tags=["v4-workpaths"])
@@ -153,7 +157,7 @@ def workpaths_resolve(req: ResolveRequest):
     missing: List[str] = []
     if matched_id:
         defn = get_path(matched_id)
-        provided = {ref.get("role", "unknown"): ref.get("value") for ref in req.input_refs}
+        provided = collect_role_values(req.input_refs)
         missing = validate_inputs(defn, provided)
 
     return ResolveResponse(
@@ -191,17 +195,26 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
             MediaGate.check(step.operation, step.cost_class)
         except MediaGateError as e:
             raise HTTPException(400, str(e))
-    # 检查幂等
-    if req.idempotency_key:
-        hit = _orchestrator.idempotency.check(req.idempotency_key)
+    if req.scope != "tenant":
+        raise HTTPException(422, "只允许 tenant scope")
+    invalid_inputs = validate_input_cardinality(defn, req.input_bindings)
+    if invalid_inputs:
+        raise HTTPException(422, {"invalid_inputs": invalid_inputs})
+    server_key = scoped_idempotency_key(tenant_id, req.idempotency_key)
+    if server_key:
+        hit = _orchestrator.idempotency.check(server_key)
         if hit and hit.run_id:
-            return {"run_id": hit.run_id, "idempotent_hit": True}
+            old_run = get_owned_run(_orchestrator, hit.run_id, tenant_id)
+            if not compatible_run_request(old_run, req):
+                raise HTTPException(409, "相同幂等键对应不同请求")
+            return {"run_id": old_run.run_id, "idempotent_hit": True,
+                    "status": old_run.status.value}
     rec = _orchestrator.create_run(
         path_id=req.path_id,
         path_revision=req.revision,
         tenant_id=tenant_id,
         input_bindings=req.input_bindings,
-        idempotency_key=req.idempotency_key,
+        idempotency_key=server_key,
         project_id=req.project_id,
         conversation_id=req.conversation_id,
         budget_cap_cents=req.budget_cap_cents,
@@ -215,18 +228,15 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
 
 
 @router.get("/workpaths/runs/{run_id}")
-def get_run(run_id: str):
-    rec = _orchestrator.get_run(run_id)
-    if rec is None:
-        raise HTTPException(404, "run 不存在")
+def get_run(run_id: str, ctx: AuthContext = Depends(auth_required)):
+    rec = get_owned_run(_orchestrator, run_id, ctx.tenant_id)
     return rec.to_dict()
 
 
 @router.post("/workpaths/runs/{run_id}/approve")
-def approve_run(run_id: str, req: ApproveRequest):
-    rec = _orchestrator.get_run(run_id)
-    if rec is None:
-        raise HTTPException(404, "run 不存在")
+def approve_run(run_id: str, req: ApproveRequest,
+                ctx: AuthContext = Depends(auth_required)):
+    rec = get_owned_run(_orchestrator, run_id, ctx.tenant_id)
     if rec.status != RunStatus.REVIEW_REQUIRED:
         raise HTTPException(409, f"当前状态 {rec.status.value} 不需要审批")
     try:
@@ -237,26 +247,16 @@ def approve_run(run_id: str, req: ApproveRequest):
 
 
 @router.post("/workpaths/runs/{run_id}/resume")
-def resume_run(run_id: str, req: ResumeRequest):
-    """断点续跑 — 只重试 failed nodes, 不重新收费"""
-    rec = _orchestrator.get_run(run_id)
-    if rec is None:
-        raise HTTPException(404, "run 不存在")
-    failed = [n for n in rec.nodes if n.status == RunStatus.FAILED]
-    return {
-        "run_id": run_id,
-        "failed_nodes": [n.node_id for n in failed],
-        "retry_count": len(failed),
-        "no_repeat_billing": True,
-        "note": "已失败节点恢复; 幂等键保证 provider 不双扣",
-    }
+def resume_run(run_id: str, req: ResumeRequest,
+               ctx: AuthContext = Depends(auth_required)):
+    """Actual worker requeue is not wired; never report a false success."""
+    get_owned_run(_orchestrator, run_id, ctx.tenant_id)
+    raise HTTPException(501, "节点恢复未接入实际执行器；未重新执行或扣费")
 
 
 @router.get("/workpaths/runs/{run_id}/export")
-def export_run(run_id: str):
-    rec = _orchestrator.get_run(run_id)
-    if rec is None:
-        raise HTTPException(404, "run 不存在")
+def export_run(run_id: str, ctx: AuthContext = Depends(auth_required)):
+    rec = get_owned_run(_orchestrator, run_id, ctx.tenant_id)
     if rec.status != RunStatus.COMPLETED:
         return {"run_id": run_id, "ready": False, "status": rec.status.value}
     return {
@@ -294,10 +294,12 @@ def resolve_alias(req: ResolveAliasRequest, ctx: AuthContext = Depends(auth_requ
 
 
 @router.post("/assets/bind")
-def bind_alias(req: BindAliasRequest):
-    """显式绑定 alias → asset_version (用于上传时)"""
+def bind_alias(req: BindAliasRequest, ctx: AuthContext = Depends(auth_required)):
+    """Bind only into the authenticated tenant."""
+    if req.tenant_id != ctx.tenant_id:
+        raise HTTPException(403, "素材绑定租户不匹配")
     b = _resolver.bind(
-        tenant_id=req.tenant_id,
+        tenant_id=ctx.tenant_id,
         project_id=req.project_id,
         conversation_id=req.conversation_id,
         alias=req.alias,
