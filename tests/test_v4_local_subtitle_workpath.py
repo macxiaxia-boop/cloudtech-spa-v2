@@ -156,3 +156,15 @@ def test_second_workpath_refuses_invalid_real_segments_without_receipt(tmp_path,
     assert done["outcome"] == "FAILED_INPUT"
     assert store.get(run_id).status is RunStatus.FAILED
     assert store.receipt_count(run_id) == 0
+
+
+
+def test_subtitle_atomic_operation_is_reachable_from_common_v4_registry():
+    from workflows.v4.registry import OperationRegistry
+    result = OperationRegistry().dispatch(
+        "subtitle.format_supplied", {"segments": SEGMENTS},
+    )
+    assert result["mock"] is False
+    assert result["asr_performed"] is False
+    assert "欢迎来到 CloudTech" in result["srt"]
+    assert result["segment_count"] == 2
