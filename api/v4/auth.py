@@ -133,6 +133,14 @@ def auth_required(
     # An explicit test/development opt-in is required for the legacy mock API.
     dev_mode = os.environ.get("CLOUDTECH_ENV", "").strip().lower() in {"development", "test"}
     explicit_bypass = os.environ.get("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH") == "1"
+    # A configured but weak HS256 secret must never authorize production or
+    # an unspecified runtime. Test/dev compatibility requires explicit opt-in.
+    if secret is not None and len(secret.encode("utf-8")) < 32:
+        if not (dev_mode and explicit_bypass):
+            raise HTTPException(
+                status_code=503,
+                detail="[AUTH-010] JWT signing secret must be at least 32 bytes",
+            )
     if secret is None:
         if not (dev_mode and explicit_bypass):
             raise HTTPException(
