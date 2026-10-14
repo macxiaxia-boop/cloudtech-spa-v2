@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
 from api.v4 import router
-from workflows.v4.paths import list_paths
+from workflows.v4.paths import list_paths, FLAGSHIP_PATHS
 
 app = FastAPI()
 app.include_router(router)
@@ -24,14 +24,16 @@ client = TestClient(app)
 class TestFlagshipPathsRegistered:
     def test_six_paths_registered(self):
         paths = list_paths()
-        assert len(paths) == 6, f"expected 6 flagship paths, got {len(paths)}"
+        assert len(FLAGSHIP_PATHS) == 6, "original six flagships must stay intact"
+        assert len(paths) == 7, "six flagships plus one actual local extraction path required"
 
     def test_paths_have_required_fields(self):
         paths = list_paths()
         for p in paths:
             assert p["id"].startswith("WP-")
             assert p["title"]
-            assert len(p["steps"]) >= 3, f"{p['id']} has only {len(p['steps'])} steps"
+            minimum = 3 if p["id"] in FLAGSHIP_PATHS else 1
+            assert len(p["steps"]) >= minimum, f"{p['id']} has only {len(p['steps'])} steps"
             assert p["planner"]
             assert len(p["inputs"]) >= 1
             assert p["exported_artifacts"]
