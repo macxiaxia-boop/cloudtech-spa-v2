@@ -21,7 +21,7 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fetch(req).catch(async()=>(await caches.match(OFFLINE_PAGE))||Response.error()));
   return;
  }
- if(/^\/assets\/.+\.[a-z0-9]{8,}\.(?:js|css)$/i.test(url.pathname)){
+ if(/^\/assets\/.+[-.][a-z0-9_-]{8,}\.(?:js|css)$/i.test(url.pathname)){
   event.respondWith(caches.open(CACHE_VERSION).then(async cache=>{
    const hit=await cache.match(req);if(hit)return hit;
    const response=await fetch(req);
