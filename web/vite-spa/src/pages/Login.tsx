@@ -69,8 +69,8 @@ export function LoginPage() {
           <div className="space-y-1.5">
             <Label htmlFor="password">{t('login.password_placeholder')}</Label>
             <div className="relative">
-              <Input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder={t('login.password_placeholder')} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground" aria-label={showPassword ? '隐藏密码' : '显示密码'}>
+              <Input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder={t('login.password_placeholder')} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-14" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" aria-label={showPassword ? '隐藏密码' : '显示密码'}>
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
