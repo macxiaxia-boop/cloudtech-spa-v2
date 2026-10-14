@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional
+from urllib.parse import urlsplit
 
 # 已知的公开创作平台白名单（大小写不敏感）
 WHITELIST_DOMAINS: set[str] = {
@@ -44,25 +45,39 @@ class PermissionResult:
         }
 
 
+def _safe_hostname(url: str) -> str:
+    """Require a real HTTP(S) host; never classify domains by substring."""
+    try:
+        parsed = urlsplit(url)
+        if parsed.scheme not in ("https", "http") or not parsed.hostname:
+            return ""
+        if parsed.username is not None or parsed.password is not None:
+            return ""
+        return parsed.hostname.lower().rstrip(".")
+    except (ValueError, TypeError, AttributeError):
+        return ""
+
+
+def _is_subdomain(host: str, domain: str) -> bool:
+    return host == domain or host.endswith("." + domain)
+
+
 def _detect_platform(url: str) -> str:
-    """根据 URL 推断平台名称。"""
-    u = url.lower()
-    if "douyin.com" in u:
-        return "douyin"
-    if "xiaohongshu.com" in u:
-        return "xiaohongshu"
-    if "weibo.com" in u:
-        return "weibo"
-    if "channels.weixin.qq.com" in u:
-        return "video_weixin"
-    if "kuaishou.com" in u:
-        return "kuaishou"
-    if "mp.weixin.qq.com" in u:
-        return "wechat_mp"
-    if "bilibili.com" in u:
-        return "bilibili"
-    if "example.com" in u:
-        return "example"
+    host = _safe_hostname(url)
+    if not host:
+        return "unknown"
+    for domain, platform in (
+        ("channels.weixin.qq.com", "video_weixin"),
+        ("mp.weixin.qq.com", "wechat_mp"),
+        ("douyin.com", "douyin"),
+        ("xiaohongshu.com", "xiaohongshu"),
+        ("weibo.com", "weibo"),
+        ("kuaishou.com", "kuaishou"),
+        ("bilibili.com", "bilibili"),
+        ("example.com", "example"),
+    ):
+        if _is_subdomain(host, domain):
+            return platform
     return "unknown"
 
 
@@ -116,12 +131,12 @@ def check(
             rate_limit_remaining=100,
         ).to_dict()
 
-    # 其它平台允许但标注需 OAuth fallback
+    # Unknown hosts or invalid URLs cannot be treated as authorized.
     return PermissionResult(
-        allowed=True,
-        reason="NEED_OAUTH_FALLBACK_PLACEHOLDER",
+        allowed=False,
+        reason="PLATFORM_NOT_CONNECTED_OR_INVALID_URL",
         source_platform=detected,
-        rate_limit_remaining=100,
+        rate_limit_remaining=0,
     ).to_dict()
 
 
