@@ -86,12 +86,16 @@ def auth_required(
     ctx = AuthContext(tenant_id=tid, permissions=[])
 
     secret = _get_jwt_secret()
-    production = os.environ.get("CLOUDTECH_ENV", "").strip().lower() in {"production", "prod"}
-    if production and not secret:
-        # Missing a signing secret must never silently create an open production API.
-        raise HTTPException(status_code=503, detail="[AUTH-007] production signing secret missing")
+    # JWT is mandatory by default, INCLUDING when CLOUDTECH_ENV was never set.
+    # An explicit test/development opt-in is required for the legacy mock API.
+    dev_mode = os.environ.get("CLOUDTECH_ENV", "").strip().lower() in {"development", "test"}
+    explicit_bypass = os.environ.get("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH") == "1"
     if secret is None:
-        # Isolated development mode only. Production must never use this branch.
+        if not (dev_mode and explicit_bypass):
+            raise HTTPException(
+                status_code=503,
+                detail="[AUTH-007] V4 authentication unavailable; JWT signing secret required",
+            )
         return ctx
 
     # prod mode — 必须 JWT
