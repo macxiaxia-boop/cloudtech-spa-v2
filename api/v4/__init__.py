@@ -302,6 +302,26 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
     }
 
 
+@router.get("/workpaths/local-outputs")
+def list_local_output_catalog(
+    limit: int = Query(50, ge=1, le=100),
+    ctx: AuthContext = Depends(auth_required),
+):
+    """Only persisted, receipt-verified metadata from the caller's tenant."""
+    store = getattr(_orchestrator, "_store", None)
+    if store is None or getattr(store, "kind", "") != "SQLITE_LOCAL_DURABLE":
+        raise HTTPException(503, "当前没有可验证的持久化成果目录")
+    from workflows.v4.local_output_projector import LocalOutputProjector
+    projector = LocalOutputProjector(store)
+    items = projector.list_for_tenant(ctx.tenant_id, limit=limit)
+    return {
+        "items": items, "returned": len(items),
+        "source": "verified_local_outbox_catalog",
+        "raw_customer_content_in_response": False,
+        "production_ready": False,
+    }
+
+
 @router.get("/workpaths/runs")
 def list_run_records(
     limit: int = Query(50, ge=1, le=100),
