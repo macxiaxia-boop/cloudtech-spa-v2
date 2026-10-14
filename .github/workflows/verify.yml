@@ -54,25 +54,6 @@ jobs:
             tests/test_v22_forward_errors.py \
             --tb=short -q --junitxml=verify_junit.xml
 
-      - name: Setup Node for frontend API security regressions
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: web/vite-spa/package-lock.json
-
-      - name: Install declared SPA dependencies
-        working-directory: web/vite-spa
-        run: npm ci
-
-      - name: Test same-origin bearer safety and real request timeout abort
-        working-directory: web/vite-spa
-        run: npm test -- src/lib/api.test.ts
-
-      - name: Build the route-split SPA with actual code
-        working-directory: web/vite-spa
-        run: npm run build
-
       - name: Upload actual JUnit evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -106,3 +87,30 @@ jobs:
                   out.write(f'Actual PASS={passed} FAIL={failed} ERR={errors} SKIP={skip}; '
                             f'production approval: NOT INFERRED.\n')
           PY
+
+  frontend-security:
+    name: Frontend API security tests and Vite build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout original CloudTech repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: web/vite-spa/package-lock.json
+
+      - name: Install declared SPA dependencies
+        working-directory: web/vite-spa
+        run: npm ci
+
+      - name: Test same-origin bearer safety and real request timeout abort
+        working-directory: web/vite-spa
+        run: npm test -- src/lib/api.test.ts
+
+      - name: Build complete route-split SPA
+        working-directory: web/vite-spa
+        run: npm run build
