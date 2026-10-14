@@ -109,3 +109,16 @@ def test_production_without_signing_secret_fails_closed(monkeypatch):
     monkeypatch.delenv("V4_JWT_SECRET", raising=False)
     r = _run("tenant_prod")
     assert r.status_code == 503
+
+def test_unspecified_runtime_auth_is_fail_closed(monkeypatch):
+    monkeypatch.delenv("CLOUDTECH_ENV", raising=False)
+    monkeypatch.delenv("V4_JWT_SECRET", raising=False)
+    monkeypatch.delenv("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH", raising=False)
+    r = _run("tenant_unconfigured")
+    assert r.status_code == 503
+
+def test_dev_mode_requires_explicit_insecure_opt_in(monkeypatch):
+    monkeypatch.setenv("CLOUDTECH_ENV", "development")
+    monkeypatch.delenv("V4_JWT_SECRET", raising=False)
+    monkeypatch.delenv("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH", raising=False)
+    assert _run("tenant_dev").status_code == 503
