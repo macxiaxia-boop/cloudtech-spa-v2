@@ -180,11 +180,38 @@ class OperationRegistry:
 
             if op_id == "platform.permission_check":
                 r = Aplat.permission_gate.check(inputs["url"])
-                return {"status": getattr(r, "status", "unknown"), "reason": getattr(r, "reason", "")}
+                if not isinstance(r, dict):
+                    return {"ok": False, "status": "INVALID_PERMISSION_CONTRACT", "mock": True}
+                # The existing gate currently implements mock policy only;
+                # allowed=True is NOT proof of account authorization.
+                return {
+                    "ok": False,
+                    "status": "MOCK_PERMISSION_NOT_AUTHORIZED",
+                    "allowed_hint": bool(r.get("allowed", False)),
+                    "reason": r.get("reason", "UNKNOWN"),
+                    "source_platform": r.get("source_platform", "unknown"),
+                    "mock": True,
+                    "permission_verified": False,
+                }
 
             if op_id == "platform.homepage_parse":
-                works = Aplat.homepage_parser.parse_homepage(inputs["url"], limit=inputs.get("limit", 30))
-                return {"total": len(works), "items": _to_dict(works[:30])}
+                parsed = Aplat.homepage_parser.parse_homepage(
+                    inputs["url"], limit=inputs.get("limit", 30)
+                )
+                if not isinstance(parsed, dict) or not isinstance(parsed.get("items"), list):
+                    return {"ok": False, "status": "INVALID_HOMEPAGE_CONTRACT", "mock": True}
+                items = parsed["items"][:30]
+                # Existing parser creates MOCK works, not real platform data.
+                return {
+                    "ok": False,
+                    "status": "MOCK_HOMEPAGE_NOT_VERIFIED",
+                    "total": len(items),
+                    "items": _to_dict(items),
+                    "source_platform": parsed.get("source_platform"),
+                    "source_author": parsed.get("source_author"),
+                    "rights_status": "unknown_need_user_confirm",
+                    "mock": True,
+                }
 
             if op_id == "content.dedupe":
                 items = inputs.get("items", [])
@@ -267,9 +294,16 @@ class OperationRegistry:
                                    output_path=inputs.get("output_path", "/tmp/out.mp4"))))
 
             if op_id == "export.zip":
-                return {"package": "mock-zip", "files": list(inputs.keys()), "mock": True}
+                return {
+                    "ok": False, "status": "MOCK_EXPORT_NOT_AN_ARTIFACT",
+                    "package": "mock-zip", "files": list(inputs.keys()), "mock": True,
+                }
 
-            return {"op": op_id, "status": "stub", "inputs": inputs, "mock": True}
+            return {
+                "ok": False, "op": op_id, "status": "UNREGISTERED_OPERATION",
+                "error": "operation has no verified adapter; fail closed",
+                "mock": True,
+            }
 
         except Exception as e:
             return {"op": op_id, "status": "error", "error": str(e)[:300]}
