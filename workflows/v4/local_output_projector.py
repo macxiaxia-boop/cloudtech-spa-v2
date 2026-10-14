@@ -200,6 +200,25 @@ class LocalOutputProjector:
                     "event_id": lease.event_id, "artifact_kind": kind,
                     "tenant_id": run.tenant_id, "catalog_entries": 1}
 
+    def get_for_tenant_run(self, tenant_id: str, run_id: str) -> dict | None:
+        """Fetch exactly one independently ACKed deliverable by tenant and run.
+
+        Do not rely on a latest-N catalogue window: high throughput must not
+        make a real older result disappear from the caller's receipt check.
+        """
+        if not tenant_id or not run_id:
+            raise ValueError("tenant and run id required")
+        with self.store._connect() as db:
+            row = db.execute("""
+                SELECT c.run_id,c.node_id,c.path_id,c.artifact_kind,
+                       c.source_sha256,c.output_sha256,c.created_at
+                FROM v4_local_output_catalog AS c
+                JOIN v4_local_outbox AS o
+                  ON o.run_id=c.run_id AND o.tenant_id=c.tenant_id
+                WHERE c.tenant_id=? AND c.run_id=? AND o.state='ACKED'
+            """, (tenant_id, run_id)).fetchone()
+        return dict(row) if row is not None else None
+
     def list_for_tenant(self, tenant_id: str, *, limit: int = 50) -> list[dict]:
         if not tenant_id:
             raise ValueError("tenant ID required")
