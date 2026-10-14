@@ -264,12 +264,27 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
             "execution_started": False,
             "storage": _orchestrator.storage_kind,
         }
-    try:
-        _orchestrator.transition(rec.run_id, RunStatus.INPUT_BOUND)
-        _orchestrator.transition(rec.run_id, RunStatus.READY)
-    except Exception as e:
-        raise HTTPException(400, str(e))
-    saved = _orchestrator.get_run(rec.run_id)
+    # Multiple clients may POST the same idempotency key simultaneously.
+    # Converge on READY rather than wrongly returning 400 when another
+    # request has already completed one of the state transitions.
+    observed = _orchestrator.get_run(rec.run_id)
+    for before, after in (
+        (RunStatus.PLANNED, RunStatus.INPUT_BOUND),
+        (RunStatus.INPUT_BOUND, RunStatus.READY),
+    ):
+        if observed is not None and observed.status == before:
+            try:
+                _orchestrator.transition(rec.run_id, after)
+            except RunStatusError:
+                # A racing same-key caller may have moved state already;
+                # re-read authoritative storage instead of claiming success.
+                pass
+        observed = _orchestrator.get_run(rec.run_id)
+    if observed is None or observed.status not in (RunStatus.READY,):
+        raise HTTPException(
+            503, "任务创建状态尚未可靠收口；使用相同幂等键安全重试"
+        )
+    saved = observed
     return {
         "run_id": rec.run_id,
         "status": saved.status.value if saved else "UNKNOWN",
