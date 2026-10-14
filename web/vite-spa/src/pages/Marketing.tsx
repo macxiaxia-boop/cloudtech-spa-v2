@@ -85,7 +85,9 @@ export function MarketingPage() {
           </div>
           {/* Hero 插画 */}
           <div className="relative">
-            <img
+            <picture>
+              <source type="image/webp" srcSet="/images/optimized/ai-team-480.webp 480w, /images/optimized/ai-team-768.webp 768w, /images/optimized/ai-team-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
+              <img
               src="/images/ai-team.jpeg"
               fetchPriority="high"
               width={1024}
@@ -95,6 +97,7 @@ export function MarketingPage() {
               alt="5 AI 数字员工团队"
               className="rounded-2xl shadow-2xl w-full h-auto"
             />
+            </picture>
             <div className="absolute -bottom-4 -left-4 bg-card p-3 rounded-lg shadow-lg border border-gray-200">
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -236,7 +239,9 @@ export function MarketingPage() {
               </Link>
             </div>
             <div>
-              <img
+              <picture>
+                <source type="image/webp" srcSet="/images/optimized/dashboard-preview-480.webp 480w, /images/optimized/dashboard-preview-768.webp 768w, /images/optimized/dashboard-preview-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
+                <img
                 src="/images/dashboard-preview.jpeg"
                 width={1024}
                 height={1024}
@@ -245,6 +250,7 @@ export function MarketingPage() {
                 alt="Cloud 仪表盘预览"
                 className="rounded-2xl shadow-2xl w-full h-auto"
               />
+              </picture>
             </div>
           </div>
         </div>
@@ -266,7 +272,9 @@ export function MarketingPage() {
         <div className="max-w-page mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <img
+              <picture>
+                <source type="image/webp" srcSet="/images/optimized/opc-hero-480.webp 480w, /images/optimized/opc-hero-768.webp 768w, /images/optimized/opc-hero-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
+                <img
                 src="/images/opc-hero.jpeg"
                 width={1024}
                 height={1024}
@@ -275,6 +283,7 @@ export function MarketingPage() {
                 alt="OPC 1 人 + AI 创业"
                 className="rounded-2xl shadow-2xl w-full h-auto"
               />
+              </picture>
             </div>
             <div>
               <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm mb-3">
