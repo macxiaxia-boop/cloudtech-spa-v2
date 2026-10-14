@@ -108,6 +108,7 @@ const AgentsPage = lazy(() => import('./pages/Agents').then(m => ({ default: m.A
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 /* Lazy-load WorkflowEditor + Workflows (xyflow 67KB) */
+const LocalWorkPathsPage = lazy(() => import('./pages/LocalWorkPaths').then(m => ({ default: m.LocalWorkPathsPage })));
 const WorkflowsPage = lazy(() => import('./pages/Workflows').then((m) => ({ default: m.WorkflowsPage })));
 const WorkflowEditorPage = lazy(() => import('./pages/WorkflowEditor').then((m) => ({ default: m.WorkflowEditorPage })));
 
@@ -245,6 +246,7 @@ export default function App() {
       <Route path="/knowledge" element={<RequireAuth><BasicLayout><KnowledgePage /></BasicLayout></RequireAuth>} />
       <Route path="/files" element={<RequireAuth><BasicLayout><FilesPage /></BasicLayout></RequireAuth>} />
       <Route path="/workflows" element={<RequireAuth><BasicLayout><Suspense fallback={<PageLoading />}><WorkflowsPage /></Suspense></BasicLayout></RequireAuth>} />
+      <Route path="/workflows/local" element={<RequireAuth><BasicLayout><Suspense fallback={<PageLoading />}><LocalWorkPathsPage /></Suspense></BasicLayout></RequireAuth>} />
       <Route path="/workflows/new" element={<RequireAuth><BasicLayout showBreadcrumb={false}><Suspense fallback={<PageLoading />}><WorkflowEditorPage /></Suspense></BasicLayout></RequireAuth>} />
       <Route path="/workflows/:id" element={<RequireAuth><BasicLayout showBreadcrumb={false}><Suspense fallback={<PageLoading />}><WorkflowEditorPage /></Suspense></BasicLayout></RequireAuth>} />
       <Route path="/settings" element={<RequireAuth><BasicLayout><SettingsPage /></BasicLayout></RequireAuth>} />
