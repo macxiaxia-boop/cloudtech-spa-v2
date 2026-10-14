@@ -103,7 +103,8 @@ def saas_info():
         'capabilities': CAPABILITIES,
         'sku_count': len(SKUS),
         'skus': SKUS,
-        'trial': {'days': 7, 'plan': 'pro', 'auto_grant': True},
+        'trial': {'days': 7, 'plan': 'pro', 'auto_grant': False,
+                  'requires_verified_subscription': True},
         'referral': {'referee_pts': 50, 'referrer_pts': 100},
         'support_email': 'support@lynxce.ai',
         'docs_url': '/docs',
@@ -125,11 +126,12 @@ async def saas_register(request: Request):
     user_id = 'u_' + secrets.token_hex(6)
     tenant_id = 't_' + secrets.token_hex(6)
     conn = sqlite3.connect(DB); c = conn.cursor()
+    subscription_written = False
     try:
         c.execute('INSERT INTO saas_users (user_id,email,password_hash,salt,tenant_id,industry,plan,created_at) VALUES (?,?,?,?,?,?,?,?)',
-                  (user_id, email, _hash_pwd(pwd, salt), salt, tenant_id, industry, 'pro', datetime.utcnow().isoformat()))
+                  (user_id, email, _hash_pwd(pwd, salt), salt, tenant_id, industry, 'basic', datetime.utcnow().isoformat()))
         c.execute('INSERT INTO saas_tenants (tenant_id,name,industry,plan,sku_id,created_at,active) VALUES (?,?,?,?,?,?,1)',
-                  (tenant_id, tenant_name, industry, 'pro', sku_id, datetime.utcnow().isoformat()))
+                  (tenant_id, tenant_name, industry, 'basic', sku_id, datetime.utcnow().isoformat()))
         # R321 修: register 同时建 aios_subscription 行 (upgrade/downgrade 才能找到)
         try:
             sub_id = 'sub_' + secrets.token_hex(6)
@@ -138,10 +140,17 @@ async def saas_register(request: Request):
             c.execute(
                 'INSERT INTO aios_subscription (subscription_id, tenant_id, industry, plan, sku_code, amount_cny, status, activated_at, expires_at, created_at)'
                 ' VALUES (?,?,?,?,?,?,?,?,?,?)',
-                (sub_id, tenant_id, industry, 'pro', sku_id, 1999, 'active', now_iso, expires_iso, now_iso),
+                (sub_id, tenant_id, industry, 'pro', sku_id, 0, 'trial', now_iso, expires_iso, now_iso),
             )
-        except Exception as e:
-            print(f'[register aios_subscription fail] {e}')
+            # Do not promote user/tenant to pro unless a durable subscription
+            # entitlement was inserted in the same SQLite transaction.
+            c.execute("UPDATE saas_users SET plan='pro' WHERE user_id=?", (user_id,))
+            c.execute("UPDATE saas_tenants SET plan='pro' WHERE tenant_id=?", (tenant_id,))
+            subscription_written = True
+        except sqlite3.Error:
+            # Many historical DBs have no subscription table. Keep a real
+            # basic account, but NEVER promise an unpersisted 7-day trial.
+            subscription_written = False
         conn.commit()
     except sqlite3.IntegrityError:
         raise HTTPException(409, detail={'error': 'email already registered'})
@@ -150,7 +159,8 @@ async def saas_register(request: Request):
     token = _mint_jwt(user_id, tenant_id)
     # R321 修: 注册成功后入队欢迎邮件 (smoke mode: 入队即视为已发送)
     # 真根因: register 原本完全没调邮件/通知, 用户实测 "发出去没回应"
-    trial_end_at = (datetime.utcnow() + timedelta(days=7)).isoformat()
+    trial_end_at = (datetime.utcnow() + timedelta(days=7)).isoformat() if subscription_written else None
+    actual_plan = 'pro' if subscription_written else 'basic'
     welcome_email_sent = False
     welcome_email_queued = False
     try:
@@ -159,14 +169,14 @@ async def saas_register(request: Request):
         welcome_html = (
             f'<h1>欢迎 {html_escape(name)}!</h1>'
             f'<p>感谢注册灵策智算 SaaS。您的账号已激活。</p>'
-            f'<p>当前 plan: <b>pro</b> · 7 天试用至 <b>{trial_end_at}</b></p>'
+            f'<p>当前账户套餐: <b>{actual_plan}</b>。试用权益: <b>{trial_end_at or "未开通"}</b></p>'
             f'<p><a href="http://localhost:5099/dashboard?from=welcome">立即登录 →</a></p>'
         )
         c2.execute(
             "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
             " VALUES (?,?,?,?,?,?,?,?,?)",
             (email, 'welcome', '欢迎加入灵策智算 / LynxceAI', welcome_html,
-             json.dumps({'name': name, 'plan': 'pro'}), 'queued', 0,
+             json.dumps({'name': name, 'plan': actual_plan}), 'queued', 0,
              datetime.utcnow().isoformat(), None),
         )
         conn2.commit()
@@ -178,7 +188,7 @@ async def saas_register(request: Request):
 
     return {
         'status': 'ok', 'user_id': user_id, 'tenant_id': tenant_id, 'token': token,
-        'plan': 'pro', 'trial_days': 7,
+        'plan': actual_plan, 'trial_days': 7 if subscription_written else 0,
         'trial_end_at': trial_end_at,
         'welcome_email_sent': welcome_email_sent,
         'welcome_email_queued': welcome_email_queued,
@@ -186,9 +196,9 @@ async def saas_register(request: Request):
         'next_steps': [
             '登录 dashboard 配置你的业务画像',
             '邀请 1 位同事加入 (推荐有奖 +100 积分)',
-            '试用 7 天 pro plan · 到期自动降级 basic',
+            '查询订阅记录后再显示试用状态；无记录不提供付费试用权益',
         ],
-        'msg': '注册成功 · 试用资格待实际核验 · 欢迎邮件已入队或待发送',
+        'msg': '账户注册成功 · 试用权益仅以已写入的订阅记录为准',
     }
 
 @router.post('/login')
@@ -343,7 +353,7 @@ document.getElementById('f').onsubmit = async e => {
   const j = await r.json();
   const m = document.getElementById('msg');
   m.style.display='block';
-  if (r.ok) { m.className='msg ok'; m.innerText = j.msg + ' | tenant=' + j.tenant_id + ' | token=' + j.token.slice(0,20)+'...'; setTimeout(()=>location.href='/chat?token='+j.token, 2500); }
+  if (r.ok) { m.className='msg ok'; m.innerText = '注册请求已处理。请前往登录页核验企业身份及实际权益。'; setTimeout(()=>location.href='/login', 2500); }
   else { m.className='msg err'; m.innerText = (j.detail && j.detail.error) || JSON.stringify(j); }
 };
 </script></body></html>''')
