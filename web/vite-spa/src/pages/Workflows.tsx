@@ -38,6 +38,8 @@ export function WorkflowsPage() {
   const [extractError, setExtractError] = useState('');
   const [lastRunId, setLastRunId] = useState('');
   const [lastRunStorage, setLastRunStorage] = useState('');
+  const [queuedRunId, setQueuedRunId] = useState('');
+  const [queueState, setQueueState] = useState('');
 
   async function refresh() {
     setLoading(true);
@@ -96,6 +98,76 @@ export function WorkflowsPage() {
       setExtracting(false);
     }
   }
+
+  async function enqueueHTML() {
+    setExtracting(true);
+    setExtractError('');
+    setArticle(null);
+    try {
+      if (new TextEncoder().encode(html).length > 1_800_000) {
+        throw new Error('HTML 不得超过 1.8MB');
+      }
+      const created = await workPathClient.createRun({
+        path_id: 'WP-LOCAL-ARTICLE-EXTRACT',
+        revision: 1,
+        input_bindings: { html, source_url: sourceUrl },
+      });
+      const queued = await workPathClient.enqueueLocalRun(created.run_id);
+      setLastRunId(created.run_id);
+      setLastRunStorage(queued.storage);
+      setQueuedRunId(created.run_id);
+      setQueueState(queued.state);
+      await refresh();
+    } catch (err) {
+      setExtractError(err instanceof Error ? err.message : '任务入队失败');
+    } finally {
+      setExtracting(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!queuedRunId) return;
+    let alive = true;
+    const check = async () => {
+      try {
+        const state = await workPathClient.getLocalQueueStatus(queuedRunId);
+        if (!alive) return;
+        setQueueState(state.state);
+        if (state.state === 'DONE') {
+          const record = await workPathClient.getRun(queuedRunId);
+          if (!alive) return;
+          const nodes = record.nodes as Array<{
+            status: string;
+            output_ref?: ArticlePreview;
+          }> | undefined;
+          const extracted = nodes?.length === 1 ? nodes[0].output_ref : undefined;
+          if (record.status !== 'COMPLETED' ||
+              nodes?.[0]?.status !== 'COMPLETED' ||
+              extracted?.mock !== false || !extracted?.content_sha256) {
+            throw new Error('Worker 已结束但结果缺少可验证的持久化凭证');
+          }
+          setArticle({ ...extracted, saved: lastRunStorage === 'SQLITE_LOCAL_DURABLE' });
+          setQueuedRunId('');
+          await refresh();
+        } else if (state.state === 'FAILED') {
+          setExtractError(`Worker 失败：${state.error_code || '未知错误'}，请查看本地操作日志`);
+          setQueuedRunId('');
+          await refresh();
+        }
+      } catch (err) {
+        if (alive) {
+          setExtractError(err instanceof Error ? err.message : '无法查询队列状态');
+          setQueuedRunId('');
+        }
+      }
+    };
+    void check();
+    const timer = window.setInterval(() => void check(), 3000);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+    };
+  }, [queuedRunId]);
 
   const selected = paths.find((path) => path.id === selectedPath);
   return (
@@ -208,10 +280,31 @@ export function WorkflowsPage() {
                     onChange={(e) => setHtml(e.target.value)}
                     rows={6} className="w-full border border-border rounded p-3 text-sm"
                     placeholder="<article>...</article>" />
-          <Button type="button" disabled={extracting || !html.trim()}
-                  onClick={() => void extractHTML()}>
-            {extracting ? '正在执行任务…' : '创建并执行真实 HTML 提取任务'}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button"
+                    disabled={extracting || !!queuedRunId || !html.trim() ||
+                              runStorage !== 'SQLITE_LOCAL_DURABLE'}
+                    onClick={() => void enqueueHTML()}>
+              {queuedRunId ? 'Worker 任务处理中…' : '提交独立 Worker 队列'}
+            </Button>
+            <Button type="button" variant="outline"
+                    disabled={extracting || !!queuedRunId || !html.trim()}
+                    onClick={() => void extractHTML()}>
+              {extracting ? '正在执行任务…' : '在 API 内同步执行（测试）'}
+            </Button>
+          </div>
+          {runStorage !== 'SQLITE_LOCAL_DURABLE' && (
+            <p role="status" className="text-xs text-muted-foreground">
+              独立 Worker 队列需要服务端单机事务存储；当前仅允许测试同步执行。
+            </p>
+          )}
+          {queuedRunId && (
+            <p role="status" className="text-sm text-muted-foreground">
+              已进入真实队列：{queueState || '读取中'}。
+              {workerConnected ? '正在等待已检测到的 Worker。' :
+                '尚未检测到常驻 Worker，任务会保留在队列中。'}
+            </p>
+          )}
           {extractError && <p role="alert" className="text-sm text-destructive-600">{extractError}</p>}
           {lastRunId && (
             <p className="text-xs text-muted-foreground break-all">
