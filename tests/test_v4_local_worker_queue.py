@@ -259,3 +259,41 @@ def test_completed_node_receipt_cannot_be_rewritten_or_deleted(tmp_path):
     # A non-mutating replay must still work without minting another receipt.
     assert store.mutate(run_id, lambda rec: "unchanged") == "unchanged"
     assert store.receipt_count(run_id) == 1
+
+
+def test_heartbeat_cannot_shorten_valid_local_job_lease(tmp_path):
+    """Short heartbeat from a slow/clock-skewed worker cannot allow early theft."""
+    store, _, run_id = setup_run(tmp_path)
+    q = LocalJobQueue(store)
+    q.enqueue(run_id, "t1")
+    lease = q.claim(lease_seconds=3600)
+    assert lease is not None
+    with store._connect() as db:
+        original = db.execute(
+            "SELECT lease_until FROM v4_local_jobs WHERE run_id=?", (run_id,)
+        ).fetchone()["lease_until"]
+    assert q.heartbeat(lease, seconds=30) is True
+    with store._connect() as db:
+        after = db.execute(
+            "SELECT lease_until FROM v4_local_jobs WHERE run_id=?", (run_id,)
+        ).fetchone()["lease_until"]
+    assert after >= original, "heartbeat may extend but may never reduce an active lease"
+    # A second worker still cannot take the long active lease.
+    assert LocalJobQueue(store).claim() is None
+
+
+def test_heartbeat_fences_invalid_tenant_stale_token_and_expired_lease(tmp_path):
+    from dataclasses import replace
+    store, _, run_id = setup_run(tmp_path)
+    q = LocalJobQueue(store)
+    q.enqueue(run_id, "t1")
+    lease = q.claim(lease_seconds=60)
+    assert lease is not None
+    assert q.heartbeat(replace(lease, tenant_id="other"), seconds=60) is False
+    assert q.heartbeat(replace(lease, token="wrong-token"), seconds=60) is False
+    with store._connect() as db:
+        db.execute("UPDATE v4_local_jobs SET lease_until=? WHERE run_id=?",
+                   (time.time() - 2, run_id))
+    assert q.heartbeat(lease, seconds=60) is False
+    assert store.get(run_id).status == RunStatus.READY
+    assert LocalJobQueue(store).claim() is not None
