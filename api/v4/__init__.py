@@ -214,6 +214,22 @@ def list_operations(kind: Optional[str] = Query(None)):
     }
 
 
+@router.get("/workpaths/capabilities")
+def workpath_capabilities():
+    """Read-only report, NOT a live provider availability claim."""
+    from workflows.v4.capability_preflight import inspect_all_paths
+    return inspect_all_paths()
+
+
+@router.get("/workpaths/{path_id}/preflight")
+def workpath_preflight(path_id: str):
+    from workflows.v4.capability_preflight import inspect_path
+    try:
+        return inspect_path(path_id)
+    except KeyError:
+        raise HTTPException(404, f"unknown workpath: {path_id}") from None
+
+
 @router.post("/workpaths/runs")
 def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required)):
     """创建 workpath run; 检查路径 + 幂等"""
