@@ -164,6 +164,10 @@ class OperationRegistry:
         # Load only the adapter used by the selected operation. Importing all
         # optional adapters here broke even local URL normalization / dedupe.
         try:
+            if op_id == "content.local_text_analyze":
+                from adapters.content.local_text_analysis import analyze_user_article
+                return analyze_user_article(inputs.get("parsed"))
+
             if op_id == "subtitle.format_supplied":
                 from adapters.transcribe.supplied_subtitle_export import (
                     format_supplied_segments,
