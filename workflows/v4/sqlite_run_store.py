@@ -182,7 +182,7 @@ class SQLiteRunStore:
             if row is None:
                 raise RunStoreError("run not found")
             record = _restore(row["snapshot"])
-            old_nodes = {n.node_id: n for n in record.nodes}
+            old_nodes = {n.node_id: n.status for n in record.nodes}
             old_tenant = record.tenant_id
             old_key = record.idempotency_key
             old_fingerprint = row["fingerprint"]
@@ -196,7 +196,7 @@ class SQLiteRunStore:
             for node in record.nodes:
                 old = old_nodes.get(node.node_id)
                 if node.status != RunStatus.COMPLETED or (
-                    old is not None and old.status == RunStatus.COMPLETED
+                    old is not None and old == RunStatus.COMPLETED
                 ):
                     continue
                 db.execute("""
