@@ -23,6 +23,8 @@ from workflows.v4 import (
 )
 from workflows.v4.contract import validate_definition, validate_inputs, ContractError
 from workflows.v4.paths import FLAGSHIP_PATHS, get_path, list_paths
+from workflows.v4.capability_preflight import inspect_all_paths, inspect_path
+from workflows.v4.orchestrator import RunStatusError
 from workflows.v4.audit_evidence import on_auth
 from .auth import auth_required, AuthContext
 
@@ -174,6 +176,28 @@ def list_operations(kind: Optional[str] = Query(None)):
     }
 
 
+@router.get("/workpaths/capabilities")
+def workpath_capabilities():
+    """Read-only static execution facts; never probes a remote provider."""
+    return inspect_all_paths()
+
+
+@router.get("/workpaths/{path_id}/preflight")
+def workpath_preflight(path_id: str):
+    try:
+        return inspect_path(path_id)
+    except KeyError:
+        raise HTTPException(404, f"未知 path_id: {path_id}") from None
+
+
+def _owned_run(run_id: str, ctx: AuthContext):
+    record = _orchestrator.get_run(run_id)
+    # 404 (not 403) avoids leaking cross-tenant run existence.
+    if record is None or record.tenant_id != ctx.tenant_id:
+        raise HTTPException(404, "run 不存在")
+    return record
+
+
 @router.post("/workpaths/runs")
 def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required)):
     """创建 workpath run; 检查路径 + 幂等"""
@@ -191,42 +215,55 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
             MediaGate.check(step.operation, step.cost_class)
         except MediaGateError as e:
             raise HTTPException(400, str(e))
-    # 检查幂等
+    # Explicit key is always scoped by tenant + path in the orchestrator.
+    # Capture prior id for informational idempotent_hit only; the actual
+    # compare-and-create is atomic inside V4Orchestrator.create_run.
+    previous_run_id = None
     if req.idempotency_key:
-        hit = _orchestrator.idempotency.check(req.idempotency_key)
-        if hit and hit.run_id:
-            return {"run_id": hit.run_id, "idempotent_hit": True}
-    rec = _orchestrator.create_run(
-        path_id=req.path_id,
-        path_revision=req.revision,
-        tenant_id=tenant_id,
-        input_bindings=req.input_bindings,
-        idempotency_key=req.idempotency_key,
-        project_id=req.project_id,
-        conversation_id=req.conversation_id,
-        budget_cap_cents=req.budget_cap_cents,
-    )
+        scoped = f"{tenant_id}|{req.path_id}|{req.idempotency_key}"
+        old = _orchestrator.idempotency.check(scoped)
+        previous_run_id = old.run_id if old is not None else None
     try:
-        _orchestrator.transition(rec.run_id, RunStatus.INPUT_BOUND)
-        _orchestrator.transition(rec.run_id, RunStatus.READY)
-    except Exception as e:
-        raise HTTPException(400, str(e))
-    return {"run_id": rec.run_id, "status": rec.status.value}
+        rec = _orchestrator.create_run(
+            path_id=req.path_id,
+            path_revision=req.revision,
+            tenant_id=tenant_id,
+            input_bindings=req.input_bindings,
+            idempotency_key=req.idempotency_key,
+            project_id=req.project_id,
+            conversation_id=req.conversation_id,
+            budget_cap_cents=req.budget_cap_cents,
+        )
+    except RunStatusError as exc:
+        raise HTTPException(409, str(exc)) from exc
 
+    if rec.status == RunStatus.PLANNED:
+        try:
+            _orchestrator.transition(rec.run_id, RunStatus.INPUT_BOUND)
+            _orchestrator.transition(rec.run_id, RunStatus.READY)
+        except Exception as exc:
+            raise HTTPException(400, str(exc)) from exc
+    capability = inspect_path(req.path_id)
+    return {
+        "run_id": rec.run_id,
+        "status": rec.status.value,
+        "idempotent_hit": previous_run_id == rec.run_id,
+        "execution_ready": capability["execution_ready"],
+        "unimplemented_or_mock_nodes": [
+            n["id"] for n in capability["nodes"] if n["blocked"]
+        ],
+        "note": "READY is a planning status, NOT proof of executable adapters",
+    }
 
 @router.get("/workpaths/runs/{run_id}")
-def get_run(run_id: str):
-    rec = _orchestrator.get_run(run_id)
-    if rec is None:
-        raise HTTPException(404, "run 不存在")
+def get_run(run_id: str, ctx: AuthContext = Depends(auth_required)):
+    rec = _owned_run(run_id, ctx)
     return rec.to_dict()
 
 
 @router.post("/workpaths/runs/{run_id}/approve")
-def approve_run(run_id: str, req: ApproveRequest):
-    rec = _orchestrator.get_run(run_id)
-    if rec is None:
-        raise HTTPException(404, "run 不存在")
+def approve_run(run_id: str, req: ApproveRequest, ctx: AuthContext = Depends(auth_required)):
+    rec = _owned_run(run_id, ctx)
     if rec.status != RunStatus.REVIEW_REQUIRED:
         raise HTTPException(409, f"当前状态 {rec.status.value} 不需要审批")
     try:
@@ -237,28 +274,29 @@ def approve_run(run_id: str, req: ApproveRequest):
 
 
 @router.post("/workpaths/runs/{run_id}/resume")
-def resume_run(run_id: str, req: ResumeRequest):
-    """断点续跑 — 只重试 failed nodes, 不重新收费"""
-    rec = _orchestrator.get_run(run_id)
-    if rec is None:
-        raise HTTPException(404, "run 不存在")
+def resume_run(run_id: str, req: ResumeRequest, ctx: AuthContext = Depends(auth_required)):
+    """Read-only resume preview; never claim to have actually dispatched."""
+    rec = _owned_run(run_id, ctx)
     failed = [n for n in rec.nodes if n.status == RunStatus.FAILED]
     return {
         "run_id": run_id,
         "failed_nodes": [n.node_id for n in failed],
         "retry_count": len(failed),
-        "no_repeat_billing": True,
-        "note": "已失败节点恢复; 幂等键保证 provider 不双扣",
+        "no_repeat_billing": False,
+        "scheduled": False,
+        "note": "仅列出可恢复节点；尚未调度执行，也不能保证外部供应商不重复计费",
     }
 
 
 @router.get("/workpaths/runs/{run_id}/export")
-def export_run(run_id: str):
-    rec = _orchestrator.get_run(run_id)
-    if rec is None:
-        raise HTTPException(404, "run 不存在")
-    if rec.status != RunStatus.COMPLETED:
-        return {"run_id": run_id, "ready": False, "status": rec.status.value}
+def export_run(run_id: str, ctx: AuthContext = Depends(auth_required)):
+    rec = _owned_run(run_id, ctx)
+    if rec.status != RunStatus.COMPLETED or not rec.nodes:
+        return {
+            "run_id": run_id, "ready": False,
+            "status": rec.status.value,
+            "reason": "no independently verified output artifacts" if not rec.nodes else None,
+        }
     return {
         "run_id": run_id,
         "ready": True,
