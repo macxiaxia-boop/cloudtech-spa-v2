@@ -232,10 +232,13 @@ class TestRegistryRealDispatch:
         assert "topic_cards" in out["files"]
 
     def test_dispatch_unknown_returns_stub(self):
+        # Previously returned a misleading stub as if it were an operation.
+        # Fail-closed is intentional; the caller must create a GAP task.
         from workflows.v4.registry import OperationRegistry
         r = OperationRegistry()
         out = r.dispatch("unknown.op.id", {})
-        assert out["status"] == "stub"
+        assert out["status"] == "UNREGISTERED_OPERATION"
+        assert out["ok"] is False
 
     def test_dispatch_with_llm_provider_runs_adapter(self):
         from workflows.v4.registry import OperationRegistry
