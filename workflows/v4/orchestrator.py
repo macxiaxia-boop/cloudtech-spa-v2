@@ -142,28 +142,43 @@ class V4Orchestrator:
         conversation_id: Optional[str] = None,
         budget_cap_cents: int = 0,
     ) -> WorkPathRunRecord:
-        if idempotency_key:
-            hit = self.idempotency.check(idempotency_key)
-            if hit and hit.run_id:
-                existing = self._runs.get(hit.run_id)
-                if existing is not None:
-                    return existing  # 同一幂等键返回原 run, 禁止重复收费
-        run_id = "wpr_" + secrets.token_hex(8)
-        rec = WorkPathRunRecord(
-            run_id=run_id,
-            path_id=path_id,
-            path_revision=path_revision,
-            tenant_id=tenant_id,
-            project_id=project_id,
-            conversation_id=conversation_id,
-            input_bindings=input_bindings,
-            idempotency_key=idempotency_key,
-            budget_cap_cents=budget_cap_cents,
+        # Atomic per-instance create/check/bind prevents two simultaneous HTTP
+        # requests from allocating different runs under one explicit key.
+        scoped_key = (
+            f"{tenant_id}|{path_id}|{idempotency_key}" if idempotency_key else None
         )
         with self._mtx:
+            if scoped_key:
+                hit = self.idempotency.check(scoped_key)
+                if hit and hit.run_id:
+                    existing = self._runs.get(hit.run_id)
+                    if existing is not None:
+                        if (
+                            existing.tenant_id != tenant_id
+                            or existing.path_id != path_id
+                            or existing.path_revision != path_revision
+                            or existing.input_bindings != input_bindings
+                            or existing.project_id != project_id
+                        ):
+                            raise RunStatusError(
+                                "idempotency key reused with different run parameters"
+                            )
+                        return existing
+            run_id = "wpr_" + secrets.token_hex(8)
+            rec = WorkPathRunRecord(
+                run_id=run_id,
+                path_id=path_id,
+                path_revision=path_revision,
+                tenant_id=tenant_id,
+                project_id=project_id,
+                conversation_id=conversation_id,
+                input_bindings=input_bindings,
+                idempotency_key=scoped_key,
+                budget_cap_cents=budget_cap_cents,
+            )
             self._runs[run_id] = rec
-        if idempotency_key:
-            self.idempotency.bind(idempotency_key, run_id)
+            if scoped_key:
+                self.idempotency.bind(scoped_key, run_id)
         return rec
 
     def transition(self, run_id: str, target: RunStatus) -> WorkPathRunRecord:
