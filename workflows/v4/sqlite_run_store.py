@@ -258,7 +258,17 @@ class SQLiteRunStore:
                   or local_job["lease_until"] <= time.time()):
                 raise RunStoreConflict("expired or superseded worker lease; result rejected")
             record = _restore(row["snapshot"])
+            from .orchestrator import RunStatus
             old_nodes = {n.node_id: n.status for n in record.nodes}
+            # Previously committed completion receipts are immutable: later
+            # updates must not edit, delete or duplicate completed node output.
+            old_completed = {
+                n.node_id: json.dumps(
+                    n.to_dict(), sort_keys=True, ensure_ascii=False,
+                    allow_nan=False,
+                )
+                for n in record.nodes if n.status == RunStatus.COMPLETED
+            }
             old_tenant = record.tenant_id
             old_key = record.idempotency_key
             old_fingerprint = row["fingerprint"]
@@ -266,6 +276,20 @@ class SQLiteRunStore:
             if (record.tenant_id != old_tenant or record.idempotency_key != old_key
                     or _fingerprint(record) != old_fingerprint):
                 raise RunStoreConflict("immutable tenant, idempotency or request changed")
+            current_ids = [n.node_id for n in record.nodes]
+            if len(current_ids) != len(set(current_ids)):
+                raise RunStoreConflict("duplicate node id in run snapshot")
+            current_completed = {n.node_id: n for n in record.nodes}
+            for node_id, saved in old_completed.items():
+                node = current_completed.get(node_id)
+                if (node is None or node.status != RunStatus.COMPLETED
+                        or json.dumps(
+                            node.to_dict(), sort_keys=True, ensure_ascii=False,
+                            allow_nan=False,
+                        ) != saved):
+                    raise RunStoreConflict(
+                        "previously completed node receipt is immutable"
+                    )
             # Persist only newly completed receipts. Replayed identical receipts
             # are a read-only no-op and cannot double-charge.
             from .orchestrator import RunStatus
