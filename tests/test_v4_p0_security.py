@@ -110,6 +110,38 @@ def test_production_without_signing_secret_fails_closed(monkeypatch):
     r = _run("tenant_prod")
     assert r.status_code == 503
 
+def test_short_jwt_secret_denied_outside_explicit_dev(monkeypatch):
+    """A valid HMAC is not sufficient when the signing key is trivially short."""
+    from api.v4.auth import mint_jwt
+    monkeypatch.setenv("V4_JWT_SECRET", "guessable")
+    monkeypatch.delenv("CLOUDTECH_SAAS_JWT_SECRET", raising=False)
+    monkeypatch.setenv("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH", "1")
+    token = mint_jwt("tenant_secure", user_id="user_1")
+    for deployment in ("production", "staging", ""):
+        monkeypatch.setenv("CLOUDTECH_ENV", deployment)
+        response = client.get(
+            "/v4/workpaths/runs?tenant_id=tenant_secure",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == 503, (deployment, response.text)
+        assert "AUTH-010" in response.text
+
+
+def test_short_secret_opt_in_is_test_only(monkeypatch):
+    """Historical isolated V4 tests may explicitly opt in; no prod bypass."""
+    from api.v4.auth import mint_jwt
+    monkeypatch.setenv("CLOUDTECH_ENV", "test")
+    monkeypatch.setenv("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH", "1")
+    monkeypatch.setenv("V4_JWT_SECRET", "guessable")
+    monkeypatch.delenv("CLOUDTECH_SAAS_JWT_SECRET", raising=False)
+    token = mint_jwt("tenant_test", user_id="user_1")
+    response = client.get(
+        "/v4/workpaths/runs?tenant_id=tenant_test",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200, response.text
+
+
 def test_unspecified_runtime_auth_is_fail_closed(monkeypatch):
     monkeypatch.delenv("CLOUDTECH_ENV", raising=False)
     monkeypatch.delenv("V4_JWT_SECRET", raising=False)
