@@ -1,0 +1,31 @@
+name: P5 CloudTech pipeline truth tests
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - "auto_pipeline.py"
+      - "tests/test_p5_pipeline_truth.py"
+      - ".github/workflows/p5-pipeline-ci.yml"
+  push:
+    branches: ["fix/cloudtech-pipeline-truth-p5-20261014"]
+  workflow_dispatch:
+
+jobs:
+  pipeline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install isolated test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest streamlit
+      - name: Test pipeline false-success guards (no live publishing)
+        env:
+          CLOUDTECH_DATA_DIR: ${{ runner.temp }}/cloudtech-p5-data
+          CLOUDTECH_OUTPUT_DIR: ${{ runner.temp }}/cloudtech-p5-output
+        run: python -m pytest tests/test_p5_pipeline_truth.py -q --tb=short
