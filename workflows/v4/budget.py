@@ -75,11 +75,13 @@ class BudgetGate:
         cents: int,
         cap_cents: int,
     ) -> BudgetReservation:
-        if cost_class not in COST_CLASS_NEEDS_APPROVAL and cents <= 0:
+        if cents < 0:
             raise BudgetError(f"[BG-001] 非法 cents={cents} for {cost_class}")
         with self._mtx:
             spent = self._spent.get(tenant_id, 0)
-            if cap_cents > 0 and (spent + cents) > cap_cents:
+            pending = sum(r.reserve_cents for r in self._reservations.values()
+                          if r.tenant_id == tenant_id and r.status == "reserved")
+            if cap_cents > 0 and (spent + pending + cents) > cap_cents:
                 raise BudgetError(
                     f"[BG-002] 预算超限 tenant={tenant_id} spent={spent} "
                     f"reserve={cents} cap={cap_cents}"
@@ -102,7 +104,11 @@ class BudgetGate:
                 raise BudgetError(f"[BG-003] reservation {reservation_id} not found")
             if res.status != "reserved":
                 raise BudgetError(f"[BG-004] reservation {reservation_id} already {res.status}")
-            actual = max(0, min(actual_cents, res.reserve_cents))
+            if actual_cents < 0 or actual_cents > res.reserve_cents:
+                raise BudgetError(
+                    f"[BG-006] 费用需对账 actual={actual_cents} reserved={res.reserve_cents}"
+                )
+            actual = actual_cents
             res.settled_cents = actual
             res.status = "settled"
             self._spent[res.tenant_id] = self._spent.get(res.tenant_id, 0) + actual
