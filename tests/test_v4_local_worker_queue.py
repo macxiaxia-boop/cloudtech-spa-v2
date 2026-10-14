@@ -157,6 +157,10 @@ def test_independent_python_worker_process(tmp_path):
     reopened = SQLiteRunStore(store.path)
     assert reopened.get(run_id).status == RunStatus.COMPLETED
     assert reopened.receipt_count(run_id) == 1
+    from workflows.v4.local_output_projector import LocalOutputProjector
+    indexed = LocalOutputProjector(reopened).list_for_tenant("t1")
+    assert len(indexed) == 1
+    assert indexed[0]["artifact_kind"] == "ARTICLE_HTML_EXTRACTION"
 
 
 
