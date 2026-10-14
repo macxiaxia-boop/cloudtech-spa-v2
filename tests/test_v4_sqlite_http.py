@@ -68,3 +68,34 @@ def test_v4_http_persistent_create_replay_read_and_tenant_isolation(
         json={"failed_nodes_only": True},
     )
     assert resume.status_code == 501  # No falsely claimed Worker recovery
+
+
+
+def test_concurrent_http_same_key_creates_only_one_ready_run(tmp_path, monkeypatch):
+    import importlib
+    from concurrent.futures import ThreadPoolExecutor
+    api = importlib.import_module("api.v4")
+    db = tmp_path / "concurrent-http.sqlite"
+    monkeypatch.setattr(api, "_orchestrator", V4Orchestrator(
+        IdempotencyStore(), run_store=SQLiteRunStore(db),
+    ))
+    app = FastAPI()
+    app.include_router(api.router)
+    payload = {
+        "path_id": "WP-VIDEO-TRANSCRIBE",
+        "revision": 1,
+        "input_bindings": {"video_source": "https://example.org/a"},
+        "idempotency_key": "same-http-request",
+    }
+    def create(_):
+        with TestClient(app) as client:
+            response = client.post("/v4/workpaths/runs?tenant_id=owner", json=payload)
+            return response.status_code, response.json()
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        results = list(pool.map(create, range(24)))
+    assert all(status == 200 for status, _ in results), results
+    assert len({body["run_id"] for _, body in results}) == 1
+    verify = V4Orchestrator(IdempotencyStore(), run_store=SQLiteRunStore(db))
+    runs = verify.list_runs(tenant_id="owner")
+    assert len(runs) == 1
+    assert runs[0].status.value == "READY"
