@@ -109,7 +109,7 @@ jobs:
 
       - name: Test same-origin bearer safety and real request timeout abort
         working-directory: web/vite-spa
-        run: npm test -- src/lib/api.test.ts
+        run: npm test -- src/lib/api.test.ts --environment node
 
       - name: Build complete route-split SPA
         working-directory: web/vite-spa
