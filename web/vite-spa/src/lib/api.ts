@@ -1,22 +1,4 @@
-/**
- * CloudTech API Client · 真实后端 fetch 封装
- *
- * 能力：
- * - 自动注入 Authorization Bearer Token（从 AuthContext localStorage）
- * - 自动注入 X-Tenant / X-Workspace headers
- * - 401 自动清登录态 + 跳转 /login
- * - 5xx 显示错误 Toast（sonner）
- * - fetch 超时 10s
- * - 类型安全响应（typed API）
- *
- * 后端真相（2026-09-29 探查）：
- * - gateway_v22.py @ 5099 在 v10 stub 模式
- * - /api/v2/{rest:path} catch-all 返回合理空 mock（空数组/空对象）
- * - 4 个真实端点：/api/v2/_meta/{routes/summary,industries,employees/tier}
- * - 无 JWT auth endpoint → login 仍走前端 mock（验证格式 + 写 localStorage）
- */
-import { useAuth } from '@/contexts/AuthContext';
-
+/** CloudTech same-origin API. Refuses external-token leakage and aborts timeouts. */
 const API_BASE = '/api/v2';
 const TIMEOUT_MS = 10_000;
 
@@ -57,31 +39,68 @@ function getAuthHeaders(): Record<string, string> {
 
 }
 
-/** fetch with timeout */
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new ApiError(0, 'Timeout', null, '')), ms);
-    promise.finally(() => clearTimeout(timer)).then(resolve, reject);
-  });
+/** API session credentials must never leave the internal API path. */
+function internalApiPath(path: string): string {
+  if (!path || path.trim() !== path || path.includes('\\') ||
+      /[\u0000-\u001f\u007f]/.test(path) ||
+      /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(path)) {
+    throw new ApiError(0, 'External or invalid API URL blocked', null, String(path));
+  }
+  const suffix = path.replace(/^\/+/, '');
+  const pathname = suffix.split(/[?#]/, 1)[0];
+  if (!pathname || pathname.split('/').some((part) => {
+    let decoded: string;
+    try { decoded = decodeURIComponent(part); } catch { return true; }
+    return decoded === '.' || decoded === '..';
+  })) {
+    throw new ApiError(0, 'Invalid API path', null, path);
+  }
+  return API_BASE + '/' + suffix;
+}
+
+/** Abort the actual fetch on timeout, not just a Promise waiting for it. */
+async function requestWithTimeout(url: string, init: RequestInit, ms: number): Promise<Response> {
+  if (!Number.isFinite(ms) || ms <= 0 || ms > 120_000) {
+    throw new ApiError(0, 'Invalid API timeout', null, url);
+  }
+  const aborter = new AbortController();
+  const caller = init.signal;
+  const onAbort = () => aborter.abort();
+  if (caller?.aborted) aborter.abort();
+  else caller?.addEventListener('abort', onAbort, { once: true });
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    aborter.abort();
+  }, ms);
+  try {
+    return await fetch(url, {
+      ...init,
+      redirect: 'error',
+      signal: aborter.signal,
+    });
+  } catch (error) {
+    if (timedOut) throw new ApiError(0, 'Timeout', null, url);
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    caller?.removeEventListener('abort', onAbort);
+  }
 }
 
 /** 核心 fetch 方法 */
 export async function apiFetch<T = unknown>(path: string, options: ApiOptions = {}): Promise<T> {
   const { timeout = TIMEOUT_MS, skipUnauthorized, headers, ...rest } = options;
 
-  const url = path.startsWith('http') ? path : `${API_BASE}/${path.replace(/^\//, '')}`;
-
-  const response = await withTimeout(
-    fetch(url, {
-      ...rest,
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeaders(),
-        ...(headers as Record<string, string> | undefined),
-      },
-    }),
-    timeout,
-  );
+  const url = internalApiPath(path);
+  const response = await requestWithTimeout(url, {
+    ...rest,
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+      ...(headers as Record<string, string> | undefined),
+    },
+  }, timeout);
 
   // 401 处理
   if (response.status === 401 && !skipUnauthorized) {
