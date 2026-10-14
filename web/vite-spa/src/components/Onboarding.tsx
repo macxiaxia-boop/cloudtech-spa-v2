@@ -51,7 +51,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-lg w-full p-8 relative shadow-2xl">
         <button
+          type="button"
           onClick={onComplete}
+          aria-label="关闭新手引导"
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
         >
           <X className="w-5 h-5" />
