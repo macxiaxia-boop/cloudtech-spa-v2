@@ -30,7 +30,7 @@ class AuthError(HTTPException):
 
 def _get_jwt_secret() -> Optional[str]:
     """从 env 读 JWT secret; 无则 None (开发模式)"""
-    return os.environ.get("V4_JWT_SECRET")
+    return os.environ.get("V4_JWT_SECRET") or os.environ.get("CLOUDTECH_SAAS_JWT_SECRET")
 
 
 def _verify_jwt(token: str, secret: str, tenant_id: str) -> Optional[dict]:
@@ -52,10 +52,18 @@ def _verify_jwt(token: str, secret: str, tenant_id: str) -> Optional[dict]:
         sig = base64.urlsafe_b64decode(sig_b64_padded.encode("utf-8"))
         if not hmac.compare_digest(expected, sig):
             return None
+        # Reject misleading/unsupported JWT algorithm metadata.
+        header = json.loads(base64.urlsafe_b64decode(
+            header_b64 + "=" * (-len(header_b64) % 4)
+        ))
+        if header.get("alg") != "HS256" or header.get("typ") != "JWT":
+            return None
         # 解码 payload
         payload_b64_padded = payload_b64 + "=" * (4 - len(payload_b64) % 4)
         payload = json.loads(base64.urlsafe_b64decode(payload_b64_padded.encode("utf-8")))
         if payload.get("tenant_id") != tenant_id:
+            return None
+        if not (payload.get("user_id") or payload.get("sub")):
             return None
         if payload.get("exp", 0) < time.time():
             return None
