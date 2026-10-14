@@ -290,6 +290,41 @@ WP_LOCAL_SUBTITLE_EXPORT = WorkPathDefinition(
 )
 
 
+# 真实两节点路径：已授权 HTML → 原文提取 → 可审计的词汇/段落分析。
+# 该路径不调用大模型，也不把统计分析称为 AI 内容改写。
+WP_LOCAL_ARTICLE_ANALYZE = WorkPathDefinition(
+    id="WP-LOCAL-ARTICLE-ANALYZE",
+    revision=1,
+    title="HTML 原文提取 → 真实内容结构分析",
+    domain="content",
+    goal="将用户提供的 HTML 连续执行正文提取及词汇、段落、CTA 信号统计，"
+         "在单个任务内保留双节点完成凭证。",
+    triggers=["用户提供有权使用的 HTML 并希望进行结构分析"],
+    preconditions=["用户拥有 HTML 的使用权限"],
+    inputs=[
+        InputSpec(role="html", mime="text/html", min=1, max=1),
+        InputSpec(role="source_url", mime="text/url", min=0, max=1),
+    ],
+    planner="deterministic_local_executor",
+    steps=[
+        {"id": "html_parse", "operation": "article.html_parse",
+         "node_kind": "TRANSFORM", "cost_class": "FREE_LOCAL",
+         "requires": [], "produces": ["article_text", "content_sha256"]},
+        {"id": "content_analyze", "operation": "content.local_text_analyze",
+         "node_kind": "TRANSFORM", "cost_class": "FREE_LOCAL",
+         "requires": ["html_parse"],
+         "produces": ["text_sha256", "lexical_counts", "paragraphs"]},
+    ],
+    quality_gates=["source_html_sha256", "text_sha256", "both_nodes_completed"],
+    exported_artifacts=["article_text", "analysis", "source_html_sha256", "text_sha256"],
+    recovery={"manual_reconciliation_only": True},
+    privacy="private_to_tenant",
+    permissions=["own_or_licensed"],
+    billing_policy="FREE_LOCAL",
+    evidence={"both_node_receipts": True, "ai_model_used": False},
+)
+
+
 # 总注册表
 FLAGSHIP_PATHS: Dict[str, WorkPathDefinition] = {
     WP_BLOGGER_RESEARCH.id: WP_BLOGGER_RESEARCH,
@@ -305,6 +340,7 @@ FLAGSHIP_PATHS: Dict[str, WorkPathDefinition] = {
 LOCAL_PATHS: Dict[str, WorkPathDefinition] = {
     WP_LOCAL_ARTICLE_EXTRACT.id: WP_LOCAL_ARTICLE_EXTRACT,
     WP_LOCAL_SUBTITLE_EXPORT.id: WP_LOCAL_SUBTITLE_EXPORT,
+    WP_LOCAL_ARTICLE_ANALYZE.id: WP_LOCAL_ARTICLE_ANALYZE,
 }
 ALL_PATHS: Dict[str, WorkPathDefinition] = {**FLAGSHIP_PATHS, **LOCAL_PATHS}
 
