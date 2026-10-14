@@ -11,14 +11,13 @@
     <meta name="description" content="CloudTech 是企业级 AI 数字员工 SaaS 平台，集成对话、智能体、工作流、任务执行、知识管理的一体化 AI 工作空间。让 AI 成为团队的 5 位数字员工，像一支完整团队跑。" />
     <meta name="keywords" content="CloudTech,AI 工作空间,智能体,工作流,任务管理,知识库,AI 对话,数字员工,SaaS" />
     <meta name="author" content="CloudTech Team" />
-    <link rel="canonical" href="https://cloudtech.example.com/" />
+    <!-- A placeholder domain is not a canonical production URL.
+         Configure the verified deployment origin at the reverse proxy. -->
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://cloudtech.example.com/" />
     <meta property="og:title" content="CloudTech · 企业级 AI 工作空间" />
     <meta property="og:description" content="集成对话、智能体、工作流、任务执行、知识管理的一体化 AI 工作空间。" />
-    <meta property="og:image" content="https://cloudtech.example.com/og-image.png" />
     <meta property="og:locale" content="zh_CN" />
     <meta property="og:site_name" content="CloudTech" />
 
@@ -26,23 +25,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="CloudTech · 企业级 AI 工作空间" />
     <meta name="twitter:description" content="AI 时代的 5 位数字员工。" />
-    <meta name="twitter:image" content="https://cloudtech.example.com/og-image.png" />
 
-    <!-- PWA 占位（未来完整 PWA 时启用）-->
-    <link rel="manifest" href="/manifest.json" />
-
-    <!-- R364 Lighthouse FCP 优化 · hero image preload (Marketing 首页主图 624KB · LCP 关键) -->
-    <link rel="preload" as="image" href="/images/opc-hero.jpeg" fetchpriority="high" />
-
-    <!-- R368 Lighthouse modulepreload 优化 · vendor chunks 提前解析 -->
-    <link rel="modulepreload" href="/assets/vendor-react.js" />
-    <link rel="modulepreload" href="/assets/vendor-radix.js" />
-    <link rel="modulepreload" href="/assets/vendor-flow.js" />
-    <link rel="modulepreload" href="/assets/vendor-icons.js" />
-
-    <!-- R374 prefetch · 用户大概率点的 lazy-load route (Workflows/WorkflowEditor) -->
-    <link rel="prefetch" href="/assets/Workflows.js" />
-    <link rel="prefetch" href="/assets/WorkflowEditor.js" />
+    <!-- Vite inserts fingerprinted modulepreloads in production builds.
+         Never hardcode /assets/*.js names: those files did not exist and
+         generated browser console 404s. No offline/PWA claim before a real
+         service worker, maskable icon and manifest are implemented. -->
 
     <!-- 图标（iOS / Android）-->
     <link rel="apple-touch-icon" href="/favicon.svg" />
