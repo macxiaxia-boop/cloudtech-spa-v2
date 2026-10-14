@@ -140,7 +140,7 @@ async def saas_register(request: Request):
             c.execute(
                 'INSERT INTO aios_subscription (subscription_id, tenant_id, industry, plan, sku_code, amount_cny, status, activated_at, expires_at, created_at)'
                 ' VALUES (?,?,?,?,?,?,?,?,?,?)',
-                (sub_id, tenant_id, industry, 'pro', sku_id, 0, 'trial', now_iso, expires_iso, now_iso),
+                (sub_id, tenant_id, industry, 'pro', sku_id, 0, 'active', now_iso, expires_iso, now_iso),
             )
             # Do not promote user/tenant to pro unless a durable subscription
             # entitlement was inserted in the same SQLite transaction.
