@@ -1,13 +1,9 @@
-/**
- * CloudTech AuthContext · 真实接入版
- *
- * 改造：
- * - login 真实 fetch /api/v2/_meta/routes/summary（验证后端连通）
- * - 失败时降级为本地 mock（确保离线可用）
- * - 注入 setUnauthorizedHandler 让 api-client 401 时清登录态
+/** CloudTech PR1: fail-closed frontend shell pending signed server auth integration.
+ * A backend health endpoint is never proof that a password was authenticated.
+ * PR2 contains the separately reviewed tenant-scoped signed session flow.
  */
 import { createContext, useContext, useEffect, useState, type ReactNode, useCallback } from 'react';
-import { api, checkBackendHealth } from '@/lib/api';
+import { checkBackendHealth } from '@/lib/api';
 
 export interface User {
   id: string;
@@ -48,13 +44,6 @@ const STORAGE_KEYS = {
   workspace: 'ct.auth.workspace',
 } as const;
 
-function loadFromStorage<T>(key: string): T | null {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
 function saveToStorage(key: string, value: unknown) {
   try {
     if (value === null || value === undefined) localStorage.removeItem(key);
@@ -68,16 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [backendOnline, setBackendOnline] = useState(false);
 
-  // 启动时恢复 + 健康检查
+  // Clear all historical client-created identities: localStorage cannot
+  // prove a signed server session or tenant membership. No API probe is
+  // performed for unauthenticated public/preview pages.
   useEffect(() => {
-    const savedUser = loadFromStorage<User>(STORAGE_KEYS.user);
-    const savedWorkspace = loadFromStorage<Workspace>(STORAGE_KEYS.workspace);
-    if (savedUser) setUser(savedUser);
-    if (savedWorkspace) setCurrentWorkspaceState(savedWorkspace);
+    saveToStorage(STORAGE_KEYS.user, null);
+    saveToStorage(STORAGE_KEYS.workspace, null);
+    setUser(null);
+    setCurrentWorkspaceState(null);
+    setBackendOnline(false);
     setLoading(false);
-
-    // 异步健康检查
-    checkBackendHealth().then(setBackendOnline).catch(() => setBackendOnline(false));
   }, []);
 
   // 注册 401 处理器（避免循环依赖）
@@ -104,53 +93,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveToStorage(STORAGE_KEYS.workspace, ws);
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    // 前端格式校验
-    if (!email || !password) return { ok: false, error: '邮箱和密码不能为空' };
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: '邮箱格式不正确' };
-    if (password.length < 6) return { ok: false, error: '密码至少 6 位' };
+  // No credential verification endpoint is implemented on this P5 branch.
+  // Never mint an admin role from an email pattern or silently sign in offline.
+  const login = useCallback(async (_email: string, _password: string) => ({
+    ok: false,
+    error: '企业登录尚未接通受信任的服务端身份验证，不能使用模拟管理员身份。',
+  }), []);
 
-    // 健康检查后端（真实接入）
-    const online = await checkBackendHealth();
-    setBackendOnline(online);
-
-    // 模拟延迟（让用户感受到"真实"）
-    await new Promise((resolve) => setTimeout(resolve, online ? 300 : 200));
-
-    // 创建 user 对象
-    const mockUser: User = {
-      id: 'u_' + btoa(email).slice(0, 12).replace(/[=+/]/g, ''),
-      email,
-      name: email.split('@')[0] || 'User',
-      role: 'admin',
-    };
-    setUser(mockUser);
-    saveToStorage(STORAGE_KEYS.user, mockUser);
-
-    // 登录成功后立即清 workspace（强制用户选择）
-    setCurrentWorkspaceState(null);
-    saveToStorage(STORAGE_KEYS.workspace, null);
-
-    return { ok: true };
-  }, []);
-
-  const register = useCallback(async (email: string, password: string, company: string) => {
-    if (!email || !password || !company) return { ok: false, error: '所有字段必填' };
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: '邮箱格式不正确' };
-    if (password.length < 6) return { ok: false, error: '密码至少 6 位' };
-
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const mockUser: User = {
-      id: 'u_' + btoa(email).slice(0, 12).replace(/[=+/]/g, ''),
-      email,
-      name: company || email.split('@')[0],
-      role: 'admin',
-    };
-    setUser(mockUser);
-    saveToStorage(STORAGE_KEYS.user, mockUser);
-    return { ok: true };
-  }, []);
+  const register = useCallback(async (_email: string, _password: string, _company: string) => ({
+    ok: false,
+    error: '企业注册尚未接通受信任的服务端账号创建接口，请联系平台管理员。',
+  }), []);
 
   const logout = useCallback(() => {
     setUser(null);
