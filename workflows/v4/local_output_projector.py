@@ -66,6 +66,8 @@ class LocalOutputProjector:
                 raise RunStoreConflict("no completed run matching event tenant")
             run = _restore(source["snapshot"])
             payload = json.loads(event["payload_json"])
+            if not isinstance(payload, dict) or not isinstance(lease.payload, dict):
+                raise RunStoreConflict("outbox event payload must be a JSON object")
             if (payload != lease.payload or
                 payload.get("run_id") != run.run_id or
                 payload.get("tenant_id") != run.tenant_id or
