@@ -401,6 +401,60 @@ def execute_local_workpath(run_id: str, ctx: AuthContext = Depends(auth_required
     }
 
 
+@router.post("/workpaths/runs/{run_id}/reconcile-local")
+def reconcile_completed_local_workpath(
+    run_id: str, ctx: AuthContext = Depends(auth_required),
+):
+    """Repair only a proven committed LOCAL result after status-write interruption.
+
+    No provider is re-called, no charge or new node is generated. A run that
+    lacks a committed receipt is left uncertain for operator review.
+    """
+    record = get_owned_run(_orchestrator, run_id, ctx.tenant_id)
+    if record.path_id != "WP-LOCAL-ARTICLE-EXTRACT":
+        raise HTTPException(422, "此操作只支持零外部副作用的本地提取路径")
+    if record.status == RunStatus.COMPLETED:
+        return {"run_id": run_id, "status": "COMPLETED", "reconciled": False}
+    if record.status != RunStatus.RUNNING:
+        raise HTTPException(409, "任务未处于可安全核对的状态")
+    store = getattr(_orchestrator, "_store", None)
+    if store is None or getattr(store, "kind", "") != "SQLITE_LOCAL_DURABLE":
+        raise HTTPException(409, "缺少持久化回执凭证；不能自动宣称任务已完成")
+    if len(record.nodes) != 1:
+        raise HTTPException(409, "节点数不符合已审核的单节点本地执行契约")
+    node = record.nodes[0]
+    source_html = record.input_bindings.get("html")
+    if not isinstance(source_html, str):
+        raise HTTPException(409, "缺少原始内容哈希核验材料")
+    expected_hash = hashlib.sha256(source_html.encode("utf-8")).hexdigest()
+    output = node.output_ref
+    valid = (
+        node.node_id == "html_parse"
+        and node.operation == "article.html_parse"
+        and node.status == RunStatus.COMPLETED
+        and node.node_kind == NodeKind.TRANSFORM
+        and node.cost_cents == 0
+        and record.budget_spent_cents == 0
+        and node.provider_name == "local_html_parser"
+        and node.provider_req_id is None
+        and node.input_hash == expected_hash
+        and isinstance(output, dict)
+        and output.get("content_sha256") == expected_hash
+        and output.get("mock") is False
+        and store.receipt_count(run_id) == 1
+    )
+    if not valid:
+        raise HTTPException(409, "缺少完整、无付费副作用的完成证据；禁止自动重试")
+    try:
+        _orchestrator.transition(run_id, RunStatus.COMPLETED)
+    except RunStatusError as exc:
+        raise HTTPException(409, "任务状态在核对期间变化；需重新读取") from exc
+    return {
+        "run_id": run_id, "status": "COMPLETED", "reconciled": True,
+        "provider_recalled": False, "new_charge_cents": 0,
+    }
+
+
 @router.get("/workpaths/runs/{run_id}/export")
 def export_run(run_id: str, ctx: AuthContext = Depends(auth_required)):
     rec = get_owned_run(_orchestrator, run_id, ctx.tenant_id)
