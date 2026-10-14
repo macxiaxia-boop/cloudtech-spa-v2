@@ -8,17 +8,14 @@ import { Cloud, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LocaleSwitcher } from '@/i18n';
-import { BRAND } from '@/lib/brand';
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [account, setAccount] = useState('');
@@ -38,7 +35,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900">
       <div className="w-full max-w-md bg-card rounded-xl shadow-xl border border-border p-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
@@ -53,10 +50,9 @@ export function LoginPage() {
         <h1 className="text-2xl font-bold mb-1.5">{t('login.welcome')}</h1>
         <p className="text-sm text-muted-foreground mb-6">{t('login.subtitle')}</p>
 
-        <div className="flex border-b border-border mb-6">
-          <button type="button" className="flex-1 pb-3 text-sm font-medium text-brand-600 border-b-2 border-brand-600">{t('login.email_tab')}</button>
-          <button type="button" className="flex-1 pb-3 text-sm font-medium text-muted-foreground hover:text-muted-foreground transition-colors">{t('login.sso_tab')}</button>
-        </div>
+        <p className="text-sm text-muted-foreground mb-6 border-b border-border pb-3">
+          当前仅支持已接通的企业邮箱密码登录；第三方单点登录尚未上线。
+        </p>
 
         {error && (
           <div className="mb-4 p-3 bg-destructive-bg border border-destructive-100 rounded-lg flex items-start gap-2 text-sm text-destructive-700">
@@ -68,47 +64,33 @@ export function LoginPage() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-5">
           <div className="space-y-1.5">
             <Label htmlFor="account">{t('login.email_placeholder')}</Label>
-            <Input id="account" type="text" placeholder={t('login.email_placeholder')} value={account} onChange={(e) => setAccount(e.target.value)} required />
+            <Input id="account" type="email" autoComplete="username" placeholder={t('login.email_placeholder')} value={account} onChange={(e) => setAccount(e.target.value)} required />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">{t('login.password_placeholder')}</Label>
             <div className="relative">
-              <Input id="password" type={showPassword ? 'text' : 'password'} placeholder={t('login.password_placeholder')} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground" aria-label={showPassword ? 'hide' : 'show'}>
+              <Input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder={t('login.password_placeholder')} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground" aria-label={showPassword ? '隐藏密码' : '显示密码'}>
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="rounded border-border text-brand-600 focus:ring-brand-500/20" />
-              <span className="text-muted-foreground">{t('login.remember')}</span>
-            </label>
-            <Link to="/forgot-password" className="text-brand-600 hover:text-brand-700">{t('login.forgot')}</Link>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            尚未启用自助密码重置；如需找回账号，请通过已核实的组织管理员处理。
+          </p>
 
           <Button type="submit" size="lg" disabled={loading} className="w-full mt-1">
             {loading ? t('login.submitting') : t('login.submit')}
           </Button>
         </form>
 
-        <div className="relative my-5">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-          <div className="relative flex justify-center text-xs"><span className="bg-card px-3 text-muted-foreground">{t('login.sso_divider')}</span></div>
-        </div>
-
-        <div className="grid grid-cols-4 gap-2 mb-6">
-          {[t('login.sso_google'), t('login.sso_github'), t('login.sso_microsoft'), t('login.sso_wechat')].map((p) => (
-            <button key={p} type="button" className="h-10 rounded-md border border-border hover:bg-muted transition-colors text-xs font-medium text-muted-foreground">{p}</button>
-          ))}
-        </div>
 
         <p className="text-center text-sm text-muted-foreground">
           {t('login.no_account')}
           <Link to="/register" className="text-brand-600 hover:text-brand-700 font-medium ml-1">{t('login.register_link')}</Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }
