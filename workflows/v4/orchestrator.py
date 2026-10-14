@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 import json
+import os
 import secrets
 import threading
 from dataclasses import dataclass, field
@@ -113,11 +114,23 @@ class V4Orchestrator:
     _instance: Optional["V4Orchestrator"] = None
     _lock = threading.Lock()
 
-    def __init__(self, idempotency: Optional[IdempotencyStore] = None):
+    def __init__(self, idempotency: Optional[IdempotencyStore] = None,
+                 durable_store=None):
         self._runs: Dict[str, WorkPathRunRecord] = {}
         self._mtx = threading.Lock()
         self.idempotency = idempotency or IdempotencyStore()
         self._persistence: Optional[Callable[[WorkPathRunRecord], None]] = None
+        if durable_store is None:
+            path = os.environ.get("CLOUDTECH_V4_SQLITE_PATH")
+            if path:
+                from .durable_snapshots import V4SnapshotStore
+                durable_store = V4SnapshotStore(path)
+        self._durable_store = durable_store
+        if self._durable_store is not None:
+            for record in self._durable_store.load_all():
+                self._runs[record.run_id] = record
+                if record.idempotency_key:
+                    self.idempotency.bind(record.idempotency_key, record.run_id)
 
     @classmethod
     def instance(cls) -> "V4Orchestrator":
@@ -130,6 +143,16 @@ class V4Orchestrator:
     def bind_persistence(self, fn: Callable[[WorkPathRunRecord], None]) -> None:
         """注入持久化回调 (默认 in-memory)"""
         self._persistence = fn
+
+    def _persist(self, rec: WorkPathRunRecord) -> None:
+        # Durable writes must fail loudly, unlike legacy advisory hooks.
+        if self._durable_store is not None:
+            self._durable_store.save(rec)
+        if self._persistence:
+            try:
+                self._persistence(rec)
+            except Exception:
+                pass
 
     def create_run(
         self,
@@ -176,6 +199,7 @@ class V4Orchestrator:
                 idempotency_key=scoped_key,
                 budget_cap_cents=budget_cap_cents,
             )
+            self._persist(rec)  # commit before API acknowledges run id
             self._runs[run_id] = rec
             if scoped_key:
                 self.idempotency.bind(scoped_key, run_id)
@@ -190,13 +214,14 @@ class V4Orchestrator:
                 raise RunStatusError(
                     f"[V4-002] illegal transition {rec.status.value} -> {target.value}"
                 )
+            previous = (rec.status, rec.updated_at)
             rec.status = target
             rec.updated_at = datetime.now(timezone.utc).isoformat()
-            if self._persistence:
-                try:
-                    self._persistence(rec)
-                except Exception:
-                    pass
+            try:
+                self._persist(rec)
+            except Exception:
+                rec.status, rec.updated_at = previous
+                raise
         return rec
 
     def add_node(self, run_id: str, node: NodeRunRecord) -> None:
@@ -207,6 +232,7 @@ class V4Orchestrator:
             rec.nodes.append(node)
             rec.last_node_id = node.node_id
             rec.updated_at = datetime.now(timezone.utc).isoformat()
+            self._persist(rec)
 
     def get_run(self, run_id: str) -> Optional[WorkPathRunRecord]:
         with self._mtx:
@@ -252,6 +278,7 @@ class V4Orchestrator:
                     n.status = RunStatus.RUNNING
                     n.started_at = datetime.now(timezone.utc).isoformat()
                     rec.updated_at = n.started_at
+                    self._persist(rec)
                     return
             raise RunStatusError(f"[V4-004] node {node_id} not in run {run_id}")
 
@@ -280,6 +307,7 @@ class V4Orchestrator:
                     n.finished_at = datetime.now(timezone.utc).isoformat()
                     rec.budget_spent_cents += cost_cents
                     rec.updated_at = n.finished_at
+                    self._persist(rec)
                     return
             raise RunStatusError(f"[V4-004] node {node_id} not in run {run_id}")
 
@@ -301,6 +329,7 @@ class V4Orchestrator:
                     n.error_message = error_message
                     n.finished_at = datetime.now(timezone.utc).isoformat()
                     rec.updated_at = n.finished_at
+                    self._persist(rec)
                     return
             raise RunStatusError(f"[V4-004] node {node_id} not in run {run_id}")
 
@@ -313,6 +342,7 @@ class V4Orchestrator:
                 return False
             rec.status = RunStatus.CANCELED
             rec.updated_at = datetime.now(timezone.utc).isoformat()
+            self._persist(rec)
         return True
 
     def reset(self) -> None:
