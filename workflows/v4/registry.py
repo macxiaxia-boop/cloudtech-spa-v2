@@ -164,6 +164,27 @@ class OperationRegistry:
         # Load only the adapter used by the selected operation. Importing all
         # optional adapters here broke even local URL normalization / dedupe.
         try:
+            if op_id in {"article.html_parse", "article.media_extract"}:
+                html = inputs.get("html")
+                if not html:
+                    return {
+                        "status": "blocked",
+                        "error_code": "USER_HTML_REQUIRED",
+                        "reason": "尚未提供网页正文；不生成虚构原文或图片",
+                        "mock": False,
+                    }
+                from adapters.article.article_parser import parse_html
+                parsed = parse_html(html, source_url=inputs.get("source_url", ""))
+                if op_id == "article.media_extract":
+                    return {
+                        "images": parsed["images"],
+                        "videos": parsed["videos"],
+                        "content_sha256": parsed["content_sha256"],
+                        "retrieval_policy": parsed["retrieval_policy"],
+                        "mock": False,
+                    }
+                return parsed
+
             if op_id == "url.normalize":
                 from urllib.parse import urlparse
                 u = inputs.get("url", "")
