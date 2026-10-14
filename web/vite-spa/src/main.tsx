@@ -17,3 +17,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </I18nProvider>
   </React.StrictMode>
 );
+
+// Installable app shell: service worker caches only public hashed bundles and
+// a truthful offline explanation. API/tenant/client data is never cached.
+if ('serviceWorker' in navigator &&
+    (window.location.protocol === 'https:' || /^(localhost|127\\.0\\.0\\.1)$/.test(window.location.hostname))) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .catch((error) => console.warn('[CloudTech] Offline shell unavailable:', error));
+  }, { once: true });
+}
