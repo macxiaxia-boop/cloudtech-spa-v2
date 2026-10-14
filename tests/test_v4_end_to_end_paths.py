@@ -25,7 +25,7 @@ class TestFlagshipPathsRegistered:
     def test_six_paths_registered(self):
         paths = list_paths()
         assert len(FLAGSHIP_PATHS) == 6, "original six flagships must stay intact"
-        assert len(paths) == 8, "six flagships plus two actual deterministic local paths required"
+        assert len(paths) == 9, "six flagships plus three actual deterministic local paths required"
 
     def test_paths_have_required_fields(self):
         paths = list_paths()
