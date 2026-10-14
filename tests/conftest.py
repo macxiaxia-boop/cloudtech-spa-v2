@@ -11,3 +11,5 @@ def _v4_isolated_dev_auth(monkeypatch, request):
     if test_name.startswith(("test_v4_", "test_adapters_")):
         monkeypatch.setenv("CLOUDTECH_ENV", "test")
         monkeypatch.setenv("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH", "1")
+        monkeypatch.setenv("CLOUDTECH_ALLOW_MOCK_MEDIA", "1")
+        monkeypatch.setenv("CLOUDTECH_ALLOW_MOCK_ASR", "1")
