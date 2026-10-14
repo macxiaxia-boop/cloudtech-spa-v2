@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "public" / "images"
 OUTPUT = SOURCE / "optimized"
 IMAGES = ("ai-team", "dashboard-preview", "opc-hero")
-SIZES = (480, 768, 1024)
+SIZES = (360, 480, 560, 768, 1024)
 
 
 def generate(source: Path, target_dir: Path, basename: str) -> dict[int, int]:
