@@ -10,8 +10,8 @@
     "preview": "vite preview --port 5098",
     "test": "vitest run",
     "lint": "eslint . --ext ts,tsx",
-    "prebuild": "node scripts/prebuild_pwa.mjs",
-    "predev": "node scripts/prebuild_pwa.mjs"
+    "prebuild": "node scripts/prebuild_pwa.mjs && node scripts/prebuild_images.mjs",
+    "predev": "node scripts/prebuild_pwa.mjs && node scripts/prebuild_images.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
