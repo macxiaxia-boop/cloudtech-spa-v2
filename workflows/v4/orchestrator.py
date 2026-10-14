@@ -142,29 +142,32 @@ class V4Orchestrator:
         conversation_id: Optional[str] = None,
         budget_cap_cents: int = 0,
     ) -> WorkPathRunRecord:
-        if idempotency_key:
-            hit = self.idempotency.check(idempotency_key)
-            if hit and hit.run_id:
-                existing = self._runs.get(hit.run_id)
-                if existing is not None:
-                    return existing  # 同一幂等键返回原 run, 禁止重复收费
-        run_id = "wpr_" + secrets.token_hex(8)
-        rec = WorkPathRunRecord(
-            run_id=run_id,
-            path_id=path_id,
-            path_revision=path_revision,
-            tenant_id=tenant_id,
-            project_id=project_id,
-            conversation_id=conversation_id,
-            input_bindings=input_bindings,
-            idempotency_key=idempotency_key,
-            budget_cap_cents=budget_cap_cents,
-        )
+        # The check, allocation and key binding MUST be one critical section.
+        # Prevent duplicate in-process runs under concurrent identical requests.
+        # Multi-process deployments still require a durable unique DB constraint.
         with self._mtx:
+            if idempotency_key:
+                hit = self.idempotency.check(idempotency_key)
+                if hit and hit.run_id:
+                    existing = self._runs.get(hit.run_id)
+                    if existing is not None:
+                        return existing
+            run_id = "wpr_" + secrets.token_hex(8)
+            rec = WorkPathRunRecord(
+                run_id=run_id,
+                path_id=path_id,
+                path_revision=path_revision,
+                tenant_id=tenant_id,
+                project_id=project_id,
+                conversation_id=conversation_id,
+                input_bindings=input_bindings,
+                idempotency_key=idempotency_key,
+                budget_cap_cents=budget_cap_cents,
+            )
             self._runs[run_id] = rec
-        if idempotency_key:
-            self.idempotency.bind(idempotency_key, run_id)
-        return rec
+            if idempotency_key:
+                self.idempotency.bind(idempotency_key, run_id)
+            return rec
 
     def transition(self, run_id: str, target: RunStatus) -> WorkPathRunRecord:
         with self._mtx:
@@ -234,6 +237,8 @@ class V4Orchestrator:
                 raise RunStatusError(f"[V4-003] run {run_id} not found")
             for n in rec.nodes:
                 if n.node_id == node_id:
+                    if n.status == RunStatus.COMPLETED:
+                        raise RunStatusError(f"[V4-005] completed node cannot restart: {node_id}")
                     n.status = RunStatus.RUNNING
                     n.started_at = datetime.now(timezone.utc).isoformat()
                     rec.updated_at = n.started_at
@@ -256,6 +261,15 @@ class V4Orchestrator:
                 raise RunStatusError(f"[V4-003] run {run_id} not found")
             for n in rec.nodes:
                 if n.node_id == node_id:
+                    if cost_cents < 0:
+                        raise RunStatusError(f"[V4-006] negative node charge: {cost_cents}")
+                    if n.status == RunStatus.COMPLETED:
+                        if (n.output_ref == output_ref and
+                                n.provider_req_id == provider_req_id and
+                                n.cost_cents == cost_cents and
+                                n.provider_name == provider_name):
+                            return  # Exact replay; never add the same cost twice.
+                        raise RunStatusError(f"[V4-007] conflicting completion: {node_id}")
                     n.status = RunStatus.COMPLETED
                     n.output_ref = output_ref
                     n.provider_req_id = provider_req_id
@@ -281,6 +295,8 @@ class V4Orchestrator:
                 raise RunStatusError(f"[V4-003] run {run_id} not found")
             for n in rec.nodes:
                 if n.node_id == node_id:
+                    if n.status == RunStatus.COMPLETED:
+                        raise RunStatusError(f"[V4-008] completed node cannot fail: {node_id}")
                     n.status = RunStatus.FAILED
                     n.error_code = error_code
                     n.error_message = error_message
