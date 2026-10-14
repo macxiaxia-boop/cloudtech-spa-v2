@@ -38,6 +38,7 @@ const navSections: NavSection[] = [
     items: [
       { label: 'AI 对话', href: '/chat', icon: MessageSquare },
       { label: '工作流', href: '/workflows', icon: Workflow },
+      { label: '本地内容任务', href: '/workflows/local', icon: FileText },
       { label: '任务中心', href: '/tasks', icon: ListTodo },
     ],
   },
