@@ -3,6 +3,7 @@
 No false model completion, no network, no customer content in the index.
 """
 from concurrent.futures import ThreadPoolExecutor
+import hashlib
 import importlib
 import json
 from pathlib import Path
@@ -21,7 +22,7 @@ from workflows.v4.sqlite_run_store import SQLiteRunStore
 def setup_completed(tmp_path, *, tenant="tenant-one", path_id="WP-LOCAL-ARTICLE-EXTRACT"):
     store = SQLiteRunStore(tmp_path / "projector.sqlite3")
     orch = V4Orchestrator(IdempotencyStore(), run_store=store)
-    if path_id == "WP-LOCAL-ARTICLE-EXTRACT":
+    if path_id in ("WP-LOCAL-ARTICLE-EXTRACT", "WP-LOCAL-ARTICLE-ANALYZE"):
         bindings = {"html": "<html><title>真实材料</title><p>我提供的正文</p></html>"}
     else:
         bindings = {"segments": [
@@ -135,3 +136,77 @@ def test_tenant_scoped_http_catalog_is_only_verified_metadata(tmp_path, monkeypa
     assert other.status_code == 200
     assert other.json()["items"] == []
     assert client.get("/v4/workpaths/local-outputs").status_code == 422
+
+
+def _forge_consistent_receipts(store, run_id, *, field, value):
+    """Simulate corrupt but mutually consistent snapshot/receipt/outbox metadata."""
+    with store._connect() as db:
+        row = db.execute(
+            "SELECT snapshot FROM v4_runs WHERE run_id=?", (run_id,),
+        ).fetchone()
+        snapshot = json.loads(row["snapshot"])
+        snapshot["nodes"][0]["output_ref"][field] = value
+        raw = json.dumps(snapshot, ensure_ascii=False, allow_nan=False)
+        db.execute(
+            "UPDATE v4_runs SET snapshot=? WHERE run_id=?", (raw, run_id),
+        )
+        db.execute(
+            "UPDATE v4_node_receipts SET receipt_json=? WHERE run_id=? AND node_id='html_parse'",
+            (json.dumps(snapshot["nodes"][0], ensure_ascii=False, allow_nan=False), run_id),
+        )
+        event_payload = {
+            "run_id": run_id,
+            "tenant_id": snapshot["tenant_id"],
+            "event_type": "LOCAL_RUN_COMPLETED",
+            "snapshot_sha256": hashlib.sha256(
+                json.dumps(snapshot, sort_keys=True, ensure_ascii=False,
+                           allow_nan=False).encode("utf-8")
+            ).hexdigest(),
+        }
+        db.execute(
+            "UPDATE v4_local_outbox SET payload_json=? WHERE run_id=?",
+            (json.dumps(event_payload, sort_keys=True, ensure_ascii=False), run_id),
+        )
+
+
+def test_forged_extraction_with_matching_receipts_is_not_catalogued(tmp_path):
+    store, run_id = setup_completed(tmp_path)
+    _forge_consistent_receipts(store, run_id, field="text",
+                               value="伪造的正文；原始HTML里没有这段内容")
+    projector = LocalOutputProjector(store)
+    verdict = projector.consume_one()
+    assert verdict["outcome"] == "BLOCKED_INVALID_EVIDENCE", verdict
+    assert projector.list_for_tenant("tenant-one") == []
+    with store._connect() as db:
+        event = db.execute("SELECT state FROM v4_local_outbox WHERE run_id=?",
+                           (run_id,)).fetchone()
+        assert event["state"] == "PENDING"
+
+
+def test_analysis_output_requires_original_unmodified_extraction(tmp_path):
+    store, run_id = setup_completed(
+        tmp_path, path_id="WP-LOCAL-ARTICLE-ANALYZE",
+    )
+    projector = LocalOutputProjector(store)
+    assert projector.consume_one()["outcome"] == "CATALOGUED"
+
+    # A second independent run has consistent forged receipt and event hashes.
+    other_store = SQLiteRunStore(tmp_path / "corrupt.sqlite")
+    orch = V4Orchestrator(IdempotencyStore(), run_store=other_store)
+    rec = orch.create_run(
+        "WP-LOCAL-ARTICLE-ANALYZE", 1, "tenant-one",
+        {"html": "<html><h1>原始标题</h1><p>原文正文</p></html>"},
+        idempotency_key="different-id",
+    )
+    orch.transition(rec.run_id, RunStatus.INPUT_BOUND)
+    orch.transition(rec.run_id, RunStatus.READY)
+    LocalJobQueue(other_store).enqueue(rec.run_id, "tenant-one")
+    assert process_one(other_store)["outcome"] == "DONE"
+    _forge_consistent_receipts(
+        other_store, rec.run_id, field="images",
+        value=[{"url": "https://example.invalid/forged.png", "alt": "伪造图片"}],
+    )
+    assert LocalOutputProjector(other_store).consume_one()["outcome"] == (
+        "BLOCKED_INVALID_EVIDENCE"
+    )
+    assert LocalOutputProjector(other_store).list_for_tenant("tenant-one") == []
