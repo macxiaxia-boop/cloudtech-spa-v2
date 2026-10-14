@@ -542,6 +542,12 @@ if DIST_DIR.exists():
     # /assets/* 静态资源直出 (specific mount, 不被 catch-all 影响)
     if DIST_ASSETS.exists():
         app.mount("/assets", StaticFiles(directory=str(DIST_ASSETS)), name="vite-assets")
+    # Vite preview serves public/images automatically; the real single-port
+    # gateway must explicitly mount the same bundled PUBLIC-only directory.
+    # Tenant uploads/private media must never be placed under this path.
+    public_images = DIST_DIR / "images"
+    if public_images.is_dir():
+        app.mount("/images", StaticFiles(directory=str(public_images)), name="vite-public-images")
     # Generated maskable/public icons from npm prebuild are immutable public
     # assets, not private tenant media. They must be served as actual PNGs.
     pwa_icons = DIST_DIR / "icons"
@@ -788,7 +794,7 @@ else:
 # 用 {full_path:path} catch-all 接收所有"未被前面匹配"的路径, 返回 index.html
 # 排除前缀: /api /assets /docs /openapi.json /redoc /health /vite.svg /manifest.json 等
 SPA_EXEMPT = (
-    "/api/", "/assets/", "/docs", "/openapi.json", "/redoc", "/health",
+    "/api/", "/assets/", "/images/", "/docs", "/openapi.json", "/redoc", "/health",
     "/vite.svg", "/manifest.json", "/manifest.webmanifest", "/offline.html",
     "/icons/", "/sw.js", "/icon-", "/favicon.ico",
     "/decoration-landing.html",
