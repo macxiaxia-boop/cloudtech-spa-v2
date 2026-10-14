@@ -205,7 +205,8 @@ class SQLiteRunStore:
                     old is not None and old == RunStatus.COMPLETED
                 ):
                     continue
-                db.execute("""
+                try:
+                    db.execute("""
                     INSERT INTO v4_node_receipts(
                       run_id,node_id,tenant_id,provider_name,provider_req_id,
                       cost_cents,receipt_json
@@ -215,6 +216,10 @@ class SQLiteRunStore:
                         node.provider_name, node.provider_req_id, node.cost_cents,
                         json.dumps(node.to_dict(), ensure_ascii=False, allow_nan=False),
                     ))
+                except sqlite3.IntegrityError as exc:
+                    raise RunStoreConflict(
+                        "provider completion receipt is already registered for another node"
+                    ) from exc
             db.execute("""
                 UPDATE v4_runs SET snapshot=?,status=?,updated_at=?,version=version+1
                 WHERE run_id=? AND version=?
