@@ -18,6 +18,7 @@ import sys
 import time
 
 from .local_job_queue import LocalJobQueue
+from .local_output_projector import LocalOutputProjector
 from .orchestrator import NodeRunRecord, RunStatus
 from .node_kinds import NodeKind
 from .sqlite_run_store import SQLiteRunStore, RunStoreConflict, RunStoreError
@@ -132,6 +133,7 @@ def main() -> int:
         parser.error("poll-seconds must be 0.1..60")
     store = SQLiteRunStore(args.db)
     queue = LocalJobQueue(store)
+    projector = LocalOutputProjector(store)
     worker_id = secrets.token_hex(16)
     while True:
         if args.loop:
@@ -141,8 +143,18 @@ def main() -> int:
         # Structured and privacy-safe: no raw prompt, HTML or environment secret.
         print(f"V4 local job: {result['outcome']} {result.get('run_id', '')}",
               flush=True)
+        # Consume committed output events independently from task execution.
+        # Projection never sends customer content to external providers.
+        indexed = projector.consume_one()
+        if indexed["outcome"] == "BLOCKED_INVALID_EVIDENCE":
+            print("V4 output projection: invalid evidence; manual review required",
+                  flush=True)
+        elif indexed["outcome"] == "CATALOGUED":
+            print("V4 output projection: CATALOGUED", flush=True)
         if args.once:
-            return 0 if result["outcome"] in ("DONE", "IDLE") else 1
+            good_job = result["outcome"] in ("DONE", "IDLE")
+            good_index = indexed["outcome"] in ("CATALOGUED", "IDLE")
+            return 0 if good_job and good_index else 1
         time.sleep(args.poll_seconds)
 
 
