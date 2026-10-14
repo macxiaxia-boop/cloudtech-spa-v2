@@ -101,6 +101,15 @@ class LocalOutputProjector:
                 if (node.input_hash != source_hash or
                         result.get("content_sha256") != source_hash):
                     raise RunStoreConflict("HTML source hash does not match output")
+                # Receipts and snapshot hashes can agree with each other while
+                # the stored extracted text is wrong. Verify against the actual
+                # user-supplied HTML, not just mutually matching metadata.
+                from adapters.article.article_parser import parse_html
+                expected = parse_html(
+                    raw, source_url=run.input_bindings.get("source_url") or "",
+                )
+                if result != expected:
+                    raise RunStoreConflict("HTML extraction differs from source")
                 kind = "ARTICLE_HTML_EXTRACTION"
             elif (len(run.nodes) == 1 and
                   run.path_id == "WP-LOCAL-SUBTITLE-EXPORT" and
@@ -136,6 +145,14 @@ class LocalOutputProjector:
                 if (extraction.input_hash != source_hash or
                     raw_output.get("content_sha256") != source_hash):
                     raise RunStoreConflict("HTML stage provenance mismatch")
+                from adapters.article.article_parser import parse_html
+                expected = parse_html(
+                    supplied, source_url=run.input_bindings.get("source_url") or "",
+                )
+                if raw_output != expected:
+                    raise RunStoreConflict(
+                        "analysis extraction stage differs from source HTML"
+                    )
                 import hashlib as _hashlib
                 actual_text = raw_output.get("text")
                 if not isinstance(actual_text, str):
