@@ -86,7 +86,7 @@ export function MarketingPage() {
           {/* Hero 插画 */}
           <div className="relative">
             <picture>
-              <source type="image/webp" srcSet="/images/optimized/ai-team-480.webp 480w, /images/optimized/ai-team-768.webp 768w, /images/optimized/ai-team-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
+              <source type="image/webp" srcSet="/images/optimized/ai-team-360.webp 360w, /images/optimized/ai-team-480.webp 480w, /images/optimized/ai-team-560.webp 560w, /images/optimized/ai-team-768.webp 768w, /images/optimized/ai-team-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
               <img
               src="/images/ai-team.jpeg"
               fetchPriority="high"
@@ -240,7 +240,7 @@ export function MarketingPage() {
             </div>
             <div>
               <picture>
-                <source type="image/webp" srcSet="/images/optimized/dashboard-preview-480.webp 480w, /images/optimized/dashboard-preview-768.webp 768w, /images/optimized/dashboard-preview-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
+                <source type="image/webp" srcSet="/images/optimized/dashboard-preview-360.webp 360w, /images/optimized/dashboard-preview-480.webp 480w, /images/optimized/dashboard-preview-560.webp 560w, /images/optimized/dashboard-preview-768.webp 768w, /images/optimized/dashboard-preview-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
                 <img
                 src="/images/dashboard-preview.jpeg"
                 width={1024}
@@ -273,7 +273,7 @@ export function MarketingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <picture>
-                <source type="image/webp" srcSet="/images/optimized/opc-hero-480.webp 480w, /images/optimized/opc-hero-768.webp 768w, /images/optimized/opc-hero-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
+                <source type="image/webp" srcSet="/images/optimized/opc-hero-360.webp 360w, /images/optimized/opc-hero-480.webp 480w, /images/optimized/opc-hero-560.webp 560w, /images/optimized/opc-hero-768.webp 768w, /images/optimized/opc-hero-1024.webp 1024w" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1280px) 45vw, 560px" />
                 <img
                 src="/images/opc-hero.jpeg"
                 width={1024}
