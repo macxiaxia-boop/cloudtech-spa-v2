@@ -39,7 +39,8 @@ def process_one(store: SQLiteRunStore, *, lease_seconds: int = 120) -> dict:
         if record.nodes:
             raise ValueError("RUN_ALREADY_HAS_NODES")
 
-        if record.path_id == "WP-LOCAL-ARTICLE-EXTRACT":
+        analysis = None
+        if record.path_id in ("WP-LOCAL-ARTICLE-EXTRACT", "WP-LOCAL-ARTICLE-ANALYZE"):
             html = record.input_bindings.get("html")
             source_url = record.input_bindings.get("source_url") or ""
             if not isinstance(html, str) or not html.strip():
@@ -56,6 +57,13 @@ def process_one(store: SQLiteRunStore, *, lease_seconds: int = 120) -> dict:
             operation = "article.html_parse"
             node_id = "html_parse"
             provider_name = "local_html_parser"
+            if record.path_id == "WP-LOCAL-ARTICLE-ANALYZE":
+                from adapters.content.local_text_analysis import analyze_user_article
+                analysis = analyze_user_article(parsed)
+                if (analysis.get("source_html_sha256") != source_hash or
+                    analysis.get("mock") is not False or
+                    analysis.get("ai_model_used") is not False):
+                    raise ValueError("INVALID_LOCAL_ANALYSIS_PROVENANCE")
         elif record.path_id == "WP-LOCAL-SUBTITLE-EXPORT":
             from adapters.transcribe.supplied_subtitle_export import format_supplied_segments
             parsed = format_supplied_segments(record.input_bindings.get("segments"))
@@ -82,11 +90,27 @@ def process_one(store: SQLiteRunStore, *, lease_seconds: int = 120) -> dict:
             )
             rec.nodes.append(node)
             rec.last_node_id = node.node_id
+            if analysis is not None:
+                # Real deterministic stages: both are committed atomically.
+                stage = NodeRunRecord(
+                    node_id="content_analyze", node_kind=NodeKind.TRANSFORM,
+                    operation="content.local_text_analyze",
+                    requires={"html_parse": node.node_id}, produces={},
+                    input_hash=analysis["text_sha256"], status=RunStatus.COMPLETED,
+                    output_ref=analysis, provider_name="local_lexical_analyzer",
+                    provider_req_id=None, cost_cents=0, cost_class="FREE_LOCAL",
+                    started_at=node.finished_at,
+                    finished_at=datetime.now(timezone.utc).isoformat(),
+                )
+                rec.nodes.append(stage)
+                rec.last_node_id = stage.node_id
+                rec.updated_at = stage.finished_at
+            else:
+                rec.updated_at = node.finished_at
             rec.status = RunStatus.COMPLETED
-            rec.updated_at = node.finished_at
             return {"run_id": rec.run_id, "outcome": "DONE",
                     "provider_called": False, "cost_cents": 0,
-                    "source_sha256": source_hash}
+                    "source_sha256": source_hash, "node_count": len(rec.nodes)}
 
         return store.mutate(run_id, commit, lease_token=lease.token)
     except RunStoreConflict:
