@@ -57,8 +57,7 @@ class TikHubConnector:
             raise RuntimeError("[TIK] httpx 未安装")
         # TikHub 真实 endpoint: api.tikhub.io/api/v1/{platform}/web/...
         # Cloudflare UA 拦截 → 必须带 browser-like UA
-        import os
-        token = os.environ.get("TIKHUB_TOKEN") or self._get_token()
+        token = self._get_token()
         url = self._tikhub_url(platform, method)
         headers = {
             "Authorization": f"Bearer {token}",
