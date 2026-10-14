@@ -41,3 +41,27 @@ def test_actual_asgi_host_serves_source_preflight_and_rejects_unknown():
         assert route.json()["local_sync_supported"] is True
         unknown = client.get("/v4/workpaths/WP-DOES-NOT-EXIST/preflight")
         assert unknown.status_code == 404
+
+
+def test_dag_integrity_rejects_duplicate_missing_self_and_cycles():
+    from workflows.v4.capability_preflight import validate_dag
+    from workflows.v4.contract import StepSpec
+
+    def node(name, requires=()):
+        return StepSpec(id=name, operation="test.local", requires=list(requires))
+
+    assert validate_dag([node("a"), node("b", ["a"])]) == []
+    assert any("duplicate" in e for e in validate_dag([node("a"), node("a")]))
+    assert any("missing" in e for e in validate_dag([node("a", ["absent"])]))
+    assert any("self" in e for e in validate_dag([node("a", ["a"])]))
+    assert any("cycle" in e for e in validate_dag([
+        node("a", ["b"]), node("b", ["a"]),
+    ]))
+
+
+def test_preflight_exposes_dag_evidence_not_runtime_claims():
+    p = inspect_path("WP-BLOGGER-RESEARCH")
+    assert isinstance(p["dag_valid"], bool)
+    assert isinstance(p["dag_errors"], list)
+    assert p["execution_ready"] is False
+    assert p["business_validated"] is False
