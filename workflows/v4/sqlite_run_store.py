@@ -12,6 +12,8 @@ from contextlib import contextmanager
 import hashlib
 import json
 import sqlite3
+import secrets
+import time
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -194,7 +196,8 @@ class SQLiteRunStore:
             rows = db.execute(sql, params).fetchall()
         return [_restore(row["snapshot"]) for row in rows]
 
-    def mutate(self, run_id: str, apply: Callable[[Any], Any]) -> Any:
+    def mutate(self, run_id: str, apply: Callable[[Any], Any], *,
+               lease_token: Optional[str] = None) -> Any:
         """Apply a transition and its new node receipt in one DB transaction."""
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -204,6 +207,21 @@ class SQLiteRunStore:
             ).fetchone()
             if row is None:
                 raise RunStoreError("run not found")
+            local_job = db.execute(
+                "SELECT state,lease_token,lease_until FROM v4_local_jobs WHERE run_id=?",
+                (run_id,),
+            ).fetchone()
+            if lease_token is None:
+                if local_job is not None and local_job["state"] in ("QUEUED", "LEASED"):
+                    raise RunStoreConflict(
+                        "run belongs to queued local worker; synchronous mutation blocked"
+                    )
+            elif (local_job is None or local_job["state"] != "LEASED"
+                  or not local_job["lease_token"]
+                  or not secrets.compare_digest(local_job["lease_token"], lease_token)
+                  or not local_job["lease_until"]
+                  or local_job["lease_until"] <= time.time()):
+                raise RunStoreConflict("expired or superseded worker lease; result rejected")
             record = _restore(row["snapshot"])
             old_nodes = {n.node_id: n.status for n in record.nodes}
             old_tenant = record.tenant_id
@@ -244,6 +262,19 @@ class SQLiteRunStore:
                   record.status.value, record.updated_at, run_id, row["version"]))
             if db.execute("SELECT changes()").fetchone()[0] != 1:
                 raise RunStoreConflict("concurrent run update rejected")
+            if lease_token is not None:
+                from .orchestrator import RunStatus
+                if record.status != RunStatus.COMPLETED:
+                    raise RunStoreConflict("worker did not produce a completed run")
+                updated = db.execute(
+                    """UPDATE v4_local_jobs
+                          SET state='DONE',lease_token=NULL,lease_until=NULL,
+                              error_code=NULL,updated_at=?
+                         WHERE run_id=? AND state='LEASED' AND lease_token=?""",
+                    (record.updated_at, run_id, lease_token),
+                ).rowcount
+                if updated != 1:
+                    raise RunStoreConflict("worker lease changed before commit")
             db.commit()
             return result
 
