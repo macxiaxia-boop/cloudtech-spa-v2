@@ -48,6 +48,7 @@ class LocalJobQueue:
             rec = _restore(row["snapshot"])
             if rec.path_id not in {
                 "WP-LOCAL-ARTICLE-EXTRACT", "WP-LOCAL-SUBTITLE-EXPORT",
+                "WP-LOCAL-ARTICLE-ANALYZE",
             }:
                 raise RunStoreConflict("only allowlisted deterministic local workpaths may be queued")
             existing = db.execute(
