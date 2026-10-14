@@ -11,7 +11,7 @@ from workflows.v4.media_gate import MediaGate
 
 def test_load_real_skills_orchestrator():
     """真实加载 D:\CloudTech-Portable\data\skill_orchestrator\200 SKILL.md"""
-    skill_root = Path("D:/CloudTech-Portable/data/skill_orchestrator")
+    skill_root = Path(os.environ.get("CLOUDTECH_SKILL_ROOT", "D:/CloudTech-Portable/data/skill_orchestrator"))
     assert skill_root.exists(), f"skill_orchestrator 不存在: {skill_root}"
     reg = OperationRegistry(skill_root=skill_root)
     n = reg.count()
@@ -34,7 +34,7 @@ def test_load_real_skills_orchestrator():
 
 def test_specific_skill_categories():
     """验证 5 行业 + 80 通用 = 200 skill 目录存在"""
-    skill_root = Path("D:/CloudTech-Portable/data/skill_orchestrator")
+    skill_root = Path(os.environ.get("CLOUDTECH_SKILL_ROOT", "D:/CloudTech-Portable/data/skill_orchestrator"))
     # 至少含 5 行业前缀
     industries = ["catering", "decoration", "education", "medical", "retail"]
     found = 0
@@ -61,7 +61,7 @@ def test_registry_dedupe_and_query():
 
 def test_real_skill_kind_distribution():
     """真实加载后 kind 分布"""
-    reg = OperationRegistry(skill_root=Path("D:/CloudTech-Portable/data/skill_orchestrator"))
+    reg = OperationRegistry(skill_root=Path(os.environ.get("CLOUDTECH_SKILL_ROOT", "D:/CloudTech-Portable/data/skill_orchestrator")))
     all_ops = reg.list_all()
     from collections import Counter
     kinds = Counter(o.kind for o in all_ops)
