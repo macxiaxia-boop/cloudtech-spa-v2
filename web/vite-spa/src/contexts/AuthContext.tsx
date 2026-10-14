@@ -127,11 +127,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUnauthorizedHandler(logout);
     let active = true;
     (async () => {
-      // This cannot be a trusted session without a server-side /me check.
+      // Public pages must not auto-probe a backend that is not mounted in
+      // static preview. This keeps the unknown/offline state fail-closed.
+      // Signed session verification, login/register and explicit refresh
+      // still surface real upstream failures instead of returning mock data.
+      let verified = false;
       try {
         const token = sessionStorage.getItem(TOKEN_KEY);
         if (token) {
           const data = await verifySession(token);
+          verified = true;
           if (active) {
             sessionStorage.setItem(TENANT_KEY, data.tenant_id);
             acceptVerified(data);
@@ -144,8 +149,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } finally {
         if (active) setLoading(false);
       }
-      const online = await checkBackendHealth().catch(() => false);
-      if (active) setBackendOnline(online);
+      if (active && verified) {
+        const online = await checkBackendHealth().catch(() => false);
+        if (active) setBackendOnline(online);
+      } else if (active) {
+        setBackendOnline(false);
+      }
     })();
     return () => { active = false; };
   }, [acceptVerified, logout]);
