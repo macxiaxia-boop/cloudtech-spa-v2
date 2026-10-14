@@ -165,10 +165,21 @@ class OperationRegistry:
         # missing plugin would break unrelated core operations before dispatch.
         try:
             if op_id == "url.normalize":
-                from urllib.parse import urlparse
+                from urllib.parse import urlsplit, urlunsplit
                 u = inputs.get("url", "")
-                p = urlparse(u)
-                return {"normalized": f"{p.scheme}://{p.netloc}{p.path}", "host": p.netloc, "path": p.path}
+                p = urlsplit(u)
+                if (
+                    p.scheme.lower() not in {"http", "https"}
+                    or not p.hostname
+                    or p.username or p.password
+                ):
+                    return {"ok": False, "status": "INVALID_PUBLIC_URL"}
+                return {
+                    "ok": True,
+                    "normalized": urlunsplit((p.scheme.lower(), p.netloc, p.path, p.query, "")),
+                    "host": p.hostname,
+                    "path": p.path,
+                }
 
             if op_id == "platform.permission_check":
                 from adapters import platform as Aplat
