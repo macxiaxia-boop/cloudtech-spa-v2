@@ -50,6 +50,7 @@ jobs:
             workflows/tests/ \
             tests/test_ui_pages_binding.py \
             tests/test_v22_stub_fail_closed.py \
+            tests/test_v22_public_image_mount.py \
             tests/test_v22_forward_errors.py \
             --tb=short -q --junitxml=verify_junit.xml
 
