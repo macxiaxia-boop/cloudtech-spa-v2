@@ -103,3 +103,78 @@ def test_local_executor_denies_complex_flagship_and_missing_html(tmp_path, monke
         "input_bindings": {},
     })
     assert invalid.status_code == 422
+
+
+
+def test_local_crash_reconciliation_uses_receipt_without_reexecution(tmp_path, monkeypatch):
+    from workflows.v4 import RunStatus
+    from workflows.v4.orchestrator import NodeRunRecord
+    from workflows.v4.node_kinds import NodeKind
+    from adapters.article.article_parser import parse_html
+
+    api = importlib.import_module("api.v4")
+    db_path = tmp_path / "recover.sqlite"
+    def new_orchestrator():
+        return V4Orchestrator(IdempotencyStore(), run_store=SQLiteRunStore(db_path))
+    orch = new_orchestrator()
+    monkeypatch.setattr(api, "_orchestrator", orch)
+    app = FastAPI()
+    app.include_router(api.router)
+    client = TestClient(app)
+    html = "<html><title>单机恢复</title><body><p>原始内容</p></body></html>"
+    created = client.post("/v4/workpaths/runs?tenant_id=tenant_r", json={
+        "path_id": "WP-LOCAL-ARTICLE-EXTRACT", "revision": 1,
+        "input_bindings": {"html": html}, "idempotency_key": "recover-1",
+    })
+    assert created.status_code == 200, created.text
+    run_id = created.json()["run_id"]
+    orch.transition(run_id, RunStatus.RUNNING)
+    node = NodeRunRecord(
+        node_id="html_parse", node_kind=NodeKind.TRANSFORM,
+        operation="article.html_parse", requires={}, produces={},
+        input_hash=hashlib.sha256(html.encode()).hexdigest(),
+    )
+    orch.add_node(run_id, node)
+    orch.mark_node_running(run_id, "html_parse")
+    orch.mark_node_done(
+        run_id, "html_parse", parse_html(html),
+        provider_name="local_html_parser", cost_cents=0,
+    )
+    assert orch.get_run(run_id).status is RunStatus.RUNNING
+    assert SQLiteRunStore(db_path).receipt_count(run_id) == 1
+
+    monkeypatch.setattr(api, "_orchestrator", new_orchestrator())
+    denied = client.post(f"/v4/workpaths/runs/{run_id}/reconcile-local?tenant_id=other")
+    assert denied.status_code == 404
+    response = client.post(f"/v4/workpaths/runs/{run_id}/reconcile-local?tenant_id=tenant_r")
+    assert response.status_code == 200, response.text
+    assert response.json()["reconciled"] is True
+    assert response.json()["provider_recalled"] is False
+    assert response.json()["new_charge_cents"] == 0
+    assert client.get(f"/v4/workpaths/runs/{run_id}?tenant_id=tenant_r").json()["status"] == "COMPLETED"
+    assert SQLiteRunStore(db_path).receipt_count(run_id) == 1
+    replay = client.post(f"/v4/workpaths/runs/{run_id}/reconcile-local?tenant_id=tenant_r")
+    assert replay.status_code == 200
+    assert replay.json()["reconciled"] is False
+
+
+def test_local_reconcile_refuses_incomplete_uncertain_execution(tmp_path, monkeypatch):
+    api = importlib.import_module("api.v4")
+    orch = V4Orchestrator(
+        IdempotencyStore(), run_store=SQLiteRunStore(tmp_path / "incomplete.sqlite")
+    )
+    monkeypatch.setattr(api, "_orchestrator", orch)
+    app = FastAPI()
+    app.include_router(api.router)
+    client = TestClient(app)
+    created = client.post("/v4/workpaths/runs?tenant_id=tenant_r", json={
+        "path_id": "WP-LOCAL-ARTICLE-EXTRACT", "revision": 1,
+        "input_bindings": {"html": "<p>未完成</p>"},
+    })
+    assert created.status_code == 200
+    run_id = created.json()["run_id"]
+    from workflows.v4 import RunStatus
+    orch.transition(run_id, RunStatus.RUNNING)
+    result = client.post(f"/v4/workpaths/runs/{run_id}/reconcile-local?tenant_id=tenant_r")
+    assert result.status_code == 409
+    assert orch.get_run(run_id).status is RunStatus.RUNNING
