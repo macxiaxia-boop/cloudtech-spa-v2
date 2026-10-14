@@ -157,3 +157,63 @@ def test_independent_python_worker_process(tmp_path):
     reopened = SQLiteRunStore(store.path)
     assert reopened.get(run_id).status == RunStatus.COMPLETED
     assert reopened.receipt_count(run_id) == 1
+
+
+
+def test_crashed_worker_after_max_attempts_is_not_a_zombie(tmp_path):
+    store, _, run_id = setup_run(tmp_path)
+    q = LocalJobQueue(store)
+    q.enqueue(run_id, "t1")
+    with store._connect() as db:
+        db.execute("UPDATE v4_local_jobs SET max_attempts=2 WHERE run_id=?", (run_id,))
+    first = q.claim()
+    assert first is not None
+    with store._connect() as db:
+        db.execute("UPDATE v4_local_jobs SET lease_until=? WHERE run_id=?",
+                   (time.time() - 1, run_id))
+    second = q.claim()
+    assert second is not None
+    assert second.attempt == 2
+    with store._connect() as db:
+        db.execute("UPDATE v4_local_jobs SET lease_until=? WHERE run_id=?",
+                   (time.time() - 1, run_id))
+    assert q.claim() is None
+    state = q.get_state(run_id, "t1")
+    assert state["state"] == "FAILED"
+    assert state["error_code"] == "LOCAL_WORKER_LEASE_EXHAUSTED"
+    assert store.get(run_id).status is RunStatus.FAILED
+    assert store.receipt_count(run_id) == 0
+
+
+def test_real_worker_heartbeat_has_strict_staleness_cutoff(tmp_path):
+    store, _, _ = setup_run(tmp_path)
+    q = LocalJobQueue(store)
+    assert q.active_workers() == 0
+    q.note_worker("local-loop-1")
+    assert q.active_workers() == 1
+    with store._connect() as db:
+        db.execute("UPDATE v4_local_worker_heartbeats SET last_seen=?",
+                   (time.time() - 300,))
+    assert q.active_workers() == 0
+
+
+def test_v4_api_reports_actual_heartbeat_only(tmp_path, monkeypatch):
+    api = importlib.import_module("api.v4")
+    store, _, run_id = setup_run(tmp_path)
+    monkeypatch.setattr(api, "_orchestrator", V4Orchestrator(
+        IdempotencyStore(), run_store=store,
+    ))
+    app = FastAPI()
+    app.include_router(api.router)
+    client = TestClient(app)
+    before = client.get("/v4/workpaths/runs?tenant_id=t1")
+    assert before.status_code == 200 and before.json()["worker_connected"] is False
+    q = LocalJobQueue(store)
+    q.note_worker("local-loop")
+    online = client.get("/v4/workpaths/runs?tenant_id=t1")
+    assert online.json()["worker_connected"] is True
+    assert online.json()["active_local_workers"] == 1
+    with store._connect() as db:
+        db.execute("UPDATE v4_local_worker_heartbeats SET last_seen=?",
+                   (time.time() - 300,))
+    assert client.get("/v4/workpaths/runs?tenant_id=t1").json()["worker_connected"] is False
