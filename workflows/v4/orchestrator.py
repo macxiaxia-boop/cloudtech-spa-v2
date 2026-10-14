@@ -6,6 +6,7 @@
   * 断点续跑 — 不重复收费
 """
 from __future__ import annotations
+import copy
 import json
 import secrets
 import threading
@@ -201,10 +202,7 @@ class V4Orchestrator:
             rec = self._runs.get(run_id)
             if rec is None:
                 return None
-            return WorkPathRunRecord(**{
-                k: (list(v) if k == "nodes" else v)
-                for k, v in rec.__dict__.items()
-            })
+            return copy.deepcopy(rec)
 
     def list_runs(
         self,
@@ -214,7 +212,7 @@ class V4Orchestrator:
         limit: int = 50,
     ) -> List[WorkPathRunRecord]:
         with self._mtx:
-            items = list(self._runs.values())
+            items = [copy.deepcopy(rec) for rec in self._runs.values()]
         if tenant_id:
             items = [r for r in items if r.tenant_id == tenant_id]
         if path_id:
@@ -222,13 +220,7 @@ class V4Orchestrator:
         if status:
             items = [r for r in items if r.status == status]
         items.sort(key=lambda r: r.created_at, reverse=True)
-        return [
-            WorkPathRunRecord(**{
-                k: (list(v) if k == "nodes" else v)
-                for k, v in r.__dict__.items()
-            })
-            for r in items[:limit]
-        ]
+        return items[:limit]
 
     def mark_node_running(self, run_id: str, node_id: str) -> None:
         with self._mtx:

@@ -65,3 +65,25 @@ def test_concurrent_run_create_same_nonce_single_run():
         ids = list(pool.map(create, range(100)))
     assert len(set(ids)) == 1
     assert len(orch.list_runs()) == 1
+
+
+def test_get_run_returns_nested_copy():
+    orch, run_id = _orch_with_node()
+    snapshot = orch.get_run(run_id)
+    snapshot.input_bindings["local"] = 1
+    snapshot.nodes[0].requires["local"] = {"nested": [1]}
+    snapshot.nodes[0].status = RunStatus.COMPLETED
+    actual = orch.get_run(run_id)
+    assert "local" not in actual.input_bindings
+    assert "local" not in actual.nodes[0].requires
+    assert actual.nodes[0].status == RunStatus.RUNNING
+
+
+def test_list_runs_returns_nested_copy():
+    orch, run_id = _orch_with_node()
+    snapshot = orch.list_runs(tenant_id="t1")[0]
+    snapshot.nodes[0].requires["local"] = 1
+    snapshot.input_bindings["local"] = 1
+    actual = orch.get_run(run_id)
+    assert "local" not in actual.nodes[0].requires
+    assert "local" not in actual.input_bindings
