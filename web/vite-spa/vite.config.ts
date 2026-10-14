@@ -20,6 +20,30 @@ export default defineConfig({
       '/v4': 'http://localhost:5099',
     },
   },
+  preview: {
+    port: 5098,
+    strictPort: true,
+    // These response headers protect the actual built bundle in preview.
+    // Production ingress must apply an equivalent reviewed CSP and headers.
+    headers: {
+      'Content-Security-Policy': [
+        "default-src 'self'",
+        "base-uri 'none'",
+        "object-src 'none'",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob:",
+        "font-src 'self' data:",
+        "connect-src 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+        "upgrade-insecure-requests",
+      ].join('; '),
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'X-Frame-Options': 'DENY',
+    },
+  },
   build: {
     outDir: 'dist-v45',
     sourcemap: true,
