@@ -15,6 +15,9 @@
 from fastapi import APIRouter, HTTPException, Body, Query, Depends
 from pydantic import BaseModel, Field
 from typing import Any, Dict, List, Optional
+import hashlib
+from workflows.v4.orchestrator import NodeRunRecord, RunStatusError
+from workflows.v4.node_kinds import NodeKind
 
 from workflows.v4 import (
     V4Orchestrator, RunStatus, OperationRegistry,
@@ -317,6 +320,85 @@ def resume_run(run_id: str, req: ResumeRequest,
     """Actual worker requeue is not wired; never report a false success."""
     get_owned_run(_orchestrator, run_id, ctx.tenant_id)
     raise HTTPException(501, "节点恢复未接入实际执行器；未重新执行或扣费")
+
+
+@router.post("/workpaths/runs/{run_id}/execute-local")
+def execute_local_workpath(run_id: str, ctx: AuthContext = Depends(auth_required)):
+    """Execute the ONE safe, deterministic HTML extraction workpath.
+
+    This is synchronous LOCAL processing only, not an LLM, RPA, billing
+    worker, scheduler or general DAG executor. Database commits are handled
+    by the existing V4 orchestrator when staged SQLite is enabled.
+    """
+    rec = get_owned_run(_orchestrator, run_id, ctx.tenant_id)
+    if rec.path_id != "WP-LOCAL-ARTICLE-EXTRACT":
+        raise HTTPException(422, "该路径尚无可安全执行的本地 Worker")
+    if rec.status == RunStatus.COMPLETED:
+        return {
+            "run_id": run_id, "status": rec.status.value,
+            "idempotent_hit": True, "worker_type": "SYNCHRONOUS_LOCAL_ONLY",
+            "nodes": [n.to_dict() for n in rec.nodes],
+        }
+    if rec.status != RunStatus.READY:
+        raise HTTPException(409, "任务非 READY；需人工核对状态，不得自动重复执行")
+
+    html = rec.input_bindings.get("html")
+    if not isinstance(html, str) or not html.strip():
+        raise HTTPException(422, "没有提供用户授权的 HTML 原文")
+    if len(html.encode("utf-8")) > 1_800_000:
+        raise HTTPException(422, "HTML 输入超过 1.8MB 限制")
+    source_url = rec.input_bindings.get("source_url") or ""
+    if not isinstance(source_url, str) or len(source_url) > 2048:
+        raise HTTPException(422, "source_url 无效")
+
+    try:
+        # A durable status transition is the claim. Concurrent callers may
+        # observe RUNNING but MUST NOT create a second provider side effect.
+        _orchestrator.transition(run_id, RunStatus.RUNNING)
+    except RunStatusError as exc:
+        raise HTTPException(409, "任务已被其他执行请求接管") from exc
+    try:
+        node = NodeRunRecord(
+            node_id="html_parse", node_kind=NodeKind.TRANSFORM,
+            operation="article.html_parse", requires={}, produces={},
+            input_hash=hashlib.sha256(html.encode("utf-8")).hexdigest(),
+            cost_class="FREE_LOCAL",
+        )
+        _orchestrator.add_node(run_id, node)
+        _orchestrator.mark_node_running(run_id, node.node_id)
+        from adapters.article.article_parser import parse_html
+        result = parse_html(html, source_url=source_url)
+        _orchestrator.mark_node_done(
+            run_id, node.node_id, result, cost_cents=0,
+            provider_name="local_html_parser", cost_class="FREE_LOCAL",
+        )
+        _orchestrator.transition(run_id, RunStatus.COMPLETED)
+    except Exception:
+        # Never claim success or silently restart uncertain runs.
+        current = _orchestrator.get_run(run_id)
+        if current and current.status == RunStatus.RUNNING:
+            if any(n.node_id == "html_parse" and n.status == RunStatus.RUNNING
+                   for n in current.nodes):
+                try:
+                    _orchestrator.mark_node_failed(
+                        run_id, "html_parse", "LOCAL_EXECUTION_ERROR",
+                        "Local extraction failed; inspect operator logs",
+                    )
+                except Exception:
+                    pass
+            try:
+                _orchestrator.transition(run_id, RunStatus.FAILED)
+            except Exception:
+                pass
+        raise HTTPException(503, "本地处理失败或完成记录不确定；未自动重试")
+    saved = _orchestrator.get_run(run_id)
+    return {
+        "run_id": run_id, "status": saved.status.value,
+        "worker_type": "SYNCHRONOUS_LOCAL_ONLY",
+        "provider_called": False, "cost_cents": 0,
+        "storage": _orchestrator.storage_kind,
+        "nodes": [n.to_dict() for n in saved.nodes],
+    }
 
 
 @router.get("/workpaths/runs/{run_id}/export")
