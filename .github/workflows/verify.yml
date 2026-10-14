@@ -104,6 +104,9 @@ jobs:
           skipped = sum(int(s.attrib.get("skipped", 0)) for s in suites)
           passed = total - failures - errors - skipped
           print(f"PASS={passed} FAIL={failures} ERR={errors} SKIP={skipped} TOTAL={total}")
+          if total <= 0 or any(n < 0 for n in (passed, failures, errors, skipped)):
+              print("GATE FAILED: empty or inconsistent JUnit results.", file=sys.stderr)
+              sys.exit(1)
           if failures > 0 or errors > 0:
               print("GATE FAILED: regressions are not allowed at PR time.", file=sys.stderr)
               sys.exit(1)
