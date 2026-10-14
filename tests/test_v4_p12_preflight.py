@@ -65,3 +65,17 @@ def test_preflight_exposes_dag_evidence_not_runtime_claims():
     assert isinstance(p["dag_errors"], list)
     assert p["execution_ready"] is False
     assert p["business_validated"] is False
+
+
+def test_blogger_fetch_waits_for_permission_after_url_validation():
+    from workflows.v4.paths import get_path
+    steps = {step.id: step for step in get_path("WP-BLOGGER-RESEARCH").steps}
+    assert "url_normalize" in steps["permission_check"].requires
+    assert "permission_check" in steps["homepage_parse"].requires
+    assert validate_workpath_dag_is_truthful()
+
+
+def validate_workpath_dag_is_truthful():
+    from workflows.v4.capability_preflight import validate_dag
+    from workflows.v4.paths import get_path
+    return validate_dag(get_path("WP-BLOGGER-RESEARCH").steps) == []
