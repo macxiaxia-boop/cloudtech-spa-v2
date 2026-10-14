@@ -38,7 +38,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900">
       <div className="w-full max-w-md bg-card rounded-xl shadow-xl border border-border p-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
@@ -109,6 +109,6 @@ export function LoginPage() {
           <Link to="/register" className="text-brand-600 hover:text-brand-700 font-medium ml-1">{t('login.register_link')}</Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }
