@@ -6,18 +6,18 @@ name: Verify (pytest + lint)
 # `524 PASS / 0 FAIL / 7 SKIP` V6.2 baseline is enforceable for every change
 # rather than being a one-off snapshot.
 
-on:
+'on':
   pull_request:
     branches: [master, main]
     paths:
-      - "tests/**"
-      - "workflows/**"
-      - "billing_real.py"
-      - "requirements*.txt"
-      - "pyproject.toml"
-      - ".github/workflows/verify.yml"
+      - 'tests/**'
+      - 'workflows/**'
+      - 'billing_real.py'
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+      - '.github/workflows/verify.yml'
   push:
-    branches: [master, main]
+    branches: [master, main, 'fix/cloudtech-v4-p0-security-20261014']
   workflow_dispatch:
 
 # Allow concurrent runs; each PR is its own clean verify.
