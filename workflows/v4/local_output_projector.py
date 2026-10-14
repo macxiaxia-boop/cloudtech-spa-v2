@@ -121,13 +121,14 @@ class LocalOutputProjector:
                 from adapters.transcribe.supplied_subtitle_export import (
                     format_supplied_segments,
                 )
-                source_hash = format_supplied_segments(
-                    run.input_bindings.get("segments"))["source_sha256"]
-                if (result.get("source_sha256") != source_hash or
-                    node.input_hash != source_hash or
-                    result.get("asr_performed") is not False or
-                    result.get("model_called") is not False):
-                    raise RunStoreConflict("subtitle provenance or source mismatch")
+                # The receipt and outbox can agree on forged metadata.
+                # Recompute the complete deliverable from the retained source,
+                # not just its source hash, before making it discoverable.
+                expected = format_supplied_segments(
+                    run.input_bindings.get("segments"))
+                source_hash = expected["source_sha256"]
+                if (node.input_hash != source_hash or result != expected):
+                    raise RunStoreConflict("subtitle bytes or provenance differ from source")
                 kind = "SUBTITLE_SRT_VTT"
             elif (len(run.nodes) == 2 and
                   run.path_id == "WP-LOCAL-ARTICLE-ANALYZE" and
