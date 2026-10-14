@@ -112,6 +112,34 @@ export class WorkPathClient {
     return response.json() as Promise<T>;
   }
 
+  async listPaths(): Promise<{
+    total_paths: number;
+    workpaths: Array<{
+      id: string; title: string; goal: string; domain: string; revision: number;
+      inputs: Array<{ role: string; min: number; max: number }>;
+      steps: Array<{ id: string; operation: string }>;
+    }>;
+  }> {
+    return this.get('/operations');
+  }
+
+  async listRuns(): Promise<{
+    items: Array<{
+      run_id: string; path_id: string; tenant_id: string;
+      status: string; created_at: string;
+    }>;
+    storage: string; worker_connected: boolean; production_ready: boolean;
+  }> {
+    return this.get('/workpaths/runs');
+  }
+
+  async extractSuppliedHTML(html: string, sourceUrl: string): Promise<{
+    title: string; text: string; images: unknown[]; videos: unknown[];
+    content_sha256: string; mock: boolean; saved: boolean;
+  }> {
+    return this.post('/article/extract-html', { html, source_url: sourceUrl });
+  }
+
   async resolve(req: ResolveRequest): Promise<ResolveResponse> {
     return this.post<ResolveResponse>('/workpaths/resolve', req);
   }
