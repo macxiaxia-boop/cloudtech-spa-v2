@@ -13,7 +13,7 @@ import sqlite3
 
 router = APIRouter(prefix='/api/saas/v1', tags=['saas-v8'])
 
-DB = r'D:\CloudTech-Portable\data\cloudtech.db'
+DB = os.environ.get('CLOUDTECH_SAAS_DB_PATH', r'D:\CloudTech-Portable\data\cloudtech.db')
 def _jwt_signing_secret():
     """Fail closed. No shared or predictable key may mint user sessions."""
     secret = os.environ.get("V4_JWT_SECRET") or os.environ.get("CLOUDTECH_SAAS_JWT_SECRET", "")
