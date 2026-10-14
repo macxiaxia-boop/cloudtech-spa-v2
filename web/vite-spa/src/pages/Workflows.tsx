@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { workPathClient } from '@/lib/workpath-client';
 import { useTranslation } from '@/i18n';
+import { SubtitleExportTool } from '@/components/workflows/SubtitleExportTool';
 
 type PathDefinition = {
   id: string; title: string; goal: string; domain: string; revision: number;
@@ -259,6 +260,8 @@ export function WorkflowsPage() {
           )}
         </CardContent>
       </Card>
+
+      <SubtitleExportTool />
 
       <Card>
         <CardContent className="p-5 space-y-3">
