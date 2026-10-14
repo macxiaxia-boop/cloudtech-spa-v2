@@ -6,6 +6,8 @@ on:
     paths:
       - "auto_pipeline.py"
       - "tests/test_p5_pipeline_truth.py"
+      - "tests/test_p5_auth_fail_closed.py"
+      - "web/vite-spa/src/contexts/AuthContext.tsx"
       - "tests/test_p8_v4_path_cell_contracts.py"
       - "workflows/v4/registry.py"
       - "workflows/v4/capability_preflight.py"
@@ -41,4 +43,4 @@ jobs:
         env:
           CLOUDTECH_DATA_DIR: ${{ runner.temp }}/cloudtech-p5-data
           CLOUDTECH_OUTPUT_DIR: ${{ runner.temp }}/cloudtech-p5-output
-        run: python -m pytest tests/test_p5_pipeline_truth.py tests/test_p8_v4_path_cell_contracts.py tests/test_p9_v4_executable_preflight_and_tenant.py tests/test_p9_local_prefix.py tests/test_p9_v4_asgi_host.py tests/test_p11_v4_durable_snapshots.py -q --tb=short
+        run: python -m pytest tests/test_p5_pipeline_truth.py tests/test_p5_auth_fail_closed.py tests/test_p8_v4_path_cell_contracts.py tests/test_p9_v4_executable_preflight_and_tenant.py tests/test_p9_local_prefix.py tests/test_p9_v4_asgi_host.py tests/test_p11_v4_durable_snapshots.py -q --tb=short
