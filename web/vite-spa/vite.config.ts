@@ -16,6 +16,8 @@ export default defineConfig({
     port: 5098,  // 与 gateway 5099 错开
     proxy: {
       '/api/v2': 'http://localhost:5099',  // 代理到 FastAPI gateway
+      '/api/saas/v1': 'http://localhost:5099',
+      '/v4': 'http://localhost:5099',
     },
   },
   build: {
