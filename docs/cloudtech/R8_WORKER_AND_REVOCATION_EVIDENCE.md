@@ -60,6 +60,29 @@ python -m uvicorn gateway_v22:app --host 127.0.0.1 --port 5099
 - **用户本机启用**：没有本地执行通道，GitHub 上的进程测试不等于用户 Windows 已运行服务。
 - **生产部署**：未授权自动合并、生产发布、付费 Provider 调用、生产数据迁移与账号密钥变更。
 
+## 同一工作引擎的第二个真实业务闭环（2026-10-14 增量）
+
+- 新增 `WP-LOCAL-SUBTITLE-EXPORT`，用户提供实际含毫秒起止时间的片段列表；通过现有 `api/v4` 的任务创建与 `enqueue-local` 端点入队。
+- `adapters/transcribe/supplied_subtitle_export.py` 校验时间轴有序、非重叠、整数毫秒、单片段非空以及 2000 片段/文字限额。实际重用 `adapters/transcribe/subtitle_formatter.py` 的 SRT/VTT 格式化能力。
+- `workflows/v4/local_worker.py` 添加严格第二条 allowlist：实际输出 `srt`、`vtt`、`source_sha256`，记录 `asr_performed=false`、`model_called=false`、`mock=false`，零外部调用和零费用。
+- `workflows/v4/registry.py` 也注册对应的原子操作 `subtitle.format_supplied`，避免能力只能从 Worker 调用。
+- `web/vite-spa/src/components/workflows/SubtitleExportTool.tsx` 与现有 `Workflows.tsx` 连接：粘贴时间戳 JSON → 队列执行 → 从实际持久化节点读取 → 浏览器导出 SRT/VTT。前端生产环境尚未部署；浏览器端到端 QA 尚需复核。
+- **本轮 GitHub CI 证据**：`38511011598`，`312 PASS / 3 FAIL / 3 SKIP`；第二条独立进程执行、真实来源、非法数据拒绝及注册器调用测试均 PASS；失败仍全部来自 Windows 私有技能目录不可达。
+- 不要把格式转换冒充自动识别视频语音：ASR 真实 Provider 尚未连接。也不要把两个小型 local workpath 冒充 6 旗舰全闭环或 263 产品入口完成。
+
+## 验收命令（只限测试/开发环境）
+
+用户先在隔离 Windows 环境运行现有 API 和独立 Worker，再于 CloudTech 工作流页面提交：
+
+```json
+[
+  {"start_ms":0,"end_ms":1500,"text":"真实字幕第一句"},
+  {"start_ms":1750,"end_ms":3000,"text":"真实字幕第二句"}
+]
+```
+
+完成后从任务记录下载两个文本文件，验证 SRT 第一行 `1`、VTT 第一行 `WEBVTT`、来源 SHA-256 一致、完成回执恰好一次、重启读取仍存在。绝不能使用模拟音频转写去满足此验收。
+
 ## 下一批必须补的原子能力
 
 1. 提供正式 PostgreSQL 后端及含队列租约、事务 outbox 与 provider request key 的独立可验证实现，运行多实例争抢/崩溃测试。
