@@ -99,3 +99,53 @@ def test_bad_jwt_secret_is_not_accepted_even_if_present(saas, monkeypatch):
     with pytest.raises(Exception) as exc:
         module._mint_jwt("user", "tenant")
     assert "503" in str(exc.value)
+
+
+def test_signed_saas_session_is_looked_up_in_db(saas):
+    module, client = saas
+    registered = client.post("/api/saas/v1/register", json={
+        "email": "verified@example.com", "password": "strong-pass-123",
+        "tenant_name": "真实工作空间",
+    })
+    assert registered.status_code == 200, registered.text
+    auth = {"Authorization": "Bearer " + registered.json()["token"]}
+    response = client.get("/api/saas/v1/me", headers=auth)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["verified"] is True
+    assert data["tenant_id"] == registered.json()["tenant_id"]
+    assert data["workspace_name"] == "真实工作空间"
+    assert data["role"] == "member"
+    assert client.get("/api/saas/v1/me").status_code == 401
+    assert client.get("/api/saas/v1/me", headers={
+        "Authorization": auth["Authorization"][:-3] + "abc",
+    }).status_code == 401
+
+
+def test_signed_saas_jwt_can_be_verified_by_existing_v4_tenant_middleware(saas, monkeypatch):
+    module, client = saas
+    from api.v4.auth import _verify_jwt, _get_jwt_secret
+    monkeypatch.delenv("V4_JWT_SECRET", raising=False)
+    token = module._mint_jwt("user-123", "tenant-123")
+    assert _get_jwt_secret() == "0123456789abcdef" * 4
+    claims = _verify_jwt(token, _get_jwt_secret(), "tenant-123")
+    assert claims is not None
+    assert claims["tenant_id"] == "tenant-123"
+    assert claims["user_id"] == "user-123"
+    assert _verify_jwt(token, _get_jwt_secret(), "other-tenant") is None
+
+
+def test_saas_session_denied_after_tenant_disabled(saas):
+    module, client = saas
+    created = client.post("/api/saas/v1/register", json={
+        "email": "disabled@example.com", "password": "strongpass",
+        "tenant_name": "Disabled",
+    })
+    assert created.status_code == 200
+    with sqlite3.connect(module.DB) as conn:
+        conn.execute("UPDATE saas_tenants SET active=0 WHERE tenant_id=?",
+                     (created.json()["tenant_id"],))
+    response = client.get("/api/saas/v1/me", headers={
+        "Authorization": "Bearer " + created.json()["token"],
+    })
+    assert response.status_code == 403
