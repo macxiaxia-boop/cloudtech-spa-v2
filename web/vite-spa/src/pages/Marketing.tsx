@@ -40,7 +40,7 @@ export function MarketingPage() {
         {/* R378 P2-C · Hero via-white toggle button (top-right) */}
         <button
           onClick={toggleHero}
-          aria-label={heroLight ? '切换到深色 Hero' : '切换到浅色 Hero'}
+          aria-label={heroLight ? '浅色 Hero：切换到深色 Hero' : '深色 Hero：切换到浅色 Hero'}
           className="absolute top-4 right-4 z-10 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm border border-gray-200 dark:border-neutral-700 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-neutral-800 transition-colors shadow-sm"
           data-testid="hero-variant-toggle"
         >
