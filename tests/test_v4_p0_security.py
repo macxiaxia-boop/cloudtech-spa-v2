@@ -122,3 +122,28 @@ def test_dev_mode_requires_explicit_insecure_opt_in(monkeypatch):
     monkeypatch.delenv("V4_JWT_SECRET", raising=False)
     monkeypatch.delenv("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH", raising=False)
     assert _run("tenant_dev").status_code == 503
+
+def test_run_listing_returns_only_owned_records_without_fake_worker():
+    own = _run("tenant_list_a", video="my-source")
+    other = _run("tenant_list_b", video="other-source")
+    assert own.status_code == other.status_code == 200
+    r = client.get("/v4/workpaths/runs?tenant_id=tenant_list_a")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    own_id = own.json()["run_id"]
+    other_id = other.json()["run_id"]
+    assert own_id in [item["run_id"] for item in body["items"]]
+    assert other_id not in [item["run_id"] for item in body["items"]]
+    assert all(item["tenant_id"] == "tenant_list_a" for item in body["items"])
+    assert body["worker_connected"] is False
+    assert body["production_ready"] is False
+    assert body["storage"] == "VOLATILE_MEMORY"
+
+def test_run_listing_cannot_be_read_without_auth_context():
+    assert client.get("/v4/workpaths/runs").status_code == 422
+
+def test_run_status_cannot_pretend_worker_started():
+    r = _run("tenant_state", video="video-alpha")
+    assert r.status_code == 200
+    assert r.json()["execution_started"] is False
+    assert r.json()["worker_connected"] is False
