@@ -8,6 +8,7 @@
 from __future__ import annotations
 import copy
 import json
+import os
 import secrets
 import threading
 from dataclasses import dataclass, field
@@ -114,22 +115,63 @@ class V4Orchestrator:
     _instance: Optional["V4Orchestrator"] = None
     _lock = threading.Lock()
 
-    def __init__(self, idempotency: Optional[IdempotencyStore] = None):
+    def __init__(self, idempotency: Optional[IdempotencyStore] = None, run_store: Optional[Any] = None):
         self._runs: Dict[str, WorkPathRunRecord] = {}
         self._mtx = threading.Lock()
         self.idempotency = idempotency or IdempotencyStore()
         self._persistence: Optional[Callable[[WorkPathRunRecord], None]] = None
+        self._store = run_store
+
+    @property
+    def storage_kind(self) -> str:
+        return self._store.kind if self._store else "VOLATILE_MEMORY"
+
+    def _edit(self, run_id: str, apply: Callable[[WorkPathRunRecord], Any]) -> Any:
+        """Commit the full mutation or propagate persistence errors."""
+        if self._store is not None:
+            from .sqlite_run_store import RunStoreError
+            try:
+                return self._store.mutate(run_id, apply)
+            except RunStoreError as exc:
+                raise RunStatusError(str(exc)) from exc
+        with self._mtx:
+            current = self._runs.get(run_id)
+            if current is None:
+                raise RunStatusError(f"[V4-003] run {run_id} not found")
+            updated = copy.deepcopy(current)
+            result = apply(updated)
+            if self._persistence:
+                try:
+                    self._persistence(copy.deepcopy(updated))
+                except Exception as exc:
+                    raise RunStatusError("[V4-009] run persistence failed") from exc
+            self._runs[run_id] = updated
+            return result
+
 
     @classmethod
     def instance(cls) -> "V4Orchestrator":
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
-                    cls._instance = V4Orchestrator()
+                    sqlite_path = os.environ.get("CLOUDTECH_V4_SQLITE_RUN_STORE")
+                    store = None
+                    if sqlite_path:
+                        env = os.environ.get("CLOUDTECH_ENV", "").lower()
+                        if env not in {"development", "test", "staging"}:
+                            raise RuntimeError(
+                                "SQLite V4 run storage requires an explicit development/staging environment; "
+                                "production must use a qualified transactional database backend"
+                            )
+                        from .sqlite_run_store import SQLiteRunStore
+                        store = SQLiteRunStore(sqlite_path)
+                    cls._instance = V4Orchestrator(run_store=store)
         return cls._instance
 
     def bind_persistence(self, fn: Callable[[WorkPathRunRecord], None]) -> None:
         """注入持久化回调 (默认 in-memory)"""
+        if self._store is not None:
+            raise RunStatusError("Persistent store already manages run writes")
         self._persistence = fn
 
     def create_run(
@@ -143,6 +185,19 @@ class V4Orchestrator:
         conversation_id: Optional[str] = None,
         budget_cap_cents: int = 0,
     ) -> WorkPathRunRecord:
+        if self._store is not None:
+            rec = WorkPathRunRecord(
+                run_id="wpr_" + secrets.token_hex(8),
+                path_id=path_id, path_revision=path_revision, tenant_id=tenant_id,
+                project_id=project_id, conversation_id=conversation_id,
+                input_bindings=copy.deepcopy(input_bindings),
+                idempotency_key=idempotency_key, budget_cap_cents=budget_cap_cents,
+            )
+            from .sqlite_run_store import RunStoreError
+            try:
+                return self._store.create_or_get(rec)
+            except RunStoreError as exc:
+                raise RunStatusError(str(exc)) from exc
         # The check, allocation and key binding MUST be one critical section.
         # Prevent duplicate in-process runs under concurrent identical requests.
         # Multi-process deployments still require a durable unique DB constraint.
@@ -171,46 +226,31 @@ class V4Orchestrator:
             return rec
 
     def transition(self, run_id: str, target: RunStatus) -> WorkPathRunRecord:
-        with self._mtx:
-            rec = self._runs.get(run_id)
-            if rec is None:
-                raise RunStatusError(f"[V4-001] run {run_id} not found")
+        def apply(rec: WorkPathRunRecord) -> WorkPathRunRecord:
             if target not in ALLOWED_TRANSITIONS.get(rec.status, set()):
                 raise RunStatusError(
                     f"[V4-002] illegal transition {rec.status.value} -> {target.value}"
                 )
-            # Persist a detached candidate first. A failing persistence hook
-            # must not silently acknowledge an in-memory state transition.
-            # This is NOT a cross-process transaction or a durable run store.
-            candidate = copy.deepcopy(rec)
-            candidate.status = target
-            candidate.updated_at = datetime.now(timezone.utc).isoformat()
-            if self._persistence:
-                try:
-                    self._persistence(candidate)
-                except Exception as exc:
-                    raise RunStatusError(
-                        "[V4-009] run transition persistence failed"
-                    ) from exc
             rec.status = target
-            rec.updated_at = candidate.updated_at
-        return rec
+            rec.updated_at = datetime.now(timezone.utc).isoformat()
+            return copy.deepcopy(rec)
+        return self._edit(run_id, apply)
 
     def add_node(self, run_id: str, node: NodeRunRecord) -> None:
-        with self._mtx:
-            rec = self._runs.get(run_id)
-            if rec is None:
-                raise RunStatusError(f"[V4-003] run {run_id} not found")
-            rec.nodes.append(node)
+        def apply(rec: WorkPathRunRecord) -> None:
+            if any(n.node_id == node.node_id for n in rec.nodes):
+                raise RunStatusError(f"[V4-010] duplicate node id: {node.node_id}")
+            rec.nodes.append(copy.deepcopy(node))
             rec.last_node_id = node.node_id
             rec.updated_at = datetime.now(timezone.utc).isoformat()
+        self._edit(run_id, apply)
 
     def get_run(self, run_id: str) -> Optional[WorkPathRunRecord]:
+        if self._store is not None:
+            return self._store.get(run_id)
         with self._mtx:
             rec = self._runs.get(run_id)
-            if rec is None:
-                return None
-            return copy.deepcopy(rec)
+            return copy.deepcopy(rec) if rec is not None else None
 
     def list_runs(
         self,
@@ -219,6 +259,9 @@ class V4Orchestrator:
         status: Optional[RunStatus] = None,
         limit: int = 50,
     ) -> List[WorkPathRunRecord]:
+        if self._store is not None:
+            return self._store.list(tenant_id=tenant_id, path_id=path_id,
+                                    status=status, limit=limit)
         with self._mtx:
             items = [copy.deepcopy(rec) for rec in self._runs.values()]
         if tenant_id:
@@ -231,90 +274,83 @@ class V4Orchestrator:
         return items[:limit]
 
     def mark_node_running(self, run_id: str, node_id: str) -> None:
-        with self._mtx:
-            rec = self._runs.get(run_id)
-            if rec is None:
-                raise RunStatusError(f"[V4-003] run {run_id} not found")
-            for n in rec.nodes:
-                if n.node_id == node_id:
-                    if n.status == RunStatus.COMPLETED:
+        def apply(rec: WorkPathRunRecord) -> None:
+            for node in rec.nodes:
+                if node.node_id == node_id:
+                    if node.status == RunStatus.COMPLETED:
                         raise RunStatusError(f"[V4-005] completed node cannot restart: {node_id}")
-                    n.status = RunStatus.RUNNING
-                    n.started_at = datetime.now(timezone.utc).isoformat()
-                    rec.updated_at = n.started_at
+                    node.status = RunStatus.RUNNING
+                    node.started_at = datetime.now(timezone.utc).isoformat()
+                    rec.updated_at = node.started_at
                     return
             raise RunStatusError(f"[V4-004] node {node_id} not in run {run_id}")
+        self._edit(run_id, apply)
 
     def mark_node_done(
-        self,
-        run_id: str,
-        node_id: str,
-        output_ref: Dict[str, Any],
+        self, run_id: str, node_id: str, output_ref: Dict[str, Any],
         provider_req_id: Optional[str] = None,
         provider_name: Optional[str] = None,
         cost_cents: int = 0,
         cost_class: str = "FREE_LOCAL",
     ) -> None:
-        with self._mtx:
-            rec = self._runs.get(run_id)
-            if rec is None:
-                raise RunStatusError(f"[V4-003] run {run_id} not found")
-            for n in rec.nodes:
-                if n.node_id == node_id:
-                    if cost_cents < 0:
-                        raise RunStatusError(f"[V4-006] negative node charge: {cost_cents}")
-                    if n.status == RunStatus.COMPLETED:
-                        if (n.output_ref == output_ref and
-                                n.provider_req_id == provider_req_id and
-                                n.cost_cents == cost_cents and
-                                n.provider_name == provider_name):
-                            return  # Exact replay; never add the same cost twice.
-                        raise RunStatusError(f"[V4-007] conflicting completion: {node_id}")
-                    n.status = RunStatus.COMPLETED
-                    n.output_ref = output_ref
-                    n.provider_req_id = provider_req_id
-                    n.provider_name = provider_name
-                    n.cost_cents = cost_cents
-                    n.cost_class = cost_class
-                    n.finished_at = datetime.now(timezone.utc).isoformat()
-                    rec.budget_spent_cents += cost_cents
-                    rec.updated_at = n.finished_at
-                    return
+        def apply(rec: WorkPathRunRecord) -> None:
+            for node in rec.nodes:
+                if node.node_id != node_id:
+                    continue
+                if cost_cents < 0:
+                    raise RunStatusError(f"[V4-006] negative node charge: {cost_cents}")
+                if node.status == RunStatus.COMPLETED:
+                    if (node.output_ref == output_ref
+                            and node.provider_req_id == provider_req_id
+                            and node.provider_name == provider_name
+                            and node.cost_cents == cost_cents
+                            and node.cost_class == cost_class):
+                        return
+                    raise RunStatusError(f"[V4-007] conflicting completion: {node_id}")
+                if node.status != RunStatus.RUNNING:
+                    raise RunStatusError(
+                        f"[V4-011] node must be RUNNING before completion: {node_id}"
+                    )
+                node.status = RunStatus.COMPLETED
+                node.output_ref = copy.deepcopy(output_ref)
+                node.provider_req_id = provider_req_id
+                node.provider_name = provider_name
+                node.cost_cents = cost_cents
+                node.cost_class = cost_class
+                node.finished_at = datetime.now(timezone.utc).isoformat()
+                rec.budget_spent_cents += cost_cents
+                rec.updated_at = node.finished_at
+                return
             raise RunStatusError(f"[V4-004] node {node_id} not in run {run_id}")
+        self._edit(run_id, apply)
 
     def mark_node_failed(
-        self,
-        run_id: str,
-        node_id: str,
-        error_code: str,
-        error_message: str,
+        self, run_id: str, node_id: str, error_code: str, error_message: str,
     ) -> None:
-        with self._mtx:
-            rec = self._runs.get(run_id)
-            if rec is None:
-                raise RunStatusError(f"[V4-003] run {run_id} not found")
-            for n in rec.nodes:
-                if n.node_id == node_id:
-                    if n.status == RunStatus.COMPLETED:
+        def apply(rec: WorkPathRunRecord) -> None:
+            for node in rec.nodes:
+                if node.node_id == node_id:
+                    if node.status == RunStatus.COMPLETED:
                         raise RunStatusError(f"[V4-008] completed node cannot fail: {node_id}")
-                    n.status = RunStatus.FAILED
-                    n.error_code = error_code
-                    n.error_message = error_message
-                    n.finished_at = datetime.now(timezone.utc).isoformat()
-                    rec.updated_at = n.finished_at
+                    node.status = RunStatus.FAILED
+                    node.error_code = error_code
+                    node.error_message = error_message
+                    node.finished_at = datetime.now(timezone.utc).isoformat()
+                    rec.updated_at = node.finished_at
                     return
             raise RunStatusError(f"[V4-004] node {node_id} not in run {run_id}")
+        self._edit(run_id, apply)
 
     def cancel(self, run_id: str) -> bool:
-        with self._mtx:
-            rec = self._runs.get(run_id)
-            if rec is None:
-                return False
+        if self.get_run(run_id) is None:
+            return False
+        def apply(rec: WorkPathRunRecord) -> bool:
             if rec.status in (RunStatus.COMPLETED, RunStatus.FAILED, RunStatus.CANCELED):
                 return False
             rec.status = RunStatus.CANCELED
             rec.updated_at = datetime.now(timezone.utc).isoformat()
-        return True
+            return True
+        return self._edit(run_id, apply)
 
     def reset(self) -> None:
         """测试用 — 清空"""
