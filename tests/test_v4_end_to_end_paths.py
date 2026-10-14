@@ -277,6 +277,30 @@ class TestRegistryRealDispatch:
     def test_dispatch_meeting_only(self):
         from workflows.v4.registry import OperationRegistry
         r = OperationRegistry()
-        out = r.dispatch("meeting.process", {"audio_path": "/tmp/mtg.mp3"})
-        assert "summary" in out
-        assert len(out["action_items"]) > 0
+        out = r.dispatch("meeting.process", {
+            "tenant_id": "tenant_meeting",
+            "transcript": {
+                "meeting_id": "mtg-real-text",
+                "title": "项目周会",
+                "duration_min": 30,
+                "utterances": [
+                    {"speaker": "负责人", "text": "决定今天确认项目排期"},
+                    {"speaker": "执行", "text": "需要跟进客户反馈和合同"}
+                ],
+            },
+        })
+        assert out["status"] == "completed", out
+        assert out["source_workflow"] == "WF-G-018"
+        assert "项目周会" in out["summary"]
+        assert len(out["decisions"]) == 1
+        assert len(out["action_items"]) == 1
+        assert out["created_task_ids"] == []
+        assert out["mock"] is False
+
+    def test_dispatch_meeting_audio_only_is_blocked(self):
+        from workflows.v4.registry import OperationRegistry
+        out = OperationRegistry().dispatch("meeting.process",
+                                           {"audio_path": "/tmp/nonexistent.mp3"})
+        assert out["status"] == "blocked"
+        assert out["error_code"] == "TRANSCRIPT_REQUIRED"
+        assert "summary" not in out
