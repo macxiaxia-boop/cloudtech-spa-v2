@@ -13,6 +13,7 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import os
+import secrets
 import sys
 import time
 
@@ -117,7 +118,12 @@ def main() -> int:
     if not 0.1 <= args.poll_seconds <= 60:
         parser.error("poll-seconds must be 0.1..60")
     store = SQLiteRunStore(args.db)
+    queue = LocalJobQueue(store)
+    worker_id = secrets.token_hex(16)
     while True:
+        if args.loop:
+            # A one-shot process exits and must not advertise itself as online.
+            queue.note_worker(worker_id)
         result = process_one(store, lease_seconds=args.lease_seconds)
         # Structured and privacy-safe: no raw prompt, HTML or environment secret.
         print(f"V4 local job: {result['outcome']} {result.get('run_id', '')}",
