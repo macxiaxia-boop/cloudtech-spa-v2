@@ -43,6 +43,12 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// An unavailable backend is not a substitute for identity verification.
+// Legacy front-end-only auth is permitted ONLY in an explicitly configured
+// local Vite dev session, never in a production build.
+const ALLOW_LOCAL_DEMO_AUTH =
+  import.meta.env.DEV && import.meta.env.VITE_CLOUDTECH_DEMO_AUTH === '1';
+
 const STORAGE_KEYS = {
   user: 'ct.auth.user',
   workspace: 'ct.auth.workspace',
@@ -72,8 +78,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const savedUser = loadFromStorage<User>(STORAGE_KEYS.user);
     const savedWorkspace = loadFromStorage<Workspace>(STORAGE_KEYS.workspace);
-    if (savedUser) setUser(savedUser);
-    if (savedWorkspace) setCurrentWorkspaceState(savedWorkspace);
+    if (ALLOW_LOCAL_DEMO_AUTH) {
+      if (savedUser) setUser(savedUser);
+      if (savedWorkspace) setCurrentWorkspaceState(savedWorkspace);
+    } else {
+      saveToStorage(STORAGE_KEYS.user, null);
+      saveToStorage(STORAGE_KEYS.workspace, null);
+    }
     setLoading(false);
 
     // 异步健康检查
@@ -105,6 +116,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
+    if (!ALLOW_LOCAL_DEMO_AUTH) {
+      return { ok: false, error: 'CloudTech 尚未接通真实身份认证；本地演示登录在正式版本中被禁用。' };
+    }
     // 前端格式校验
     if (!email || !password) return { ok: false, error: '邮箱和密码不能为空' };
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: '邮箱格式不正确' };
@@ -135,6 +149,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(async (email: string, password: string, company: string) => {
+    if (!ALLOW_LOCAL_DEMO_AUTH) {
+      return { ok: false, error: 'CloudTech 尚未接通真实注册服务；不能在正式版本中伪造注册成功。' };
+    }
     if (!email || !password || !company) return { ok: false, error: '所有字段必填' };
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: '邮箱格式不正确' };
     if (password.length < 6) return { ok: false, error: '密码至少 6 位' };
