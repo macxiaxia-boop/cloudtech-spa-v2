@@ -4,7 +4,8 @@
 - POST /api/saas/v1/login        → 验证 + JWT 24h
 - GET  /api/saas/v1/landing      → SaaS 落地 HTML
 """
-import hashlib, secrets, json, hmac, base64
+import hashlib, secrets, json, hmac, base64, os
+from html import escape as html_escape
 from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
@@ -13,7 +14,15 @@ import sqlite3
 router = APIRouter(prefix='/api/saas/v1', tags=['saas-v8'])
 
 DB = r'D:\CloudTech-Portable\data\cloudtech.db'
-JWT_SECRET = b'ct-saas-v8-secret-2026'
+def _jwt_signing_secret():
+    """Fail closed. No shared or predictable key may mint user sessions."""
+    secret = os.environ.get("CLOUDTECH_SAAS_JWT_SECRET", "")
+    if len(secret.encode("utf-8")) < 32:
+        raise HTTPException(503, detail={
+            "error": "SAAS_AUTH_NOT_CONFIGURED",
+            "message": "CLOUDTECH_SAAS_JWT_SECRET must have at least 32 bytes",
+        })
+    return secret.encode("utf-8")
 
 SKUS = [
     {'sku_id': 'dec_basic',       'industry': 'decoration', 'plan': 'basic',       'price_yuan': 199,   'name': '装企 · 基础版'},
@@ -52,15 +61,34 @@ def _ensure_db():
     conn.commit(); conn.close()
 
 def _hash_pwd(pwd, salt):
-    return hashlib.sha256((salt + pwd).encode()).hexdigest()
+    """New hashes are adaptive and self-describing; retain a legacy verifier."""
+    dk = hashlib.pbkdf2_hmac(
+        "sha256", pwd.encode("utf-8"), salt.encode("utf-8"), 260000
+    )
+    return "pbkdf2:sha256:260000$" + dk.hex()
+
+
+def _verify_pwd(pwd, salt, stored):
+    if not isinstance(stored, str) or not isinstance(salt, str):
+        return False, False
+    if stored.startswith("pbkdf2:sha256:260000$"):
+        candidate = _hash_pwd(pwd, salt)
+        return hmac.compare_digest(candidate, stored), False
+    if stored.startswith("pbkdf2:"):
+        return False, False
+    # Legacy salted SHA256 accounts migrate only after a successful login.
+    candidate = hashlib.sha256((salt + pwd).encode("utf-8")).hexdigest()
+    valid = hmac.compare_digest(candidate, stored)
+    return valid, valid
 
 def _mint_jwt(user_id, tenant_id, ttl_h=24):
+    key = _jwt_signing_secret()
     header = base64.urlsafe_b64encode(json.dumps({'alg':'HS256','typ':'JWT'}).encode()).rstrip(b'=')
     payload = base64.urlsafe_b64encode(json.dumps({
         'sub': user_id, 'tid': tenant_id,
         'exp': int((datetime.utcnow()+timedelta(hours=ttl_h)).timestamp())
     }).encode()).rstrip(b'=')
-    sig = base64.urlsafe_b64encode(hmac.new(JWT_SECRET, header+b'.'+payload, hashlib.sha256).digest()).rstrip(b'=')
+    sig = base64.urlsafe_b64encode(hmac.new(key, header+b'.'+payload, hashlib.sha256).digest()).rstrip(b'=')
     return (header+b'.'+payload+b'.'+sig).decode()
 
 @router.get('/info')
@@ -82,6 +110,7 @@ def saas_info():
 
 @router.post('/register')
 async def saas_register(request: Request):
+    _jwt_signing_secret()  # Preflight before writing the new account to DB.
     _ensure_db()
     body = await request.json()
     email = (body.get('email') or '').strip().lower()
@@ -122,11 +151,12 @@ async def saas_register(request: Request):
     # 真根因: register 原本完全没调邮件/通知, 用户实测 "发出去没回应"
     trial_end_at = (datetime.utcnow() + timedelta(days=7)).isoformat()
     welcome_email_sent = False
+    welcome_email_queued = False
     try:
         conn2 = sqlite3.connect(DB); c2 = conn2.cursor()
         name = body.get('name') or email.split('@')[0]
         welcome_html = (
-            f'<h1>欢迎 {name}!</h1>'
+            f'<h1>欢迎 {html_escape(name)}!</h1>'
             f'<p>感谢注册灵策智算 SaaS。您的账号已激活。</p>'
             f'<p>当前 plan: <b>pro</b> · 7 天试用至 <b>{trial_end_at}</b></p>'
             f'<p><a href="http://localhost:5099/dashboard?from=welcome">立即登录 →</a></p>'
@@ -135,32 +165,34 @@ async def saas_register(request: Request):
             "INSERT INTO email_queue(to_email,template,subject,body_html,variables,status,attempts,created_at,sent_at)"
             " VALUES (?,?,?,?,?,?,?,?,?)",
             (email, 'welcome', '欢迎加入灵策智算 / LynxceAI', welcome_html,
-             json.dumps({'name': name, 'plan': 'pro'}), 'sent', 1,
-             datetime.utcnow().isoformat(), datetime.utcnow().isoformat()),
+             json.dumps({'name': name, 'plan': 'pro'}), 'queued', 0,
+             datetime.utcnow().isoformat(), None),
         )
         conn2.commit()
         conn2.close()
-        welcome_email_sent = True
+        welcome_email_queued = True
     except Exception as e:
         # 邮件入队失败不阻塞注册主流程
-        welcome_email_sent = False
+        welcome_email_queued = False
 
     return {
         'status': 'ok', 'user_id': user_id, 'tenant_id': tenant_id, 'token': token,
         'plan': 'pro', 'trial_days': 7,
         'trial_end_at': trial_end_at,
         'welcome_email_sent': welcome_email_sent,
+        'welcome_email_queued': welcome_email_queued,
         'onboarding_url': '/dashboard?from=welcome',
         'next_steps': [
             '登录 dashboard 配置你的业务画像',
             '邀请 1 位同事加入 (推荐有奖 +100 积分)',
             '试用 7 天 pro plan · 到期自动降级 basic',
         ],
-        'msg': '注册成功 · 7 天 pro 试用已开通 · 欢迎邮件已发送',
+        'msg': '注册成功 · 试用资格待实际核验 · 欢迎邮件已入队或待发送',
     }
 
 @router.post('/login')
 async def saas_login(request: Request):
+    _jwt_signing_secret()
     _ensure_db()
     body = await request.json()
     email = (body.get('email') or '').strip().lower()
@@ -172,9 +204,13 @@ async def saas_login(request: Request):
         conn.close()
         raise HTTPException(401, detail={'error': 'invalid credentials'})
     user_id, tenant_id, db_hash, salt = row
-    if db_hash != _hash_pwd(pwd, salt):
+    verified, needs_upgrade = _verify_pwd(pwd, salt, db_hash)
+    if not verified:
         conn.close()
         raise HTTPException(401, detail={'error': 'invalid credentials'})
+    if needs_upgrade:
+        c.execute('UPDATE saas_users SET password_hash=? WHERE user_id=?',
+                  (_hash_pwd(pwd, salt), user_id))
     c.execute('UPDATE saas_users SET last_login_at=? WHERE user_id=?', (datetime.utcnow().isoformat(), user_id))
     conn.commit(); conn.close()
     token = _mint_jwt(user_id, tenant_id)
@@ -192,7 +228,7 @@ async def saas_login(request: Request):
             " VALUES (?,?,?,?,?,?,?,?,?)",
             (email, 'support_reply', '账号登录提醒 / LynxceAI', body_html,
              json.dumps({'event': 'login', 'ts': datetime.utcnow().isoformat()}),
-             'sent', 1, datetime.utcnow().isoformat(), datetime.utcnow().isoformat()),
+             'queued', 0, datetime.utcnow().isoformat(), None),
         )
         conn2.commit(); conn2.close()
     except Exception:
