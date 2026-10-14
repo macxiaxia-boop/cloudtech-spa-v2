@@ -117,6 +117,10 @@ def test_second_workpath_http_queue_and_independent_python_worker(tmp_path, monk
     assert "欢迎来到 CloudTech" in node.output_ref["srt"]
     assert node.output_ref["mock"] is False
     assert persisted.receipt_count(run_id) == 1
+    from workflows.v4.local_output_projector import LocalOutputProjector
+    indexed = LocalOutputProjector(persisted).list_for_tenant("tenant-subtitle")
+    assert len(indexed) == 1
+    assert indexed[0]["artifact_kind"] == "SUBTITLE_SRT_VTT"
     assert LocalJobQueue(persisted).get_state(run_id, "tenant-subtitle")["state"] == "DONE"
     assert client.get(
         f"/v4/workpaths/runs/{run_id}?tenant_id=tenant-subtitle"
