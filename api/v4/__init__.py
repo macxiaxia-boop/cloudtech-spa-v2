@@ -234,8 +234,9 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
                 raise HTTPException(409, "相同幂等键对应不同请求")
             return {"run_id": old_run.run_id, "idempotent_hit": True,
                     "status": old_run.status.value}
-    rec = _orchestrator.create_run(
-        path_id=req.path_id,
+    try:
+        rec = _orchestrator.create_run(
+            path_id=req.path_id,
         path_revision=req.revision,
         tenant_id=tenant_id,
         input_bindings=req.input_bindings,
@@ -243,18 +244,35 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
         project_id=req.project_id,
         conversation_id=req.conversation_id,
         budget_cap_cents=req.budget_cap_cents,
-    )
+        )
+    except Exception as exc:
+        # SQLite unique idempotency conflicts are not 500s or new runs.
+        if "different request" in str(exc):
+            raise HTTPException(409, "相同幂等键对应不同请求") from exc
+        raise HTTPException(503, "持久化任务存储暂不可用") from exc
+    if rec.status != RunStatus.PLANNED:
+        if not compatible_run_request(rec, req):
+            raise HTTPException(409, "相同幂等键对应不同请求")
+        return {
+            "run_id": rec.run_id,
+            "status": rec.status.value,
+            "idempotent_hit": True,
+            "worker_connected": False,
+            "execution_started": False,
+            "storage": _orchestrator.storage_kind,
+        }
     try:
         _orchestrator.transition(rec.run_id, RunStatus.INPUT_BOUND)
         _orchestrator.transition(rec.run_id, RunStatus.READY)
     except Exception as e:
         raise HTTPException(400, str(e))
+    saved = _orchestrator.get_run(rec.run_id)
     return {
         "run_id": rec.run_id,
-        "status": rec.status.value,
+        "status": saved.status.value if saved else "UNKNOWN",
         "worker_connected": False,
         "execution_started": False,
-        "storage": "VOLATILE_MEMORY",
+        "storage": _orchestrator.storage_kind,
     }
 
 
@@ -263,12 +281,12 @@ def list_run_records(
     limit: int = Query(50, ge=1, le=100),
     ctx: AuthContext = Depends(auth_required),
 ):
-    """Return actual in-process task records only, scoped to the authorized tenant."""
+    """Return tenant-scoped actual records from configured storage."""
     runs = _orchestrator.list_runs(tenant_id=ctx.tenant_id, limit=limit)
     return {
         "items": [rec.to_dict() for rec in runs],
         "returned": len(runs),
-        "storage": "VOLATILE_MEMORY",
+        "storage": _orchestrator.storage_kind,
         "worker_connected": False,
         "production_ready": False,
     }
@@ -396,6 +414,6 @@ def health():
         "operations_count": 0,
         "orchestrator_runs": len(_orchestrator.list_runs()),
         "worker_connected": False,
-        "run_storage": "VOLATILE_MEMORY",
+        "run_storage": _orchestrator.storage_kind,
         "production_ready": False,
     }
