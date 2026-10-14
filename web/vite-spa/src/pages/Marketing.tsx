@@ -87,6 +87,7 @@ export function MarketingPage() {
           <div className="relative">
             <img
               src="/images/ai-team.jpeg"
+              fetchPriority="high"
               width={1024}
               height={1024}
               loading="eager"
