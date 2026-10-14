@@ -51,3 +51,13 @@ def test_html_size_limit_is_enforced():
         assert False, "size limit bypassed"
     except ValueError as e:
         assert "2MB" in str(e)
+
+def test_url_mock_parser_forbidden_in_production(monkeypatch):
+    from adapters.article.article_parser import parse
+    monkeypatch.setenv("CLOUDTECH_ENV", "production")
+    monkeypatch.setenv("CLOUDTECH_ALLOW_MOCK_ARTICLE", "1")
+    try:
+        parse("https://example.com/any-article")
+        assert False, "fabricated article was allowed in production"
+    except RuntimeError as error:
+        assert "ARTICLE-MOCK-403" in str(error)
