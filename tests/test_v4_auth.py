@@ -19,7 +19,7 @@ def test_dev_mode_tenant_only():
     if "V4_JWT_SECRET" in os.environ:
         del os.environ["V4_JWT_SECRET"]
     r = client.post("/v4/workpaths/runs?tenant_id=t_test_001", json={
-        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {}
+        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {"video_source": "asset_demo"}
     })
     assert r.status_code == 200
     print("[OK] dev_mode tenant only")
@@ -29,7 +29,7 @@ def test_dev_mode_tenant_id_required():
     if "V4_JWT_SECRET" in os.environ:
         del os.environ["V4_JWT_SECRET"]
     r = client.post("/v4/workpaths/runs", json={
-        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {}
+        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {"video_source": "asset_demo"}
     })
     assert r.status_code == 422  # FastAPI validation
     print("[OK] dev_mode missing tenant_id → 422")
@@ -39,7 +39,7 @@ def test_dev_mode_tenant_id_too_long():
     if "V4_JWT_SECRET" in os.environ:
         del os.environ["V4_JWT_SECRET"]
     r = client.post(f"/v4/workpaths/runs?tenant_id={'x'*100}", json={
-        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {}
+        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {"video_source": "asset_demo"}
     })
     assert r.status_code == 401
     print("[OK] tenant_id_too_long → 401")
@@ -49,7 +49,7 @@ def test_dev_mode_invalid_tenant_chars():
     if "V4_JWT_SECRET" in os.environ:
         del os.environ["V4_JWT_SECRET"]
     r = client.post("/v4/workpaths/runs?tenant_id=t!@#", json={
-        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {}
+        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {"video_source": "asset_demo"}
     })
     assert r.status_code == 401
     print("[OK] invalid_tenant_chars → 401")
@@ -59,7 +59,7 @@ def test_prod_mode_missing_jwt():
     """生产模式 (V4_JWT_SECRET 设): 必须 JWT"""
     os.environ["V4_JWT_SECRET"] = "test_secret_xxx"
     r = client.post("/v4/workpaths/runs?tenant_id=t_test_001", json={
-        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {}
+        "path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {"video_source": "asset_demo"}
     })
     assert r.status_code == 401
     print(f"[OK] prod_mode missing JWT → 401")
@@ -72,7 +72,7 @@ def test_prod_mode_valid_jwt():
     token = mint_jwt("t_test_001", user_id="u_1", permissions=["v4:run"])
     r = client.post(
         "/v4/workpaths/runs?tenant_id=t_test_001",
-        json={"path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {}},
+        json={"path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {"video_source": "asset_demo"}},
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == 200
@@ -86,7 +86,7 @@ def test_prod_mode_jwt_wrong_tenant():
     token = mint_jwt("t_other_tenant", user_id="u_1")
     r = client.post(
         "/v4/workpaths/runs?tenant_id=t_test_001",
-        json={"path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {}},
+        json={"path_id": "WP-VIDEO-TRANSCRIBE", "revision": 1, "input_bindings": {"video_source": "asset_demo"}},
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == 401
