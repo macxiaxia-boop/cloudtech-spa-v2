@@ -16,7 +16,7 @@ router = APIRouter(prefix='/api/saas/v1', tags=['saas-v8'])
 DB = r'D:\CloudTech-Portable\data\cloudtech.db'
 def _jwt_signing_secret():
     """Fail closed. No shared or predictable key may mint user sessions."""
-    secret = os.environ.get("CLOUDTECH_SAAS_JWT_SECRET", "")
+    secret = os.environ.get("V4_JWT_SECRET") or os.environ.get("CLOUDTECH_SAAS_JWT_SECRET", "")
     if len(secret.encode("utf-8")) < 32:
         raise HTTPException(503, detail={
             "error": "SAAS_AUTH_NOT_CONFIGURED",
@@ -86,6 +86,7 @@ def _mint_jwt(user_id, tenant_id, ttl_h=24):
     header = base64.urlsafe_b64encode(json.dumps({'alg':'HS256','typ':'JWT'}).encode()).rstrip(b'=')
     payload = base64.urlsafe_b64encode(json.dumps({
         'sub': user_id, 'tid': tenant_id,
+        'user_id': user_id, 'tenant_id': tenant_id,
         'exp': int((datetime.utcnow()+timedelta(hours=ttl_h)).timestamp())
     }).encode()).rstrip(b'=')
     sig = base64.urlsafe_b64encode(hmac.new(key, header+b'.'+payload, hashlib.sha256).digest()).rstrip(b'=')
@@ -234,6 +235,66 @@ async def saas_login(request: Request):
     except Exception:
         pass
     return {'status': 'ok', 'user_id': user_id, 'tenant_id': tenant_id, 'token': token}
+
+def _verify_session_token(token):
+    """Verify the existing SaaS signed token; never trust browser tenant claims."""
+    key = _jwt_signing_secret()
+    try:
+        parts = token.split('.')
+        if len(parts) != 3:
+            return None
+        hb, pb, sb = parts
+        header = json.loads(base64.urlsafe_b64decode(hb + '=' * (-len(hb) % 4)))
+        if header.get('alg') != 'HS256' or header.get('typ') != 'JWT':
+            return None
+        expected = hmac.new(key, f"{hb}.{pb}".encode(), hashlib.sha256).digest()
+        received = base64.urlsafe_b64decode(sb + '=' * (-len(sb) % 4))
+        if not hmac.compare_digest(expected, received):
+            return None
+        claims = json.loads(base64.urlsafe_b64decode(pb + '=' * (-len(pb) % 4)))
+        from datetime import timezone
+        import time as _time
+        exp = claims.get('exp')
+        uid, tid = claims.get('sub'), claims.get('tid')
+        if not isinstance(exp, int) or exp <= _time.time():
+            return None
+        if not isinstance(uid, str) or not uid or not isinstance(tid, str) or not tid:
+            return None
+        if claims.get('tenant_id', tid) != tid or claims.get('user_id', uid) != uid:
+            return None
+        return claims
+    except (ValueError, TypeError, KeyError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+
+
+@router.get('/me')
+async def saas_me(request: Request):
+    _jwt_signing_secret()
+    authorization = request.headers.get('authorization', '')
+    if not authorization.startswith('Bearer '):
+        raise HTTPException(401, detail={'error': 'bearer token required'})
+    claims = _verify_session_token(authorization[7:].strip())
+    if claims is None:
+        raise HTTPException(401, detail={'error': 'invalid or expired session'})
+    _ensure_db()
+    with sqlite3.connect(DB) as conn:
+        row = conn.execute(
+            "SELECT u.user_id,u.email,u.tenant_id,t.name,t.active "
+            "FROM saas_users u JOIN saas_tenants t ON u.tenant_id=t.tenant_id "
+            "WHERE u.user_id=? AND u.tenant_id=?",
+            (claims['sub'], claims['tid']),
+        ).fetchone()
+    if row is None or row[4] != 1:
+        raise HTTPException(403, detail={'error': 'membership inactive or unavailable'})
+    return {
+        'user_id': row[0],
+        'email': row[1],
+        'tenant_id': row[2],
+        'workspace_name': row[3],
+        'role': 'member',
+        'verified': True,
+    }
+
 
 @router.get('/landing', response_class=HTMLResponse)
 def saas_landing():
