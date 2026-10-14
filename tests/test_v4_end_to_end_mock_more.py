@@ -44,7 +44,7 @@ def test_e2e_video_transcribe():
     print(f"[OK] video_transcribe step 2: create_run → {run_id}")
 
     # 3. Alias bind (源视频作为图 1)
-    r = _post("/v4/assets/bind", {
+    r = _post("/v4/assets/bind?tenant_id=t1", {
         "tenant_id": "t1", "conversation_id": "C_video_001",
         "alias": "源视频", "role": "video_source",
         "asset_id": "asset_video_001", "version_id": "v1",
@@ -88,7 +88,7 @@ def test_e2e_article_rewrite():
     print(f"[OK] article_rewrite step 2: create_run → {run_id}")
 
     # Bind source article as alias
-    r = _post("/v4/assets/bind", {
+    r = _post("/v4/assets/bind?tenant_id=t1", {
         "tenant_id": "t1", "conversation_id": "C_article_001",
         "alias": "源图文", "role": "article_source",
         "asset_id": "asset_article_001", "version_id": "v1",
@@ -129,7 +129,7 @@ def test_e2e_growth_video():
 
     # Bind 首帧/尾帧
     for alias, asset in [("首帧", "asset_first"), ("尾帧", "asset_last")]:
-        r = _post("/v4/assets/bind", {
+        r = _post("/v4/assets/bind?tenant_id=t1", {
             "tenant_id": "t1", "conversation_id": "C_growth_001",
             "alias": alias, "role": "frame",
             "asset_id": asset, "version_id": "v1", "message_id": "msg_1",
@@ -163,7 +163,7 @@ def test_e2e_product_marketing():
     print(f"[OK] product_marketing step 2: create_run → {run_id}")
 
     # Bind product image
-    r = _post("/v4/assets/bind", {
+    r = _post("/v4/assets/bind?tenant_id=t1", {
         "tenant_id": "t1", "conversation_id": "C_product_001",
         "alias": "图1", "role": "product_image",
         "asset_id": "asset_product", "version_id": "v1", "message_id": "msg_1",
