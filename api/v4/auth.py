@@ -54,6 +54,10 @@ def _verify_jwt(token: str, secret: str, tenant_id: str) -> Optional[dict]:
             return None
         # 解码 payload
         payload_b64_padded = payload_b64 + "=" * (4 - len(payload_b64) % 4)
+        header_b64_padded = header_b64 + "=" * (4 - len(header_b64) % 4)
+        header = json.loads(base64.urlsafe_b64decode(header_b64_padded.encode()))
+        if header.get("alg") != "HS256" or header.get("typ") != "JWT":
+            return None
         payload = json.loads(base64.urlsafe_b64decode(payload_b64_padded.encode("utf-8")))
         if payload.get("tenant_id") != tenant_id:
             return None
@@ -86,8 +90,14 @@ def auth_required(
     ctx = AuthContext(tenant_id=tid, permissions=[])
 
     secret = _get_jwt_secret()
+    deployment = os.environ.get("V4_ENV", "development").strip().lower()
+    if deployment in {"production", "prod", "staging"}:
+        if not secret or len(secret.encode()) < 32:
+            raise AuthError(
+                "006", "production/staging requires V4_JWT_SECRET of at least 32 bytes"
+            )
     if secret is None:
-        # dev mode — 不强制 JWT
+        # Developer-only compatibility mode. NOT authenticated multi-tenancy.
         return ctx
 
     # prod mode — 必须 JWT
