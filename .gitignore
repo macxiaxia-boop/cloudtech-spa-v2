@@ -100,3 +100,7 @@ design/research/references/
 
 # R1501 housekeeping 备份
 .gitignore.r1501.bak
+
+# Deterministic generated PWA/image assets (retain GitHub source JPEGs + scripts)
+web/vite-spa/public/icons/
+web/vite-spa/public/images/optimized/
