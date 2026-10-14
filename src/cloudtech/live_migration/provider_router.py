@@ -27,6 +27,7 @@ class ProviderMode(Enum):
     FAKE = "fake"
     REAL_DEEPSEEK = "real_deepseek"
     MINIMAX_M3 = "minimax_m3"
+    UNAVAILABLE = "unavailable"
 
 
 @dataclass
@@ -53,12 +54,15 @@ def detect_provider_mode() -> ProviderMode:
 
     No MINIMAX_API_KEY needed: minimax-M3 is self-referential.
     """
-    if os.environ.get("CLOUDTECH_RC2_USE_FAKE") == "1":
+    isolated = os.environ.get("CLOUDTECH_ENV", "").lower() in {"test", "development"}
+    if isolated and os.environ.get("CLOUDTECH_RC2_USE_FAKE") == "1":
         return ProviderMode.FAKE
-    if os.environ.get("DEEPSEEK_API_KEY"):
+    if (os.environ.get("DEEPSEEK_API_KEY")
+            and os.environ.get("CLOUDTECH_ALLOW_REAL_PROVIDER") == "1"):
         return ProviderMode.REAL_DEEPSEEK
-    # Default: MINIMAX_M3 (session model, no key needed)
-    return ProviderMode.MINIMAX_M3
+    # Existing MINIMAX_M3 implementation is a self-referential ACK, NOT a
+    # real provider. Never route production model calls to an echo shim.
+    return ProviderMode.UNAVAILABLE
 
 
 def chat(messages: List[Dict[str, str]], model: str = "deepseek-chat",
@@ -83,10 +87,18 @@ def chat(messages: List[Dict[str, str]], model: str = "deepseek-chat",
             provider="fake",
             metadata=resp.metadata,
         )
-    elif mode == ProviderMode.MINIMAX_M3:
-        return _chat_minimax(messages, model, max_tokens)
-    else:
+    elif mode == ProviderMode.REAL_DEEPSEEK:
         return _chat_real_deepseek(messages, model, max_tokens)
+    else:
+        return ProviderResponse(
+            request_id="not-dispatched",
+            mode="invalid",
+            content="[MODEL_NOT_CONNECTED] No authorized real LLM provider is configured",
+            tokens_in=0, tokens_out=0, cost_usd=0.0, latency_ms=0.0,
+            provider="unavailable",
+            metadata={"model_call_executed": False, "billable": False,
+                      "reason": "missing real provider connection or explicit authorization"},
+        )
 
 
 def _chat_real_deepseek(messages: List[Dict[str, str]], model: str,
@@ -172,25 +184,14 @@ def _chat_real_deepseek(messages: List[Dict[str, str]], model: str,
 
 def _chat_minimax(messages: List[Dict[str, str]], model: str,
                   max_tokens: int) -> ProviderResponse:
-    """Real minimax-M3 chat via Atlas Cloud. NEVER called unless MINIMAX_API_KEY is in env.
-
-    Implementation notes (red lines honored):
-    - Reads key from env only, never from file
-    - Never logs the key (sanitizes headers in any error message)
-    - Uses OpenAI-compatible minimax API at api.atlascloud.ai
-    """
-    from minimax_provider import chat_minimax
-    resp = chat_minimax(messages, model=model, max_tokens=max_tokens)
+    """Legacy MiniMax hook is not an API connection: fail closed."""
     return ProviderResponse(
-        request_id=resp.request_id,
-        mode=resp.mode,
-        content=resp.content,
-        tokens_in=resp.tokens_in,
-        tokens_out=resp.tokens_out,
-        cost_usd=resp.cost_usd,
-        latency_ms=resp.latency_ms,
-        provider=resp.provider,
-        metadata=resp.metadata,
+        request_id="not-dispatched",
+        mode="invalid",
+        content="[MODEL_NOT_CONNECTED] MiniMax session shim is not callable as an API",
+        tokens_in=0, tokens_out=0, cost_usd=0.0, latency_ms=0.0,
+        provider="unavailable",
+        metadata={"model_call_executed": False, "billable": False},
     )
 
 
