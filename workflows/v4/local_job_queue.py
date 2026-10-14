@@ -78,6 +78,34 @@ class LocalJobQueue:
         instant = time.time() if now is None else now
         with self.store._connect() as db:
             db.execute("BEGIN IMMEDIATE")
+            # Crash exhaustion must not leave a forever-LEASED zombie job.
+            # Recover only the single deterministic local operation; never
+            # infer this policy for paid or externally side-effecting jobs.
+            exhausted = db.execute("""
+                SELECT j.run_id,r.snapshot,r.version
+                  FROM v4_local_jobs j
+                  JOIN v4_runs r ON r.run_id=j.run_id
+                 WHERE j.state='LEASED' AND j.lease_until<=?
+                   AND j.attempts>=j.max_attempts AND r.status='READY'
+            """, (instant,)).fetchall()
+            for expired in exhausted:
+                rec = _restore(expired["snapshot"])
+                rec.status = RunStatus.FAILED
+                rec.error_code = "LOCAL_WORKER_LEASE_EXHAUSTED"
+                rec.error_message = "Local worker lease expired after bounded attempts"
+                rec.updated_at = _utc_now()
+                db.execute("""
+                    UPDATE v4_runs SET snapshot=?,status='FAILED',
+                           updated_at=?,version=version+1
+                     WHERE run_id=? AND version=?
+                """, (json.dumps(rec.to_dict(), ensure_ascii=False),
+                      rec.updated_at, expired["run_id"], expired["version"]))
+                db.execute("""
+                    UPDATE v4_local_jobs SET state='FAILED',lease_token=NULL,
+                        lease_until=NULL,error_code='LOCAL_WORKER_LEASE_EXHAUSTED',
+                        updated_at=?
+                    WHERE run_id=?
+                """, (_utc_now(), expired["run_id"]))
             row = db.execute("""
                 SELECT j.job_id,j.run_id,j.tenant_id,j.attempts
                 FROM v4_local_jobs j
@@ -148,7 +176,6 @@ class LocalJobQueue:
                            error_code=?,updated_at=?
                      WHERE run_id=?
                 """, (error_code[:80], _utc_now(), lease.run_id))
-                from .sqlite_run_store import _fingerprint
                 raw = db.execute(
                     "SELECT snapshot,version FROM v4_runs WHERE run_id=?",
                     (lease.run_id,),
