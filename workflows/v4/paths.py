@@ -260,6 +260,36 @@ WP_LOCAL_ARTICLE_EXTRACT = WorkPathDefinition(
 )
 
 
+# 已提供逐句时间戳的字幕转换：不宣称已完成音频 ASR。
+WP_LOCAL_SUBTITLE_EXPORT = WorkPathDefinition(
+    id="WP-LOCAL-SUBTITLE-EXPORT",
+    revision=1,
+    title="真实转写片段 → SRT / VTT 字幕",
+    domain="content",
+    goal="对用户提供的逐句时间戳和真实文本进行校验，输出可直接导出的字幕文本。",
+    triggers=["用户已提供带时间戳的字幕片段"],
+    preconditions=["转写文本和时间戳均来自用户已获授权的实际素材"],
+    inputs=[InputSpec(role="segments", mime="application/json", min=1, max=1)],
+    planner="deterministic_local_executor",
+    steps=[{
+        "id": "subtitle_export",
+        "operation": "subtitle.format_supplied",
+        "node_kind": "TRANSFORM",
+        "cost_class": "FREE_LOCAL",
+        "requires": [],
+        "produces": ["srt", "vtt", "source_sha256"],
+        "retries": 0,
+    }],
+    quality_gates=["segments_validated", "source_sha256_present"],
+    exported_artifacts=["srt", "vtt", "source_sha256"],
+    recovery={"manual_reconciliation_only": True},
+    privacy="private_to_tenant",
+    permissions=["own_or_licensed"],
+    billing_policy="FREE_LOCAL",
+    evidence={"source_hash": True, "asr_performed": False, "model_called": False},
+)
+
+
 # 总注册表
 FLAGSHIP_PATHS: Dict[str, WorkPathDefinition] = {
     WP_BLOGGER_RESEARCH.id: WP_BLOGGER_RESEARCH,
@@ -274,6 +304,7 @@ FLAGSHIP_PATHS: Dict[str, WorkPathDefinition] = {
 # Separate the original six flagship paths from deterministic local paths.
 LOCAL_PATHS: Dict[str, WorkPathDefinition] = {
     WP_LOCAL_ARTICLE_EXTRACT.id: WP_LOCAL_ARTICLE_EXTRACT,
+    WP_LOCAL_SUBTITLE_EXPORT.id: WP_LOCAL_SUBTITLE_EXPORT,
 }
 ALL_PATHS: Dict[str, WorkPathDefinition] = {**FLAGSHIP_PATHS, **LOCAL_PATHS}
 
