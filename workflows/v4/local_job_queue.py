@@ -143,10 +143,10 @@ class LocalJobQueue:
         with self.store._connect() as db:
             db.execute("BEGIN IMMEDIATE")
             changed = db.execute("""
-                UPDATE v4_local_jobs SET lease_until=?,updated_at=?
-                 WHERE run_id=? AND lease_token=? AND state='LEASED'
+                UPDATE v4_local_jobs SET lease_until=MAX(lease_until, ?),updated_at=?
+                 WHERE run_id=? AND tenant_id=? AND lease_token=? AND state='LEASED'
                    AND lease_until>?
-            """, (now + seconds, _utc_now(), lease.run_id, lease.token, now)).rowcount
+            """, (now + seconds, _utc_now(), lease.run_id, lease.tenant_id, lease.token, now)).rowcount
             db.commit()
         return changed == 1
 
