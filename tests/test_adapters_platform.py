@@ -72,10 +72,28 @@ class TestPermissionGateBlacklist(unittest.TestCase):
 # T3: permission_gate — 非白名单平台
 # ---------------------------------------------------------------------------
 class TestPermissionGateFallback(unittest.TestCase):
-    def test_unknown_platform_allowed_with_placeholder(self):
+    def test_unknown_platform_denied_not_falsely_authorized(self):
         r = check("https://www.someunknownplatform.com/user/123")
-        self.assertTrue(r["allowed"])
-        self.assertEqual(r["reason"], "NEED_OAUTH_FALLBACK_PLACEHOLDER")
+        self.assertFalse(r["allowed"])
+        self.assertEqual(r["reason"], "PLATFORM_NOT_CONNECTED_OR_INVALID_URL")
+
+    def test_lookalike_platform_domain_denied(self):
+        for url in (
+            "https://douyin.com.evil.example/user/abc",
+            "https://evil.example/path/douyin.com/user/abc",
+            "https://xiaohongshu.com.attacker.example/profile",
+            "https://user:pass@evil.example/redirect?to=douyin.com",
+            "file:///etc/passwd",
+            "http://127.0.0.1/private",
+        ):
+            with self.subTest(url=url):
+                self.assertFalse(check(url)["allowed"])
+
+    def test_real_subdomain_still_detected(self):
+        self.assertEqual(
+            check("https://www.douyin.com/user/abc")["source_platform"],
+            "douyin",
+        )
 
     def test_permission_gate_class(self):
         r = PermissionGate.check("https://www.douyin.com/user/test")
