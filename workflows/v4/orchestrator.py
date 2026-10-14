@@ -179,13 +179,21 @@ class V4Orchestrator:
                 raise RunStatusError(
                     f"[V4-002] illegal transition {rec.status.value} -> {target.value}"
                 )
-            rec.status = target
-            rec.updated_at = datetime.now(timezone.utc).isoformat()
+            # Persist a detached candidate first. A failing persistence hook
+            # must not silently acknowledge an in-memory state transition.
+            # This is NOT a cross-process transaction or a durable run store.
+            candidate = copy.deepcopy(rec)
+            candidate.status = target
+            candidate.updated_at = datetime.now(timezone.utc).isoformat()
             if self._persistence:
                 try:
-                    self._persistence(rec)
-                except Exception:
-                    pass
+                    self._persistence(candidate)
+                except Exception as exc:
+                    raise RunStatusError(
+                        "[V4-009] run transition persistence failed"
+                    ) from exc
+            rec.status = target
+            rec.updated_at = candidate.updated_at
         return rec
 
     def add_node(self, run_id: str, node: NodeRunRecord) -> None:
