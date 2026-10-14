@@ -49,6 +49,7 @@ jobs:
             tests/test_v63_t03_multitenant_stress.py \
             workflows/tests/ \
             tests/test_ui_pages_binding.py \
+            tests/test_v22_stub_fail_closed.py \
             --tb=short -q --junitxml=verify_junit.xml
 
       - name: Upload actual JUnit evidence
