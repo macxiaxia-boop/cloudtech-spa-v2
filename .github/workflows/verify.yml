@@ -12,6 +12,9 @@ on:
     paths:
       - "tests/**"
       - "workflows/**"
+      - "api/**"
+      - "adapters/**"
+      - "auto_pipeline.py"
       - "billing_real.py"
       - "requirements*.txt"
       - "pyproject.toml"
