@@ -181,6 +181,27 @@ class LocalJobQueue:
             return None
         return {key: row[key] for key in row.keys()}
 
+    def note_worker(self, worker_id: str) -> None:
+        """A live polling process refreshes its own presence in the DB."""
+        if not worker_id or len(worker_id) > 128:
+            raise ValueError("invalid local worker id")
+        instant = time.time()
+        with self.store._connect() as db:
+            db.execute("""
+                INSERT INTO v4_local_worker_heartbeats(worker_id,last_seen)
+                VALUES(?,?)
+                ON CONFLICT(worker_id) DO UPDATE SET last_seen=excluded.last_seen
+            """, (worker_id, instant))
+
+    def active_workers(self, *, max_age_seconds: int = 15) -> int:
+        """Only recently active loops count, not workers that ran --once."""
+        with self.store._connect() as db:
+            row = db.execute("""
+                SELECT COUNT(*) AS total FROM v4_local_worker_heartbeats
+                WHERE last_seen>?
+            """, (time.time() - max_age_seconds,)).fetchone()
+        return int(row["total"])
+
     def stats(self, tenant_id: str) -> dict:
         with self.store._connect() as db:
             rows = db.execute("""
