@@ -1,5 +1,6 @@
 """Article Parser — 解析公开文章元数据 + 正文 (mock-only, 禁止调用真实网络)"""
 from datetime import datetime
+import os
 from typing import Literal
 
 
@@ -20,6 +21,14 @@ def parse(url: str) -> dict:
 
     Mock: 生成 1000 字样本 + 3 个 media_refs。
     """
+    if not (
+        os.environ.get("CLOUDTECH_ENV", "").lower() in {"test", "development"}
+        and os.environ.get("CLOUDTECH_ALLOW_MOCK_ARTICLE") == "1"
+    ):
+        raise RuntimeError(
+            "[ARTICLE-MOCK-403] Real webpage ingestion not connected; "
+            "refusing to return a fabricated article body"
+        )
     # 从 URL 推断 platform
     platform_map = {
         "weixin": "微信公众平台",
