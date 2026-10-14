@@ -64,11 +64,14 @@ it('actually aborts a pending request when the API timeout elapses', async () =>
   }));
   vi.stubGlobal('fetch', mocked);
   const pending = apiFetch('workpaths/runs', { method: 'POST', timeout: 100 });
-  await vi.advanceTimersByTimeAsync(101);
-  await expect(pending).rejects.toMatchObject({
+  // Attach rejection observation BEFORE advancing fake timers. Otherwise
+  // Node reports the intentionally rejected request as unhandled.
+  const rejection = expect(pending).rejects.toMatchObject({
     status: 0,
     statusText: 'Timeout',
   });
+  await vi.advanceTimersByTimeAsync(101);
+  await rejection;
   expect(actualAbort).toBe(true);
   expect(mocked).toHaveBeenCalledTimes(1);
 });
