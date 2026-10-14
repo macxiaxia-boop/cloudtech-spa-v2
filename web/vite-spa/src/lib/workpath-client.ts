@@ -123,6 +123,20 @@ export class WorkPathClient {
     return this.get('/operations');
   }
 
+  async listLocalOutputs(): Promise<{
+    items: Array<{
+      run_id: string; node_id: string; path_id: string;
+      artifact_kind: string; source_sha256: string;
+      output_sha256: string; created_at: string;
+    }>;
+    returned: number;
+    source: string;
+    raw_customer_content_in_response: false;
+    production_ready: false;
+  }> {
+    return this.get('/workpaths/local-outputs');
+  }
+
   async listRuns(): Promise<{
     items: Array<{
       run_id: string; path_id: string; tenant_id: string;
