@@ -27,6 +27,10 @@ export function WorkflowsPage() {
   const { t } = useTranslation();
   const [paths, setPaths] = useState<PathDefinition[]>([]);
   const [runs, setRuns] = useState<RunRecord[]>([]);
+  const [indexedOutputs, setIndexedOutputs] = useState<Array<{
+    run_id: string; artifact_kind: string; source_sha256: string;
+    output_sha256: string; created_at: string;
+  }>>([]);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [workerConnected, setWorkerConnected] = useState(false);
   const [runStorage, setRunStorage] = useState('UNKNOWN');
@@ -53,6 +57,18 @@ export function WorkflowsPage() {
       setRuns(currentRuns.items);
       setWorkerConnected(currentRuns.worker_connected);
       setRunStorage(currentRuns.storage);
+      if (currentRuns.storage === 'SQLITE_LOCAL_DURABLE') {
+        try {
+          const catalog = await workPathClient.listLocalOutputs();
+          setIndexedOutputs(catalog.items);
+        } catch {
+          setIndexedOutputs([]);
+          // Catalog indexing is eventually consistent and must not erase
+          // the actual run list if projection is temporarily unavailable.
+        }
+      } else {
+        setIndexedOutputs([]);
+      }
     } catch (err) {
       setPaths([]);
       setRuns([]);
@@ -256,6 +272,36 @@ export function WorkflowsPage() {
           ) : (
             <p className="text-sm text-muted-foreground">
               未读取到实际任务记录；不会生成演示运行次数或伪造最近执行时间。
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-5 space-y-3">
+          <h2 className="font-semibold">已核验的本租户成果目录</h2>
+          <p className="text-xs text-muted-foreground">
+            仅展示 Outbox 校验过完成回执后建立的成果指针和哈希，不公开客户原文。
+            完成任务与目录入库是两个不同阶段。
+          </p>
+          {indexedOutputs.length ? (
+            <ul className="text-sm space-y-2">
+              {indexedOutputs.map((item) => (
+                <li key={item.run_id} className="border-b border-border pb-2">
+                  <strong>{item.artifact_kind === 'SUBTITLE_SRT_VTT' ?
+                    '字幕 SRT/VTT' : 'HTML 图文提取'}</strong>
+                  <span className="block text-xs text-muted-foreground break-all">
+                    任务 {item.run_id} · {item.created_at}
+                  </span>
+                  <span className="block text-xs text-muted-foreground break-all">
+                    来源 SHA-256：{item.source_sha256}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              当前没有完成回执已核验的成果索引；不会用模拟文件填充目录。
             </p>
           )}
         </CardContent>
