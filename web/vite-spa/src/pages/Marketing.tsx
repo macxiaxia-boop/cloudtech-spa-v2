@@ -87,8 +87,12 @@ export function MarketingPage() {
           <div className="relative">
             <img
               src="/images/ai-team.jpeg"
+              width={1024}
+              height={1024}
+              loading="eager"
+              decoding="async"
               alt="5 AI 数字员工团队"
-              className="rounded-2xl shadow-2xl w-full"
+              className="rounded-2xl shadow-2xl w-full h-auto"
             />
             <div className="absolute -bottom-4 -left-4 bg-card p-3 rounded-lg shadow-lg border border-gray-200">
               <div className="flex items-center gap-2 text-sm">
@@ -233,8 +237,12 @@ export function MarketingPage() {
             <div>
               <img
                 src="/images/dashboard-preview.jpeg"
+                width={1024}
+                height={1024}
+                loading="lazy"
+                decoding="async"
                 alt="Cloud 仪表盘预览"
-                className="rounded-2xl shadow-2xl w-full"
+                className="rounded-2xl shadow-2xl w-full h-auto"
               />
             </div>
           </div>
@@ -259,8 +267,12 @@ export function MarketingPage() {
             <div>
               <img
                 src="/images/opc-hero.jpeg"
+                width={1024}
+                height={1024}
+                loading="lazy"
+                decoding="async"
                 alt="OPC 1 人 + AI 创业"
-                className="rounded-2xl shadow-2xl w-full"
+                className="rounded-2xl shadow-2xl w-full h-auto"
               />
             </div>
             <div>
