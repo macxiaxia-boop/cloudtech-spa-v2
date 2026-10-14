@@ -127,7 +127,7 @@ export function Header() {
           </Link>
           <Link
             to="/try"
-            className="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 text-sm font-medium"
+            className="px-4 py-2 bg-brand-700 text-white rounded-md hover:bg-brand-600 text-sm font-medium"
           >
             🚀 7 天试用
           </Link>
