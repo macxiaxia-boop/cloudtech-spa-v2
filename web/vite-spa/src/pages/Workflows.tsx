@@ -36,6 +36,8 @@ export function WorkflowsPage() {
   const [article, setArticle] = useState<ArticlePreview | null>(null);
   const [extracting, setExtracting] = useState(false);
   const [extractError, setExtractError] = useState('');
+  const [lastRunId, setLastRunId] = useState('');
+  const [lastRunStorage, setLastRunStorage] = useState('');
 
   async function refresh() {
     setLoading(true);
@@ -65,12 +67,31 @@ export function WorkflowsPage() {
     setExtracting(true);
     setExtractError('');
     setArticle(null);
+    setLastRunId('');
+    setLastRunStorage('');
     try {
-      const result = await workPathClient.extractSuppliedHTML(html, sourceUrl);
-      if (result.mock) throw new Error('服务器返回模拟数据，拒绝作为真实提取结果');
-      setArticle(result);
+      if (new TextEncoder().encode(html).length > 1_800_000) {
+        throw new Error('HTML 不得超过 1.8MB');
+      }
+      const created = await workPathClient.createRun({
+        path_id: 'WP-LOCAL-ARTICLE-EXTRACT',
+        revision: 1,
+        input_bindings: { html, source_url: sourceUrl },
+      });
+      setLastRunId(created.run_id);
+      const executed = await workPathClient.executeLocalRun(created.run_id);
+      if (executed.status !== 'COMPLETED' || executed.nodes.length !== 1) {
+        throw new Error('任务没有可靠的单节点完成证据');
+      }
+      const output = executed.nodes[0].output_ref;
+      if (!output || output.mock !== false || !output.content_sha256) {
+        throw new Error('输出内容缺少来源哈希或不是实际提取结果');
+      }
+      setArticle({ ...output, saved: executed.storage === 'SQLITE_LOCAL_DURABLE' });
+      setLastRunStorage(executed.storage || 'UNKNOWN');
+      await refresh();
     } catch (err) {
-      setExtractError(err instanceof Error ? err.message : 'HTML 提取失败');
+      setExtractError(err instanceof Error ? err.message : '任务执行失败');
     } finally {
       setExtracting(false);
     }
@@ -173,8 +194,9 @@ export function WorkflowsPage() {
             <FileText className="w-5 h-5" /> 用户 HTML 素材提取
           </h2>
           <p className="text-sm text-muted-foreground">
-            从你已获得使用授权的 HTML 中提取原文、图片和视频引用。
-            当前不抓取外部网页、不判断版权归属，也不保存素材到资产库。
+            将你有权处理的 HTML 提交给 CloudTech 任务引擎：记录任务、执行本地解析、
+            保存原文及媒体引用、可从任务记录重新读取。不抓取外部网页、不调用模型。
+            输入会存放在当前租户的任务存储中；不要粘贴未授权或含密钥的内容。
           </p>
           <label htmlFor="ct-article-source" className="text-sm font-medium">原文来源 URL（可选）</label>
           <input id="ct-article-source" value={sourceUrl}
@@ -188,16 +210,23 @@ export function WorkflowsPage() {
                     placeholder="<article>...</article>" />
           <Button type="button" disabled={extracting || !html.trim()}
                   onClick={() => void extractHTML()}>
-            {extracting ? '正在提取…' : '调用 V4 真实 HTML 提取'}
+            {extracting ? '正在执行任务…' : '创建并执行真实 HTML 提取任务'}
           </Button>
           {extractError && <p role="alert" className="text-sm text-destructive-600">{extractError}</p>}
+          {lastRunId && (
+            <p className="text-xs text-muted-foreground break-all">
+              任务：{lastRunId} · 存储：{lastRunStorage || '未确认'}
+            </p>
+          )}
           {article && (
             <section className="border border-border rounded p-4 text-sm space-y-2">
               <h3 className="font-semibold">{article.title || '无标题'}</h3>
               <p className="text-muted-foreground whitespace-pre-wrap">{article.text.slice(0, 2000)}</p>
               <p>图片引用：{article.images.length} · 视频引用：{article.videos.length}</p>
               <p className="text-xs text-muted-foreground break-all">
-                来源摘要：{article.content_sha256} · 保存资产：{article.saved ? '已保存' : '未保存'}
+                来源摘要：{article.content_sha256} ·
+                任务结果：{article.saved ? '已写入单机事务数据库' : '仅临时保存，尚无持久化保证'}
+                · 尚未建立独立素材资产版本
               </p>
             </section>
           )}
