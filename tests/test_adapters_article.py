@@ -137,3 +137,33 @@ class TestLicenseChecker:
                "alt": "视频", "width": 1920, "height": 1080, "license": ""}
         result = check(ref, source_platform="微信公众平台")
         assert result["media_url"] == "https://example.com/video.mp4"
+
+
+
+def test_supplied_html_media_references_resolve_to_source_without_fetch():
+    html = (
+        '<img src="/rooms/before.jpg" alt="房间">'
+        '<img src="../images/after.jpg">'
+        '<video src="clips/preview.mp4"></video>'
+    )
+    result = extract(html, base_url="https://example.org/rooms/article")
+    assert [m["url"] for m in result["images"]] == [
+        "https://example.org/rooms/before.jpg",
+        "https://example.org/images/after.jpg",
+    ]
+    assert any(m["url"] == "https://example.org/rooms/clips/preview.mp4"
+               for m in result["videos"])
+    assert all(m["license"] == "unknown_need_user_confirm"
+               for m in result["images"])
+
+
+def test_supplied_html_rejects_active_media_protocols():
+    html = (
+        '<img src="javascript:alert(1)">'
+        '<img src="data:image/svg+xml;base64,PHN2Zz4=">'
+        '<img src="https://safe.example/photo.png">'
+        '<source src="file:///etc/passwd">'
+    )
+    result = extract(html, base_url="https://example.org/article")
+    assert [m["url"] for m in result["images"]] == ["https://safe.example/photo.png"]
+    assert result["videos"] == []
