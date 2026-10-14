@@ -32,8 +32,8 @@ WP_BLOGGER_RESEARCH = WorkPathDefinition(
     planner="intent_resolver_v4",
     steps=[
         {"id": "url_normalize", "operation": "url.normalize", "node_kind": "TRANSFORM", "cost_class": "FREE_LOCAL"},
-        {"id": "permission_check", "operation": "platform.permission_check", "node_kind": "FETCH_PUBLIC", "cost_class": "METERED_NONMEDIA"},
-        {"id": "homepage_parse", "operation": "platform.homepage_parse", "requires": ["url_normalize"], "node_kind": "FETCH_PUBLIC", "cost_class": "METERED_NONMEDIA"},
+        {"id": "permission_check", "operation": "platform.permission_check", "requires": ["url_normalize"], "node_kind": "FETCH_PUBLIC", "cost_class": "METERED_NONMEDIA"},
+        {"id": "homepage_parse", "operation": "platform.homepage_parse", "requires": ["permission_check"], "node_kind": "FETCH_PUBLIC", "cost_class": "METERED_NONMEDIA"},
         {"id": "work_list_dedupe", "operation": "content.dedupe", "requires": ["homepage_parse"], "node_kind": "TRANSFORM", "cost_class": "FREE_LOCAL"},
         {"id": "transcript_extract", "operation": "transcript.extract", "requires": ["work_list_dedupe"], "node_kind": "TRANSFORM", "cost_class": "METERED_NONMEDIA", "retries": 2},
         {"id": "structure_analyze", "operation": "content.structure.analyze", "requires": ["transcript_extract"], "node_kind": "MODEL_REASON", "cost_class": "METERED_NONMEDIA"},
