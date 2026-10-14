@@ -34,3 +34,26 @@ def test_outbox_event_lease_fencing(tmp_path: Path):
     import pytest
     with pytest.raises(RunStoreConflict):
         outbox.acknowledge(lease)
+
+
+def test_outbox_release_and_reclaim(tmp_path: Path):
+    from workflows.v4.local_outbox import LocalCompletionOutbox
+    from workflows.v4.sqlite_run_store import RunStoreConflict
+    import pytest
+    store = SQLiteRunStore(tmp_path / "runs.sqlite3")
+    with store._connect() as db:
+        db.execute("PRAGMA foreign_keys=OFF")
+        db.execute("""INSERT INTO v4_local_outbox
+          (run_id,tenant_id,event_type,payload_json)
+          VALUES ('run-2','tenant-1','LOCAL_RUN_COMPLETED','{}')""")
+    outbox = LocalCompletionOutbox(store)
+    first = outbox.claim()
+    assert first is not None
+    outbox.release(first)
+    second = outbox.claim()
+    assert second is not None and second.token != first.token
+    assert second.attempt == 2
+    with pytest.raises(RunStoreConflict):
+        outbox.acknowledge(first)
+    outbox.acknowledge(second)
+    assert outbox.status("run-2", "tenant-1")["state"] == "ACKED"
