@@ -6,6 +6,8 @@ on:
     paths:
       - "auto_pipeline.py"
       - "tests/test_p5_pipeline_truth.py"
+      - "tests/test_p8_v4_path_cell_contracts.py"
+      - "workflows/v4/registry.py"
       - ".github/workflows/p5-pipeline-ci.yml"
   push:
     branches: ["fix/cloudtech-pipeline-truth-p5-20261014"]
@@ -28,4 +30,4 @@ jobs:
         env:
           CLOUDTECH_DATA_DIR: ${{ runner.temp }}/cloudtech-p5-data
           CLOUDTECH_OUTPUT_DIR: ${{ runner.temp }}/cloudtech-p5-output
-        run: python -m pytest tests/test_p5_pipeline_truth.py -q --tb=short
+        run: python -m pytest tests/test_p5_pipeline_truth.py tests/test_p8_v4_path_cell_contracts.py -q --tb=short
