@@ -224,7 +224,29 @@ def create_run(req: CreateRunRequest, ctx: AuthContext = Depends(auth_required))
         _orchestrator.transition(rec.run_id, RunStatus.READY)
     except Exception as e:
         raise HTTPException(400, str(e))
-    return {"run_id": rec.run_id, "status": rec.status.value}
+    return {
+        "run_id": rec.run_id,
+        "status": rec.status.value,
+        "worker_connected": False,
+        "execution_started": False,
+        "storage": "VOLATILE_MEMORY",
+    }
+
+
+@router.get("/workpaths/runs")
+def list_run_records(
+    limit: int = Query(50, ge=1, le=100),
+    ctx: AuthContext = Depends(auth_required),
+):
+    """Return actual in-process task records only, scoped to the authorized tenant."""
+    runs = _orchestrator.list_runs(tenant_id=ctx.tenant_id, limit=limit)
+    return {
+        "items": [rec.to_dict() for rec in runs],
+        "returned": len(runs),
+        "storage": "VOLATILE_MEMORY",
+        "worker_connected": False,
+        "production_ready": False,
+    }
 
 
 @router.get("/workpaths/runs/{run_id}")
@@ -348,4 +370,7 @@ def health():
         "paths_registered": len(FLAGSHIP_PATHS),
         "operations_count": 0,
         "orchestrator_runs": len(_orchestrator.list_runs()),
+        "worker_connected": False,
+        "run_storage": "VOLATILE_MEMORY",
+        "production_ready": False,
     }
