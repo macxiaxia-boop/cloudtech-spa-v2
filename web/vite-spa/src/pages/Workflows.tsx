@@ -23,6 +23,26 @@ type ArticlePreview = {
   content_sha256: string; mock: boolean; saved: boolean;
 };
 
+type VerifiedOutput = {
+  run_id: string;
+  kind: 'ARTICLE_HTML_EXTRACTION' | 'SUBTITLE_SRT_VTT';
+  title: string;
+  text: string;
+  srt?: string;
+  vtt?: string;
+  hash: string;
+};
+
+function saveVerifiedText(text: string, extension: 'txt' | 'srt' | 'vtt', runId: string) {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const element = document.createElement('a');
+  element.href = url;
+  element.download = `cloudtech-${runId}.${extension}`;
+  element.click();
+  URL.revokeObjectURL(url);
+}
+
 export function WorkflowsPage() {
   const { t } = useTranslation();
   const [paths, setPaths] = useState<PathDefinition[]>([]);
@@ -32,6 +52,9 @@ export function WorkflowsPage() {
     output_sha256: string; created_at: string;
   }>>([]);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [selectedOutput, setSelectedOutput] = useState<VerifiedOutput | null>(null);
+  const [outputError, setOutputError] = useState('');
+  const [openingOutputId, setOpeningOutputId] = useState<string | null>(null);
   const [workerConnected, setWorkerConnected] = useState(false);
   const [runStorage, setRunStorage] = useState('UNKNOWN');
   const [loading, setLoading] = useState(true);
@@ -81,6 +104,58 @@ export function WorkflowsPage() {
   useEffect(() => {
     void refresh();
   }, []);
+
+  async function openIndexedOutput(item: {
+    run_id: string; artifact_kind: string;
+    source_sha256: string; output_sha256: string;
+  }) {
+    setOpeningOutputId(item.run_id);
+    setOutputError('');
+    setSelectedOutput(null);
+    try {
+      const record = await workPathClient.getRun(item.run_id);
+      const nodes = record.nodes as Array<{
+        status: string; node_id: string; operation: string;
+        output_ref?: Record<string, unknown>;
+      }> | undefined;
+      const node = nodes?.length === 1 ? nodes[0] : undefined;
+      const result = node?.output_ref;
+      if (record.status !== 'COMPLETED' || !node ||
+          node.status !== 'COMPLETED' || !result ||
+          result.mock !== false) {
+        throw new Error('成果不含真实、已完成的节点凭证');
+      }
+      if (item.artifact_kind === 'ARTICLE_HTML_EXTRACTION' &&
+          node.operation === 'article.html_parse' &&
+          result.content_sha256 === item.source_sha256 &&
+          typeof result.text === 'string') {
+        setSelectedOutput({
+          run_id: item.run_id, kind: 'ARTICLE_HTML_EXTRACTION',
+          title: String(result.title || 'HTML 原文提取'),
+          text: result.text, hash: item.source_sha256,
+        });
+      } else if (item.artifact_kind === 'SUBTITLE_SRT_VTT' &&
+                 node.operation === 'subtitle.format_supplied' &&
+                 result.source_sha256 === item.source_sha256 &&
+                 result.asr_performed === false &&
+                 result.model_called === false &&
+                 typeof result.srt === 'string' &&
+                 typeof result.vtt === 'string') {
+        setSelectedOutput({
+          run_id: item.run_id, kind: 'SUBTITLE_SRT_VTT',
+          title: '真实时间戳字幕', text: result.srt,
+          srt: result.srt, vtt: result.vtt,
+          hash: item.source_sha256,
+        });
+      } else {
+        throw new Error('成果类型与持久化节点或来源哈希不匹配');
+      }
+    } catch (err) {
+      setOutputError(err instanceof Error ? err.message : '无法读取真实成果');
+    } finally {
+      setOpeningOutputId(null);
+    }
+  }
 
   async function extractHTML() {
     setExtracting(true);
@@ -296,6 +371,11 @@ export function WorkflowsPage() {
                   <span className="block text-xs text-muted-foreground break-all">
                     来源 SHA-256：{item.source_sha256}
                   </span>
+                  <Button type="button" variant="outline" size="sm"
+                          disabled={openingOutputId === item.run_id}
+                          onClick={() => void openIndexedOutput(item)}>
+                    {openingOutputId === item.run_id ? '读取中…' : '查看真实成果'}
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -303,6 +383,41 @@ export function WorkflowsPage() {
             <p className="text-sm text-muted-foreground">
               当前没有完成回执已核验的成果索引；不会用模拟文件填充目录。
             </p>
+          )}
+          {outputError && <p role="alert" className="text-sm text-destructive-600">{outputError}</p>}
+          {selectedOutput && (
+            <section aria-label="已核验的成果预览"
+                     className="space-y-3 border border-border rounded p-4">
+              <h3 className="font-semibold">{selectedOutput.title}</h3>
+              <p className="text-xs text-muted-foreground break-all">
+                任务：{selectedOutput.run_id} · 来源哈希：{selectedOutput.hash}
+              </p>
+              <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words text-sm">
+                {selectedOutput.text.slice(0, 12000)}
+              </pre>
+              <div className="flex flex-wrap gap-2">
+                {selectedOutput.kind === 'ARTICLE_HTML_EXTRACTION' ? (
+                  <Button type="button" variant="outline"
+                          onClick={() => saveVerifiedText(selectedOutput.text, 'txt',
+                            selectedOutput.run_id)}>
+                    下载原文 TXT
+                  </Button>
+                ) : (
+                  <>
+                    <Button type="button" variant="outline"
+                            onClick={() => saveVerifiedText(selectedOutput.srt || '', 'srt',
+                              selectedOutput.run_id)}>
+                      下载 SRT
+                    </Button>
+                    <Button type="button" variant="outline"
+                            onClick={() => saveVerifiedText(selectedOutput.vtt || '', 'vtt',
+                              selectedOutput.run_id)}>
+                      下载 VTT
+                    </Button>
+                  </>
+                )}
+              </div>
+            </section>
           )}
         </CardContent>
       </Card>
