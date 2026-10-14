@@ -11,8 +11,37 @@ from typing import Any
 from .paths import ALL_PATHS, get_path
 
 
+def validate_dag(steps) -> list[str]:
+    """Report invalid dependency graphs without executing any work."""
+    ids = [step.id for step in steps]
+    known = set(ids)
+    problems: list[str] = []
+    if len(ids) != len(known):
+        problems.append("duplicate node id")
+    for step in steps:
+        if step.id in step.requires:
+            problems.append(f"{step.id}: self dependency")
+        missing = set(step.requires) - known
+        if missing:
+            problems.append(f"{step.id}: missing dependencies {sorted(missing)}")
+    if problems:
+        return problems
+    remaining = {step.id: set(step.requires) for step in steps}
+    done: set[str] = set()
+    while remaining:
+        ready = {node_id for node_id, deps in remaining.items() if deps <= done}
+        if not ready:
+            problems.append("dependency cycle")
+            break
+        done.update(ready)
+        for node_id in ready:
+            del remaining[node_id]
+    return problems
+
+
 def inspect_path(path_id: str) -> dict[str, Any]:
     definition = get_path(path_id)
+    dag_errors = validate_dag(definition.steps)
     local_article = path_id == "WP-LOCAL-ARTICLE-EXTRACT"
     local_subtitle = path_id == "WP-LOCAL-SUBTITLE-EXPORT"
     local_analysis = path_id == "WP-LOCAL-ARTICLE-ANALYZE"
@@ -39,6 +68,8 @@ def inspect_path(path_id: str) -> dict[str, Any]:
         "title": definition.title,
         "total_nodes": len(steps),
         "nodes": steps,
+        "dag_valid": not dag_errors,
+        "dag_errors": dag_errors,
         "level": "STATIC_SOURCE_PREFLIGHT_NOT_RUNTIME_VALIDATION",
         "execution_ready": False,  # only runtime + evidence may grant this
         "local_sync_supported": local_article,
