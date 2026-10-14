@@ -161,16 +161,8 @@ class OperationRegistry:
                 return [_to_dict(x) for x in obj]
             return obj
 
-        from adapters.ocr import MockOCREngine
-        from adapters.search import MockSearchEngine
-        from adapters.tts import MockTTSEngine
-        from adapters.ffmpeg_video import FFmpegEngine
-        from adapters.metrics import MockMetricsStore
-        from adapters.meeting import MockMeetingProcessor
-        from adapters import platform as Aplat
-        from adapters import transcribe as Atrans
-        from adapters import content as Acont
-
+        # Load only the adapter needed by this op. Otherwise an optional
+        # missing plugin would break unrelated core operations before dispatch.
         try:
             if op_id == "url.normalize":
                 from urllib.parse import urlparse
@@ -179,6 +171,7 @@ class OperationRegistry:
                 return {"normalized": f"{p.scheme}://{p.netloc}{p.path}", "host": p.netloc, "path": p.path}
 
             if op_id == "platform.permission_check":
+                from adapters import platform as Aplat
                 r = Aplat.permission_gate.check(inputs["url"])
                 if not isinstance(r, dict):
                     return {"ok": False, "status": "INVALID_PERMISSION_CONTRACT", "mock": True}
@@ -195,6 +188,7 @@ class OperationRegistry:
                 }
 
             if op_id == "platform.homepage_parse":
+                from adapters import platform as Aplat
                 parsed = Aplat.homepage_parser.parse_homepage(
                     inputs["url"], limit=inputs.get("limit", 30)
                 )
@@ -226,15 +220,18 @@ class OperationRegistry:
                 return {"deduped": len(out), "items": out}
 
             if op_id == "transcript.extract":
+                from adapters import transcribe as Atrans
                 audio = inputs.get("audio_path") or inputs.get("video_path")
                 if not audio:
                     return {"text": "", "segments": []}
                 return _to_dict(Atrans.asr_engine.transcribe(audio))
 
             if op_id == "video.frame_extract":
+                from adapters import transcribe as Atrans
                 return {"frames": _to_dict(Atrans.frame_extractor.extract(inputs["video_path"], n=8))}
 
             if op_id == "content.structure.analyze":
+                from adapters import content as Acont
                 return _to_dict(Acont.structure_analyzer.analyze(
                     inputs.get("segments", []),
                     inputs.get("transcript", ""),
@@ -242,6 +239,7 @@ class OperationRegistry:
                 ))
 
             if op_id == "content.original_script.generate":
+                from adapters import content as Acont
                 return _to_dict(Acont.original_script_generator.generate(
                     inputs.get("structure", {}),
                     inputs.get("audience", ""),
@@ -251,6 +249,7 @@ class OperationRegistry:
                 ))
 
             if op_id == "content.storyboard.generate":
+                from adapters import content as Acont
                 result = Acont.director.direct(
                     inputs.get("goal", ""),
                     inputs.get("audience", ""),
@@ -261,6 +260,7 @@ class OperationRegistry:
                 return {"storyboard": _to_dict(result)}
 
             if op_id == "content.similarity.review":
+                from adapters import content as Acont
                 r = Acont.similarity_qc.review(
                     inputs.get("original", ""),
                     inputs.get("derivative", ""),
@@ -269,25 +269,31 @@ class OperationRegistry:
                 return _to_dict(r)
 
             if op_id == "doubao.tts":
+                from adapters.tts import MockTTSEngine
                 from adapters.tts import TTSRequest
                 return _to_dict(MockTTSEngine().synthesize(TTSRequest(text=inputs.get("text", ""))))
 
             if op_id == "ocr.recognize":
+                from adapters.ocr import MockOCREngine
                 return _to_dict(MockOCREngine().recognize(inputs.get("image_path", "")))
 
             if op_id == "search.authors":
+                from adapters.search import MockSearchEngine
                 return _to_dict(MockSearchEngine().search_authors(
                     inputs.get("keywords", []), platform=inputs.get("platform", "douyin")))
 
             if op_id == "metrics.fetch":
+                from adapters.metrics import MockMetricsStore
                 return _to_dict(MockMetricsStore().fetch_videos(inputs.get("author_id", "")))
 
             if op_id == "meeting.process":
+                from adapters.meeting import MockMeetingProcessor
                 from adapters.meeting import MeetingRequest
                 return _to_dict(MockMeetingProcessor().process(
                     MeetingRequest(audio_path=inputs.get("audio_path", ""))))
 
             if op_id == "video.assembly":
+                from adapters.ffmpeg_video import FFmpegEngine
                 from adapters.ffmpeg_video import AssemblyRequest
                 return _to_dict(FFmpegEngine().assemble(
                     AssemblyRequest(segments=inputs.get("segments", []),
