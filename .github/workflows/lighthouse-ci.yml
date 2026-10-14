@@ -76,6 +76,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: web/vite-spa/package-lock.json
 
+      - name: Install dependencies
+        working-directory: web/vite-spa
+        run: npm ci
+
       - name: Build
         working-directory: web/vite-spa
         run: npm run build
