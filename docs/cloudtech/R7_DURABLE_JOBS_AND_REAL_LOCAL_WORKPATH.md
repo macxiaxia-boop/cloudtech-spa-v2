@@ -26,14 +26,14 @@
 2. 准备单独的开发/隔离测试目录。只在开发环境设置：
    ```powershell
    $env:CLOUDTECH_ENV = "development"
-   $env:CLOUDTECH_V4_SQLITE_RUN_STORE = "D:\\CloudTech-Portable\\data\\v4_staging_runs.sqlite3"
+   $env:CLOUDTECH_V4_SQLITE_RUN_STORE = "D:\CloudTech-Portable\data\v4_staging_runs.sqlite3"
    ```
    该文件父目录必须事先存在。不要将此路径指向正在运行的生产数据文件。
 3. 在重启现有网关后，检查 `GET /v4/health` 的 `run_storage` 是否实际显示 `SQLITE_LOCAL_DURABLE`，并核验已配置的 SaaS 身份。严禁仅靠自己填写的 tenant_id 当成真实登录。
 4. 用具备授权的测试 HTML 走页面或 API：`POST /v4/workpaths/runs`（`WP-LOCAL-ARTICLE-EXTRACT`）→ `POST /v4/workpaths/runs/{id}/execute-local` → `GET /v4/workpaths/runs/{id}`。在不发生外部调用情况下核对内容哈希、零费用和提交回执。
 5. 单机重启网关，重新读取 Run，并测试同幂等键再次提交仍返回相同 Run ID；跨租户返回 404；含未完成回执的运行不得自动恢复。
 6. 跨进程 SQLite 和单机状态正确 ≠ 生产可靠的多副本 Worker。进入生产前必须引入具备 **unique key、CAS/锁、fencing、outbox、ledger** 的正式数据库方案以及消费者执行租约，完成崩溃与重复回执测试。
-7. 其余三个失败来自 `D:\\CloudTech-Portable\\data\\skill_orchestrator` 在 GitHub Linux runner 不可访问。通过 `scripts/cloudtech_skill_inventory.py` 做本地真实清点；保留私有技能原文，不在公开 GitHub 建占位文件。详见 `SKILL_ASSET_HANDOFF.md`。
+7. 其余三个失败来自 `D:\CloudTech-Portable\data\skill_orchestrator` 在 GitHub Linux runner 不可访问。通过 `scripts/cloudtech_skill_inventory.py` 做本地真实清点；保留私有技能原文，不在公开 GitHub 建占位文件。详见 `SKILL_ASSET_HANDOFF.md`。
 8. 暂未授权真实 Provider 扣费、真实邮件投递、生产 DB 迁移、公开发布或自动合并，保持禁止。每个新里程碑必须有原子能力调用轨迹和 CI 证据。
 
 ## 保持不变的高优先级缺口
