@@ -1,0 +1,18 @@
+{
+  "id": "/",
+  "name": "CloudTech 企业 AI 工作空间",
+  "short_name": "CloudTech",
+  "description": "企业 AI 工作空间。离线时不提供客户数据或模拟任务。",
+  "lang": "zh-CN",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#f8fafc",
+  "icons": [
+    {"src":"/icons/cloudtech-192-any.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/icons/cloudtech-512-any.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/icons/cloudtech-192-maskable.png","sizes":"192x192","type":"image/png","purpose":"maskable"},
+    {"src":"/icons/cloudtech-512-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ]
+}
