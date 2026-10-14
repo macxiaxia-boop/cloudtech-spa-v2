@@ -37,6 +37,10 @@ jobs:
         working-directory: web/vite-spa
         run: npm run build
 
+      - name: Assert actual PWA build artifacts
+        working-directory: web/vite-spa
+        run: node scripts/test_pwa_assets.mjs
+
       - name: Start preview server
         working-directory: web/vite-spa
         run: |
