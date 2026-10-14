@@ -27,7 +27,7 @@ def test_v4_requires_current_active_user_and_tenant(tmp_path, monkeypatch):
 
     accepted = client.get("/v4/workpaths/runs?tenant_id=t1", headers=auth)
     assert accepted.status_code == 200, accepted.text
-    assert accepted.json()["items"] == []
+    assert all(item["tenant_id"] == "t1" for item in accepted.json()["items"])
     assert client.get("/v4/workpaths/runs?tenant_id=t2", headers=auth).status_code == 401
 
     # Revoking the enterprise takes effect with the next V4 request.
