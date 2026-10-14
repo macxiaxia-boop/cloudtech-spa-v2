@@ -61,3 +61,23 @@ def test_url_mock_parser_forbidden_in_production(monkeypatch):
         assert False, "fabricated article was allowed in production"
     except RuntimeError as error:
         assert "ARTICLE-MOCK-403" in str(error)
+
+
+def test_authenticated_http_article_endpoint_preserves_tenant_and_no_network():
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from api.v4 import router
+    app = FastAPI()
+    app.include_router(router)
+    client = TestClient(app)
+    body = {"html": HTML, "source_url": "https://example.com/original"}
+    assert client.post("/v4/article/extract-html", json=body).status_code == 422
+    response = client.post("/v4/article/extract-html?tenant_id=tenant_a", json=body)
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["tenant_id"] == "tenant_a"
+    assert result["mock"] is False
+    assert result["provider_called"] is False
+    assert result["saved"] is False
+    assert result["permission_status"] == "rights_unknown_need_user_confirm"
+    assert result["content_sha256"] == hashlib.sha256(HTML.encode()).hexdigest()
