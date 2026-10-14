@@ -133,6 +133,33 @@ export class WorkPathClient {
     return this.get('/workpaths/runs');
   }
 
+  async executeLocalRun(runId: string): Promise<{
+    run_id: string;
+    status: string;
+    idempotent_hit?: boolean;
+    worker_type?: string;
+    provider_called?: boolean;
+    cost_cents?: number;
+    storage?: string;
+    nodes: Array<{
+      node_id: string;
+      status: string;
+      output_ref?: {
+        title: string; text: string; images: unknown[]; videos: unknown[];
+        content_sha256: string; mock: boolean;
+      };
+    }>;
+  }> {
+    return this.post(`/workpaths/runs/${encodeURIComponent(runId)}/execute-local`, {});
+  }
+
+  async reconcileLocalRun(runId: string): Promise<{
+    run_id: string; status: string; reconciled: boolean;
+    provider_recalled?: boolean; new_charge_cents?: number;
+  }> {
+    return this.post(`/workpaths/runs/${encodeURIComponent(runId)}/reconcile-local`, {});
+  }
+
   async extractSuppliedHTML(html: string, sourceUrl: string): Promise<{
     title: string; text: string; images: unknown[]; videos: unknown[];
     content_sha256: string; mock: boolean; saved: boolean;
