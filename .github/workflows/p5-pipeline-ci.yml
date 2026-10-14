@@ -12,6 +12,9 @@ on:
       - "workflows/v4/orchestrator.py"
       - "api/v4/__init__.py"
       - "tests/test_p9_v4_executable_preflight_and_tenant.py"
+      - "tests/test_p9_local_prefix.py"
+      - "workflows/v4/local_prefix.py"
+      - "api/v4/auth.py"
       - ".github/workflows/p5-pipeline-ci.yml"
   push:
     branches: ["fix/cloudtech-pipeline-truth-p5-20261014"]
@@ -34,4 +37,4 @@ jobs:
         env:
           CLOUDTECH_DATA_DIR: ${{ runner.temp }}/cloudtech-p5-data
           CLOUDTECH_OUTPUT_DIR: ${{ runner.temp }}/cloudtech-p5-output
-        run: python -m pytest tests/test_p5_pipeline_truth.py tests/test_p8_v4_path_cell_contracts.py tests/test_p9_v4_executable_preflight_and_tenant.py -q --tb=short
+        run: python -m pytest tests/test_p5_pipeline_truth.py tests/test_p8_v4_path_cell_contracts.py tests/test_p9_v4_executable_preflight_and_tenant.py tests/test_p9_local_prefix.py -q --tb=short
