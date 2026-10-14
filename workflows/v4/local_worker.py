@@ -35,33 +35,46 @@ def process_one(store: SQLiteRunStore, *, lease_seconds: int = 120) -> dict:
             raise ValueError("TENANT_RUN_MISMATCH")
         if record.status != RunStatus.READY:
             raise ValueError("RUN_NOT_READY")
-        if record.path_id != "WP-LOCAL-ARTICLE-EXTRACT":
-            raise ValueError("OPERATION_NOT_ALLOWLISTED")
         if record.nodes:
             raise ValueError("RUN_ALREADY_HAS_NODES")
 
-        html = record.input_bindings.get("html")
-        source_url = record.input_bindings.get("source_url") or ""
-        if not isinstance(html, str) or not html.strip():
-            raise ValueError("HTML_NOT_SUPPLIED")
-        if len(html.encode("utf-8")) > 1_800_000:
-            raise ValueError("HTML_TOO_LARGE")
-        if not isinstance(source_url, str) or len(source_url) > 2048:
-            raise ValueError("SOURCE_URL_INVALID")
-        from adapters.article.article_parser import parse_html
-        parsed = parse_html(html, source_url=source_url)
-        source_hash = hashlib.sha256(html.encode("utf-8")).hexdigest()
-        if parsed.get("content_sha256") != source_hash or parsed.get("mock") is not False:
-            raise ValueError("INVALID_PARSER_PROVENANCE")
+        if record.path_id == "WP-LOCAL-ARTICLE-EXTRACT":
+            html = record.input_bindings.get("html")
+            source_url = record.input_bindings.get("source_url") or ""
+            if not isinstance(html, str) or not html.strip():
+                raise ValueError("HTML_NOT_SUPPLIED")
+            if len(html.encode("utf-8")) > 1_800_000:
+                raise ValueError("HTML_TOO_LARGE")
+            if not isinstance(source_url, str) or len(source_url) > 2048:
+                raise ValueError("SOURCE_URL_INVALID")
+            from adapters.article.article_parser import parse_html
+            parsed = parse_html(html, source_url=source_url)
+            source_hash = hashlib.sha256(html.encode("utf-8")).hexdigest()
+            if parsed.get("content_sha256") != source_hash or parsed.get("mock") is not False:
+                raise ValueError("INVALID_PARSER_PROVENANCE")
+            operation = "article.html_parse"
+            node_id = "html_parse"
+            provider_name = "local_html_parser"
+        elif record.path_id == "WP-LOCAL-SUBTITLE-EXPORT":
+            from adapters.transcribe.supplied_subtitle_export import format_supplied_segments
+            parsed = format_supplied_segments(record.input_bindings.get("segments"))
+            source_hash = parsed["source_sha256"]
+            if parsed.get("mock") is not False or parsed.get("asr_performed") is not False:
+                raise ValueError("INVALID_SUBTITLE_PROVENANCE")
+            operation = "subtitle.format_supplied"
+            node_id = "subtitle_export"
+            provider_name = "local_subtitle_formatter"
+        else:
+            raise ValueError("OPERATION_NOT_ALLOWLISTED")
 
         def commit(rec):
             if rec.status != RunStatus.READY or rec.nodes:
                 raise RunStoreConflict("local task changed before worker commit")
             node = NodeRunRecord(
-                node_id="html_parse", node_kind=NodeKind.TRANSFORM,
-                operation="article.html_parse", requires={}, produces={},
+                node_id=node_id, node_kind=NodeKind.TRANSFORM,
+                operation=operation, requires={}, produces={},
                 input_hash=source_hash, status=RunStatus.COMPLETED,
-                output_ref=parsed, provider_name="local_html_parser",
+                output_ref=parsed, provider_name=provider_name,
                 provider_req_id=None, cost_cents=0, cost_class="FREE_LOCAL",
                 started_at=datetime.now(timezone.utc).isoformat(),
                 finished_at=datetime.now(timezone.utc).isoformat(),
