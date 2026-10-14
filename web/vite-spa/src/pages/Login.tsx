@@ -31,7 +31,7 @@ export function LoginPage() {
     const result = await login(account, password);
     setLoading(false);
     if (result.ok) {
-      navigate('/workspace/select');
+      navigate('/dashboard');
     } else {
       setError(result.error || t('common.error'));
     }
