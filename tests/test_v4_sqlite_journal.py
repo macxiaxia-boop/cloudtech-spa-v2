@@ -103,7 +103,7 @@ def test_duplicate_upstream_receipt_across_runs_rolls_back(tmp_path):
     orch.mark_node_done(runs[0].run_id, "n", {"asset_id": "a"},
                         provider_req_id="same-upstream", provider_name="provider",
                         cost_cents=10)
-    with pytest.raises(sqlite3.IntegrityError):
+    with pytest.raises(RunStatusError, match="provider completion receipt"):
         orch.mark_node_done(runs[1].run_id, "n", {"asset_id": "b"},
                             provider_req_id="same-upstream", provider_name="provider",
                             cost_cents=10)
