@@ -249,30 +249,68 @@ class TestRegistryRealDispatch:
         assert out["structure_template"] == "llm-derived"
         assert out["mock"] is True  # mock provider marks mock=True
 
-    def test_dispatch_ocr_only(self):
+    def test_dispatch_ocr_only(self, monkeypatch):
         from workflows.v4.registry import OperationRegistry
-        r = OperationRegistry()
-        out = r.dispatch("ocr.recognize", {"image_path": "/tmp/invoice_001.pdf"})
-        assert "full_text" in out
+        monkeypatch.delenv("CLOUDTECH_OCR_INPUT_ROOT", raising=False)
+        out = OperationRegistry().dispatch("ocr.recognize", {"image_path": "/tmp/invoice_001.pdf"})
+        assert out["status"] == "blocked"
+        assert out["error_code"] == "OCR_INPUT_ROOT_NOT_CONFIGURED"
+        assert "full_text" not in out
 
     def test_dispatch_search_only(self):
         from workflows.v4.registry import OperationRegistry
-        r = OperationRegistry()
-        out = r.dispatch("search.authors", {"keywords": ["装修"], "platform": "douyin"})
-        assert out["total"] > 0
+        out = OperationRegistry().dispatch("search.authors", {
+            "keywords": ["装修"], "platform": "douyin",
+            "catalog": [
+                {"author_id": "real-1", "platform": "douyin", "name": "厦门装修教程", "bio": "装修"},
+                {"author_id": "real-2", "platform": "douyin", "name": "家常菜", "bio": "美食"},
+            ],
+        })
+        assert out["status"] == "completed"
+        assert out["total"] == 1
+        assert out["items"][0]["author_id"] == "real-1"
+        assert out["provider_called"] is False
+        assert out["mock"] is False
+
+    def test_dispatch_search_without_source_is_blocked(self):
+        from workflows.v4.registry import OperationRegistry
+        out = OperationRegistry().dispatch("search.authors", {
+            "keywords": ["装修"], "platform": "douyin",
+        })
+        assert out["status"] == "blocked"
+        assert out["error_code"] == "AUTHOR_CATALOG_REQUIRED"
 
     def test_dispatch_metrics_only(self):
         from workflows.v4.registry import OperationRegistry
-        r = OperationRegistry()
-        out = r.dispatch("metrics.fetch", {"author_id": "mock_001"})
-        assert out["total_videos"] > 0
+        out = OperationRegistry().dispatch("metrics.fetch", {
+            "author_id": "real-author-1",
+            "records": [
+                {"work_id": "v1", "author_id": "real-author-1",
+                 "view_count": 100, "like_count": 10, "comment_count": 2, "share_count": 1},
+                {"work_id": "v2", "author_id": "real-author-1",
+                 "view_count": 50, "like_count": 5, "comment_count": 1, "share_count": 0},
+                {"work_id": "v3", "author_id": "other",
+                 "view_count": 500, "like_count": 1, "comment_count": 1, "share_count": 1},
+            ],
+        })
+        assert out["total_videos"] == 2
+        assert out["total_views"] == 150
+        assert out["total_likes"] == 15
+        assert out["mock"] is False
+
+    def test_dispatch_metrics_without_source_is_blocked(self):
+        from workflows.v4.registry import OperationRegistry
+        out = OperationRegistry().dispatch("metrics.fetch", {"author_id": "real-author-1"})
+        assert out["status"] == "blocked"
+        assert out["error_code"] == "SOURCE_METRICS_REQUIRED"
 
     def test_dispatch_tts_only(self):
         from workflows.v4.registry import OperationRegistry
-        r = OperationRegistry()
-        out = r.dispatch("doubao.tts", {"text": "你好世界"})
-        assert out["mock"] is True
-        assert out["duration_sec"] > 0
+        out = OperationRegistry().dispatch("doubao.tts", {"text": "你好世界"})
+        assert out["status"] == "blocked"
+        assert out["error_code"] == "TTS_PROVIDER_NOT_CONNECTED"
+        assert "duration_sec" not in out
+        assert out["mock"] is False
 
     def test_dispatch_meeting_only(self):
         from workflows.v4.registry import OperationRegistry
