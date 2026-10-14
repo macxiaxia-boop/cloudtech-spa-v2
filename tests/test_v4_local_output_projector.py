@@ -258,3 +258,62 @@ def test_malformed_outbox_payload_isolated_without_stopping_next_job(tmp_path, i
             "SELECT state FROM v4_local_outbox WHERE run_id=?", (next_run.run_id,)
         ).fetchone()
         assert good["state"] == "ACKED"
+
+
+
+def test_exact_run_output_endpoint_requires_ack_and_ownership(tmp_path, monkeypatch):
+    """Local completion is not the same thing as an independently ACKed result."""
+    api = importlib.import_module("api.v4")
+    store, run_id = setup_completed(tmp_path)
+    monkeypatch.setattr(api, "_orchestrator", V4Orchestrator(
+        IdempotencyStore(), run_store=store,
+    ))
+    app = FastAPI()
+    app.include_router(api.router)
+    client = TestClient(app)
+
+    endpoint = f"/v4/workpaths/local-outputs/{run_id}"
+    pending = client.get(endpoint + "?tenant_id=tenant-one")
+    assert pending.status_code == 404
+    assert client.get(endpoint + "?tenant_id=other-tenant").status_code == 404
+    assert LocalOutputProjector(store).consume_one()["outcome"] == "CATALOGUED"
+
+    finished = client.get(endpoint + "?tenant_id=tenant-one")
+    assert finished.status_code == 200
+    data = finished.json()
+    assert data["source"] == "verified_local_outbox_catalog"
+    assert data["raw_customer_content_in_response"] is False
+    assert data["production_ready"] is False
+    assert data["item"]["run_id"] == run_id
+    assert data["item"]["artifact_kind"] == "ARTICLE_HTML_EXTRACTION"
+    assert client.get(endpoint + "?tenant_id=other-tenant").status_code == 404
+    assert client.get(endpoint).status_code == 422
+
+
+def test_exact_run_catalog_lookup_survives_recent_window_truncation(tmp_path):
+    """An older valid result is queryable even when latest-N list omits it."""
+    store, older = setup_completed(tmp_path)
+    projector = LocalOutputProjector(store)
+    assert projector.consume_one()["outcome"] == "CATALOGUED"
+
+    orch = V4Orchestrator(IdempotencyStore(), run_store=store)
+    newer = orch.create_run(
+        "WP-LOCAL-ARTICLE-EXTRACT", 1, "tenant-one",
+        {"html": "<html><h1>后面的另一个任务</h1></html>"},
+        idempotency_key="newer-output",
+    )
+    orch.transition(newer.run_id, RunStatus.INPUT_BOUND)
+    orch.transition(newer.run_id, RunStatus.READY)
+    LocalJobQueue(store).enqueue(newer.run_id, "tenant-one")
+    assert process_one(store)["outcome"] == "DONE"
+    assert projector.consume_one()["outcome"] == "CATALOGUED"
+
+    # Even if a caller requests only one latest item, the older run's proof
+    # is still independently retrievable without paginating unbounded lists.
+    assert len(projector.list_for_tenant("tenant-one", limit=1)) == 1
+    old = projector.get_for_tenant_run("tenant-one", older)
+    assert old is not None
+    assert old["run_id"] == older
+    assert old["artifact_kind"] == "ARTICLE_HTML_EXTRACTION"
+    assert projector.get_for_tenant_run("tenant-other", older) is None
+    assert projector.get_for_tenant_run("tenant-one", "does-not-exist") is None
