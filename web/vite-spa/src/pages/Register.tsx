@@ -8,14 +8,16 @@ import { Cloud, Eye, EyeOff, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation, LocaleSwitcher } from '@/i18n';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { register } = useAuth();
+  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -24,7 +26,6 @@ export function RegisterPage() {
     password: '',
     confirm: '',
     agreed: false,
-    code: '',
   });
 
   const passwordStrength = (() => {
@@ -38,12 +39,25 @@ export function RegisterPage() {
     return score;
   })();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.agreed) return;
-    if (form.password !== form.confirm) return;
+    setError(null);
+    if (!form.agreed) {
+      setError('请先确认您已阅读并同意相关条款');
+      return;
+    }
+    if (form.password !== form.confirm || form.password.length < 8) {
+      setError('密码至少 8 位，并且两次输入必须一致');
+      return;
+    }
     setLoading(true);
-    setTimeout(() => navigate('/workspace/select'), 500);
+    try {
+      const result = await register(form.email, form.password, form.company);
+      if (result.ok) navigate('/dashboard');
+      else setError(result.error || '真实注册服务不可用');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -59,6 +73,12 @@ export function RegisterPage() {
         <h1 className="text-2xl font-bold mb-1.5">创建账户</h1>
         <p className="text-sm text-muted-foreground mb-6">开始你的 AI 工作空间之旅</p>
 
+        {error && (
+          <p role="alert" className="mb-4 rounded-lg border border-destructive-200
+                                  bg-destructive-bg p-3 text-sm text-destructive-700">
+            {error}
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-5">
           <div className="space-y-1.5">
             <Label htmlFor="company">公司名称</Label>
@@ -68,13 +88,10 @@ export function RegisterPage() {
             <Label htmlFor="email">工作邮箱</Label>
             <Input id="email" type="email" placeholder="name@company.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="code">验证码</Label>
-            <div className="flex gap-2">
-              <Input id="code" placeholder="6 位验证码" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required className="flex-1" />
-              <Button type="button" variant="outline" size="default">发送验证码</Button>
-            </div>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            当前尚未接通邮箱验证码服务；实际注册与账号安全以服务器返回为准。
+            邮箱未核验的注册流程不得作为公开商用验收通过依据。
+          </p>
           <div className="space-y-1.5">
             <Label htmlFor="password">密码</Label>
             <div className="relative">
