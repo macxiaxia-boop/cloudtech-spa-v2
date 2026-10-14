@@ -269,7 +269,7 @@ WP_LOCAL_SUBTITLE_EXPORT = WorkPathDefinition(
     goal="对用户提供的逐句时间戳和真实文本进行校验，输出可直接导出的字幕文本。",
     triggers=["用户已提供带时间戳的字幕片段"],
     preconditions=["转写文本和时间戳均来自用户已获授权的实际素材"],
-    inputs=[InputSpec(role="segments", mime="application/json", min=1, max=1)],
+    inputs=[InputSpec(role="segments", mime="application/json", min=1, max=2000)],
     planner="deterministic_local_executor",
     steps=[{
         "id": "subtitle_export",
