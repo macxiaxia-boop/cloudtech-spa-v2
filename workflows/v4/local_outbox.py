@@ -21,7 +21,7 @@ class OutboxLease:
     run_id: str
     tenant_id: str
     event_type: str
-    payload: dict
+    payload: dict | None  # Invalid JSON is quarantined by the consumer, not fatal to the worker.
     token: str
     attempt: int
 
@@ -54,10 +54,19 @@ class LocalCompletionOutbox:
                  WHERE event_id=?
             """, (token, now + lease_seconds, row["event_id"]))
             db.commit()
+        # Corrupt DB payloads are a real possibility after interrupted writes,
+        # manual edits or storage faults. Claiming must never kill the poller:
+        # the consumer will preserve a non-ACKed event for investigation.
+        try:
+            payload = json.loads(row["payload_json"])
+        except (ValueError, TypeError):
+            payload = None
+        if not isinstance(payload, dict):
+            payload = None
         return OutboxLease(
             event_id=row["event_id"], run_id=row["run_id"],
             tenant_id=row["tenant_id"], event_type=row["event_type"],
-            payload=json.loads(row["payload_json"]), token=token,
+            payload=payload, token=token,
             attempt=row["attempts"] + 1,
         )
 
