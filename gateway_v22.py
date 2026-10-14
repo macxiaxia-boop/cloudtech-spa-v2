@@ -561,7 +561,11 @@ V10_STUB_TAGS = ["v3.99 V10 Stub (前端用了但 V10 未实现, 避免 React cr
 #   mark   (默认) → 假 200 响应注入 "stub": true, 并由中间件补 X-CloudTech-Stub 头
 #   strict        → 假 200 彻底消失, 未实现端点诚实 404 (生产/验收用)
 import os as _os
-_STUBS_STRICT = _os.environ.get("CLOUDTECH_STUBS", "mark").lower() == "strict"
+# Fail closed by default, and unconditionally outside isolated development.
+# Explicit CLOUDTECH_STUBS=mark is a developer-only display compatibility mode.
+_CLOUDTECH_DEPLOYMENT = _os.environ.get("CLOUDTECH_ENV", _os.environ.get("V4_ENV", "development")).strip().lower()
+_STUBS_STRICT = (_CLOUDTECH_DEPLOYMENT in {"production", "prod", "staging"} or
+                 _os.environ.get("CLOUDTECH_STUBS", "strict").strip().lower() != "mark")
 
 
 def v10_stub_data(path_params):
@@ -590,10 +594,13 @@ def v10_stub_data(path_params):
     return {"status": "ok", "stub": True, "data": []}
 
 
-def _stub_response(rest: str, status: int = 200):
-    """strict 模式 → 404; mark 模式 → 打标 mock。统一出口保证一致性。"""
-    if _STUBS_STRICT:
-        return JSONResponse(status_code=404, content={"status": "error", "error": "not_implemented", "stub": True, "path": f"/api/v2/{rest}"})
+def _stub_response(rest: str, method: str = "GET"):
+    """Never pretend an unimplemented mutation succeeded, even in demo mode."""
+    if _STUBS_STRICT or method.upper() != "GET":
+        return JSONResponse(status_code=404, content={
+            "status": "error", "error": "not_implemented", "stub": True,
+            "path": f"/api/v2/{rest}", "method": method.upper(),
+        })
     return JSONResponse(content=v10_stub_data(rest))
 
 
@@ -654,7 +661,7 @@ async def v10_stub_post(rest: str, request: Request):
     fwd = _try_forward_v23(rest, method="POST", body=body)
     if fwd is not None:
         return fwd
-    return _stub_response(rest)
+    return _stub_response(rest, method="POST")
 
 
 # R293 2026-09-26 治本: web-vitals.ts 上报 POST /api/v3/monitoring/web-vitals 返 405
@@ -681,12 +688,12 @@ async def v3_monitoring_compat_get():
 async def v10_stub_put(rest: str, request: Request):
     try: await request.body()
     except Exception: pass
-    return _stub_response(rest)
+    return _stub_response(rest, method="PUT")
 
 
 @app.delete("/api/v2/{rest:path}", include_in_schema=False)
 def v10_stub_delete(rest: str):
-    return _stub_response(rest)
+    return _stub_response(rest, method="DELETE")
 
 log.info("  + V10 stub catch-all: /api/v2/{rest:path} "
          f"mode={'strict(404)' if _STUBS_STRICT else 'mark(stub:true)'}")
