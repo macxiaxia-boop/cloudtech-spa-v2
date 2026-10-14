@@ -223,6 +223,43 @@ WP_PRODUCT_MARKETING = WorkPathDefinition(
 )
 
 
+# 单原子能力的完整执行路径：只做真实本地 HTML 提取，不冒充 AI 改写。
+# 与 6 类旗舰复杂工作流分开计数。
+WP_LOCAL_ARTICLE_EXTRACT = WorkPathDefinition(
+    id="WP-LOCAL-ARTICLE-EXTRACT",
+    revision=1,
+    title="已授权 HTML → 原文与媒体引用提取",
+    domain="content",
+    goal="使用用户提供的 HTML 提取真实正文、标题、图片与视频引用，"
+         "保存任务节点结果，不访问外部 URL，不使用 LLM",
+    triggers=["用户已提供授权 HTML 原文"],
+    preconditions=["用户具备提供和处理原文的权利"],
+    inputs=[
+        InputSpec(role="html", mime="text/html", min=1, max=1),
+        InputSpec(role="source_url", mime="text/url", min=0, max=1),
+    ],
+    planner="deterministic_local_executor",
+    steps=[
+        {
+            "id": "html_parse",
+            "operation": "article.html_parse",
+            "node_kind": "TRANSFORM",
+            "cost_class": "FREE_LOCAL",
+            "requires": [],
+            "produces": ["article_text", "media_refs", "content_sha256"],
+            "retries": 0,
+        },
+    ],
+    quality_gates=["input_html_supplied", "content_sha256_present"],
+    exported_artifacts=["article_text", "media_refs", "content_sha256"],
+    recovery={"manual_reconciliation_only": True},
+    privacy="private_to_tenant",
+    permissions=["own_or_licensed"],
+    billing_policy="FREE_LOCAL",
+    evidence={"source_hash": True, "provider_called": False},
+)
+
+
 # 总注册表
 FLAGSHIP_PATHS: Dict[str, WorkPathDefinition] = {
     WP_BLOGGER_RESEARCH.id: WP_BLOGGER_RESEARCH,
@@ -234,16 +271,22 @@ FLAGSHIP_PATHS: Dict[str, WorkPathDefinition] = {
 }
 
 
+# Separate the original six flagship paths from deterministic local paths.
+LOCAL_PATHS: Dict[str, WorkPathDefinition] = {
+    WP_LOCAL_ARTICLE_EXTRACT.id: WP_LOCAL_ARTICLE_EXTRACT,
+}
+ALL_PATHS: Dict[str, WorkPathDefinition] = {**FLAGSHIP_PATHS, **LOCAL_PATHS}
+
 # 后处理: 将所有 steps dict → StepSpec (便于 type check + serialization)
-for _defn in FLAGSHIP_PATHS.values():
+for _defn in ALL_PATHS.values():
     _defn.steps = _to_steps(_defn.steps)
 
 
 def list_paths() -> List[Dict]:
-    return [p.to_dict() for p in FLAGSHIP_PATHS.values()]
+    return [p.to_dict() for p in ALL_PATHS.values()]
 
 
 def get_path(path_id: str) -> WorkPathDefinition:
-    if path_id not in FLAGSHIP_PATHS:
+    if path_id not in ALL_PATHS:
         raise KeyError(f"[WP-001] 未知 workpath {path_id}")
-    return FLAGSHIP_PATHS[path_id]
+    return ALL_PATHS[path_id]
