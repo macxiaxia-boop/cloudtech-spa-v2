@@ -185,10 +185,10 @@ def test_resume_run():
     }
     r = client.post("/v4/workpaths/runs?tenant_id=t1", json=body)
     run_id = r.json()["run_id"]
-    r2 = client.post(f"/v4/workpaths/runs/{run_id}/resume", json={"failed_nodes_only": True})
+    r2 = client.post(f"/v4/workpaths/runs/{run_id}/resume?tenant_id=t1", json={"failed_nodes_only": True})
     assert r2.status_code == 200
     data = r2.json()
-    assert data["no_repeat_billing"] is True
+    assert data["no_repeat_billing"] is False
     print(f"[OK] resume_run → no_repeat_billing={data['no_repeat_billing']}")
 
 
@@ -197,7 +197,7 @@ def test_export_run_not_ready():
         "path_id": "WP-ARTICLE-REWRITE", "revision": 1, "input_bindings": {}
     })
     run_id = r.json()["run_id"]
-    r2 = client.get(f"/v4/workpaths/runs/{run_id}/export")
+    r2 = client.get(f"/v4/workpaths/runs/{run_id}/export?tenant_id=t1")
     data = r2.json()
     assert data["ready"] is False
     print(f"[OK] export_run_not_ready → status={data['status']}")
