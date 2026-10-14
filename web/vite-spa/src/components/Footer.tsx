@@ -39,7 +39,7 @@ export function Footer() {
 
           {/* 产品 */}
           <div>
-            <h4 className="font-bold mb-3 text-sm">产品</h4>
+            <h3 className="font-bold mb-3 text-sm">产品</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li><Link to="/employees" className="hover:text-brand-500">5 AI 数字员工</Link></li>
               <li><Link to="/monitoring" className="hover:text-brand-500">监控中心</Link></li>
@@ -51,7 +51,7 @@ export function Footer() {
 
           {/* 行业 */}
           <div>
-            <h4 className="font-bold mb-3 text-sm">行业</h4>
+            <h3 className="font-bold mb-3 text-sm">行业</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li><Link to="/industries/decoration" className="hover:text-brand-500">装企获客</Link></li>
               <li><Link to="/industries/medical" className="hover:text-brand-500">医美合规</Link></li>
@@ -61,14 +61,14 @@ export function Footer() {
 
           {/* 资源 + 关于 */}
           <div>
-            <h4 className="font-bold mb-3 text-sm">资源</h4>
+            <h3 className="font-bold mb-3 text-sm">资源</h3>
             <ul className="space-y-2 text-sm text-gray-600 mb-4">
               <li><Link to="/cases" className="hover:text-brand-500">案例库</Link></li>
               <li><Link to="/blog" className="hover:text-brand-500">博客</Link></li>
               <li><Link to="/faq" className="hover:text-brand-500">FAQ</Link></li>
               <li><Link to="/opc-story" className="hover:text-brand-500">OPC 故事</Link></li>
             </ul>
-            <h4 className="font-bold mb-3 text-sm">关于</h4>
+            <h3 className="font-bold mb-3 text-sm">关于</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li><Link to="/pricing" className="hover:text-brand-500">定价</Link></li>
               <li><Link to="/contact" className="hover:text-brand-500">联系</Link></li>
