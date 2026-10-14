@@ -139,3 +139,37 @@ def test_same_key_concurrent_submit_creates_single_run():
             input_bindings={"homepage_url": "https://example.com/DIFFERENT"},
             idempotency_key="same-key",
         )
+
+
+def test_production_requires_real_secret_and_authenticated_tenant(monkeypatch):
+    from api.v4.auth import mint_jwt
+
+    monkeypatch.setenv("V4_ENV", "production")
+    monkeypatch.delenv("V4_JWT_SECRET", raising=False)
+    body = _body("production-auth-test")
+    url = "/v4/workpaths/runs?tenant_id=prod-A"
+    missing = client.post(url, json=body)
+    assert missing.status_code == 401
+    monkeypatch.setenv("V4_JWT_SECRET", "short-secret")
+    short = client.post(url, json=body)
+    assert short.status_code == 401
+
+    monkeypatch.setenv("V4_JWT_SECRET", "p9-test-only-secret-with-32-plus-bytes-123456")
+    absent_token = client.post(url, json=body)
+    assert absent_token.status_code == 401
+    real_token = mint_jwt("prod-A", user_id="tester")
+    authorized = client.post(
+        url, json=body, headers={"Authorization": f"Bearer {real_token}"},
+    )
+    assert authorized.status_code == 200
+    rid = authorized.json()["run_id"]
+    forged_tenant = client.get(
+        f"/v4/workpaths/runs/{rid}?tenant_id=prod-B",
+        headers={"Authorization": f"Bearer {real_token}"},
+    )
+    assert forged_tenant.status_code == 401
+    own = client.get(
+        f"/v4/workpaths/runs/{rid}?tenant_id=prod-A",
+        headers={"Authorization": f"Bearer {real_token}"},
+    )
+    assert own.status_code == 200
