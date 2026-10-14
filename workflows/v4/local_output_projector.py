@@ -72,22 +72,25 @@ class LocalOutputProjector:
                 payload.get("event_type") != "LOCAL_RUN_COMPLETED" or
                 payload.get("snapshot_sha256") != _json_hash(run.to_dict())):
                 raise RunStoreConflict("completion event provenance does not match run")
-            if len(run.nodes) != 1 or run.budget_spent_cents != 0:
-                raise RunStoreConflict("not a zero-cost single-node local run")
-            node = run.nodes[0]
+            if not 1 <= len(run.nodes) <= 2 or run.budget_spent_cents != 0:
+                raise RunStoreConflict("not an allowed zero-cost local workflow")
+            for current in run.nodes:
+                if (current.status != RunStatus.COMPLETED or
+                    current.cost_cents != 0 or current.provider_req_id is not None or
+                    not isinstance(current.output_ref, dict) or
+                    current.output_ref.get("mock") is not False):
+                    raise RunStoreConflict("unverified or metered node result")
+                receipt = db.execute("""
+                    SELECT receipt_json FROM v4_node_receipts
+                    WHERE run_id=? AND node_id=? AND tenant_id=?
+                """, (run.run_id, current.node_id, run.tenant_id)).fetchone()
+                if receipt is None or json.loads(receipt["receipt_json"]) != current.to_dict():
+                    raise RunStoreConflict("a completed node has no matching receipt")
+            node = run.nodes[-1]
             result = node.output_ref
-            if (node.status != RunStatus.COMPLETED or
-                node.cost_cents != 0 or node.provider_req_id is not None or
-                not isinstance(result, dict) or result.get("mock") is not False):
-                raise RunStoreConflict("node output cannot be trusted")
-            receipt = db.execute("""
-                SELECT receipt_json FROM v4_node_receipts
-                WHERE run_id=? AND node_id=? AND tenant_id=?
-            """, (run.run_id, node.node_id, run.tenant_id)).fetchone()
-            if receipt is None or json.loads(receipt["receipt_json"]) != node.to_dict():
-                raise RunStoreConflict("completed node has no matching committed receipt")
 
-            if (run.path_id == "WP-LOCAL-ARTICLE-EXTRACT" and
+            if (len(run.nodes) == 1 and
+                    run.path_id == "WP-LOCAL-ARTICLE-EXTRACT" and
                     node.operation == "article.html_parse" and
                     node.provider_name == "local_html_parser" and
                     node.node_id == "html_parse"):
@@ -99,7 +102,8 @@ class LocalOutputProjector:
                         result.get("content_sha256") != source_hash):
                     raise RunStoreConflict("HTML source hash does not match output")
                 kind = "ARTICLE_HTML_EXTRACTION"
-            elif (run.path_id == "WP-LOCAL-SUBTITLE-EXPORT" and
+            elif (len(run.nodes) == 1 and
+                  run.path_id == "WP-LOCAL-SUBTITLE-EXPORT" and
                   node.operation == "subtitle.format_supplied" and
                   node.provider_name == "local_subtitle_formatter" and
                   node.node_id == "subtitle_export"):
@@ -114,6 +118,38 @@ class LocalOutputProjector:
                     result.get("model_called") is not False):
                     raise RunStoreConflict("subtitle provenance or source mismatch")
                 kind = "SUBTITLE_SRT_VTT"
+            elif (len(run.nodes) == 2 and
+                  run.path_id == "WP-LOCAL-ARTICLE-ANALYZE" and
+                  node.node_id == "content_analyze" and
+                  node.operation == "content.local_text_analyze" and
+                  node.provider_name == "local_lexical_analyzer"):
+                extraction = run.nodes[0]
+                if (extraction.node_id != "html_parse" or
+                    extraction.operation != "article.html_parse" or
+                    extraction.provider_name != "local_html_parser"):
+                    raise RunStoreConflict("first stage must be genuine HTML extraction")
+                supplied = run.input_bindings.get("html")
+                raw_output = extraction.output_ref
+                if not isinstance(supplied, str):
+                    raise RunStoreConflict("original HTML was not retained")
+                source_hash = hashlib.sha256(supplied.encode("utf-8")).hexdigest()
+                if (extraction.input_hash != source_hash or
+                    raw_output.get("content_sha256") != source_hash):
+                    raise RunStoreConflict("HTML stage provenance mismatch")
+                import hashlib as _hashlib
+                actual_text = raw_output.get("text")
+                if not isinstance(actual_text, str):
+                    raise RunStoreConflict("actual extracted text missing")
+                real_text_hash = _hashlib.sha256(actual_text.encode("utf-8")).hexdigest()
+                if (node.input_hash != real_text_hash or
+                    result.get("text_sha256") != real_text_hash or
+                    result.get("source_html_sha256") != source_hash or
+                    result.get("ai_model_used") is not False):
+                    raise RunStoreConflict("analysis inputs or model provenance invalid")
+                from adapters.content.local_text_analysis import analyze_user_article
+                if result != analyze_user_article(raw_output):
+                    raise RunStoreConflict("analysis output differs from verified source text")
+                kind = "ARTICLE_CONTENT_ANALYSIS"
             else:
                 raise RunStoreConflict("operation is not in approved local catalog")
             out_hash = _json_hash(result)
