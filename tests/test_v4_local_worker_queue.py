@@ -221,3 +221,41 @@ def test_v4_api_reports_actual_heartbeat_only(tmp_path, monkeypatch):
         db.execute("UPDATE v4_local_worker_heartbeats SET last_seen=?",
                    (time.time() - 300,))
     assert client.get("/v4/workpaths/runs?tenant_id=t1").json()["worker_connected"] is False
+
+
+def test_completed_node_receipt_cannot_be_rewritten_or_deleted(tmp_path):
+    """A later snapshot mutation must not rewrite previously issued evidence."""
+    store, _, run_id = setup_run(tmp_path)
+    LocalJobQueue(store).enqueue(run_id, "t1")
+    assert process_one(store)["outcome"] == "DONE"
+    original = store.get(run_id).nodes[0].to_dict()
+    assert store.receipt_count(run_id) == 1
+
+    def tamper_output(rec):
+        rec.nodes[0].output_ref["text"] = "tampered content"
+
+    def remove_completed_node(rec):
+        rec.nodes.clear()
+
+    def duplicate_completed_node(rec):
+        import copy
+        rec.nodes.append(copy.deepcopy(rec.nodes[0]))
+
+    def tamper_provider_identity(rec):
+        rec.nodes[0].provider_name = "unverified_provider"
+
+    for mutation in (
+        tamper_output, remove_completed_node,
+        duplicate_completed_node, tamper_provider_identity,
+    ):
+        with pytest.raises(RunStoreConflict, match="immutable|duplicate"):
+            store.mutate(run_id, mutation)
+        still_saved = store.get(run_id)
+        assert still_saved.status == RunStatus.COMPLETED
+        assert len(still_saved.nodes) == 1
+        assert still_saved.nodes[0].to_dict() == original
+        assert store.receipt_count(run_id) == 1
+
+    # A non-mutating replay must still work without minting another receipt.
+    assert store.mutate(run_id, lambda rec: "unchanged") == "unchanged"
+    assert store.receipt_count(run_id) == 1
