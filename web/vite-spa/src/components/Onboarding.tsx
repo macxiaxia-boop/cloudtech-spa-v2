@@ -89,7 +89,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           ) : (
             <button
               onClick={onComplete}
-              className="px-4 py-2 text-gray-400 hover:text-gray-600 text-sm"
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 text-sm"
             >
               跳过引导
             </button>
@@ -98,7 +98,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           {step < STEPS.length - 1 ? (
             <button
               onClick={() => setStep(step + 1)}
-              className="px-6 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 flex items-center gap-1"
+              className="px-6 py-2 bg-brand-700 text-white rounded-md hover:bg-brand-600 flex items-center gap-1"
             >
               {current.cta} <ChevronRight className="w-4 h-4" />
             </button>
@@ -106,7 +106,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Link
               to={current.ctaLink || '/dashboard'}
               onClick={onComplete}
-              className="px-6 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 flex items-center gap-1"
+              className="px-6 py-2 bg-brand-700 text-white rounded-md hover:bg-brand-600 flex items-center gap-1"
             >
               <Sparkles className="w-4 h-4" /> {current.cta}
             </Link>
