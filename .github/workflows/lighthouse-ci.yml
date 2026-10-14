@@ -29,6 +29,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: web/vite-spa/package-lock.json
 
+      - name: Setup Python for deterministic image optimization
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install image encoder
+        run: python -m pip install 'Pillow>=10,<13'
+
       - name: Install dependencies
         working-directory: web/vite-spa
         run: npm ci
@@ -40,6 +48,10 @@ jobs:
       - name: Assert actual PWA build artifacts
         working-directory: web/vite-spa
         run: node scripts/test_pwa_assets.mjs
+
+      - name: Verify responsive WebP outputs
+        working-directory: web/vite-spa
+        run: python scripts/test_optimized_images.py
 
       - name: Start preview server
         working-directory: web/vite-spa
@@ -79,6 +91,14 @@ jobs:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: web/vite-spa/package-lock.json
+
+      - name: Setup Python for deterministic image optimization
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install image encoder
+        run: python -m pip install 'Pillow>=10,<13'
 
       - name: Install dependencies
         working-directory: web/vite-spa
