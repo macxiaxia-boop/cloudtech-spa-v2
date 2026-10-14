@@ -13,3 +13,4 @@ def _v4_isolated_dev_auth(monkeypatch, request):
         monkeypatch.setenv("CLOUDTECH_ALLOW_INSECURE_DEV_AUTH", "1")
         monkeypatch.setenv("CLOUDTECH_ALLOW_MOCK_MEDIA", "1")
         monkeypatch.setenv("CLOUDTECH_ALLOW_MOCK_ASR", "1")
+        monkeypatch.setenv("CLOUDTECH_ALLOW_MOCK_PLATFORM", "1")
