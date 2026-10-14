@@ -118,6 +118,23 @@ class SQLiteRunStore:
                 CREATE UNIQUE INDEX IF NOT EXISTS v4_provider_receipt_once
                   ON v4_node_receipts (tenant_id, provider_name, provider_req_id)
                   WHERE provider_req_id IS NOT NULL AND provider_name IS NOT NULL;
+                CREATE TABLE IF NOT EXISTS v4_local_jobs (
+                    job_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    run_id TEXT NOT NULL UNIQUE REFERENCES v4_runs(run_id),
+                    tenant_id TEXT NOT NULL,
+                    state TEXT NOT NULL CHECK (
+                        state IN ('QUEUED','LEASED','DONE','FAILED')),
+                    lease_token TEXT,
+                    lease_until REAL,
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    max_attempts INTEGER NOT NULL DEFAULT 3,
+                    available_at REAL NOT NULL DEFAULT 0,
+                    error_code TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS v4_local_jobs_claim
+                  ON v4_local_jobs(state,available_at,job_id);
             """)
 
     def create_or_get(self, record: Any) -> Any:
