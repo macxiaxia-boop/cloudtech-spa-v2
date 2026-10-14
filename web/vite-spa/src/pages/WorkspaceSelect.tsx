@@ -1,39 +1,12 @@
-/**
- * CloudTech WorkspaceSelector · v3 视觉母版 03 模块
- * 选择组织/工作空间（v3 新增 · 多租户隔离入口）· AuthContext 持久化
- */
+/** CloudTech Workspace selection — show only the verified SaaS tenant. */
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Plus, RefreshCw, Cloud, Building2, Briefcase, Users } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { ArrowRight, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface Workspace {
-  id: string;
-  name: string;
-  description: string;
-  memberCount: number;
-  role: '管理员' | '团队成员' | '数据观察';
-  iconColor: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-const workspaces: Workspace[] = [
-  { id: 'nova-team',       name: 'Nova Team',  description: 'AI 业务全链路',     memberCount: 12, role: '管理员',   iconColor: 'text-brand-600 bg-brand-50',                 icon: Cloud },
-  { id: 'operations',      name: '运营团队',   description: '多人协同 · 监控',   memberCount: 8,  role: '团队成员', iconColor: 'text-success-600 bg-success-50',           icon: Users },
-  { id: 'rnd',             name: '研发团队',   description: '技术研发',          memberCount: 16, role: '团队成员', iconColor: 'text-warning-600 bg-warning-50',           icon: Briefcase },
-  { id: 'client-projects', name: '客户项目组', description: '多人协同 · 监控',   memberCount: 4,  role: '数据观察', iconColor: 'text-accent-purple-600 bg-accent-purple-50', icon: Building2 },
-];
-
 export function WorkspaceSelectorPage() {
   const navigate = useNavigate();
-  const { user, setCurrentWorkspace, logout } = useAuth();
-
-  function handleSelect(ws: Workspace) {
-    setCurrentWorkspace(ws);
-    navigate('/dashboard');
-  }
+  const { user, currentWorkspace, setCurrentWorkspace, logout } = useAuth();
 
   function handleLogout() {
     logout();
@@ -41,52 +14,40 @@ export function WorkspaceSelectorPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--gradient-ice)' }}>
-      <div className="w-full max-w-[var(--workspace-selector-w)] bg-card rounded-xl shadow-xl border border-border p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-              <Cloud className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="font-semibold text-foreground text-base">CloudTech</span>
-              {user && <div className="text-xs text-muted-foreground">{user.email}</div>}
-            </div>
-          </div>
-          <button onClick={handleLogout} className="text-xs text-muted-foreground hover:text-foreground">切换账号</button>
-        </div>
-
-        <h1 className="text-2xl font-bold mb-2">选择工作空间</h1>
-        <p className="text-sm text-muted-foreground mb-6">一个更高效的 AI 工作方式</p>
-
-        <div className="flex flex-col gap-3 mb-6">
-          {workspaces.map((ws) => (
-            <button key={ws.id} onClick={() => handleSelect(ws)} className="flex items-center gap-4 p-4 rounded-lg border border-border hover:border-brand-500 hover:shadow-sm transition-all text-left group">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${ws.iconColor}`}>
-                <ws.icon className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-foreground">{ws.name}</span>
-                  <span className="text-xs text-muted-foreground">{ws.memberCount} 人</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{ws.role}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{ws.description}</p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-brand-600 group-hover:translate-x-1 transition-all" />
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between pt-4 border-t border-border">
-          <button className="flex items-center gap-2 text-sm text-brand-600 hover:text-brand-700 transition-colors">
-            <Plus className="w-4 h-4" />
-            创建新组织
+    <div className="min-h-screen flex items-center justify-center p-6"
+         style={{ background: 'var(--gradient-ice)' }}>
+      <div className="w-full max-w-lg bg-card rounded-xl shadow-xl border border-border p-8">
+        <h1 className="text-2xl font-bold mb-2">企业工作空间</h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          仅显示后端已核验身份、租户归属的工作空间；不会加载演示组织。
+        </p>
+        {user && currentWorkspace ? (
+          <button
+            type="button"
+            onClick={() => {
+              setCurrentWorkspace(currentWorkspace);
+              navigate('/dashboard');
+            }}
+            className="w-full flex items-center gap-4 border border-border rounded-lg
+                       p-4 hover:border-brand-500 text-left"
+          >
+            <Building2 className="w-8 h-8 text-brand-600 shrink-0" />
+            <span className="flex-1 min-w-0">
+              <strong className="block truncate">{currentWorkspace.name}</strong>
+              <span className="text-sm text-muted-foreground block truncate">
+                企业 ID：{currentWorkspace.id}
+              </span>
+              <span className="text-xs text-muted-foreground block mt-1">{user.email}</span>
+            </span>
+            <ArrowRight className="w-5 h-5 text-muted-foreground" />
           </button>
-          <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <RefreshCw className="w-4 h-4" />
-            切换账号
-          </button>
+        ) : (
+          <p role="alert" className="text-sm text-destructive-600">
+            未获取到经过服务器验证的企业身份，请重新登录。
+          </p>
+        )}
+        <div className="mt-6 flex justify-end">
+          <Button type="button" variant="outline" onClick={handleLogout}>切换账号</Button>
         </div>
       </div>
     </div>
