@@ -338,6 +338,28 @@ def list_local_output_catalog(
     }
 
 
+@router.get("/workpaths/local-outputs/{run_id}")
+def get_local_output_by_run(
+    run_id: str,
+    ctx: AuthContext = Depends(auth_required),
+):
+    """Read a single receipt-verified output, never unauthenticated raw content."""
+    get_owned_run(_orchestrator, run_id, ctx.tenant_id)
+    store = getattr(_orchestrator, "_store", None)
+    if store is None or getattr(store, "kind", "") != "SQLITE_LOCAL_DURABLE":
+        raise HTTPException(503, "当前没有可验证的持久化成果目录")
+    from workflows.v4.local_output_projector import LocalOutputProjector
+    item = LocalOutputProjector(store).get_for_tenant_run(ctx.tenant_id, run_id)
+    if item is None:
+        raise HTTPException(404, "该租户任务尚无经核验并 ACK 的成果")
+    return {
+        "item": item,
+        "source": "verified_local_outbox_catalog",
+        "raw_customer_content_in_response": False,
+        "production_ready": False,
+    }
+
+
 @router.get("/workpaths/runs")
 def list_run_records(
     limit: int = Query(50, ge=1, le=100),
