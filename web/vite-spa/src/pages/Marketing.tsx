@@ -1,11 +1,10 @@
 // Phase 45-47: SaaS 官网首页 · 5 AI 员工矩阵 + 客户证言 + 真插画 + i18n
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Bot, Briefcase, Heart, ArrowRight, Hammer, Stethoscope, CheckCircle2, Quote, Building2, Sun, Moon } from 'lucide-react';
+import { Sparkles, Bot, Briefcase, Heart, ArrowRight, Hammer, Stethoscope, CheckCircle2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CUSTOMER_LOGOS, TESTIMONIALS, TRUST_STATS } from '../data/customers';
 import { useTranslation } from '@/i18n';
 
 const FE_EMPLOYEES = [
@@ -65,7 +64,7 @@ export function MarketingPage() {
                 to="/try"
                 className="px-6 py-3 bg-brand-500 text-white rounded-md hover:bg-brand-600 inline-flex items-center gap-2 font-medium"
               >
-                7 天免费试用 <ArrowRight className="w-4 h-4" />
+                了解试用方式 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 to="/employees"
@@ -77,28 +76,12 @@ export function MarketingPage() {
                 to="/cases"
                 className="px-6 py-3 text-brand-500 hover:bg-brand-50 rounded-md inline-flex items-center gap-2"
               >
-                看 10 客户案例 →
+                查看产品示例 →
               </Link>
             </div>
-            {/* 关键数字 · Phase 48.D85 4 关键（80 家 / 1.25% / ¥999 / ¥3.99） */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-6 border-t border-gray-200">
-              <div>
-                <p className="text-2xl font-bold text-brand-500">80</p>
-                <p className="text-xs text-gray-500">P0 客户清单</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-orange-500">1.25%</p>
-                <p className="text-xs text-gray-500">漏斗转化率</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-green-500">¥999</p>
-                <p className="text-xs text-gray-500">标准版 / 月</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-brand-500">3.99</p>
-                <p className="text-xs text-gray-500">LTV/CAC（健康）</p>
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground border-t border-gray-200 pt-4">
+              功能演示不是已交付的客户成果。真实能力以实际工作流输出及验收记录为准。
+            </p>
           </div>
           {/* Hero 插画 */}
           <div className="relative">
@@ -110,37 +93,27 @@ export function MarketingPage() {
             <div className="absolute -bottom-4 -left-4 bg-card p-3 rounded-lg shadow-lg border border-gray-200">
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span className="font-medium">5 AI 员工在线</span>
+                <span className="font-medium">产品能力演示</span>
               </div>
             </div>
             <div className="absolute -top-4 -right-4 bg-card p-3 rounded-lg shadow-lg border border-gray-200">
               <div className="text-xs">
                 <p className="font-bold text-purple-600">Hermes · 治理</p>
-                <p className="text-gray-500">49 红线全绿</p>
+                <p className="text-gray-500">验收状态以记录为准</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trusted By 客户 logo */}
-      <section className="py-12 bg-card border-y border-gray-200">
-        <div className="max-w-page mx-auto px-6">
-          <p className="text-center text-xs uppercase font-bold text-gray-500 mb-6 tracking-wider">
-            <Building2 className="w-4 h-4 inline mr-1" /> 80+ P0 客户信赖 · 装企 + 医美 + 通用 SaaS
+      {/* 不展示未经许可的客户品牌或未经证实的商业合作。 */}
+      <section className="py-10 bg-card border-y border-gray-200">
+        <div className="max-w-page mx-auto px-6 text-center">
+          <p className="text-sm font-semibold text-foreground">真实功能，逐项验证</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            当前已完成部分本地能力：用户授权的 HTML 提取，以及用户已提供时间戳的字幕导出。
+            其他供应商与业务链需以实际接通和验收为准。
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {CUSTOMER_LOGOS.slice(0, 10).map((c) => (
-              <div
-                key={c.name}
-                className={`px-4 py-3 ${c.color} rounded-lg text-center hover:shadow-md transition cursor-pointer`}
-                title={`${c.name} · ${c.city} · ${c.scale}`}
-              >
-                <p className="font-bold text-sm">{c.shortName}</p>
-                <p className="text-xs opacity-75">{c.city}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -149,10 +122,10 @@ export function MarketingPage() {
         <div className="max-w-page mx-auto px-6">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-sm mb-3">
-              <Bot className="w-3 h-3" /> 5 AI 数字员工 · 前台 3 + 后端 5
+              <Bot className="w-3 h-3" /> 数字员工与工作流 · 规划中的产品能力
             </span>
-            <h2 className="text-3xl font-bold mb-3">不只 3 个 FE 员工，5 个后端 AI 也在跑</h2>
-            <p className="text-muted-foreground">Hermes（治理）+ Lyra（内容）+ Athena（架构）+ Apollo（数据）+ Artemis（运营）</p>
+            <h2 className="text-3xl font-bold mb-3">数字员工协作体系</h2>
+            <p className="text-muted-foreground">Hermes（治理）+ Lyra（内容）+ Athena（架构）+ Apollo（数据）+ Artemis（运营）。各项功能以实际验收为准</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {FE_EMPLOYEES.map((emp) => (
@@ -268,46 +241,14 @@ export function MarketingPage() {
         </div>
       </section>
 
-      {/* 客户证言 */}
-      <section className="py-20 bg-muted">
-        <div className="max-w-page mx-auto px-6">
-          <div className="text-center mb-12">
-            <span className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm mb-3">
-              <Quote className="w-3 h-3" /> 真实客户证言 · 6 个脱敏案例
-            </span>
-            <h2 className="text-3xl font-bold mb-3">老板们怎么说</h2>
-            <p className="text-muted-foreground">不编故事 · 每条都有客户名 + 数据可验证</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="p-6 bg-card rounded-xl border border-gray-200 hover:shadow-lg transition">
-                <Quote className="w-6 h-6 text-brand-300 mb-3" />
-                <p className="text-sm text-foreground mb-4 leading-relaxed">"{t.quote}"</p>
-                <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
-                  <div>
-                    <p className="font-bold text-sm">{t.author}</p>
-                    <p className="text-xs text-gray-500">{t.role}</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 text-xs">
-                  {Object.entries(t.metrics).map(([k, v]) => (
-                    <div key={k} className="flex-1">
-                      <p className="text-lg font-bold text-brand-500">{v}</p>
-                      <p className="text-gray-500">{k}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link
-              to="/cases"
-              className="px-6 py-3 bg-brand-500 text-white rounded-md hover:bg-brand-600 inline-flex items-center gap-2"
-            >
-              看全部 10 案例 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+      {/* 正式案例应取得客户授权和实际指标证据，禁用演示证言冒充。 */}
+      <section className="py-14 bg-muted">
+        <div className="max-w-page mx-auto px-6 text-center">
+          <h2 className="text-2xl font-bold mb-3">结果必须能够核验</h2>
+          <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+            每项真实交付应保留任务状态、来源哈希、节点输出和审计回执。
+            获得许可、核实数据后才发布客户评价与案例。
+          </p>
         </div>
       </section>
 
@@ -328,17 +269,9 @@ export function MarketingPage() {
               </span>
               <h2 className="text-3xl font-bold mb-4">Cloud 自己就是 OPC 跑出来的</h2>
               <p className="text-muted-foreground mb-6">
-                创始人心之所向便是光 1 人 + 5 AI 数字员工 · 30 天跑出 80 家客户清单 + 16 份公司文档 +
-                11 个 SPA 页面 + 208 测试 PASS。OPC 不是营销词，是实证。
+                探索一人公司如何利用 AI 解决真实企业问题：从需求分析、工作流、
+                任务执行直到实际结果的验证。未上线的能力不会被表述为已交付。
               </p>
-              <ul className="space-y-2 mb-6 text-sm">
-                {TRUST_STATS.map((s) => (
-                  <li key={s.label} className="flex items-center justify-between border-b border-gray-200 pb-2">
-                    <span className="text-muted-foreground">{s.label}</span>
-                    <span className="font-bold text-brand-500">{s.value}</span>
-                  </li>
-                ))}
-              </ul>
               <Link
                 to="/opc-story"
                 className="px-6 py-3 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 inline-flex items-center gap-2"
@@ -354,8 +287,8 @@ export function MarketingPage() {
       <section className="py-20 bg-brand-500 text-white">
         <div className="max-w-page mx-auto px-6 text-center">
           <Heart className="w-12 h-12 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">7 天免费试用 · 不需要信用卡</h2>
-          <p className="text-lg opacity-90 mb-8">30 分钟跑通你公司的第一条管线 · 1v1 微信群 24h 响应</p>
+          <h2 className="text-3xl font-bold mb-4">了解 CloudTech 的真实能力</h2>
+          <p className="text-lg opacity-90 mb-8">根据已接通的功能安排试用；实施范围与服务时间以实际沟通为准。</p>
           <div className="flex items-center justify-center gap-4">
             <Link
               to="/try"
@@ -364,10 +297,10 @@ export function MarketingPage() {
               立即试用 <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              to="/contact"
+              to="/register"
               className="px-8 py-3 border border-white text-white rounded-md hover:bg-white/10"
             >
-              约 1v1 demo
+              创建企业账号
             </Link>
           </div>
         </div>
