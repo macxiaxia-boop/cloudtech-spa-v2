@@ -1,71 +1,45 @@
 // 试用页 · 7 天免费试用
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Check, ArrowRight, Sparkles, Clock, Shield, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-const V23_API = 'http://localhost:7791';
-
-const INDUSTRIES = [
-  { value: 'decoration', label: '装修/建材/装企' },
-  { value: 'education', label: '教育' },
-  { value: 'manufacturing', label: '制造' },
-  { value: 'service', label: '服务' },
-];
-
-const SKU_OPTIONS = [
-  { value: 'dec_basic', label: '装企 · 基础版（199元/月）', industry: 'decoration' },
-  { value: 'dec_pro', label: '装企 · 专业版（1999元/月）', industry: 'decoration' },
-  { value: 'dec_enterprise', label: '装企 · 企业版（2999元/月）', industry: 'decoration' },
-  { value: 'edu_basic', label: '教育 · 基础版（199元/月）', industry: 'education' },
-  { value: 'edu_pro', label: '教育 · 专业版（1999元/月）', industry: 'education' },
-  { value: 'edu_enterprise', label: '教育 · 企业版（2999元/月）', industry: 'education' },
-  { value: 'mfg_basic', label: '制造 · 基础版（199元/月）', industry: 'manufacturing' },
-  { value: 'mfg_pro', label: '制造 · 专业版（1999元/月）', industry: 'manufacturing' },
-  { value: 'mfg_enterprise', label: '制造 · 企业版（2999元/月）', industry: 'manufacturing' },
-  { value: 'svc_basic', label: '服务 · 基础版（199元/月）', industry: 'service' },
-  { value: 'svc_pro', label: '服务 · 专业版（1999元/月）', industry: 'service' },
-  { value: 'svc_enterprise', label: '服务 · 企业版（2999元/月）', industry: 'service' },
-];
-
 const STEPS = [
   {
     n: 1,
-    title: '填写信息（30 秒）',
-    desc: '公司名 + 手机号 + 邮箱。无需信用卡。',
+    title: '提交企业账户信息',
+    desc: '企业名称、邮箱和密码由服务端验证。',
     time: '30 秒',
   },
   {
     n: 2,
-    title: '5 AI 员工就绪（自动）',
-    desc: 'Hermes/Lyra/Athena/Apollo/Artemis 自动初始化，无需配置。',
+    title: '服务端核验租户身份',
+    desc: '注册响应必须通过签名会话和所属企业核验。',
     time: '1 分钟',
   },
   {
     n: 3,
-    title: '跑你的第一条管线（30 分钟）',
-    desc: '选模板（装企/医美/通用），AI 自动跑出第一条获客 / 内容 / 财务管线。',
+    title: '查看已接通的业务工作流',
+    desc: '仅允许访问已真实实现并已授权的业务功能。',
     time: '30 分钟',
   },
   {
     n: 4,
-    title: '看真实数据 + 试用 7 天',
-    desc: '监控 / 漏斗 / 财务 / 客户清单全开。任意功能免费用 7 天。',
+    title: '按真实权益使用',
+    desc: '试用时长和套餐以服务端明确授权为准，不提供模拟权益。',
     time: '7 天',
   },
 ];
 
 export function TryNowPage() {
-  const navigate = useNavigate();
+  const { register } = useAuth();
   const [form, setForm] = useState({
     tenant_name: '',
-    name: '',
     email: '',
     password: '',
-    industry: 'decoration',
-    sku_id: 'dec_pro',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -73,56 +47,22 @@ export function TryNowPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError('');
     setLoading(true);
-
     try {
-      // R360: 真 POST 到 V23 /api/v2/auth/login (试用注册) + 兜底 mock
-      let realOk = false;
-      try {
-        const loginRes = await fetch(`${V23_API}/api/v2/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: form.email,
-            password: form.password,
-            tenant_name: form.tenant_name,
-            industry: form.industry,
-            sku_id: form.sku_id,
-          }),
-        });
-        if (loginRes.ok) {
-          const json = await loginRes.json();
-          if (json?.status === 'ok' && json?.data?.token) {
-            localStorage.setItem('ct_token', json.data.token);
-            localStorage.setItem('ct_user_id', json.data.user_id);
-            localStorage.setItem('ct_tenant_id', json.data.tenant_id);
-            localStorage.setItem('ct_trial', String(json.data.trial ?? true));
-            localStorage.setItem('ct_tenant_name', form.tenant_name);
-            localStorage.setItem('ct_industry', form.industry);
-            localStorage.setItem('ct_sku_id', form.sku_id);
-            realOk = true;
-          }
-        }
-      } catch {
-        // 后端不可用，继续 mock fallback
+      // Signed backend register + /api/saas/v1/me verification happen inside
+      // AuthContext.register(). Never manufacture browser admin identities.
+      const result = await register(
+        form.email.trim(), form.password, form.tenant_name.trim(),
+      );
+      if (!result.ok) {
+        setError(result.error || '服务端没有确认注册，不能进入工作空间。');
+        return;
       }
-
-      if (!realOk) {
-        // 后端不可用，纯 mock (兜底)
-        const mockToken = `ct_mock_${Date.now()}`;
-        localStorage.setItem('ct_token', mockToken);
-        localStorage.setItem('ct_user_id', `mock_u`);
-        localStorage.setItem('ct_tenant_name', form.tenant_name);
-        localStorage.setItem('ct_industry', form.industry);
-        localStorage.setItem('ct_sku_id', form.sku_id);
-      }
-
       setSubmitted(true);
-      // 3 秒后跳转 dashboard
-      setTimeout(() => navigate('/dashboard'), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '注册失败，请重试');
+      setError(err instanceof Error ? err.message : '服务端未确认注册，请重试');
     } finally {
       setLoading(false);
     }
@@ -133,15 +73,15 @@ export function TryNowPage() {
       <section className="py-16 bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900">
         <div className="max-w-page mx-auto px-6 text-center">
           <span className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm mb-4">
-            <Sparkles className="w-3 h-3" /> 7 天免费试用 · 无需信用卡
+            <Sparkles className="w-3 h-3" /> 企业账户注册 · 服务端真实验证
           </span>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            30 分钟跑通你公司的
+            把企业需求接入
             <br />
-            <span className="text-brand-500">第一条管线</span>
+            <span className="text-brand-500">真实工作空间</span>
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            不懂技术也能用。装企老板 / 医美老板 / 中小企业主 — 自己填表，5 AI 员工自动跑。
+            面向企业的 AI 工作空间。未实现、未验证或未经授权的功能不会模拟开通。
           </p>
         </div>
       </section>
@@ -176,16 +116,16 @@ export function TryNowPage() {
             {submitted ? (
               <div className="text-center py-8">
                 <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-2xl font-bold mb-2">试用开通成功！</h2>
+                <h2 className="text-2xl font-bold mb-2">企业账户验证成功</h2>
                 <p className="text-muted-foreground mb-6">
-                  <strong>{form.tenant_name}</strong>（{form.email}）已开通 7 天免费试用。
+                  <strong>{form.tenant_name}</strong>（{form.email}）已通过服务端身份及租户核验；试用期限和套餐以后端授权为准。
                 </p>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-left">
                   <p className="text-sm font-medium text-green-900 mb-2">下一步：</p>
                   <ol className="text-sm text-green-800 space-y-1">
-                    <li>1. 正在跳转仪表盘...</li>
-                    <li>2. 进入 /onboarding 走 5 步引导</li>
-                    <li>3. 让 5 AI 员工跑你的第一条管线</li>
+                    <li>1. 打开已经验证的企业工作空间</li>
+                    <li>2. 查看实际可用的工作流</li>
+                    <li>3. 仅执行已授权的功能</li>
                   </ol>
                 </div>
                 <Link
@@ -197,9 +137,9 @@ export function TryNowPage() {
               </div>
             ) : (
               <>
-                <h2 className="text-2xl font-bold mb-2">填写信息，立即开通</h2>
+                <h2 className="text-2xl font-bold mb-2">填写信息，验证企业账户</h2>
                 <p className="text-sm text-gray-500 mb-6 flex items-center gap-1">
-                  <Shield className="w-3 h-3" /> 信息加密 · 仅用于开通账号
+                  <Shield className="w-3 h-3" /> 信息提交给真实身份服务；后端不可用时不会生成模拟账号
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -216,17 +156,6 @@ export function TryNowPage() {
                       placeholder="例如：深圳市云数科技有限公司"
                       value={form.tenant_name}
                       onChange={(e) => setForm({ ...form, tenant_name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-brand-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">你的名字 *</label>
-                    <input
-                      required
-                      placeholder="张三"
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-brand-500 focus:outline-none"
                     />
                   </div>
@@ -255,44 +184,12 @@ export function TryNowPage() {
                     />
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">行业 *</label>
-                      <select
-                        required
-                        value={form.industry}
-                        onChange={(e) => {
-                          setForm({ ...form, industry: e.target.value, sku_id: '' });
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-card"
-                      >
-                        {INDUSTRIES.map((ind) => (
-                          <option key={ind.value} value={ind.value}>{ind.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">选择方案 *</label>
-                      <select
-                        required
-                        value={form.sku_id}
-                        onChange={(e) => setForm({ ...form, sku_id: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-card"
-                      >
-                        <option value="">请先选择行业</option>
-                        {SKU_OPTIONS.filter((s) => s.industry === form.industry).map((sku) => (
-                          <option key={sku.value} value={sku.value}>{sku.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
                   <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm">
                     <p className="font-medium text-yellow-900 mb-1">试用说明：</p>
                     <ul className="text-yellow-800 space-y-0.5 text-xs">
-                      <li>✓ 5 AI 数字员工全功能（7 天免费）</li>
-                      <li>✓ 1v1 微信群（5 人服务群 · 24h 内回复）</li>
-                      <li>✓ 试用到期后 1v1 续费回访（不强制）</li>
+                      <li>✓ 账户权限由真实服务端授权控制</li>
+                      <li>✓ 未配置的模型及外部服务不会自动开通</li>
+                      <li>✓ 注册不会自动付款，也不会生成模拟登录令牌</li>
                     </ul>
                   </div>
 
@@ -306,7 +203,7 @@ export function TryNowPage() {
                         <Loader2 className="w-4 h-4 animate-spin" /> 开通中...
                       </>
                     ) : (
-                      '🚀 立即开通 7 天试用'
+                      '服务端验证并创建企业账户'
                     )}
                   </button>
 
@@ -319,22 +216,9 @@ export function TryNowPage() {
             )}
           </div>
 
-          {/* 试用包含什么 */}
-          <div className="mt-8 grid md:grid-cols-2 gap-4">
-            {[
-              '5 AI 数字员工全功能',
-              '11 个 SPA 页面无限访问',
-              '80 家客户清单 + 外呼',
-              '16 份公司文档下载',
-              '监控仪表盘 + 告警',
-              '7 天 1v1 微信群',
-            ].map((f) => (
-              <div key={f} className="flex items-center gap-2 text-sm">
-                <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                <span>{f}</span>
-              </div>
-            ))}
-          </div>
+          <p className="mt-8 text-sm text-muted-foreground">
+            企业注册不等于已获试用或生产权限。付费模型、自动发布、套餐额度均需独立服务端授权。
+          </p>
         </div>
       </section>
     </>
