@@ -86,8 +86,12 @@ def auth_required(
     ctx = AuthContext(tenant_id=tid, permissions=[])
 
     secret = _get_jwt_secret()
+    production = os.environ.get("CLOUDTECH_ENV", "").strip().lower() in {"production", "prod"}
+    if production and not secret:
+        # Missing a signing secret must never silently create an open production API.
+        raise HTTPException(status_code=503, detail="[AUTH-007] production signing secret missing")
     if secret is None:
-        # dev mode — 不强制 JWT
+        # Isolated development mode only. Production must never use this branch.
         return ctx
 
     # prod mode — 必须 JWT
