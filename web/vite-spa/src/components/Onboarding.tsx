@@ -52,7 +52,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       <div className="bg-white rounded-2xl max-w-lg w-full p-8 relative shadow-2xl">
         <button
           onClick={onComplete}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="关闭"
+          className="absolute top-4 right-4 text-gray-600 hover:text-gray-600"
         >
           <X className="w-5 h-5" />
         </button>
@@ -87,7 +87,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           ) : (
             <button
               onClick={onComplete}
-              className="px-4 py-2 text-gray-400 hover:text-gray-600 text-sm"
+              className="px-4 py-2 text-gray-600 hover:text-gray-600 text-sm"
             >
               跳过引导
             </button>

@@ -198,7 +198,7 @@ function CalendarDayButton({
       variant="ghost"
       size="icon"
       data-day={day.date.toLocaleDateString()}
-      aria-label="选择日期" data-selected-single={
+      data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&
         !modifiers.range_end &&
