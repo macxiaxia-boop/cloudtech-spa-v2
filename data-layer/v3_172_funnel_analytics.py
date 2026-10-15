@@ -240,18 +240,7 @@ def auto_review(
         ind_leads = [l for l in leads_filtered if l.get("industry") == ind]
         n = len(ind_leads)
 
-        # 样本不足
-        if n < 5:
-            reviews.append({
-                "industry": ind,
-                "status": "insufficient_data",
-                "decision": "continue_observation",
-                "reason": f"样本数 {n} < 5，不足以决策",
-                "phase45_status": "deprecated" if ind in DEPRECATED_INDUSTRIES else "active",
-            })
-            continue
-
-        # 行业废弃
+        # 行业废弃(优先于 n<5 判定 — deprecated 行业无论样本数都应停投)
         if ind in DEPRECATED_INDUSTRIES:
             reviews.append({
                 "industry": ind,
@@ -263,6 +252,17 @@ def auto_review(
                 ),
                 "phase45_status": "deprecated",
                 "migration_target": "decoration",
+            })
+            continue
+
+        # 样本不足
+        if n < 5:
+            reviews.append({
+                "industry": ind,
+                "status": "insufficient_data",
+                "decision": "continue_observation",
+                "reason": f"样本数 {n} < 5，不足以决策",
+                "phase45_status": "deprecated" if ind in DEPRECATED_INDUSTRIES else "active",
             })
             continue
 
