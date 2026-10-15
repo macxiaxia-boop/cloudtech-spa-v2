@@ -226,12 +226,35 @@ class TestRegistryRealDispatch:
         out = r.dispatch("content.dedupe", {"items": items})
         assert out["deduped"] == 3
 
-    def test_dispatch_export_zip(self):
+    def test_dispatch_export_zip(self, tmp_path):
+        import hashlib
+        import json
+        import zipfile
+
         from workflows.v4.registry import OperationRegistry
-        r = OperationRegistry()
-        out = r.dispatch("export.zip", {"topic_cards": 10, "scripts": 5})
-        assert out["mock"] is True
-        assert "topic_cards" in out["files"]
+
+        requested = {"topic_cards.json": {"count": 10}, "scripts.txt": "5 scripts"}
+        out = OperationRegistry().dispatch(
+            "export.zip", {"files": requested, "output_dir": str(tmp_path)}
+        )
+        assert out["status"] == "completed"
+        assert out["mock"] is False
+        assert out["provider_called"] is False
+        with zipfile.ZipFile(out["package"]) as archive:
+            assert archive.testzip() is None
+            assert set(archive.namelist()) == {*requested, "manifest.json"}
+            assert json.loads(archive.read("topic_cards.json"))["count"] == 10
+            manifest = json.loads(archive.read("manifest.json"))
+            for item in manifest["files"]:
+                assert hashlib.sha256(archive.read(item["name"])).hexdigest() == item["sha256"]
+
+    def test_dispatch_export_zip_requires_explicit_files(self):
+        from workflows.v4.registry import OperationRegistry
+
+        out = OperationRegistry().dispatch("export.zip", {"topic_cards": 10, "scripts": 5})
+        assert out["status"] == "blocked"
+        assert out["error_code"] == "LOCAL_EXPORT_INVALID"
+        assert out["mock"] is False
 
     def test_dispatch_unknown_returns_stub(self):
         from workflows.v4.registry import OperationRegistry
