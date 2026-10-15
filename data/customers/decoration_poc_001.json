@@ -1,0 +1,17 @@
+{
+  "customer_id": "decoration_poc_001",
+  "name": "京城装饰",
+  "industry": "decoration",
+  "scale": "600万",
+  "location": "北京",
+  "pain_points": [
+    "客户决策周期长",
+    "工地管理混乱",
+    "设计转化低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 60,
+    "monthly_cost": 35
+  },
+  "team_size": 7
+}

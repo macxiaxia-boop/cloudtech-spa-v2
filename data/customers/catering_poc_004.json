@@ -1,0 +1,17 @@
+{
+  "customer_id": "catering_poc_004",
+  "name": "深派海鲜",
+  "industry": "catering",
+  "scale": "900万",
+  "location": "深圳",
+  "pain_points": [
+    "获客成本高",
+    "复购率低",
+    "配送时效差"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 90,
+    "monthly_cost": 50
+  },
+  "team_size": 13
+}

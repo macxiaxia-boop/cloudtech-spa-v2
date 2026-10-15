@@ -1,0 +1,17 @@
+{
+  "customer_id": "education_poc_001",
+  "name": "京师培训",
+  "industry": "education",
+  "scale": "600万",
+  "location": "北京",
+  "pain_points": [
+    "招生成本高",
+    "续班率低",
+    "课程研发慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 60,
+    "monthly_cost": 35
+  },
+  "team_size": 7
+}

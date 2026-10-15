@@ -1,0 +1,17 @@
+{
+  "customer_id": "education_poc_006",
+  "name": "江城学苑",
+  "industry": "education",
+  "scale": "1100万",
+  "location": "武汉",
+  "pain_points": [
+    "招生成本高",
+    "续班率低",
+    "课程研发慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 110,
+    "monthly_cost": 60
+  },
+  "team_size": 17
+}

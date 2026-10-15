@@ -1,0 +1,17 @@
+{
+  "customer_id": "retail_poc_002",
+  "name": "沪上零售",
+  "industry": "retail",
+  "scale": "700万",
+  "location": "上海",
+  "pain_points": [
+    "客流低",
+    "复购弱",
+    "库存周转慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 70,
+    "monthly_cost": 40
+  },
+  "team_size": 9
+}

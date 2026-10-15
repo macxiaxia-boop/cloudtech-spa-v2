@@ -1,0 +1,17 @@
+{
+  "customer_id": "medical_poc_001",
+  "name": "沪上医美",
+  "industry": "medical",
+  "scale": "600万",
+  "location": "上海",
+  "pain_points": [
+    "获客难",
+    "客户决策慢",
+    "复购低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 60,
+    "monthly_cost": 35
+  },
+  "team_size": 7
+}

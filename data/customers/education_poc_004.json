@@ -1,0 +1,17 @@
+{
+  "customer_id": "education_poc_004",
+  "name": "鹏城学塾",
+  "industry": "education",
+  "scale": "900万",
+  "location": "深圳",
+  "pain_points": [
+    "招生成本高",
+    "续班率低",
+    "课程研发慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 90,
+    "monthly_cost": 50
+  },
+  "team_size": 13
+}

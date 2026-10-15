@@ -1,0 +1,17 @@
+{
+  "customer_id": "medical_poc_003",
+  "name": "深圳美容",
+  "industry": "medical",
+  "scale": "800万",
+  "location": "深圳",
+  "pain_points": [
+    "获客难",
+    "客户决策慢",
+    "复购低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 80,
+    "monthly_cost": 45
+  },
+  "team_size": 11
+}

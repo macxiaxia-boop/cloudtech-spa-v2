@@ -1,0 +1,17 @@
+{
+  "customer_id": "medical_poc_006",
+  "name": "杭派医美",
+  "industry": "medical",
+  "scale": "1100万",
+  "location": "杭州",
+  "pain_points": [
+    "获客难",
+    "客户决策慢",
+    "复购低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 110,
+    "monthly_cost": 60
+  },
+  "team_size": 17
+}

@@ -1,0 +1,17 @@
+{
+  "customer_id": "medical_poc_005",
+  "name": "蓉城诊所",
+  "industry": "medical",
+  "scale": "1000万",
+  "location": "成都",
+  "pain_points": [
+    "获客难",
+    "客户决策慢",
+    "复购低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 100,
+    "monthly_cost": 55
+  },
+  "team_size": 15
+}

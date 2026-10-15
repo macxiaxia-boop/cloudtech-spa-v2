@@ -1,0 +1,17 @@
+{
+  "customer_id": "catering_poc_003",
+  "name": "粤菜坊",
+  "industry": "catering",
+  "scale": "800万",
+  "location": "广州",
+  "pain_points": [
+    "获客成本高",
+    "复购率低",
+    "配送时效差"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 80,
+    "monthly_cost": 45
+  },
+  "team_size": 11
+}

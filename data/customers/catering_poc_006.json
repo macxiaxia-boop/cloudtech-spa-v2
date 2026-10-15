@@ -1,0 +1,17 @@
+{
+  "customer_id": "catering_poc_006",
+  "name": "蓉香小院",
+  "industry": "catering",
+  "scale": "1100万",
+  "location": "成都",
+  "pain_points": [
+    "获客成本高",
+    "复购率低",
+    "配送时效差"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 110,
+    "monthly_cost": 60
+  },
+  "team_size": 17
+}

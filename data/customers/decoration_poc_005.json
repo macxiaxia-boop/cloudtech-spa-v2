@@ -1,0 +1,17 @@
+{
+  "customer_id": "decoration_poc_005",
+  "name": "蓉城装修",
+  "industry": "decoration",
+  "scale": "1000万",
+  "location": "成都",
+  "pain_points": [
+    "客户决策周期长",
+    "工地管理混乱",
+    "设计转化低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 100,
+    "monthly_cost": 55
+  },
+  "team_size": 15
+}
