@@ -142,7 +142,7 @@ function SidebarProvider({
             "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar",
             className
           )}
-          {...props}
+          aria-label="切换侧边栏" {...props}
         >
           {children}
         </div>
@@ -173,7 +173,7 @@ function Sidebar({
           "flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground",
           className
         )}
-        {...props}
+        aria-label="切换侧边栏" {...props}
       >
         {children}
       </div>
@@ -239,7 +239,7 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className
         )}
-        {...props}
+        aria-label="切换侧边栏" {...props}
       >
         <div
           data-sidebar="sidebar"
@@ -271,7 +271,7 @@ function SidebarTrigger({
         onClick?.(event)
         toggleSidebar()
       }}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     >
       <PanelLeftIcon />
       <span className="sr-only">Toggle Sidebar</span>
@@ -299,7 +299,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
         "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -313,7 +313,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -327,7 +327,7 @@ function SidebarInput({
       data-slot="sidebar-input"
       data-sidebar="input"
       className={cn("h-8 w-full bg-background shadow-none", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -338,7 +338,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-header"
       data-sidebar="header"
       className={cn("flex flex-col gap-2 p-2", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -349,7 +349,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-footer"
       data-sidebar="footer"
       className={cn("flex flex-col gap-2 p-2", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -363,7 +363,7 @@ function SidebarSeparator({
       data-slot="sidebar-separator"
       data-sidebar="separator"
       className={cn("mx-2 w-auto bg-sidebar-border", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -377,7 +377,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
         "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -388,7 +388,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-group"
       data-sidebar="group"
       className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -409,7 +409,7 @@ function SidebarGroupLabel({
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -432,7 +432,7 @@ function SidebarGroupAction({
         "group-data-[collapsible=icon]:hidden",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -446,7 +446,7 @@ function SidebarGroupContent({
       data-slot="sidebar-group-content"
       data-sidebar="group-content"
       className={cn("w-full text-sm", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -457,7 +457,7 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
       data-slot="sidebar-menu"
       data-sidebar="menu"
       className={cn("flex w-full min-w-0 flex-col gap-1", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -468,7 +468,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
       className={cn("group/menu-item relative", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -518,7 +518,7 @@ function SidebarMenuButton({
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 
@@ -572,7 +572,7 @@ function SidebarMenuAction({
           "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground data-[state=open]:opacity-100 md:opacity-0",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -594,7 +594,7 @@ function SidebarMenuBadge({
         "group-data-[collapsible=icon]:hidden",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -616,7 +616,7 @@ function SidebarMenuSkeleton({
       data-slot="sidebar-menu-skeleton"
       data-sidebar="menu-skeleton"
       className={cn("flex h-8 items-center gap-2 rounded-md px-2", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     >
       {showIcon && (
         <Skeleton
@@ -647,7 +647,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
         "group-data-[collapsible=icon]:hidden",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -661,7 +661,7 @@ function SidebarMenuSubItem({
       data-slot="sidebar-menu-sub-item"
       data-sidebar="menu-sub-item"
       className={cn("group/menu-sub-item relative", className)}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
@@ -693,7 +693,7 @@ function SidebarMenuSubButton({
         "group-data-[collapsible=icon]:hidden",
         className
       )}
-      {...props}
+      aria-label="切换侧边栏" {...props}
     />
   )
 }
