@@ -348,7 +348,16 @@ class OperationRegistry:
                                    output_path=inputs.get("output_path", "/tmp/out.mp4"))))
 
             if op_id == "export.zip":
-                return {"package": "mock-zip", "files": list(inputs.keys()), "mock": True}
+                from .local_zip_export import LocalZipExportError, export_zip
+                try:
+                    return export_zip(inputs)
+                except LocalZipExportError as exc:
+                    return {
+                        "status": "blocked",
+                        "error_code": "LOCAL_EXPORT_INVALID",
+                        "reason": str(exc),
+                        "mock": False,
+                    }
 
             return {"op": op_id, "status": "stub", "inputs": inputs, "mock": True}
 
