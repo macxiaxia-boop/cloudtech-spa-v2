@@ -67,7 +67,25 @@ def _verify_jwt(token: str, secret: str, tenant_id: str) -> Optional[dict]:
             return None
         if not (payload.get("user_id") or payload.get("sub")):
             return None
-        if payload.get("exp", 0) < time.time():
+        # NumericDate claims must be finite numbers (bool is not a time).
+        # A correctly signed token is still invalid before its nbf timestamp.
+        import math
+        def valid_date(value):
+            return type(value) in (int, float) and math.isfinite(value)
+
+        now = time.time()
+        expiry = payload.get("exp")
+        if not valid_date(expiry) or expiry <= now:
+            return None
+        not_before = payload.get("nbf")
+        if not_before is not None and (
+            not valid_date(not_before) or not_before > now
+        ):
+            return None
+        issued_at = payload.get("iat")
+        if issued_at is not None and (
+            not valid_date(issued_at) or issued_at > now + 60
+        ):
             return None
         return payload
     except Exception:
