@@ -214,16 +214,16 @@ export function MarketingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm mb-3">
-                📊 你的真实仪表盘
+                📊 经营看板展示
               </span>
               <h2 className="text-3xl font-bold mb-4">监控 / 漏斗 / 财务 / 告警<br />一眼看完</h2>
               <ul className="space-y-3">
                 {[
-                  'MRR 月度经常性收入 + ARR + CAC + LTV',
-                  '80 家客户漏斗（P0/P1/P2/P3）',
-                  'Grafana 5 技术面板 + 7 业务面板',
-                  '13 告警规则 P0-P3 + 飞书实时推送',
-                  '208 测试 PASS 数据守护',
+                  '经营指标示例：MRR / ARR / CAC / LTV',
+                  '客户线索阶段与转化漏斗（示例）',
+                  '技术与业务指标看板（以实际接入为准）',
+                  '告警与通知能力（需完成服务端联调）',
+                  '测试结果以当前 CI 记录为准',
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-foreground">
                     <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
