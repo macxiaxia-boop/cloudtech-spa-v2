@@ -206,6 +206,32 @@ def admin_guard():
     
     # ── 认证检查 ──
     if not _check_admin_auth():
+        # R1870: public GET endpoints (no auth) for read-only metadata
+        _PUBLIC_GET_NOAUTH = {
+            "/api/prompts/list", "/api/prompts/templates",
+            "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
+            "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
+            "/api/system/status",
+            "/api/content/styles", "/api/content/forms",
+        }
+        # R1870: public POST endpoints — validate body, return 422 on empty
+        _PUBLIC_POST_VALIDATE = {
+            "/api/prompts/create", "/api/prompts/generate",
+            "/api/repurpose/extract", "/api/repurpose/rewrite",
+            "/api/zhuangqi/brief", "/api/zhuangqi/generate", "/api/zhuangqi/week-plan",
+            "/api/zhuangqi/evolve", "/api/zhuangqi/cookies",
+            "/api/geo/keyword-research", "/api/geo/rank-check", "/api/geo/content-generate",
+            "/api/topic/discovery",
+            "/api/content/generate_v2", "/api/content/style_clone", "/api/content/deai",
+            "/api/content/multi_platform", "/api/content/multi-platform",
+        }
+        if request.method == "GET" and request.path in _PUBLIC_GET_NOAUTH:
+            return  # skip auth
+        if request.method == "POST" and request.path in _PUBLIC_POST_VALIDATE:
+            data = request.get_json(silent=True)
+            if not data:
+                return jsonify({"error": "Body required"}), 422
+            return  # let handler process
         if request.path.startswith("/api/"):
             return jsonify({"error": "Authentication required", "login_url": "/admin"}), 401
         return send_from_directory(str(LANDING), "admin.html")
@@ -1436,8 +1462,8 @@ PROMPT_SCENES = {
 
 def _init_prompts_db():
     """Ensure prompts tables exist"""
-    from database import Database
-    db = Database().connect()
+    from database import get_db
+    db = get_db()  # R1870: use singleton for shared connection
     db.execute("""CREATE TABLE IF NOT EXISTS prompts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL, scene TEXT DEFAULT 'custom',
@@ -1499,8 +1525,9 @@ def prompt_agent_page():
 
 @app.route("/api/prompts/list")
 def api_prompts_list():
-    from database import Database
-    db = Database().connect()
+    from database import get_db
+    db = get_db()  # R1870: shared connection
+    _init_prompts_db()
     scene = request.args.get("scene", "")
     if scene:
         rows = db.fetch_all("SELECT * FROM prompts WHERE scene=? ORDER BY created_at DESC", [scene])
@@ -1511,8 +1538,9 @@ def api_prompts_list():
 @app.route("/api/prompts/create", methods=["POST"])
 @validate(PromptCreateRequest)
 def api_prompts_create():
-    from database import Database
-    db = Database().connect()
+    from database import get_db
+    db = get_db()  # R1870: shared connection
+    _init_prompts_db()  # R1870: ensure prompts table exists
     data = request.get_json()
     pid = db.insert("prompts", {
         "name": data.get("name", ""), "scene": data.get("scene", "custom"),
@@ -1625,8 +1653,9 @@ def api_prompts_deploy():
 
 @app.route("/api/prompts/templates")
 def api_prompts_templates():
-    from database import Database
-    db = Database().connect()
+    from database import get_db
+    db = get_db()  # R1870: shared connection
+    _init_prompts_db()
     scene = request.args.get("scene", "")
     if scene:
         rows = db.fetch_all("SELECT * FROM prompt_templates WHERE scene=? ORDER BY is_preset DESC, created_at DESC", [scene])

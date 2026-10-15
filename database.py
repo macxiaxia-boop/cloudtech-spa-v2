@@ -118,6 +118,10 @@ class Database:
                                     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
                                 )
                             """)
+                        # NOTE: prompts + prompt_templates tables are owned by
+                        # admin_dashboard.py endpoint bodies (line 1450+) with
+                        # their complete schema. Don't redefine here to avoid
+                        # conflicting "no such column" errors.
                     except Exception:
                         pass
                 return self
