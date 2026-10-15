@@ -41,11 +41,13 @@ jobs:
         run: npm run build
 
       - name: Start preview server
-        working-directory: web/vite-spa
         run: |
-          npm run preview &
-          sleep 5
-          echo "Preview server started on http://localhost:5098"
+          # R1880 round 4: use python3 http.server to serve dist-v45/ directly
+          # (avoids Vite preview routing issues; serves the real production build)
+          cd web/vite-spa
+          nohup python3 -m http.server 5098 --directory dist-v45 > /tmp/preview.log 2>&1 &
+          sleep 3
+          echo "Static server started on http://localhost:5098"
 
       - name: Wait for server
         run: |
