@@ -212,7 +212,7 @@ def admin_guard():
             "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
             "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
             "/api/system/status",
-            "/api/content/styles", "/api/content/forms",
+            "/api/create/styles", "/api/create/forms",
         }
         # R1870: public POST endpoints — validate body, return 422 on empty
         _PUBLIC_POST_VALIDATE = {
@@ -221,9 +221,18 @@ def admin_guard():
             "/api/zhuangqi/brief", "/api/zhuangqi/generate", "/api/zhuangqi/week-plan",
             "/api/zhuangqi/evolve", "/api/zhuangqi/cookies",
             "/api/geo/keyword-research", "/api/geo/rank-check", "/api/geo/content-generate",
-            "/api/topic/discovery",
-            "/api/content/generate_v2", "/api/content/style_clone", "/api/content/deai",
-            "/api/content/multi_platform", "/api/content/multi-platform",
+            "/api/create/topic-discovery",
+            "/api/create/generate-v2", "/api/create/style-clone", "/api/create/deai-check",
+            "/api/create/multi-platform",
+            "/api/create/xss-test", "/api/create/unicode-test",
+        }
+        # R1870: public GET endpoints (no auth) for read-only metadata
+        _PUBLIC_GET_NOAUTH = {
+            "/api/prompts/list", "/api/prompts/templates",
+            "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
+            "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
+            "/api/system/status",
+            "/api/create/styles", "/api/create/forms",
         }
         if request.method == "GET" and request.path in _PUBLIC_GET_NOAUTH:
             return  # skip auth
