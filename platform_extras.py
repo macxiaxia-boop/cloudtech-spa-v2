@@ -12,7 +12,12 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict
 from collections import defaultdict
-from cloudtech_app import DATA_DIR, OUTPUT_DIR
+import os
+from pathlib import Path
+_DATA_ROOT = Path(os.environ.get("CLOUDTECH_DATA_ROOT", str(Path(__file__).parent / "data")))
+_OUTPUT_ROOT = Path(os.environ.get("CLOUDTECH_OUTPUT_ROOT", str(Path(__file__).parent / "outputs")))
+DATA_DIR = _DATA_ROOT
+OUTPUT_DIR = _OUTPUT_ROOT
 
 
 def _safe_parse_fps(fps_str):

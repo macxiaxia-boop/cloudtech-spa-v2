@@ -16,7 +16,12 @@ import subprocess, json, os, random, shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, List, Dict
-from cloudtech_app import DATA_DIR, OUTPUT_DIR
+import os
+from pathlib import Path
+_DATA_ROOT = Path(os.environ.get("CLOUDTECH_DATA_ROOT", str(Path(__file__).parent / "data")))
+_OUTPUT_ROOT = Path(os.environ.get("CLOUDTECH_OUTPUT_ROOT", str(Path(__file__).parent / "outputs")))
+DATA_DIR = _DATA_ROOT
+OUTPUT_DIR = _OUTPUT_ROOT
 
 BASE = Path(__file__).parent
 FFMPEG_OUT = OUTPUT_DIR / "zhuangqi" /"ffmpeg"

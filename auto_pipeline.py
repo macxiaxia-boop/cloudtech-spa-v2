@@ -9,7 +9,12 @@
 用法:
     python auto_pipeline.py --topic "奶油风装修" --city 漳州 --area 100 --budget 15
 """
-from cloudtech_app import DATA_DIR, OUTPUT_DIR
+import os
+from pathlib import Path
+_DATA_ROOT = Path(os.environ.get("CLOUDTECH_DATA_ROOT", str(Path(__file__).parent / "data")))
+_OUTPUT_ROOT = Path(os.environ.get("CLOUDTECH_OUTPUT_ROOT", str(Path(__file__).parent / "outputs")))
+DATA_DIR = _DATA_ROOT
+OUTPUT_DIR = _OUTPUT_ROOT
 
 import json, os, time
 import app_logger as _al

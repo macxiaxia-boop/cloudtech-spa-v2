@@ -1,0 +1,15 @@
+{
+  "pipeline_id": "pipe-20261015143243",
+  "timestamp": "2026-10-15T14:32:43",
+  "dry_run": true,
+  "input_summary": {
+    "topic": "测试视频",
+    "city": "厦门",
+    "style": null,
+    "area": 100
+  },
+  "stages_completed": [
+    "stage_1_knowledge"
+  ],
+  "knowledge_notes": "主题 '测试视频' 在 '厦门' 使用 'None' 风格。面积 100 平，预算 15 万。模式: 模拟。"
+}

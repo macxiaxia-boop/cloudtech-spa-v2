@@ -16,7 +16,12 @@
 
 架构: 统一发布接口 → 平台适配器 → API调用/模拟
 """
-from cloudtech_app import DATA_DIR, OUTPUT_DIR
+import os
+from pathlib import Path
+_DATA_ROOT = Path(os.environ.get("CLOUDTECH_DATA_ROOT", str(Path(__file__).parent / "data")))
+_OUTPUT_ROOT = Path(os.environ.get("CLOUDTECH_OUTPUT_ROOT", str(Path(__file__).parent / "outputs")))
+DATA_DIR = _DATA_ROOT
+OUTPUT_DIR = _OUTPUT_ROOT
 
 import json, os, time
 from pathlib import Path
