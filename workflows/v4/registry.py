@@ -202,14 +202,51 @@ class OperationRegistry:
                 return {"normalized": f"{p.scheme}://{p.netloc}{p.path}", "host": p.netloc, "path": p.path}
 
             if op_id == "platform.permission_check":
-                from adapters import platform as Aplat
-                r = Aplat.permission_gate.check(inputs["url"])
-                return {"status": getattr(r, "status", "unknown"), "reason": getattr(r, "reason", "")}
+                # A URL allowlist is a syntactic/policy preflight, NOT proof of
+                # OAuth authorization or a connected content API.
+                from adapters.platform.permission_gate import check
+                if not isinstance(inputs.get("url"), str):
+                    return {"status": "blocked", "error_code": "URL_REQUIRED", "mock": False}
+                gate = check(inputs["url"])
+                return {
+                    "status": "blocked",
+                    "error_code": (
+                        "PLATFORM_CONNECTOR_NOT_CONNECTED" if gate["allowed"]
+                        else "PLATFORM_URL_POLICY_DENIED"
+                    ),
+                    "url_policy_passed": bool(gate["allowed"]),
+                    "provider_connected": False,
+                    "authenticated": False,
+                    "platform": gate["source_platform"],
+                    "reason": gate["reason"],
+                    "mock": False,
+                }
 
             if op_id == "platform.homepage_parse":
-                from adapters import platform as Aplat
-                works = Aplat.homepage_parser.parse_homepage(inputs["url"], limit=inputs.get("limit", 30))
-                return {"total": len(works), "items": _to_dict(works[:30])}
+                from adapters.platform.homepage_parser import parse_homepage
+                if not isinstance(inputs.get("url"), str):
+                    return {"status": "blocked", "error_code": "URL_REQUIRED", "mock": False}
+                try:
+                    parsed = parse_homepage(inputs["url"], limit=inputs.get("limit", 30))
+                except RuntimeError as exc:
+                    if "PLATFORM-MOCK-403" not in str(exc):
+                        raise
+                    return {
+                        "status": "blocked",
+                        "error_code": "PLATFORM_CONNECTOR_NOT_CONNECTED",
+                        "reason": "No authorized public homepage API; no creator works invented",
+                        "mock": False,
+                    }
+                except PermissionError:
+                    return {"status": "blocked", "error_code": "PLATFORM_URL_POLICY_DENIED", "mock": False}
+                # Only explicitly enabled development/test mode may return mock
+                # works. Keep full provenance so consumers cannot mistake them.
+                return {
+                    **parsed,
+                    "status": "mock_only",
+                    "total": len(parsed["items"]),
+                    "mock": True,
+                }
 
             if op_id == "content.dedupe":
                 items = inputs.get("items", [])
