@@ -1,0 +1,35 @@
+{
+  "pipeline_id": "pipe-20261015143451",
+  "ok": true,
+  "started_at": "2026-10-15T14:34:51",
+  "finished_at": "2026-10-15T14:34:51",
+  "total_stages": 1,
+  "success_stages": 1,
+  "failed_stages": 0,
+  "dry_run": true,
+  "input": {
+    "topic": "测试!@#$%^&*()",
+    "city": "漳州",
+    "area": 100,
+    "budget": 15
+  },
+  "stages": [
+    {
+      "ok": true,
+      "knowledge_loaded": 4,
+      "city": "漳州",
+      "style": "现代简约",
+      "has_community_data": false,
+      "local_issues": [
+        "回南天",
+        "台风",
+        "高温"
+      ],
+      "elapsed": 0.0,
+      "stage": "stage_1_knowledge",
+      "stage_name": "📚 知识注入"
+    }
+  ],
+  "output": {},
+  "summary": "🚀 自动化流水线 #pipe-20261015143451\n时间: 2026-10-15T14:34:51\n模式: 模拟\n\n## 产出清单\n\n## 状态\n✅ 📚 知识注入 (0.0s)"
+}
