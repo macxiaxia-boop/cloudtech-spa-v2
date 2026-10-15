@@ -109,7 +109,7 @@ export default function V4WorkPathsDemo() {
           </div>
         )}
 
-        <div className="text-xs text-gray-400 mt-8">
+        <div className="text-xs text-gray-600 mt-8">
           <div>6 旗舰路径: WP-BLOGGER-RESEARCH / WP-VIDEO-TRANSCRIBE / WP-ARTICLE-REWRITE / WP-RENOVATION-FULL / WP-GROWTH-VIDEO / WP-PRODUCT-MARKETING</div>
           <div>228 mock 测试 PASSED · Production Ready = 0 (红线 #60)</div>
         </div>

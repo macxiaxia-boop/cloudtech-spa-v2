@@ -83,7 +83,7 @@ export function Header() {
                 }`}
               >
                 {section.title}
-                <ChevronDown className="w-3 h-3 text-gray-400" />
+                <ChevronDown className="w-3 h-3 text-gray-600" />
               </button>
               {openSection === section.title && (
                 <div className="absolute top-full left-0 mt-0 w-56 bg-card border border-border rounded-md shadow-lg py-2">

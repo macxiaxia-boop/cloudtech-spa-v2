@@ -29,7 +29,7 @@ export function FilterBar({
       <div className="flex flex-wrap items-center gap-3">
         {/* 搜索 */}
         <div className="flex-1 min-w-[200px] relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
           <input
             type="text"
             placeholder={searchPlaceholder}
@@ -42,7 +42,7 @@ export function FilterBar({
         {/* 筛选 */}
         {filters.length > 0 && (
           <div className="flex items-center gap-2 text-sm">
-            <Filter className="w-4 h-4 text-gray-400" />
+            <Filter className="w-4 h-4 text-gray-600" />
             {filters.map((f) => (
               <select
                 key={f.label}

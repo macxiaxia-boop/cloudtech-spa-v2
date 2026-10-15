@@ -26,7 +26,7 @@ export function EmptyState({ icon, title, desc, cta, illustration = 'rocket' }: 
       <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
       <p className="text-gray-500 mb-6 max-w-md">{desc}</p>
       {cta && <div>{cta}</div>}
-      <p className="text-xs text-gray-400 mt-6 inline-flex items-center gap-1">
+      <p className="text-xs text-gray-600 mt-6 inline-flex items-center gap-1">
         <Sparkles className="w-3 h-3" /> OPC 模式：AI 自动跑出首批数据
       </p>
     </div>

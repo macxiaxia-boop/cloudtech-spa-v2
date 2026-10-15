@@ -107,7 +107,7 @@ export function AIEmployeeDashboard() {
                   <span className={`px-2 py-0.5 text-xs rounded ${STATUS_BADGE[a.status]}`}>
                     {STATUS_LABEL[a.status]}
                   </span>
-                  <span className="text-xs text-gray-400 w-20 text-right">{a.time}</span>
+                  <span className="text-xs text-gray-600 w-20 text-right">{a.time}</span>
                 </div>
               );
             })}

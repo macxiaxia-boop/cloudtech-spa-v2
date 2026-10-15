@@ -65,7 +65,7 @@ export function SettingsPage() {
           {saved ? <><Check className="w-4 h-4" /> 已保存（Demo）</> : '保存修改'}
         </button>
 
-        <p className="text-xs text-gray-400 mt-4 text-center">
+        <p className="text-xs text-gray-600 mt-4 text-center">
           注：实际修改接口待用户拍板后接入（红 #22）
         </p>
       </div>

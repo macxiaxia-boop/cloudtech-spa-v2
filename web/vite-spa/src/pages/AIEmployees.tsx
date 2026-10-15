@@ -457,7 +457,7 @@ export function AIEmployeesPage() {
           <div className="bg-card p-4 rounded-lg border border-gray-200 mb-6">
             <div className="flex flex-col md:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
                 <input
                   type="text"
                   value={search}

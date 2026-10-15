@@ -185,14 +185,14 @@ export function ContentSOPPage() {
                   <div className="p-3 bg-card rounded border border-gray-200">
                     <p className="text-xs text-gray-500">压缩比例</p>
                     <p className="text-2xl font-bold text-orange-600">{t.compression}</p>
-                    <p className="text-xs text-gray-400 mt-1">2.0 vs 1.0</p>
+                    <p className="text-xs text-gray-600 mt-1">2.0 vs 1.0</p>
                   </div>
                   <div className="p-3 bg-card rounded border border-gray-200">
                     <p className="text-xs text-gray-500">派最优</p>
                     <p className={`text-2xl font-bold ${t.winner === '1.0' ? 'text-yellow-600' : 'text-green-600'}`}>
                       {t.winner}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">主题决定</p>
+                    <p className="text-xs text-gray-600 mt-1">主题决定</p>
                   </div>
                 </div>
 
@@ -238,7 +238,7 @@ export function ContentSOPPage() {
                     <div key={opt.type} className="p-3 bg-gray-50 rounded border border-gray-200">
                       <p className="text-sm font-bold text-indigo-700 mb-1">{opt.type}</p>
                       <p className="text-sm text-gray-600 mb-1">{opt.next}</p>
-                      <p className="text-xs text-gray-400">实证: {opt.example}</p>
+                      <p className="text-xs text-gray-600">实证: {opt.example}</p>
                     </div>
                   ))}
                 </div>

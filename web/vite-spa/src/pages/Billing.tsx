@@ -108,7 +108,7 @@ export function BillingPage() {
                   }}
                   className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-md ${
                     isCurrent
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
                       : 'bg-brand-500 text-white hover:bg-brand-600'
                   }`}
                 >

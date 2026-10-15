@@ -221,7 +221,7 @@ export function MarketingPage() {
               );
             })}
           </div>
-          <p className="text-center text-xs text-gray-400 mt-6">
+          <p className="text-center text-xs text-gray-600 mt-6">
             注：教培/餐饮/零售行业已 P3-BA 撤回（2026-09-11），永久 deprecated
           </p>
         </div>

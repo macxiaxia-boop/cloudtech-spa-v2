@@ -168,7 +168,7 @@ export function IndustryMedicalPage() {
               <div key={m.label} className="bg-card p-6 rounded-lg border border-gray-200 text-center">
                 <p className="text-sm text-gray-500 mb-2">{m.label}</p>
                 <p className={`text-4xl font-bold mb-1 ${m.color}`}>{m.value}</p>
-                <p className="text-xs text-gray-400">{m.vs}</p>
+                <p className="text-xs text-gray-600">{m.vs}</p>
               </div>
             ))}
           </div>

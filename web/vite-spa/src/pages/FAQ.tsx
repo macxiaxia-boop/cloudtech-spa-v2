@@ -173,7 +173,7 @@ export function FAQPage() {
       <section className="py-8 bg-card border-b border-gray-200">
         <div className="max-w-page mx-auto px-6">
           <div className="max-w-2xl mx-auto relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
             <input
               type="text"
               placeholder="搜问题或关键词..."
@@ -266,7 +266,7 @@ function FAQItem({ f, open, onToggle }: { f: FAQ; open: boolean; onToggle: () =>
         className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-muted"
       >
         <span className="font-medium flex-1">{f.q}</span>
-        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-5 h-5 text-gray-600 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div className="px-6 pb-4 text-foreground border-t border-gray-100 pt-3">
