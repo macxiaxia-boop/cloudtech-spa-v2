@@ -90,9 +90,23 @@ jobs:
       - name: Check bundle size
         working-directory: web/vite-spa
         run: |
-          main_size=$(stat -c %s dist-v45/assets/index-*.js | head -1)
-          main_gzip_size=$(gzip -c dist-v45/assets/index-*.js | wc -c)
-          editor_size=$(stat -c %s dist-v45/assets/WorkflowEditor-*.js 2>/dev/null || echo 0)
+          # R1880 round 3: use wc -c (POSIX) instead of stat -c (Linux-only)
+          # to avoid exit 127 when glob has no match
+          shopt -s nullglob 2>/dev/null || true
+          main_files=(dist-v45/assets/index-*.js)
+          editor_files=(dist-v45/assets/WorkflowEditor-*.js)
+          if [ ${#main_files[@]} -eq 0 ]; then
+            echo "::error::No main bundle found (build may have failed)"
+            ls -la dist-v45/ 2>/dev/null || echo "dist-v45/ not created"
+            exit 1
+          fi
+          main_size=$(wc -c < "${main_files[0]}" | tr -d ' ')
+          main_gzip_size=$(gzip -c "${main_files[0]}" | wc -c | tr -d ' ')
+          if [ ${#editor_files[@]} -gt 0 ]; then
+            editor_size=$(wc -c < "${editor_files[0]}" | tr -d ' ')
+          else
+            editor_size=0
+          fi
           echo "Main bundle: $main_size bytes ($main_gzip_size gzipped)"
           echo "Editor lazy chunk: $editor_size bytes"
 
