@@ -1,6 +1,8 @@
 // Onboarding 触发器 · 首次访问自动弹 5 步引导
-import { useEffect, useState } from 'react';
-import { Onboarding } from './Onboarding';
+import { lazy, Suspense, useEffect, useState } from 'react';
+
+// Only load the wizard chunk after the welcome timer actually fires.
+const Onboarding = lazy(() => import('./Onboarding').then(m => ({ default: m.Onboarding })));
 
 const STORAGE_KEY = 'cloudtech_onboarding_done';
 
@@ -26,5 +28,5 @@ export function OnboardingTrigger() {
   };
 
   if (!show) return null;
-  return <Onboarding onComplete={handleClose} />;
+  return <Suspense fallback={null}><Onboarding onComplete={handleClose} /></Suspense>;
 }
