@@ -92,33 +92,31 @@ def _amount_to_plan(amount: float) -> str:
 # 核心 API：创建订单
 # ═══════════════════════════════════════════════════════════
 
-def create_order(amount, currency="CNY", provider="stripe",
-                 customer_id=None, description=None) -> dict:
+def create_order(customer_id, plan_id="starter", method="stripe",
+                 currency="CNY", description=None) -> dict:
     """
     创建支付订单 — 路由到 Stripe / WeChat Pay / Mock。
 
+    R1870: signature corrected to (customer_id, plan_id, method) matching
+    all 4 callers (admin_dashboard, test_integration, etc).
+    Old sig (amount, currency, provider, customer_id) was wrong — first param
+    is customer_id, not amount.
+
     Args:
-        amount:      订单金额（元），如 99.00
-        currency:    货币代码 (CNY/USD/EUR)，默认 CNY
-        provider:    支付提供商 "stripe" | "wechat" | "mock"
         customer_id: 客户/租户标识
-        description: 订单描述/产品名称
+        plan_id:      套餐 ID (starter|pro|enterprise)
+        method:       支付方式 (stripe|wechat|mock)
+        currency:     货币代码 (CNY/USD/EUR)
+        description:  订单描述/产品名称
 
     Returns:
-        {
-            "order_id": "ORD-20260807...",
-            "provider": "stripe",
-            "status": "pending",
-            "amount": 99.0,
-            "currency": "CNY",
-            "checkout_url": "https://...",     # Stripe时
-            "code_url": "weixin://...",         # WeChat时
-            "qr_data": "CLOUDTECH|...",         # Mock时
-            "created_at": "2026-08-07T14:30:00",
-        }
+        dict with order_id, amount (from plan), status, etc.
     """
+    PLAN_AMOUNTS = {"starter": 99.0, "pro": 999.0, "enterprise": 1999.0,
+                    "free": 0.0, "trial": 0.0}
     order_id = _generate_order_id()
-    amount_f = float(amount)
+    amount_f = PLAN_AMOUNTS.get(plan_id, 99.0)
+    provider = method  # backward-compat alias for existing internal code
 
     order = {
         "order_id": order_id,
@@ -127,9 +125,9 @@ def create_order(amount, currency="CNY", provider="stripe",
         "tenant_id": customer_id,               # 向后兼容别名
         "amount": amount_f,
         "currency": currency.upper(),
-        "provider": provider,
-        "payment_method": provider,             # 向后兼容别名
-        "description": description or "",
+        "provider": method,
+        "payment_method": method,             # 向后兼容别名
+        "description": description or plan_id,
         "status": "pending",
         "created_at": datetime.now().isoformat(),
         "updated_at": datetime.now().isoformat(),
@@ -196,7 +194,7 @@ def create_order(amount, currency="CNY", provider="stripe",
         order["qr_data"] = f"CLOUDTECH|{order_id}|{amount_f}|{description or 'Subscription'}"
 
     _save_order(order)
-    return order
+    return {"ok": True, "order": order}
 
 
 # ═══════════════════════════════════════════════════════════
