@@ -136,9 +136,9 @@ function PageLoading() {
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { OnboardingTrigger } from './components/OnboardingTrigger';
-import { BasicLayout } from './components/AppShell/BasicLayout';
+const BasicLayout = lazy(() => import('./components/AppShell/BasicLayout').then(m => ({ default: m.BasicLayout })));
 
-import { LoginPage } from './pages/Login';
+const LoginPage = lazy(() => import('./pages/Login').then(m => ({ default: m.LoginPage })));
 
 
 
