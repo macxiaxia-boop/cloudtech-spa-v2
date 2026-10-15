@@ -932,7 +932,8 @@ def api_login():
     password = data.get("password", "")
 
     if not email or not password:
-        return jsonify({"error": "邮箱和密码为必填项"}), 400
+        # R1870: empty/missing fields → 422 (validation), 401 reserved for wrong creds
+        return jsonify({"error": "邮箱和密码为必填项"}), 422
 
     try:
         from auth import AuthManager
