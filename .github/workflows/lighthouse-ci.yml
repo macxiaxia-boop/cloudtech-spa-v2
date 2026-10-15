@@ -75,7 +75,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24  # R1880 round 3c: upgrade from 20 (deprecated)
           cache: 'npm'
           cache-dependency-path: web/vite-spa/package-lock.json
 
@@ -85,7 +85,16 @@ jobs:
 
       - name: Build
         working-directory: web/vite-spa
-        run: npm run build
+        run: npm run build 2>&1 | tail -50  # R1880 round 3c: show build output if it fails
+
+      - name: Verify build output
+        working-directory: web/vite-spa
+        run: |
+          if [ ! -d dist-v45 ]; then
+            echo "::error::dist-v45/ not created — build silently failed"
+            exit 1
+          fi
+          ls -la dist-v45/assets/ 2>/dev/null | head -20 || echo "no assets/ subdir"
 
       - name: Check bundle size
         working-directory: web/vite-spa
