@@ -62,13 +62,19 @@ jobs:
 
       - name: Wait for server
         run: |
+          ready=0
           for i in {1..30}; do
-            if curl -s http://localhost:5098 > /dev/null; then
-              echo "Server ready"
+            if curl --fail --silent --show-error http://localhost:5098/ > /dev/null; then
+              echo "Preview server ready on attempt $i"
+              ready=1
               break
             fi
             sleep 1
           done
+          if [ "$ready" -ne 1 ]; then
+            echo "::error::Preview server did not become HTTP-ready within 30 attempts"
+            exit 1
+          fi
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v11
