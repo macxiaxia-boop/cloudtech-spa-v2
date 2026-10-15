@@ -8,10 +8,10 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from pathlib import Path
 import tempfile
 import uuid
 import zipfile
+from pathlib import Path
 
 MAX_FILES = 100
 MAX_TOTAL_BYTES = 16 * 1024 * 1024
@@ -99,8 +99,10 @@ def export_zip(inputs: dict) -> dict:
     ]
     manifest = (json.dumps({"schema": "cloudtech.local-zip.v1", "files": manifest_files},
                            ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    created = False
     try:
         with os.fdopen(os.open(str(result_path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb") as target:
+            created = True
             with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED,
                                  compresslevel=6, allowZip64=False) as archive:
                 for name, body in sorted(members):
@@ -111,7 +113,8 @@ def export_zip(inputs: dict) -> dict:
             target.flush()
             os.fsync(target.fileno())
     except Exception:
-        result_path.unlink(missing_ok=True)
+        if created:
+            result_path.unlink(missing_ok=True)
         raise
     archive_sha256 = hashlib.sha256(result_path.read_bytes()).hexdigest()
     return {"status": "completed", "mock": False, "package": str(result_path),
