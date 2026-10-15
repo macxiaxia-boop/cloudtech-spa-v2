@@ -41,13 +41,14 @@ jobs:
         run: npm run build
 
       - name: Start preview server
+        working-directory: web/vite-spa
         run: |
-          # R1880 round 4: use python3 http.server to serve dist-v45/ directly
-          # (avoids Vite preview routing issues; serves the real production build)
-          cd web/vite-spa
-          nohup python3 -m http.server 5098 --directory dist-v45 > /tmp/preview.log 2>&1 &
-          sleep 3
-          echo "Static server started on http://localhost:5098"
+          # R1880 round 4: use npx http-server with serve.json for SPA fallback
+          # (npm run preview routing failed; python3 -m http.server doesn't support
+          # rewrites → /login returned 404 → LHCI 'collect' failed)
+          nohup npx --yes http-server dist-v45 -p 5098 --proxy http://localhost:5098? -s > /tmp/preview.log 2>&1 &
+          sleep 10
+          echo "Static server with SPA fallback started on http://localhost:5098"
 
       - name: Wait for server
         run: |
