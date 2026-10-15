@@ -1,0 +1,17 @@
+{
+  "customer_id": "catering_poc_005",
+  "name": "杭帮菜",
+  "industry": "catering",
+  "scale": "1000万",
+  "location": "杭州",
+  "pain_points": [
+    "获客成本高",
+    "复购率低",
+    "配送时效差"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 100,
+    "monthly_cost": 55
+  },
+  "team_size": 15
+}

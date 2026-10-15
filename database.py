@@ -84,6 +84,46 @@ class Database:
                             pass
                     self.conn.execute("PRAGMA cache_size=-8000")  # 8MB cache
                     self.conn.execute("PRAGMA mmap_size=268435456")  # 256MB mmap
+                    # R1870 idempotent migration: ensure legacy DBs have tenants.slug + users.password_salt + workflow_runs
+                    try:
+                        existing_tables = {row[0] for row in self.conn.execute(
+                            "SELECT name FROM sqlite_master WHERE type='table'"
+                        ).fetchall()}
+                        if "tenants" in existing_tables:
+                            existing_cols = {row[1] for row in self.conn.execute(
+                                "PRAGMA table_info(tenants)"
+                            ).fetchall()}
+                            if "slug" not in existing_cols:
+                                self.conn.execute("ALTER TABLE tenants ADD COLUMN slug TEXT")
+                                self.conn.execute(
+                                    "CREATE UNIQUE INDEX IF NOT EXISTS idx_tenants_slug "
+                                    "ON tenants(slug) WHERE slug IS NOT NULL"
+                                )
+                        if "users" in existing_tables:
+                            users_cols = {row[1] for row in self.conn.execute(
+                                "PRAGMA table_info(users)"
+                            ).fetchall()}
+                            if "password_salt" not in users_cols:
+                                self.conn.execute("ALTER TABLE users ADD COLUMN password_salt TEXT DEFAULT ''")
+                        if "workflow_runs" not in existing_tables:
+                            self.conn.execute("""
+                                CREATE TABLE IF NOT EXISTS workflow_runs (
+                                    id TEXT PRIMARY KEY,
+                                    tenant_id TEXT REFERENCES tenants(id),
+                                    workflow_name TEXT NOT NULL,
+                                    state TEXT NOT NULL DEFAULT 'pending',
+                                    inputs TEXT DEFAULT '{}',
+                                    outputs TEXT DEFAULT '{}',
+                                    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                                    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                                )
+                            """)
+                        # NOTE: prompts + prompt_templates tables are owned by
+                        # admin_dashboard.py endpoint bodies (line 1450+) with
+                        # their complete schema. Don't redefine here to avoid
+                        # conflicting "no such column" errors.
+                    except Exception:
+                        pass
                 return self
             except sqlite3.OperationalError as e:
                 last_err = e
@@ -169,14 +209,17 @@ class Database:
             "sql": """
                 -- Tenants
                 CREATE TABLE IF NOT EXISTS tenants (
-                    id TEXT PRIMARY KEY,
+                    id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                     name TEXT NOT NULL,
-                    email TEXT NOT NULL,
+                    slug TEXT UNIQUE,
+                    email TEXT DEFAULT '',
                     company TEXT DEFAULT '',
+                    owner_user_id TEXT,
+                    settings_json TEXT DEFAULT '{}',
                     plan TEXT DEFAULT 'starter',
                     status TEXT DEFAULT 'active',
-                    api_key TEXT UNIQUE NOT NULL,
-                    api_key_hash TEXT NOT NULL,
+                    api_key TEXT UNIQUE NOT NULL DEFAULT (lower(hex(randomblob(16)))),
+                    api_key_hash TEXT NOT NULL DEFAULT '',
                     created_at TEXT NOT NULL DEFAULT (datetime('now')),
                     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
                     deactivated_at TEXT
@@ -306,7 +349,8 @@ class Database:
                     id TEXT PRIMARY KEY,
                     tenant_id TEXT REFERENCES tenants(id),
                     email TEXT NOT NULL UNIQUE,
-                    password_hash TEXT NOT NULL,
+                    password_hash TEXT NOT NULL DEFAULT '',
+                    password_salt TEXT DEFAULT '',
                     name TEXT NOT NULL,
                     role TEXT DEFAULT 'user',
                     is_active INTEGER DEFAULT 1,

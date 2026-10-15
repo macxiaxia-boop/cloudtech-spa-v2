@@ -1,0 +1,17 @@
+{
+  "customer_id": "retail_poc_001",
+  "name": "羊城百货",
+  "industry": "retail",
+  "scale": "600万",
+  "location": "广州",
+  "pain_points": [
+    "客流低",
+    "复购弱",
+    "库存周转慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 60,
+    "monthly_cost": 35
+  },
+  "team_size": 7
+}

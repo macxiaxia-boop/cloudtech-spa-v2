@@ -11,7 +11,12 @@
 4. 转场特效 — 淡入淡出/滑动/缩放
 5. 背景音乐 — 自动配乐+音量调节
 """
-from cloudtech_app import DATA_DIR, OUTPUT_DIR
+import os
+from pathlib import Path
+_DATA_ROOT = Path(os.environ.get("CLOUDTECH_DATA_ROOT", str(Path(__file__).parent / "data")))
+_OUTPUT_ROOT = Path(os.environ.get("CLOUDTECH_OUTPUT_ROOT", str(Path(__file__).parent / "outputs")))
+DATA_DIR = _DATA_ROOT
+OUTPUT_DIR = _OUTPUT_ROOT
 
 import json, os, random, hashlib
 from pathlib import Path
@@ -714,7 +719,7 @@ def create_text_clip(
 ) -> "ImageClip":
     """创建文字片段（带背景渐变）"""
     if not _moviepy_available:
-        return None
+        return {"ok": False, "error": "moviepy not available", "fallback": "text"}
 
     sty = SUBTITLE_STYLES.get(style, SUBTITLE_STYLES["clean_white"])
     font_size = sty["font_size"]

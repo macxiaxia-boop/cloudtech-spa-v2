@@ -1,0 +1,17 @@
+{
+  "customer_id": "retail_poc_004",
+  "name": "鹏城零售",
+  "industry": "retail",
+  "scale": "900万",
+  "location": "深圳",
+  "pain_points": [
+    "客流低",
+    "复购弱",
+    "库存周转慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 90,
+    "monthly_cost": 50
+  },
+  "team_size": 13
+}

@@ -1,0 +1,17 @@
+{
+  "customer_id": "decoration_poc_002",
+  "name": "沪上家装",
+  "industry": "decoration",
+  "scale": "700万",
+  "location": "上海",
+  "pain_points": [
+    "客户决策周期长",
+    "工地管理混乱",
+    "设计转化低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 70,
+    "monthly_cost": 40
+  },
+  "team_size": 9
+}

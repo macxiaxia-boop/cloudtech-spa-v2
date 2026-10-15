@@ -1,0 +1,17 @@
+{
+  "customer_id": "catering_poc_001",
+  "name": "上海美食王",
+  "industry": "catering",
+  "scale": "600万",
+  "location": "上海",
+  "pain_points": [
+    "获客成本高",
+    "复购率低",
+    "配送时效差"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 60,
+    "monthly_cost": 35
+  },
+  "team_size": 7
+}

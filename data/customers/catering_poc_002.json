@@ -1,0 +1,17 @@
+{
+  "customer_id": "catering_poc_002",
+  "name": "京味小厨",
+  "industry": "catering",
+  "scale": "700万",
+  "location": "北京",
+  "pain_points": [
+    "获客成本高",
+    "复购率低",
+    "配送时效差"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 70,
+    "monthly_cost": 40
+  },
+  "team_size": 9
+}

@@ -9,7 +9,12 @@
 - 爆款复刻: 提取爆款结构→生成同款模板→套用新内容
 - 元素替换: 背景替换/产品替换/文字替换/Logo替换
 """
-from cloudtech_app import DATA_DIR, OUTPUT_DIR
+import os
+from pathlib import Path
+_DATA_ROOT = Path(os.environ.get("CLOUDTECH_DATA_ROOT", str(Path(__file__).parent / "data")))
+_OUTPUT_ROOT = Path(os.environ.get("CLOUDTECH_OUTPUT_ROOT", str(Path(__file__).parent / "outputs")))
+DATA_DIR = _DATA_ROOT
+OUTPUT_DIR = _OUTPUT_ROOT
 
 import json, os, re, subprocess
 from pathlib import Path

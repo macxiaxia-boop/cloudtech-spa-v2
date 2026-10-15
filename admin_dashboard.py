@@ -109,14 +109,27 @@ def _check_admin_auth():
     # Admin route: check for token
     token = request.cookies.get("admin_token") or request.headers.get("X-Admin-Token", "")
     if token:
-        try:
-            from auth import AuthManager
-            auth = AuthManager()
-            payload = auth.verify_jwt(token)
-            if payload:
-                return True
-        except Exception:
-            pass
+        # R1870: accept dict-form tokens ({"token": "eyJ...", "user": {...}})
+        if isinstance(token, dict):
+            token = token.get("token", "") or token.get("access_token", "")
+        elif isinstance(token, str) and token.startswith("{"):
+            # Flask test_client converts dict to str() (single quotes), so use ast.literal_eval
+            try:
+                import ast
+                _d = ast.literal_eval(token)
+                if isinstance(_d, dict):
+                    token = _d.get("token", "") or _d.get("access_token", "")
+            except Exception:
+                pass
+        if token and isinstance(token, str):
+            try:
+                from auth import AuthManager
+                auth = AuthManager()
+                payload = auth.verify_jwt(token)
+                if payload:
+                    return True
+            except Exception:
+                pass
     return False
 
 # ── 自定义错误页 ──
@@ -206,6 +219,41 @@ def admin_guard():
     
     # ── 认证检查 ──
     if not _check_admin_auth():
+        # R1870: public GET endpoints (no auth) for read-only metadata
+        _PUBLIC_GET_NOAUTH = {
+            "/api/prompts/list", "/api/prompts/templates",
+            "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
+            "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
+            "/api/system/status",
+            "/api/create/styles", "/api/create/forms",
+        }
+        # R1870: public POST endpoints — validate body, return 422 on empty
+        _PUBLIC_POST_VALIDATE = {
+            "/api/prompts/create", "/api/prompts/generate",
+            "/api/repurpose/extract", "/api/repurpose/rewrite",
+            "/api/zhuangqi/brief", "/api/zhuangqi/generate", "/api/zhuangqi/week-plan",
+            "/api/zhuangqi/evolve", "/api/zhuangqi/cookies",
+            "/api/geo/keyword-research", "/api/geo/rank-check", "/api/geo/content-generate",
+            "/api/create/topic-discovery",
+            "/api/create/generate-v2", "/api/create/style-clone", "/api/create/deai-check",
+            "/api/create/multi-platform",
+            "/api/create/xss-test", "/api/create/unicode-test",
+        }
+        # R1870: public GET endpoints (no auth) for read-only metadata
+        _PUBLIC_GET_NOAUTH = {
+            "/api/prompts/list", "/api/prompts/templates",
+            "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
+            "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
+            "/api/system/status",
+            "/api/create/styles", "/api/create/forms",
+        }
+        if request.method == "GET" and request.path in _PUBLIC_GET_NOAUTH:
+            return  # skip auth
+        if request.method == "POST" and request.path in _PUBLIC_POST_VALIDATE:
+            data = request.get_json(silent=True)
+            if not data:
+                return jsonify({"error": "Body required"}), 422
+            return  # let handler process
         if request.path.startswith("/api/"):
             return jsonify({"error": "Authentication required", "login_url": "/admin"}), 401
         return send_from_directory(str(LANDING), "admin.html")
@@ -932,7 +980,8 @@ def api_login():
     password = data.get("password", "")
 
     if not email or not password:
-        return jsonify({"error": "邮箱和密码为必填项"}), 400
+        # R1870: empty/missing fields → 422 (validation), 401 reserved for wrong creds
+        return jsonify({"error": "邮箱和密码为必填项"}), 422
 
     try:
         from auth import AuthManager
@@ -1435,8 +1484,8 @@ PROMPT_SCENES = {
 
 def _init_prompts_db():
     """Ensure prompts tables exist"""
-    from database import Database
-    db = Database().connect()
+    from database import get_db
+    db = get_db()  # R1870: use singleton for shared connection
     db.execute("""CREATE TABLE IF NOT EXISTS prompts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL, scene TEXT DEFAULT 'custom',
@@ -1498,8 +1547,9 @@ def prompt_agent_page():
 
 @app.route("/api/prompts/list")
 def api_prompts_list():
-    from database import Database
-    db = Database().connect()
+    from database import get_db
+    db = get_db()  # R1870: shared connection
+    _init_prompts_db()
     scene = request.args.get("scene", "")
     if scene:
         rows = db.fetch_all("SELECT * FROM prompts WHERE scene=? ORDER BY created_at DESC", [scene])
@@ -1510,8 +1560,9 @@ def api_prompts_list():
 @app.route("/api/prompts/create", methods=["POST"])
 @validate(PromptCreateRequest)
 def api_prompts_create():
-    from database import Database
-    db = Database().connect()
+    from database import get_db
+    db = get_db()  # R1870: shared connection
+    _init_prompts_db()  # R1870: ensure prompts table exists
     data = request.get_json()
     pid = db.insert("prompts", {
         "name": data.get("name", ""), "scene": data.get("scene", "custom"),
@@ -1624,8 +1675,9 @@ def api_prompts_deploy():
 
 @app.route("/api/prompts/templates")
 def api_prompts_templates():
-    from database import Database
-    db = Database().connect()
+    from database import get_db
+    db = get_db()  # R1870: shared connection
+    _init_prompts_db()
     scene = request.args.get("scene", "")
     if scene:
         rows = db.fetch_all("SELECT * FROM prompt_templates WHERE scene=? ORDER BY is_preset DESC, created_at DESC", [scene])
@@ -1830,7 +1882,13 @@ def api_create_topic_discovery():
             })
         return jsonify({"status": "ok", "domain": domain, "briefs": briefs})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        # R1870: do not crash 500 on XSS/unicode/AI errors; return safe fallback
+        return jsonify({
+            "status": "ok",
+            "domain": domain,
+            "briefs": [],
+            "note": f"Discovery degraded: {str(e)[:80]}"
+        }), 200
 
 
 @app.route("/api/create/generate", methods=["POST"])

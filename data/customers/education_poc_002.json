@@ -1,0 +1,17 @@
+{
+  "customer_id": "education_poc_002",
+  "name": "沪上教育",
+  "industry": "education",
+  "scale": "700万",
+  "location": "上海",
+  "pain_points": [
+    "招生成本高",
+    "续班率低",
+    "课程研发慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 70,
+    "monthly_cost": 40
+  },
+  "team_size": 9
+}

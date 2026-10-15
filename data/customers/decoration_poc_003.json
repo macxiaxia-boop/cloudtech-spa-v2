@@ -1,0 +1,17 @@
+{
+  "customer_id": "decoration_poc_003",
+  "name": "深圳设计",
+  "industry": "decoration",
+  "scale": "800万",
+  "location": "深圳",
+  "pain_points": [
+    "客户决策周期长",
+    "工地管理混乱",
+    "设计转化低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 80,
+    "monthly_cost": 45
+  },
+  "team_size": 11
+}

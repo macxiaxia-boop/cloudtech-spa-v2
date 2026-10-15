@@ -1,0 +1,17 @@
+{
+  "customer_id": "education_poc_003",
+  "name": "羊城学堂",
+  "industry": "education",
+  "scale": "800万",
+  "location": "广州",
+  "pain_points": [
+    "招生成本高",
+    "续班率低",
+    "课程研发慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 80,
+    "monthly_cost": 45
+  },
+  "team_size": 11
+}

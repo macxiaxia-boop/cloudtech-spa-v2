@@ -1,0 +1,17 @@
+{
+  "customer_id": "retail_poc_006",
+  "name": "金陵商超",
+  "industry": "retail",
+  "scale": "1100万",
+  "location": "南京",
+  "pain_points": [
+    "客流低",
+    "复购弱",
+    "库存周转慢"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 110,
+    "monthly_cost": 60
+  },
+  "team_size": 17
+}

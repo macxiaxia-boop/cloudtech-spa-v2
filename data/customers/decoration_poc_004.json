@@ -1,0 +1,17 @@
+{
+  "customer_id": "decoration_poc_004",
+  "name": "杭派装饰",
+  "industry": "decoration",
+  "scale": "900万",
+  "location": "杭州",
+  "pain_points": [
+    "客户决策周期长",
+    "工地管理混乱",
+    "设计转化低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 90,
+    "monthly_cost": 50
+  },
+  "team_size": 13
+}

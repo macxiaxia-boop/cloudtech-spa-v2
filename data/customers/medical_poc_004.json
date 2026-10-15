@@ -1,0 +1,17 @@
+{
+  "customer_id": "medical_poc_004",
+  "name": "羊城医美",
+  "industry": "medical",
+  "scale": "900万",
+  "location": "广州",
+  "pain_points": [
+    "获客难",
+    "客户决策慢",
+    "复购低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 90,
+    "monthly_cost": 50
+  },
+  "team_size": 13
+}

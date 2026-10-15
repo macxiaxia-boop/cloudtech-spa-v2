@@ -1,0 +1,17 @@
+{
+  "customer_id": "decoration_poc_006",
+  "name": "厦门美居",
+  "industry": "decoration",
+  "scale": "1100万",
+  "location": "厦门",
+  "pain_points": [
+    "客户决策周期长",
+    "工地管理混乱",
+    "设计转化低"
+  ],
+  "current_marketing": {
+    "monthly_revenue": 110,
+    "monthly_cost": 60
+  },
+  "team_size": 17
+}
