@@ -53,6 +53,7 @@ pluggy==1.6.0
 proglog==0.1.12
 protobuf==7.35.1
 psycopg2-binary==2.9.12
+psycopg[binary]==3.3.6  # R1870: SQLAlchemy 2.x defaults to psycopg3 + libpq static
 pyarrow==24.0.0
 pydantic==2.13.4
 pydantic_core==2.46.4
