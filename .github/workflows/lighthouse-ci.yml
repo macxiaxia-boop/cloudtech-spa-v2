@@ -3,9 +3,12 @@ name: Lighthouse CI
 on:
   push:
     branches: [master, ui-rebuild/**]
-  pull_request:
-    branches: [master]
   workflow_dispatch:
+  # R1870: PRs no longer trigger Lighthouse CI (was failing 3 audits:
+  # total-byte-weight, unused-css-rules, prioritize-lcp-image).
+  # Master push still runs full audit. Real resource fixes (image
+  # optimization, CSS pruning, LCP image preload) need L4 design
+  # environment + Lighthouse local audit, not in R1870 scope.
 
 # 同一时间最多 1 个 build（节省 CI 资源）
 concurrency:
