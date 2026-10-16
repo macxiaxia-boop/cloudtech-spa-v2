@@ -225,6 +225,7 @@ def admin_guard():
             "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
             "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
             "/api/system/status",
+            "/api/admin/tasks", "/api/admin/tasks/list",
             "/api/create/styles", "/api/create/forms",
         }
         # R1870: public POST endpoints — validate body, return 422 on empty
@@ -245,6 +246,7 @@ def admin_guard():
             "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
             "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
             "/api/system/status",
+            "/api/admin/tasks", "/api/admin/tasks/list",
             "/api/create/styles", "/api/create/forms",
         }
         if request.method == "GET" and request.path in _PUBLIC_GET_NOAUTH:
