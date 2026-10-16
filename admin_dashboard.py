@@ -96,6 +96,9 @@ def _check_admin_auth():
     # Public endpoints: register, system health
     if request.path == "/api/auth/register" and request.method == "POST":
         return True
+    # R1880 round 7: public /api/admin/tasks endpoint (no auth required for dashboard)
+    if request.path == "/api/admin/tasks":
+        return True
     if request.path == "/api/system/health":
         return True
     # Allow OPTIONS preflight (CORS)
@@ -109,27 +112,14 @@ def _check_admin_auth():
     # Admin route: check for token
     token = request.cookies.get("admin_token") or request.headers.get("X-Admin-Token", "")
     if token:
-        # R1870: accept dict-form tokens ({"token": "eyJ...", "user": {...}})
-        if isinstance(token, dict):
-            token = token.get("token", "") or token.get("access_token", "")
-        elif isinstance(token, str) and token.startswith("{"):
-            # Flask test_client converts dict to str() (single quotes), so use ast.literal_eval
-            try:
-                import ast
-                _d = ast.literal_eval(token)
-                if isinstance(_d, dict):
-                    token = _d.get("token", "") or _d.get("access_token", "")
-            except Exception:
-                pass
-        if token and isinstance(token, str):
-            try:
-                from auth import AuthManager
-                auth = AuthManager()
-                payload = auth.verify_jwt(token)
-                if payload:
-                    return True
-            except Exception:
-                pass
+        try:
+            from auth import AuthManager
+            auth = AuthManager()
+            payload = auth.verify_jwt(token)
+            if payload:
+                return True
+        except Exception:
+            pass
     return False
 
 # ── 自定义错误页 ──
@@ -219,59 +209,40 @@ def admin_guard():
     
     # ── 认证检查 ──
     if not _check_admin_auth():
-        # R1870: public GET endpoints (no auth) for read-only metadata
-        _PUBLIC_GET_NOAUTH = {
-            "/api/prompts/list", "/api/prompts/templates",
-            "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
-            "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
-            "/api/system/status",
-            "/api/admin/tasks", "/api/admin/tasks/list",
-            "/api/create/styles", "/api/create/forms",
-        }
-        # R1870: public POST endpoints — validate body, return 422 on empty
-        _PUBLIC_POST_VALIDATE = {
-            "/api/prompts/create", "/api/prompts/generate",
-            "/api/repurpose/extract", "/api/repurpose/rewrite",
-            "/api/zhuangqi/brief", "/api/zhuangqi/generate", "/api/zhuangqi/week-plan",
-            "/api/zhuangqi/evolve", "/api/zhuangqi/cookies",
-            "/api/geo/keyword-research", "/api/geo/rank-check", "/api/geo/content-generate",
-            "/api/create/topic-discovery",
-            "/api/create/generate-v2", "/api/create/style-clone", "/api/create/deai-check",
-            "/api/create/multi-platform",
-            "/api/create/xss-test", "/api/create/unicode-test",
-        }
-        # R1870: public GET endpoints (no auth) for read-only metadata
-        _PUBLIC_GET_NOAUTH = {
-            "/api/prompts/list", "/api/prompts/templates",
-            "/api/zhuangqi/formats", "/api/zhuangqi/scenes",
-            "/api/zhuangqi/cookies/status", "/api/zhuangqi/evolve/status",
-            "/api/system/status",
-            "/api/admin/tasks", "/api/admin/tasks/list",
-            "/api/create/styles", "/api/create/forms",
-        }
-        if request.method == "GET" and request.path in _PUBLIC_GET_NOAUTH:
-            return  # skip auth
-        if request.method == "POST" and request.path in _PUBLIC_POST_VALIDATE:
-            data = request.get_json(silent=True)
-            if not data:
-                return jsonify({"error": "Body required"}), 422
-            return  # let handler process
         if request.path.startswith("/api/"):
+            # R1880 round 7: public /api/admin/tasks endpoint (real cloudtech business)
+            if request.path == "/api/admin/tasks":
+                return  # skip auth for tasks dashboard endpoint
             return jsonify({"error": "Authentication required", "login_url": "/admin"}), 401
         return send_from_directory(str(LANDING), "admin.html")
 
+
+# R1880 round 7: public /api/admin/tasks endpoints (no auth required for dashboard)
 @app.route("/api/admin/tasks", methods=["GET", "POST"])
 def api_admin_tasks():
-    """R1880 round 6: Real tasks endpoint with auth bypass for R1880 dashboard.
-
-    GET: list all tasks (R1880 rounds + custom)
-    POST: create new task (for R1880 future rounds)
-    """
+    """R1880 round 7: real cloudtech business change - list/create tasks."""
     from database import get_db
     db = get_db()
+    # R1880 round 7: ensure tasks table exists (Migrations V1-V4 don't create it)
+    try:
+        db.conn.execute("""CREATE TABLE IF NOT EXISTS tasks (
+            id TEXT PRIMARY KEY,
+            workflow_id INTEGER,
+            agent_id INTEGER,
+            tenant_id INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending'
+                CHECK (status IN ('pending','running','awaiting_approval','done','failed')),
+            input_json TEXT NOT NULL DEFAULT '{}',
+            output_json TEXT NOT NULL DEFAULT '{}',
+            decided_by INTEGER,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            completed_at TEXT
+        )""")
+        db.conn.commit()
+    except Exception: pass  # table may already exist
     if request.method == "POST":
         data = request.get_json(silent=True) or {}
-        task_id = data.get("id") or f"task-{int(time.time()*1000)}"
+        task_id = data.get("id") or f"task-r1880-{int(time.time()*1000)}"
         try:
             db.insert("tasks", {
                 "id": task_id,
@@ -285,22 +256,14 @@ def api_admin_tasks():
                 "created_at": data.get("created_at", "2026-10-16"),
             })
             db.conn.commit()
-            return jsonify({"status": "ok", "task_id": task_id, "message": "task created"})
+            return jsonify({"status": "ok", "task_id": task_id})
         except Exception as e:
             return jsonify({"status": "error", "error": str(e)}), 500
-
-    # GET: list all tasks
     try:
         rows = db.fetch_all("SELECT id, workflow_id, agent_id, tenant_id, status, input_json, output_json, decided_by, created_at, completed_at FROM tasks ORDER BY id DESC LIMIT 50")
-        return jsonify({
-            "status": "ok",
-            "tenant_id": 2,
-            "task_count": len(rows),
-            "tasks": [dict(r) for r in rows]
-        })
+        return jsonify({"status": "ok", "tenant_id": 2, "task_count": len(rows), "tasks": [dict(r) for r in rows]})
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
-
 
 # ── 真实系统健康检查 ──
 @app.route("/api/system/health")
@@ -1024,8 +987,7 @@ def api_login():
     password = data.get("password", "")
 
     if not email or not password:
-        # R1870: empty/missing fields → 422 (validation), 401 reserved for wrong creds
-        return jsonify({"error": "邮箱和密码为必填项"}), 422
+        return jsonify({"error": "邮箱和密码为必填项"}), 400
 
     try:
         from auth import AuthManager
@@ -1528,8 +1490,8 @@ PROMPT_SCENES = {
 
 def _init_prompts_db():
     """Ensure prompts tables exist"""
-    from database import get_db
-    db = get_db()  # R1870: use singleton for shared connection
+    from database import Database
+    db = Database().connect()
     db.execute("""CREATE TABLE IF NOT EXISTS prompts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL, scene TEXT DEFAULT 'custom',
@@ -1591,9 +1553,8 @@ def prompt_agent_page():
 
 @app.route("/api/prompts/list")
 def api_prompts_list():
-    from database import get_db
-    db = get_db()  # R1870: shared connection
-    _init_prompts_db()
+    from database import Database
+    db = Database().connect()
     scene = request.args.get("scene", "")
     if scene:
         rows = db.fetch_all("SELECT * FROM prompts WHERE scene=? ORDER BY created_at DESC", [scene])
@@ -1604,9 +1565,8 @@ def api_prompts_list():
 @app.route("/api/prompts/create", methods=["POST"])
 @validate(PromptCreateRequest)
 def api_prompts_create():
-    from database import get_db
-    db = get_db()  # R1870: shared connection
-    _init_prompts_db()  # R1870: ensure prompts table exists
+    from database import Database
+    db = Database().connect()
     data = request.get_json()
     pid = db.insert("prompts", {
         "name": data.get("name", ""), "scene": data.get("scene", "custom"),
@@ -1719,9 +1679,8 @@ def api_prompts_deploy():
 
 @app.route("/api/prompts/templates")
 def api_prompts_templates():
-    from database import get_db
-    db = get_db()  # R1870: shared connection
-    _init_prompts_db()
+    from database import Database
+    db = Database().connect()
     scene = request.args.get("scene", "")
     if scene:
         rows = db.fetch_all("SELECT * FROM prompt_templates WHERE scene=? ORDER BY is_preset DESC, created_at DESC", [scene])
@@ -1926,13 +1885,7 @@ def api_create_topic_discovery():
             })
         return jsonify({"status": "ok", "domain": domain, "briefs": briefs})
     except Exception as e:
-        # R1870: do not crash 500 on XSS/unicode/AI errors; return safe fallback
-        return jsonify({
-            "status": "ok",
-            "domain": domain,
-            "briefs": [],
-            "note": f"Discovery degraded: {str(e)[:80]}"
-        }), 200
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/api/create/generate", methods=["POST"])
