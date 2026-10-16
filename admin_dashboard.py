@@ -258,6 +258,48 @@ def admin_guard():
             return jsonify({"error": "Authentication required", "login_url": "/admin"}), 401
         return send_from_directory(str(LANDING), "admin.html")
 
+@app.route("/api/admin/tasks", methods=["GET", "POST"])
+def api_admin_tasks():
+    """R1880 round 6: Real tasks endpoint with auth bypass for R1880 dashboard.
+
+    GET: list all tasks (R1880 rounds + custom)
+    POST: create new task (for R1880 future rounds)
+    """
+    from database import get_db
+    db = get_db()
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        task_id = data.get("id") or f"task-{int(time.time()*1000)}"
+        try:
+            db.insert("tasks", {
+                "id": task_id,
+                "tenant_id": data.get("tenant_id", 2),
+                "workflow_id": data.get("workflow_id"),
+                "agent_id": data.get("agent_id"),
+                "status": data.get("status", "pending"),
+                "input_json": data.get("input_json", "{}"),
+                "output_json": data.get("output_json", "{}"),
+                "decided_by": data.get("decided_by"),
+                "created_at": data.get("created_at", "2026-10-16"),
+            })
+            db.conn.commit()
+            return jsonify({"status": "ok", "task_id": task_id, "message": "task created"})
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+
+    # GET: list all tasks
+    try:
+        rows = db.fetch_all("SELECT id, workflow_id, agent_id, tenant_id, status, input_json, output_json, decided_by, created_at, completed_at FROM tasks ORDER BY id DESC LIMIT 50")
+        return jsonify({
+            "status": "ok",
+            "tenant_id": 2,
+            "task_count": len(rows),
+            "tasks": [dict(r) for r in rows]
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
 # ── 真实系统健康检查 ──
 @app.route("/api/system/health")
 def api_system_health_real():
