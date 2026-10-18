@@ -17,7 +17,16 @@ _START_TIME = time.time()
 _rate_buckets = {}  # ip → {tokens, last_refill}
 
 def _rate_limit(ip: str, limit: int = 30, window: int = 10) -> bool:
-    """令牌桶限流: 默认30req/10s·返回True=放行 False=限流"""
+    """Thread-local-process token bucket (additional shared limit needed for multi-node)."""
+    if not ip or limit <= 0 or window <= 0:
+        return False
+    now = time.monotonic()
+    bucket = _rate_buckets.get(ip, {"tokens": float(limit), "last": now})
+    elapsed = max(0.0, now - float(bucket["last"]))
+    tokens = min(float(limit), float(bucket["tokens"]) + elapsed * (float(limit) / window))
+    allowed = tokens >= 1.0
+    _rate_buckets[ip] = {"tokens": tokens - (1.0 if allowed else 0.0), "last": now}
+    return allowed
 
 def _rate_limit_tenant(tid: str, limit: int = None) -> bool:
     """租户级限流: starter=20·pro=60·enterprise=200 req/min"""
@@ -30,17 +39,6 @@ def _rate_limit_tenant(tid: str, limit: int = None) -> bool:
             limit = limits.get(plan, 20)
         except: limit = 20
     return _rate_limit(f"tenant:{tid}", limit=limit, window=60)
-    now = time.time()
-    bucket = _rate_buckets.get(ip, {"tokens": limit, "last": now})
-    elapsed = now - bucket["last"]
-    bucket["tokens"] = min(limit, bucket["tokens"] + elapsed * (limit / window))
-    bucket["last"] = now
-    if bucket["tokens"] >= 1:
-        bucket["tokens"] -= 1
-        _rate_buckets[ip] = bucket
-        return True
-    _rate_buckets[ip] = bucket
-    return False
 
 # ═══════════════════════════════════════
 # 计费强制执行层
@@ -79,7 +77,7 @@ LANDING = BASE / "landing-page"
 app = Flask(__name__, static_folder=str(LANDING), static_url_path="/static")
 
 # ── Admin Auth Guard ──
-ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "cloudtech-admin-2026")
+ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "")  # No public default secret; configure in deployment secrets
 ADMIN_TOKEN = None  # generated on first login
 
 def _is_admin_route(path):
@@ -95,11 +93,6 @@ def _check_admin_auth():
         return True
     # Public endpoints: register, system health
     if request.path == "/api/auth/register" and request.method == "POST":
-        return True
-    # R1880 round 7: public /api/admin/tasks endpoint (no auth required for dashboard)
-    if request.path == "/api/admin/tasks":
-        return True
-    if request.path == "/api/system/health":
         return True
     # Allow OPTIONS preflight (CORS)
     if request.method == "OPTIONS":
@@ -210,14 +203,11 @@ def admin_guard():
     # ── 认证检查 ──
     if not _check_admin_auth():
         if request.path.startswith("/api/"):
-            # R1880 round 7: public /api/admin/tasks endpoint (real cloudtech business)
-            if request.path == "/api/admin/tasks":
-                return  # skip auth for tasks dashboard endpoint
             return jsonify({"error": "Authentication required", "login_url": "/admin"}), 401
         return send_from_directory(str(LANDING), "admin.html")
 
 
-# R1880 round 7: public /api/admin/tasks endpoints (no auth required for dashboard)
+# Admin-only task endpoint; request must pass the shared JWT guard above
 @app.route("/api/admin/tasks", methods=["GET", "POST"])
 def api_admin_tasks():
     """R1880 round 7: real cloudtech business change - list/create tasks."""
