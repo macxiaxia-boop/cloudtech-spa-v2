@@ -97,10 +97,12 @@ def _check_admin_auth():
     # Allow OPTIONS preflight (CORS)
     if request.method == "OPTIONS":
         return True
-    # Static files
-    if request.path.startswith("/static") or request.path.endswith((".html", ".css", ".js", ".ico", ".png")):
-        if not request.path.startswith("/admin"):
-            return True
+    # Static assets are public; never infer that an /api/ URL is static.
+    if request.path.startswith("/static/") or (
+        not request.path.startswith(("/api/", "/admin"))
+        and request.path.endswith((".html", ".css", ".js", ".ico", ".png"))
+    ):
+        return True
 
     # Admin route: check for token
     token = request.cookies.get("admin_token") or request.headers.get("X-Admin-Token", "")
@@ -110,6 +112,9 @@ def _check_admin_auth():
             auth = AuthManager()
             payload = auth.verify_jwt(token)
             if payload:
+                # JWT validity alone is insufficient for privileged admin endpoints.
+                if _is_admin_route(request.path):
+                    return payload.get("role") in {"owner", "admin"}
                 return True
         except Exception:
             pass
