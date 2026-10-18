@@ -46,15 +46,24 @@ def test_jwt_admin_still_passes_and_invalid_token_fails():
     fake_auth = ModuleType("auth")
     class AuthManager:
         def verify_jwt(self, token):
-            return {"sub": "admin"} if token == "valid" else None
+            if token == "valid":
+                return {"sub": "admin", "role": "admin"}
+            if token == "viewer":
+                return {"sub": "viewer", "role": "viewer"}
+            return None
     fake_auth.AuthManager = AuthManager
     original = sys.modules.get("auth")
     sys.modules["auth"] = fake_auth
     try:
         request.headers = {"X-Admin-Token": "invalid"}
         assert auth() is False
+        request.headers = {"X-Admin-Token": "viewer"}
+        assert auth() is False
         request.headers = {"X-Admin-Token": "valid"}
         assert auth() is True
+        request.path = "/api/admin/tasks.css"
+        request.headers = {"X-Admin-Token": "viewer"}
+        assert auth() is False
     finally:
         if original is None:
             sys.modules.pop("auth", None)
