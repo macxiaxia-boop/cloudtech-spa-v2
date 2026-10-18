@@ -31,7 +31,9 @@ def test_token_bucket_is_executable_and_throttles():
 
 def test_admin_task_and_system_health_fail_closed():
     request = SimpleNamespace(path="/api/admin/tasks", method="GET", cookies={}, headers={})
-    auth = standalone("_check_admin_auth", {"request": request})
+    namespace = {"request": request}
+    standalone("_is_admin_route", namespace)
+    auth = standalone("_check_admin_auth", namespace)
     assert auth() is False
     request.method = "POST"
     assert auth() is False
@@ -42,7 +44,9 @@ def test_admin_task_and_system_health_fail_closed():
 
 def test_jwt_admin_still_passes_and_invalid_token_fails():
     request = SimpleNamespace(path="/api/admin/tasks", method="GET", cookies={}, headers={})
-    auth = standalone("_check_admin_auth", {"request": request})
+    namespace = {"request": request}
+    standalone("_is_admin_route", namespace)
+    auth = standalone("_check_admin_auth", namespace)
     fake_auth = ModuleType("auth")
     class AuthManager:
         def verify_jwt(self, token):
