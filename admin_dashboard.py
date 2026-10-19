@@ -17,7 +17,16 @@ _START_TIME = time.time()
 _rate_buckets = {}  # ip → {tokens, last_refill}
 
 def _rate_limit(ip: str, limit: int = 30, window: int = 10) -> bool:
-    """令牌桶限流: 默认30req/10s·返回True=放行 False=限流"""
+    """Thread-local-process token bucket (additional shared limit needed for multi-node)."""
+    if not ip or limit <= 0 or window <= 0:
+        return False
+    now = time.monotonic()
+    bucket = _rate_buckets.get(ip, {"tokens": float(limit), "last": now})
+    elapsed = max(0.0, now - float(bucket["last"]))
+    tokens = min(float(limit), float(bucket["tokens"]) + elapsed * (float(limit) / window))
+    allowed = tokens >= 1.0
+    _rate_buckets[ip] = {"tokens": tokens - (1.0 if allowed else 0.0), "last": now}
+    return allowed
 
 def _rate_limit_tenant(tid: str, limit: int = None) -> bool:
     """租户级限流: starter=20·pro=60·enterprise=200 req/min"""
@@ -30,17 +39,6 @@ def _rate_limit_tenant(tid: str, limit: int = None) -> bool:
             limit = limits.get(plan, 20)
         except: limit = 20
     return _rate_limit(f"tenant:{tid}", limit=limit, window=60)
-    now = time.time()
-    bucket = _rate_buckets.get(ip, {"tokens": limit, "last": now})
-    elapsed = now - bucket["last"]
-    bucket["tokens"] = min(limit, bucket["tokens"] + elapsed * (limit / window))
-    bucket["last"] = now
-    if bucket["tokens"] >= 1:
-        bucket["tokens"] -= 1
-        _rate_buckets[ip] = bucket
-        return True
-    _rate_buckets[ip] = bucket
-    return False
 
 # ═══════════════════════════════════════
 # 计费强制执行层
@@ -61,7 +59,7 @@ def _usage_log(tid: str, content_type: str, topic: str, tokens: int = None):
 # 默认租户（Admin面板操作归属）
 _DEFAULT_TID = "zq-5bb59623"
 
-from flask import Flask, send_from_directory, jsonify, request
+from flask import Flask, send_from_directory, jsonify, request, g
 
 from error_tracker import setup_error_handler
 from schemas import validate, LoginRequest, RegisterRequest, GenerateV2Request
@@ -79,7 +77,7 @@ LANDING = BASE / "landing-page"
 app = Flask(__name__, static_folder=str(LANDING), static_url_path="/static")
 
 # ── Admin Auth Guard ──
-ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "cloudtech-admin-2026")
+ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "")  # No public default secret; configure in deployment secrets
 ADMIN_TOKEN = None  # generated on first login
 
 def _is_admin_route(path):
@@ -96,18 +94,15 @@ def _check_admin_auth():
     # Public endpoints: register, system health
     if request.path == "/api/auth/register" and request.method == "POST":
         return True
-    # R1880 round 7: public /api/admin/tasks endpoint (no auth required for dashboard)
-    if request.path == "/api/admin/tasks":
-        return True
-    if request.path == "/api/system/health":
-        return True
     # Allow OPTIONS preflight (CORS)
     if request.method == "OPTIONS":
         return True
-    # Static files
-    if request.path.startswith("/static") or request.path.endswith((".html", ".css", ".js", ".ico", ".png")):
-        if not request.path.startswith("/admin"):
-            return True
+    # Static assets are public; never infer that an /api/ URL is static.
+    if request.path.startswith("/static/") or (
+        not request.path.startswith(("/api/", "/admin"))
+        and request.path.endswith((".html", ".css", ".js", ".ico", ".png"))
+    ):
+        return True
 
     # Admin route: check for token
     token = request.cookies.get("admin_token") or request.headers.get("X-Admin-Token", "")
@@ -117,6 +112,14 @@ def _check_admin_auth():
             auth = AuthManager()
             payload = auth.verify_jwt(token)
             if payload:
+                # JWT validity alone is insufficient for privileged admin endpoints.
+                if _is_admin_route(request.path):
+                    if payload.get("role") not in {"owner", "admin"}:
+                        return False
+                    if not str(payload.get("tenant_id") or "").strip():
+                        return False
+                    g.yunshu_admin_claims = payload
+                    return True
                 return True
         except Exception:
             pass
@@ -192,36 +195,42 @@ def admin_guard():
         if not _check_endpoint_rate_limit(ip, "ai_create", max_req=20, window_sec=60):
             return jsonify({"error": "AI 内容生成请求过于频繁，请稍后再试", "retry_after": 60}), 429
     
-    # ── CSRF 保护: POST/PUT/DELETE 检查同源 ──
-    # R1398 治本: /api/auth/* (login/register/logout) 是登录前 = 无 token = 不可能 CSRF 攻击 → 跳过
-    if request.method in ("POST", "PUT", "DELETE"):
-        if request.path.startswith("/api/auth/"):
-            pass  # auth 路由不需要 CSRF
-        else:
-            origin = request.headers.get("Origin", "")
-            referer = request.headers.get("Referer", "")
-            xrw = request.headers.get("X-Requested-With", "")
-            if origin or referer:
-                host = request.host.split(":")[0]
-                is_same_origin = (host in origin or host in referer or xrw == "XMLHttpRequest")
-                if not is_same_origin and request.path.startswith("/api/"):
+    # Match the entire authority, not substrings (e.g. example.com.evil).
+    # X-Requested-With is not proof of origin and must not bypass CSRF.
+    if request.method in ("POST", "PUT", "PATCH", "DELETE") and request.path.startswith("/api/"):
+        if not request.path.startswith("/api/auth/"):
+            from urllib.parse import urlsplit
+            origin = request.headers.get("Origin", "").strip()
+            referer = request.headers.get("Referer", "").strip()
+            source = origin or referer
+            if source:
+                parsed = urlsplit(source)
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or parsed.netloc.lower() != request.host.lower()
+                ):
                     return jsonify({"error": "CSRF validation failed"}), 403
+            elif request.cookies.get("admin_token") and not request.headers.get("X-Admin-Token"):
+                # Cookie-authenticated state changes must prove same-origin.
+                return jsonify({"error": "CSRF origin required"}), 403
     
     # ── 认证检查 ──
     if not _check_admin_auth():
         if request.path.startswith("/api/"):
-            # R1880 round 7: public /api/admin/tasks endpoint (real cloudtech business)
-            if request.path == "/api/admin/tasks":
-                return  # skip auth for tasks dashboard endpoint
             return jsonify({"error": "Authentication required", "login_url": "/admin"}), 401
         return send_from_directory(str(LANDING), "admin.html")
 
 
-# R1880 round 7: public /api/admin/tasks endpoints (no auth required for dashboard)
+# Admin-only task endpoint; request must pass the shared JWT guard above
 @app.route("/api/admin/tasks", methods=["GET", "POST"])
 def api_admin_tasks():
     """R1880 round 7: real cloudtech business change - list/create tasks."""
     from database import get_db
+    # Enforce authenticated tenant scope, not a client-supplied tenant ID.
+    claims = getattr(g, "yunshu_admin_claims", None) or {}
+    tenant_id = str(claims.get("tenant_id") or "").strip()
+    if not tenant_id:
+        return jsonify({"error": "Tenant authorization required"}), 403
     db = get_db()
     # R1880 round 7: ensure tasks table exists (Migrations V1-V4 don't create it)
     try:
@@ -229,7 +238,7 @@ def api_admin_tasks():
             id TEXT PRIMARY KEY,
             workflow_id INTEGER,
             agent_id INTEGER,
-            tenant_id INTEGER NOT NULL,
+            tenant_id TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'pending'
                 CHECK (status IN ('pending','running','awaiting_approval','done','failed')),
             input_json TEXT NOT NULL DEFAULT '{}',
@@ -242,11 +251,16 @@ def api_admin_tasks():
     except Exception: pass  # table may already exist
     if request.method == "POST":
         data = request.get_json(silent=True) or {}
+        requested_tenant = data.get("tenant_id")
+        if requested_tenant is not None and str(requested_tenant) != tenant_id:
+            return jsonify({"error": "Cross-tenant task creation denied"}), 403
+        if data.get("status", "pending") != "pending":
+            return jsonify({"error": "New tasks must begin pending"}), 422
         task_id = data.get("id") or f"task-r1880-{int(time.time()*1000)}"
         try:
             db.insert("tasks", {
                 "id": task_id,
-                "tenant_id": data.get("tenant_id", 2),
+                "tenant_id": tenant_id,
                 "workflow_id": data.get("workflow_id"),
                 "agent_id": data.get("agent_id"),
                 "status": data.get("status", "pending"),
@@ -260,8 +274,11 @@ def api_admin_tasks():
         except Exception as e:
             return jsonify({"status": "error", "error": str(e)}), 500
     try:
-        rows = db.fetch_all("SELECT id, workflow_id, agent_id, tenant_id, status, input_json, output_json, decided_by, created_at, completed_at FROM tasks ORDER BY id DESC LIMIT 50")
-        return jsonify({"status": "ok", "tenant_id": 2, "task_count": len(rows), "tasks": [dict(r) for r in rows]})
+        rows = db.fetch_all(
+            "SELECT id, workflow_id, agent_id, tenant_id, status, input_json, output_json, decided_by, created_at, completed_at FROM tasks WHERE tenant_id = ? ORDER BY id DESC LIMIT 50",
+            (tenant_id,),
+        )
+        return jsonify({"status": "ok", "tenant_id": tenant_id, "task_count": len(rows), "tasks": [dict(r) for r in rows]})
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
 

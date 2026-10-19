@@ -1,0 +1,30 @@
+name: YUNSHU security PR gate
+
+on:
+  push:
+    branches:
+      - security/yunshu-audit-auth-ratelimit-20261019
+  pull_request:
+    paths:
+      - admin_dashboard.py
+      - tests/test_yunshu_admin_auth_security.py
+      - .github/workflows/yunshu-security-pr-gate.yml
+
+permissions:
+  contents: read
+
+jobs:
+  secure-gateway-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout reviewed source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify Python source parses without running app bootstrap
+        run: python3 -m py_compile admin_dashboard.py tests/test_yunshu_admin_auth_security.py
+      - name: Run isolated security regressions
+        run: |
+          python3 -m pip install --disable-pip-version-check "pytest==8.4.2"
+          python3 -m pytest -q tests/test_yunshu_admin_auth_security.py
