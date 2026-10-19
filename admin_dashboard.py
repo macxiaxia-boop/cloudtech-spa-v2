@@ -59,7 +59,7 @@ def _usage_log(tid: str, content_type: str, topic: str, tokens: int = None):
 # 默认租户（Admin面板操作归属）
 _DEFAULT_TID = "zq-5bb59623"
 
-from flask import Flask, send_from_directory, jsonify, request
+from flask import Flask, send_from_directory, jsonify, request, g
 
 from error_tracker import setup_error_handler
 from schemas import validate, LoginRequest, RegisterRequest, GenerateV2Request
@@ -114,7 +114,12 @@ def _check_admin_auth():
             if payload:
                 # JWT validity alone is insufficient for privileged admin endpoints.
                 if _is_admin_route(request.path):
-                    return payload.get("role") in {"owner", "admin"}
+                    if payload.get("role") not in {"owner", "admin"}:
+                        return False
+                    if not str(payload.get("tenant_id") or "").strip():
+                        return False
+                    g.yunshu_admin_claims = payload
+                    return True
                 return True
         except Exception:
             pass
@@ -217,6 +222,11 @@ def admin_guard():
 def api_admin_tasks():
     """R1880 round 7: real cloudtech business change - list/create tasks."""
     from database import get_db
+    # Enforce authenticated tenant scope, not a client-supplied tenant ID.
+    claims = getattr(g, "yunshu_admin_claims", None) or {}
+    tenant_id = str(claims.get("tenant_id") or "").strip()
+    if not tenant_id:
+        return jsonify({"error": "Tenant authorization required"}), 403
     db = get_db()
     # R1880 round 7: ensure tasks table exists (Migrations V1-V4 don't create it)
     try:
@@ -224,7 +234,7 @@ def api_admin_tasks():
             id TEXT PRIMARY KEY,
             workflow_id INTEGER,
             agent_id INTEGER,
-            tenant_id INTEGER NOT NULL,
+            tenant_id TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'pending'
                 CHECK (status IN ('pending','running','awaiting_approval','done','failed')),
             input_json TEXT NOT NULL DEFAULT '{}',
@@ -237,11 +247,16 @@ def api_admin_tasks():
     except Exception: pass  # table may already exist
     if request.method == "POST":
         data = request.get_json(silent=True) or {}
+        requested_tenant = data.get("tenant_id")
+        if requested_tenant is not None and str(requested_tenant) != tenant_id:
+            return jsonify({"error": "Cross-tenant task creation denied"}), 403
+        if data.get("status", "pending") != "pending":
+            return jsonify({"error": "New tasks must begin pending"}), 422
         task_id = data.get("id") or f"task-r1880-{int(time.time()*1000)}"
         try:
             db.insert("tasks", {
                 "id": task_id,
-                "tenant_id": data.get("tenant_id", 2),
+                "tenant_id": tenant_id,
                 "workflow_id": data.get("workflow_id"),
                 "agent_id": data.get("agent_id"),
                 "status": data.get("status", "pending"),
@@ -255,8 +270,11 @@ def api_admin_tasks():
         except Exception as e:
             return jsonify({"status": "error", "error": str(e)}), 500
     try:
-        rows = db.fetch_all("SELECT id, workflow_id, agent_id, tenant_id, status, input_json, output_json, decided_by, created_at, completed_at FROM tasks ORDER BY id DESC LIMIT 50")
-        return jsonify({"status": "ok", "tenant_id": 2, "task_count": len(rows), "tasks": [dict(r) for r in rows]})
+        rows = db.fetch_all(
+            "SELECT id, workflow_id, agent_id, tenant_id, status, input_json, output_json, decided_by, created_at, completed_at FROM tasks WHERE tenant_id = ? ORDER BY id DESC LIMIT 50",
+            (tenant_id,),
+        )
+        return jsonify({"status": "ok", "tenant_id": tenant_id, "task_count": len(rows), "tasks": [dict(r) for r in rows]})
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
 
