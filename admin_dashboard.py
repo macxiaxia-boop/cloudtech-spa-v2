@@ -195,20 +195,24 @@ def admin_guard():
         if not _check_endpoint_rate_limit(ip, "ai_create", max_req=20, window_sec=60):
             return jsonify({"error": "AI 内容生成请求过于频繁，请稍后再试", "retry_after": 60}), 429
     
-    # ── CSRF 保护: POST/PUT/DELETE 检查同源 ──
-    # R1398 治本: /api/auth/* (login/register/logout) 是登录前 = 无 token = 不可能 CSRF 攻击 → 跳过
-    if request.method in ("POST", "PUT", "DELETE"):
-        if request.path.startswith("/api/auth/"):
-            pass  # auth 路由不需要 CSRF
-        else:
-            origin = request.headers.get("Origin", "")
-            referer = request.headers.get("Referer", "")
-            xrw = request.headers.get("X-Requested-With", "")
-            if origin or referer:
-                host = request.host.split(":")[0]
-                is_same_origin = (host in origin or host in referer or xrw == "XMLHttpRequest")
-                if not is_same_origin and request.path.startswith("/api/"):
+    # Match the entire authority, not substrings (e.g. example.com.evil).
+    # X-Requested-With is not proof of origin and must not bypass CSRF.
+    if request.method in ("POST", "PUT", "PATCH", "DELETE") and request.path.startswith("/api/"):
+        if not request.path.startswith("/api/auth/"):
+            from urllib.parse import urlsplit
+            origin = request.headers.get("Origin", "").strip()
+            referer = request.headers.get("Referer", "").strip()
+            source = origin or referer
+            if source:
+                parsed = urlsplit(source)
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or parsed.netloc.lower() != request.host.lower()
+                ):
                     return jsonify({"error": "CSRF validation failed"}), 403
+            elif request.cookies.get("admin_token") and not request.headers.get("X-Admin-Token"):
+                # Cookie-authenticated state changes must prove same-origin.
+                return jsonify({"error": "CSRF origin required"}), 403
     
     # ── 认证检查 ──
     if not _check_admin_auth():
