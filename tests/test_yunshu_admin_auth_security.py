@@ -148,3 +148,47 @@ def test_admin_task_endpoint_is_tenant_isolated():
             sys.modules.pop("database", None)
         else:
             sys.modules["database"] = previous
+
+
+def test_csrf_exact_origin_and_cookie_protection():
+    import copy
+    request = SimpleNamespace(
+        method="POST", path="/api/admin/tasks", host="trusted.example",
+        remote_addr="127.0.0.1", cookies={}, headers={},
+    )
+    node = copy.deepcopy(FUNCTIONS["admin_guard"])
+    node.decorator_list = []
+    module = ast.fix_missing_locations(ast.Module(body=[node], type_ignores=[]))
+    ns = {
+        "request": request,
+        "jsonify": lambda obj: obj,
+        "_check_admin_auth": lambda: True,
+        "_check_endpoint_rate_limit": lambda *args, **kwargs: True,
+    }
+    exec(compile(module, "<csrf-test>", "exec"), ns)
+    guard = ns["admin_guard"]
+
+    request.headers = {
+        "Origin": "https://trusted.example.attacker.net",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+    assert guard()[1] == 403
+    request.headers = {
+        "Origin": "https://attacker.invalid",
+        "Referer": "https://trusted.example/page",
+    }
+    assert guard()[1] == 403
+    request.headers = {"Origin": "https://trusted.example"}
+    assert guard() is None
+    request.headers = {"Referer": "https://trusted.example/dashboard"}
+    assert guard() is None
+
+    request.headers = {}
+    request.cookies = {"admin_token": "signed-cookie"}
+    assert guard()[1] == 403
+    request.headers = {"X-Admin-Token": "signed-token"}
+    assert guard() is None
+
+    request.headers = {"Origin": "https://trusted.example.attacker.net"}
+    request.path = "/api/auth/login"
+    assert guard() is None
